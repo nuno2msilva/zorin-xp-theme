@@ -1,0 +1,79 @@
+/*
+ * Dentro das páginas (userContent.css do perfil): o que o IE6 mudava lá.
+ *   - barras de deslocamento com as cores do Luna (a forma do XP — setas em
+ *     cima e em baixo, 17 px — vem das preferências, tools/setup/zenprefs.py)
+ *   - a página de erro "Não é possível apresentar a página" do IE
+ *     (tools/builders/ieerror.py: os ZXP-ERROR-* são postos pelo tools/builders/zenie.py)
+ */
+:root { scrollbar-color: #c4d4f7 #f6f5f0; }
+
+/* erros de rede (o IE mostrava esta página para todos: servidor não
+   encontrado, ligação recusada, tempo esgotado, sem rede...); os de
+   certificados ficam como estão. A página de erro só aceita recursos chrome:
+   — o texto e as imagens são desenhados só com CSS (tools/builders/ieerror.py) */
+@-moz-document regexp("about:neterror\\?e=(dnsNotFound|connectionFailure|netTimeout|netReset|netInterrupt|proxyConnectFailure|proxyResolveFailure|netOffline|unknownSocketType|redirectLoop)&.*") {
+    :root {
+        color-scheme: light !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+    body {
+        position: relative !important;
+        display: flow-root !important;
+        min-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: ZXP-ERROR-BG, #fff !important;
+    }
+    /* a página do Zen sai toda, menos o caminho até ao "Tentar novamente" */
+    body > :not(.container),
+    body > .container > :not(#netErrorButtonContainer),
+    #netErrorButtonContainer > :not(#neterrorTryAgainButton) { display: none !important; }
+    body > .container, #netErrorButtonContainer {
+        position: static !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+    /* o texto (preto, com negritos e o título) e as ligações (vermelho) */
+    body::before, body::after {
+        visibility: visible !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        white-space: pre;
+        font: 11px/1px "ZXP Verdana IE", sans-serif;
+        pointer-events: none;
+    }
+    body::before { content: ZXP-ERROR-TEXT; color: #000; }
+    body::after { content: ZXP-ERROR-LINKS; color: #f00; }
+    /* os ícones (pagerror, refresh, search, back) e as marcas da lista */
+    :root::after {
+        content: "";
+        position: absolute;
+        left: -1px;
+        top: -1px;
+        width: 1px;
+        height: 1px;
+        box-shadow: ZXP-ERROR-ICONS;
+        pointer-events: none;
+    }
+    /* "Detectar definições de rede" (no IE: detetar e voltar a carregar): o
+       "Tentar novamente" do Zen, invisível, por cima da ligação */
+    #neterrorTryAgainButton {
+        visibility: visible !important;
+        position: absolute !important;
+        left: ZXP-DETECT-LEFTpx !important;
+        top: ZXP-DETECT-TOPpx !important;
+        width: ZXP-DETECT-WIDTHpx !important;
+        height: ZXP-DETECT-HEIGHTpx !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        cursor: pointer !important;
+    }
+}

@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+"""Zorin XP — ecrã de carregamento do XP desde o primeiro instante da sessão.
+
+Entre o fim do ecrã de início de sessão e o GNOME Shell desenhar o seu
+primeiro ecrã, uma sessão X11 nova fica preta alguns segundos. O XP mostrava
+o ecrã de boas-vindas ("bem-vindo", a conta e "A carregar as suas definições
+pessoais...") até ao ambiente de trabalho aparecer. Este programa arranca a
+partir do ~/.xprofile (lido pelo arranque X11 do GDM) e desenha esse ecrã —
+o mesmo da extensão zorin-xp (xpScreen.js), com as mesmas imagens e textos.
+
+Fecha-se quando a extensão já mostra o ecrã dela (ficheiro
+$XDG_RUNTIME_DIR/zorin-xp-splash.done); se a extensão não o fizer, 6 s
+depois de o GNOME Shell arrancar, e nunca dura mais de 30 s.
+
+Teste sem janela: zorin-xp-splash --png saida.png [LxA]
+"""
+import os
+import pwd
+import sys
+
+# (o texto do XP: interpretador v35, como o GNOME Shell da sessão e do greeter)
+os.environ["FREETYPE_PROPERTIES"] = "truetype:interpreter-version=35"
+
+import cairo  # noqa: E402
+import gi  # noqa: E402
+
+gi.require_version("Pango", "1.0")
+gi.require_version("PangoCairo", "1.0")
+gi.require_version("GdkPixbuf", "2.0")
+gi.require_version("Gdk", "3.0")
+from gi.repository import GdkPixbuf, GLib, Pango, PangoCairo  # noqa: E402
+
+HOME = os.path.expanduser("~")
+EXTENSIONS = os.path.join(HOME, ".local/share/gnome-shell/extensions")
+LOGON = os.path.join(EXTENSIONS, "zorin-xp@zorin-xp.local/logon")
+RUNTIME = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
+DONE = os.path.join(RUNTIME, "zorin-xp-splash.done")
+MAX_SECONDS = 30
+AFTER_SHELL_SECONDS = 6
+
+# medidas do UIFILE 1000 do logonui.exe (as da extensão)
+TOP_H, BOTTOM_H, LINE_H, PANEL_W = 80, 96, 2, 384
+LIST_X, ITEM_H, FRAME, PICTURE = 27, 80, 58, 48
+TEXT_X = 7 + FRAME + 7
+
+
+def strings():
+    import json
+    try:
+        with open(os.path.join(LOGON, "strings.json"), encoding="utf-8") as f:
+            return json.load(f)
+    except OSError:
+        return {}
+
+
+def image(name):
+    return GdkPixbuf.Pixbuf.new_from_file(os.path.join(LOGON, "images", f"{name}.png"))
+
+
+def user():
+    pw = pwd.getpwuid(os.getuid())
+    real = pw.pw_gecos.split(",")[0] or pw.pw_name
+    icon = f"/var/lib/AccountsService/icons/{pw.pw_name}"
+    return real, icon if os.access(icon, os.R_OK) else os.path.join(LOGON, "images", "picture.png")
+
+
+def text_layout(cr, text, family, px, bold=False, italic=False):
+    fo = cairo.FontOptions()
+    fo.set_hint_style(cairo.HINT_STYLE_FULL)
+    fo.set_hint_metrics(cairo.HINT_METRICS_ON)
+    fo.set_antialias(cairo.ANTIALIAS_GRAY)
+    lay = PangoCairo.create_layout(cr)
+    PangoCairo.context_set_font_options(lay.get_context(), fo)
+    PangoCairo.context_set_resolution(lay.get_context(), 96)
+    fd = Pango.FontDescription(family)
+    fd.set_absolute_size(px * Pango.SCALE)
+    if bold:
+        fd.set_weight(Pango.Weight.BOLD)
+    if italic:
+        fd.set_style(Pango.Style.ITALIC)
+    lay.set_font_description(fd)
+    lay.set_text(text, -1)
+    return lay
+
+
+# texto como o GDI do XP (como gdiText.js na extensão): cada letra avança a
+# largura inteira da tabela gdi-metrics.json; linha = subida + descida Windows
+_METRICS = None
+
+
+def _gdi_table():
+    global _METRICS
+    if _METRICS is None:
+        import json
+        try:
+            with open(os.path.join(EXTENSIONS, "zorin-xp@zorin-xp.local", "gdi-metrics.json")) as f:
+                _METRICS = json.load(f)
+        except (OSError, ValueError):
+            _METRICS = {}
+    return _METRICS
+
+
+class GdiText:
+    FILES = {("Tahoma", False, False): "tahoma", ("Tahoma", True, False): "tahomabd",
+             ("Arial", False, False): "arial", ("Arial", True, True): "arialbi"}
+
+    def __init__(self, cr, text, family, px, bold=False, italic=False):
+        self.text, self.cr = text, cr
+        self.lay = text_layout(cr, "", family, px, bold, italic)
+        self.m = _gdi_table().get(f"{self.FILES.get((family, bold, italic))}|{px}")
+        if self.m:
+            self.height = self.m["a"] + self.m["d"]
+        else:
+            self.lay.set_text("Ag", -1)
+            self.height = self.lay.get_pixel_size()[1]
+
+    def adv(self, ch):
+        if self.m and str(ord(ch)) in self.m["adv"]:
+            return self.m["adv"][str(ord(ch))]
+        self.lay.set_text(ch, -1)
+        return self.lay.get_pixel_extents()[1].width
+
+    @property
+    def width(self):
+        return sum(self.adv(ch) for ch in self.text)
+
+    def draw(self, x, y):
+        asc = self.m["a"] if self.m else 0
+        for ch in self.text:
+            if ch != " ":
+                self.lay.set_text(ch, -1)
+                base = self.lay.get_baseline() / Pango.SCALE if self.m else 0
+                self.cr.move_to(x, y + asc - base)
+                PangoCairo.show_layout(self.cr, self.lay)
+            x += self.adv(ch)
+
+
+def paint_pixbuf(cr, pb, x, y, w=None, h=None):
+    cr.save()
+    cr.translate(x, y)
+    if w and h:
+        cr.scale(w / pb.get_width(), h / pb.get_height())
+    from gi.repository import Gdk
+    Gdk.cairo_set_source_pixbuf(cr, pb, 0, 0)
+    cr.paint()
+    cr.restore()
+
+
+def rgb(cr, r, g, b):
+    cr.set_source_rgb(r / 255, g / 255, b / 255)
+
+
+def background(cr, W, H):
+    """O fundo do ecrã de boas-vindas (welcome.js): faixas, linhas e o brilho."""
+    rgb(cr, 90, 126, 220)
+    cr.rectangle(0, 0, W, H)
+    cr.fill()
+    rgb(cr, 0, 48, 156)
+    cr.rectangle(0, 0, W, TOP_H - LINE_H)
+    cr.fill()
+    paint_pixbuf(cr, image("divider-top"), 0, TOP_H - LINE_H, W, LINE_H)
+    bottom = H - BOTTOM_H
+    grad = cairo.LinearGradient(0, 0, W, 0)
+    grad.add_color_stop_rgb(0, 57 / 255, 52 / 255, 173 / 255)
+    grad.add_color_stop_rgb(1, 0, 48 / 255, 156 / 255)
+    cr.set_source(grad)
+    cr.rectangle(0, bottom + LINE_H, W, BOTTOM_H - LINE_H)
+    cr.fill()
+    paint_pixbuf(cr, image("divider-bottom"), 0, bottom, W, LINE_H)
+    paint_pixbuf(cr, image("glow"), 0, TOP_H)
+
+
+def draw(cr, X, Y, W, H, s, real, icon):
+    """O ecrã de boas-vindas do XP com "bem-vindo" na área (X, Y, W, H)."""
+    cr.save()
+    cr.translate(X, Y)
+    background(cr, W, H)
+    bottom = H - BOTTOM_H
+    top, content_h = TOP_H, bottom - TOP_H
+    div = W // 2 - 2
+    paint_pixbuf(cr, image("divider-v"), div, top, 1, content_h)
+
+    # "bem-vindo" à direita do painel esquerdo, com a sombra 2 px ao lado e 3 abaixo
+    for dx, dy, col in ((2, 3, (49, 81, 181)), (0, 0, (239, 247, 255))):
+        t = GdiText(cr, s.get("welcome", "bem-vindo"), "Arial", 48, bold=True, italic=True)
+        rgb(cr, *col)
+        t.draw(div - 22 - t.width + dx, top + (content_h - t.height) // 2 + dy)
+
+    # a conta: moldura, imagem, nome e "A carregar as suas definições pessoais..."
+    tx, ty = div + LIST_X, top + (content_h - ITEM_H) // 2
+    paint_pixbuf(cr, image("frame-hot"), tx + 7, ty + 7)
+    try:
+        pic = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon, PICTURE, PICTURE, False)
+        paint_pixbuf(cr, pic, tx + 12, ty + 12)
+    except GLib.Error:
+        pass
+    rgb(cr, 239, 247, 255)
+    name = GdiText(cr, real, "Tahoma", 19)
+    name.draw(tx + TEXT_X, ty + 7)
+    GdiText(cr, s.get("loadingSettings", ""), "Tahoma", 11, bold=True).draw(
+        tx + TEXT_X, ty + 7 + name.height)
+    cr.restore()
+
+
+def render_png(path, size):
+    W, H = (int(v) for v in size.split("x"))
+    surf = cairo.ImageSurface(cairo.FORMAT_RGB24, W, H)
+    real, icon = user()
+    draw(cairo.Context(surf), 0, 0, W, H, strings(), real, icon)
+    surf.write_to_png(path)
+
+
+def run():
+    gi.require_version("Gtk", "3.0")
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import Gdk, Gio, Gtk
+    try:
+        os.remove(DONE)
+    except OSError:
+        pass
+    s = strings()
+    real, icon = user()
+    display = Gdk.Display.get_default()
+    if display is None:
+        return
+    mon = display.get_primary_monitor() or display.get_monitor(0)
+    geo = mon.get_geometry()
+    screen = Gdk.Screen.get_default()
+
+    win = Gtk.Window(type=Gtk.WindowType.POPUP)
+    win.set_app_paintable(True)
+    win.move(0, 0)
+    win.resize(screen.get_width(), screen.get_height())
+
+    def on_draw(_w, cr):
+        cr.set_source_rgb(0, 0, 0)
+        cr.paint()
+        draw(cr, geo.x, geo.y, geo.width, geo.height, s, real, icon)
+        return True
+    win.connect("draw", on_draw)
+    win.show_all()
+
+    loop = GLib.MainLoop()
+
+    def check_done():
+        if os.path.exists(DONE):
+            loop.quit()
+            return False
+        return True
+    GLib.timeout_add(100, check_done)
+    GLib.timeout_add_seconds(MAX_SECONDS, lambda: loop.quit() or False)
+
+    def shell_appeared(*_a):
+        GLib.timeout_add_seconds(AFTER_SHELL_SECONDS, lambda: loop.quit() or False)
+    if os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
+        try:
+            Gio.bus_watch_name(Gio.BusType.SESSION, "org.gnome.Shell", Gio.BusNameWatcherFlags.NONE,
+                               shell_appeared, None)
+        except GLib.Error:
+            pass
+    loop.run()
+    win.destroy()
+    try:
+        os.remove(DONE)
+    except OSError:
+        pass
+
+
+if __name__ == "__main__":
+    if len(sys.argv) >= 3 and sys.argv[1] == "--png":
+        render_png(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "1920x1080")
+    else:
+        try:
+            run()
+        except Exception as e:  # nunca atrapalhar o arranque da sessão
+            print(f"zorin-xp-splash: {e}", file=sys.stderr)

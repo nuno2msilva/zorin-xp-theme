@@ -1,0 +1,127 @@
+# Zorin XP — ecrã de arranque do Windows XP (usado por tools/builders/bootscreen.py)
+#
+# Arranque: o ecrã de 640x480 do ntoskrnl.exe refeito à resolução do ecrã,
+# com as peças no tamanho original: o logótipo e a caixa da barra ao centro,
+# "Copyright © Microsoft Corporation" no canto de baixo à esquerda e
+# "Microsoft" à direita, às mesmas distâncias das margens que no XP. Acende do
+# preto e os três blocos azuis correm na caixa. Desligar/reiniciar: o ecrã de
+# estado do XP, "O Windows está a encerrar...".
+#
+# No arranque o script corre antes de existir o ecrã gráfico (o Plymouth espera
+# pela placa e a largura/altura começam a 0): a disposição é refeita sempre que
+# o tamanho muda, e um fundo preto tapa o logótipo do fabricante.
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+global.mode = Plymouth.GetMode();
+global.frame = 0;
+global.W = 0;
+global.H = 0;
+global.black = Sprite();
+global.black.SetZ(-10);
+
+fun layout_boot() {
+    W = global.W;
+    H = global.H;
+    if (!global.boot) {
+        global.boot = Sprite(Image("boot-center.png"));
+        global.copyright = Sprite(Image("boot-copyright.png"));
+        global.microsoft = Sprite(Image("boot-microsoft.png"));
+        for (i = 0; i < 18; i = i + 1)
+            global.steps[i] = Image("bar-" + i + ".png");
+        global.bar = Sprite(global.steps[0]);
+        global.boot.SetOpacity(0);
+        global.copyright.SetOpacity(0);
+        global.microsoft.SetOpacity(0);
+        global.bar.SetOpacity(0);
+    }
+    # o centro do ecrã do XP no centro deste; os textos presos aos cantos de baixo
+    ox = Math.Int((W - 640) / 2);
+    oy = Math.Int((H - 480) / 2);
+    global.boot.SetPosition(ox + @CENTER_X@, oy + @CENTER_Y@, 0);
+    global.bar.SetPosition(ox + @BAR_CLIP_L@, oy + @BAR_Y@, 1);
+    global.copyright.SetPosition(@COPYRIGHT_X@, H - 480 + @COPYRIGHT_Y@, 0);
+    global.microsoft.SetPosition(W - 640 + @MICROSOFT_X@, H - 480 + @MICROSOFT_Y@, 0);
+}
+
+fun layout_shutdown() {
+    W = global.W;
+    H = global.H;
+    # medidas do logonui.exe (UIFILE 1000), como a extensão da sessão
+    global.top = Sprite(Image("top.png").Scale(W, 78));
+    global.top.SetPosition(0, 0, 0);
+    global.topline = Sprite(Image("divider-top.png").Scale(W, 2));
+    global.topline.SetPosition(0, 78, 1);
+    global.content = Sprite(Image("content.png").Scale(W, H - 80 - 96));
+    global.content.SetPosition(0, 80, 0);
+    global.glow = Sprite(Image("glow.png"));
+    global.glow.SetPosition(0, 80, 1);
+    global.bottomline = Sprite(Image("divider-bottom.png").Scale(W, 2));
+    global.bottomline.SetPosition(0, H - 96, 1);
+    global.bottom = Sprite(Image("bottom.png").Scale(W, 94));
+    global.bottom.SetPosition(0, H - 94, 0);
+    # painel esquerdo centrado: logótipo e o texto alinhados à direita
+    right = Math.Int(W / 2) + 192;
+    text = Image("shutting-down.png");
+    blockh = 86 + 20 + text.GetHeight();
+    by = 80 + Math.Int((H - 80 - 96 - blockh) / 2);
+    global.logo = Sprite(Image("logo.png"));
+    global.logo.SetPosition(right - 20 - 137, by, 2);
+    global.status = Sprite(text);
+    global.status.SetPosition(right - 40 - text.GetWidth(), by + 86 + 20, 2);
+}
+
+fun relayout() {
+    w = Window.GetWidth();
+    h = Window.GetHeight();
+    if (w < 1 || h < 1)
+        return;
+    if (w == global.W && h == global.H)
+        return;
+    global.W = w;
+    global.H = h;
+    global.black.SetImage(Image("black.png").Scale(w, h));
+    global.black.SetPosition(0, 0, -10);
+    if (global.mode == "shutdown" || global.mode == "reboot")
+        layout_shutdown();
+    else
+        layout_boot();
+}
+
+fun refresh_callback() {
+    relayout();
+    if (global.boot) {
+        global.frame = global.frame + 1;
+        # o kernel do XP acende a paleta a partir do preto
+        a = global.frame / @FADE_FRAMES@;
+        if (a > 1) a = 1;
+        global.boot.SetOpacity(a);
+        global.copyright.SetOpacity(a);
+        global.microsoft.SetOpacity(a);
+        global.bar.SetOpacity(a);
+        step = Math.Int(global.frame / @STEP_FRAMES@) % 18;
+        global.bar.SetImage(global.steps[step]);
+    }
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+relayout();
+
+# palavra-passe (discos cifrados): o XP não tinha; texto simples por baixo da barra
+fun display_password_callback(prompt, bullets) {
+    W = Window.GetWidth();
+    H = Window.GetHeight();
+    global.prompt_sprite = Sprite(Image.Text(prompt, 0.75, 0.75, 0.75));
+    global.prompt_sprite.SetPosition(Math.Int((W - global.prompt_sprite.GetImage().GetWidth()) / 2), Math.Int(H * 0.82), 10);
+    stars = "";
+    for (i = 0; i < bullets; i = i + 1)
+        stars = stars + "•";
+    global.bullets_sprite = Sprite(Image.Text(stars + " ", 1, 1, 1));
+    global.bullets_sprite.SetPosition(Math.Int((W - global.bullets_sprite.GetImage().GetWidth()) / 2), Math.Int(H * 0.82) + 24, 10);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback() {
+    global.prompt_sprite = NULL;
+    global.bullets_sprite = NULL;
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);

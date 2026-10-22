@@ -1,0 +1,593 @@
+/* =====================================================================
+ * Separadores (Tab) — medidas confirmadas contra capturas do XP:
+ *   não selecionado: 18 px, 2 px abaixo do topo do cabeçalho
+ *   selecionado: +2 px em cima, +2 px de cada lado, sobrepõe 1 px do painel
+ *   painel: Tab.Pane (borda #919B9C + sombra de 2 px) com Tab.Body em tamanho real
+ * =================================================================== */
+notebook {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+/* (com show-border o GtkNotebook do GTK4 leva a classe .frame: sem o contorno
+ * das caixas de grupo, a moldura é só a do separador) */
+notebook.frame { border: 0; border-radius: 0; box-shadow: none; }
+notebook > header {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+notebook > header.top { padding: 0 0 0 2px; }
+notebook > header > tabs { margin: 0; }
+notebook > header tab {
+  min-height: 13px;
+  min-width: 0;
+  margin: 2px 0 0 0;
+  padding: 2px 6px 3px;
+  {{part:tab:normal}}
+  box-shadow: none;
+  outline-offset: -3px;
+  color: @xp_text;
+}
+notebook > header tab:hover { {{state:tab:hover}} }
+notebook > header tab:disabled { {{state:tab:disabled}} }
+notebook > header tab:first-child { {{state:tab-left:normal}} }
+notebook > header tab:first-child:hover { {{state:tab-left:hover}} }
+notebook > header tab:checked {
+  margin: 0 -2px -1px;
+  padding: 4px 8px 4px;
+  {{state:tab-top:checked}}
+}
+notebook > header tab:checked:first-child {
+  margin-left: -2px;
+  {{state:tab-top-left:checked}}
+}
+notebook > header tab label { padding: 0; }
+notebook > header tab button.flat { min-width: 13px; min-height: 13px; padding: 0; margin: 0 -3px 0 3px; }
+
+notebook > stack:not(:only-child) {
+  padding: 2px 4px 4px 2px;
+  {{part:tab-pane:normal}}
+  background-color: #F4F3EE;
+  background-image: url("assets/tab-body.png");
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+/* dentro de uma página com separadores o fundo é o do painel */
+notebook > stack:not(:only-child) > * { background: none; }
+/*@gtk4*/
+/* O XP (e o GTK3) desenha a moldura antes dos separadores e o selecionado
+ * desce 1 px por cima da linha de cima dela; o GTK4 desenha a moldura depois
+ * e tapava o separador. Aqui essa linha (#919B9C) é a borda de baixo do
+ * cabeçalho — que o separador selecionado tapa — e a moldura perde a linha
+ * de cima (TabPaneEdge sem a 1.ª linha) */
+notebook > header.top { border-bottom: 1px solid #919B9C; }
+notebook > header.top > tabs { padding: 0; }
+notebook > header.top ~ stack:not(:only-child) {
+  padding-top: 1px;
+  border-image: url("assets/tab-pane-notop.png") 1 4 4 2 stretch;
+  border-image-width: 1px 4px 4px 2px;
+}
+/*@end*/
+
+/* ---------------------------------------------------------------------
+ * Caixas de grupo (button.groupbox): contorno #D0D0BF arredondado,
+ * título azul #0046D5
+ * ------------------------------------------------------------------- */
+frame > border, .frame {
+  margin: 0;
+  padding: 0;
+  border: 1px solid #D0D0BF;
+  border-radius: 3px;
+  box-shadow: none;
+}
+/* título a 10 px da borda: 6 px de margem + 3 px de folga de cada lado (medido) */
+frame > label { color: @xp_groupbox_text; margin: 0 0 0 6px; padding: 0 3px; }
+frame > label:disabled { color: @xp_disabled_text; }
+frame.flat > border { border-style: none; }
+/* (no GTK4 o contorno é do próprio nó frame, sem nó border) */
+/*@gtk4*/
+frame { border: 1px solid #D0D0BF; border-radius: 3px; box-shadow: none; }
+frame.flat { border-style: none; }
+/*@end*/
+
+/* Folhas de propriedades montadas a partir de aplicações modernas (ver
+ * src/zorin-appearance-xp): listas sem moldura nem linhas, dentro de caixas
+ * de grupo com o conteúdo a ~10 px do contorno */
+list.zxp-plain-list { border: 0; background: none; box-shadow: none; }
+list.zxp-plain-list > row, list.zxp-plain-list > row:hover { background: none; border: 0; }
+frame.zxp-groupbox > list, frame.zxp-groupbox > box, frame.zxp-groupbox > grid,
+frame.zxp-groupbox > flowbox { margin: 3px 4px 6px 4px; }
+window.zxp-property-sheet flowbox > flowboxchild { padding: 3px; }
+
+/* Molduras de listas/vistas com scroll: 1 px #7F9DB9 como as do XP */
+scrolledwindow.frame, scrolledwindow > border, .frame.view {
+  border: 1px solid @xp_field_border;
+  border-radius: 0;
+}
+
+/* ---------------------------------------------------------------------
+ * Dicas (InfoWindow): fundo #FFFFE1, contorno preto, 1×2 px, sem sombra
+ * ------------------------------------------------------------------- */
+tooltip, tooltip.background, .tooltip {
+  padding: 1px 2px;
+  border: 1px solid #000000;
+  border-radius: 0;
+  background-color: @xp_infobk;
+  color: @xp_text;
+  box-shadow: none;
+  text-shadow: none;
+}
+tooltip * { padding: 0; margin: 0; background: none; color: @xp_text; }
+tooltip decoration { box-shadow: none; border-radius: 0; background: none; }
+
+/* ---------------------------------------------------------------------
+ * Barra de menus e menus (FlatMenus=true)
+ *   barra: 19 px · item: 3×6 px · destaque MenuHilight #316AC5
+ *   menu: borda 1 px #ACA899, 2 px de margem, itens de 17 px,
+ *         separador de 9 px com a linha 3 px abaixo do topo,
+ *         texto a 17 px do início do destaque, seta a 6 px da direita
+ *   sombra (CS_DROPSHADOW): 5 px à direita e em baixo
+ * ------------------------------------------------------------------- */
+menubar, .menubar {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background-color: @xp_btnface;
+  box-shadow: none;
+}
+menubar > menuitem, .menubar > menuitem {
+  min-height: 13px;
+  padding: 3px 6px;
+  color: @xp_text;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+menubar > menuitem:hover, .menubar > menuitem:hover {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+  box-shadow: none;
+}
+menubar > menuitem:disabled { color: @xp_graytext; }
+menubar > menuitem label:disabled { color: @xp_graytext; }
+
+menu, .menu, .context-menu {
+  margin: 0;
+  padding: 2px;
+  border: 1px solid @xp_btnshadow;
+  border-radius: 0;
+  background-color: @xp_window;
+  color: @xp_text;
+  font: initial;
+}
+/*@gtk3*/
+menu, .menu, .context-menu { font-size: inherit; font-family: inherit; }
+.csd.popup decoration, window.popup decoration, .popup decoration {
+  border-radius: 0;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.170),
+              2px 2px 0 rgba(0, 0, 0, 0.193),
+              3px 3px 0 rgba(0, 0, 0, 0.121),
+              4px 4px 0 rgba(0, 0, 0, 0.0435),
+              5px 5px 0 rgba(0, 0, 0, 0.012);
+}
+menu > arrow, .menu > arrow {
+  min-width: 16px;
+  min-height: 16px;
+  border: 0;
+  background-color: @xp_window;
+  -gtk-icon-source: url("assets/menu-arrow-up-normal.png");
+}
+menu > arrow.bottom, .menu > arrow.bottom { -gtk-icon-source: url("assets/menu-arrow-down-normal.png"); }
+/*@end*/
+/* itens de 17 px; o texto começa a 17 px do realce: é a coluna das marcas,
+ * que o GtkMenu já reserva (medido) */
+menu menuitem, .menu menuitem, .context-menu menuitem {
+  min-height: 13px;
+  min-width: 40px;
+  padding: 1px 6px 2px 1px;   /* (o texto Tahoma 8 tem 14 px de altura: 17 no total) */
+  border: 0;
+  background: none;
+  color: @xp_text;
+  text-shadow: none;
+}
+menu menuitem:hover, .menu menuitem:hover, .context-menu menuitem:hover {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+menu menuitem:disabled, .menu menuitem:disabled, .context-menu menuitem:disabled,
+menu menuitem:disabled label, .menu menuitem:disabled label {
+  color: @xp_graytext;
+}
+menu menuitem accelerator, .menu menuitem accelerator { color: inherit; margin-left: 20px; }
+menu menuitem:hover accelerator { color: @xp_highlight_text; }
+
+/* Glifos Marlett (visto, ponto, seta) */
+menu menuitem arrow, .menu menuitem arrow {
+  min-width: 4px;
+  min-height: 7px;
+  margin-left: 10px;
+  -gtk-icon-source: url("assets/menu-arrow-right-normal.png");
+}
+menu menuitem:hover arrow { -gtk-icon-source: url("assets/menu-arrow-right-selected.png"); }
+menu menuitem:disabled arrow { -gtk-icon-source: url("assets/menu-arrow-right-disabled.png"); }
+menu menuitem check, menu menuitem radio, .menu menuitem check, .menu menuitem radio {
+  min-width: 7px;
+  min-height: 7px;
+  margin: 0 6px 0 4px;
+  -gtk-icon-source: none;
+}
+menu menuitem check:checked, .menu menuitem check:checked { -gtk-icon-source: url("assets/menu-check-normal.png"); }
+menu menuitem:hover check:checked { -gtk-icon-source: url("assets/menu-check-selected.png"); }
+menu menuitem:disabled check:checked { -gtk-icon-source: url("assets/menu-check-disabled.png"); }
+menu menuitem radio:checked, .menu menuitem radio:checked { -gtk-icon-source: url("assets/menu-bullet-normal.png"); }
+menu menuitem:hover radio:checked { -gtk-icon-source: url("assets/menu-bullet-selected.png"); }
+menu menuitem:disabled radio:checked { -gtk-icon-source: url("assets/menu-bullet-disabled.png"); }
+/* (as regras gerais dos botões de opção, radio:hover / check:hover, ganhavam a
+ * estas: o círculo do botão de opção aparecia no item por baixo do rato.
+ * Nos menus do XP só há o ponto ou o visto no item escolhido) */
+menu menuitem radio:hover, menu menuitem radio:active, menu menuitem radio:disabled,
+menu menuitem check:hover, menu menuitem check:active, menu menuitem check:disabled,
+.menu menuitem radio:hover, .menu menuitem radio:active, .menu menuitem radio:disabled,
+.menu menuitem check:hover, .menu menuitem check:active, .menu menuitem check:disabled { -gtk-icon-source: none; }
+menu menuitem radio:checked:hover, menu menuitem radio:checked:active,
+.menu menuitem radio:checked:hover, .menu menuitem radio:checked:active { -gtk-icon-source: url("assets/menu-bullet-normal.png"); }
+menu menuitem:hover radio:checked:hover, menu menuitem:hover radio:checked:active { -gtk-icon-source: url("assets/menu-bullet-selected.png"); }
+menu menuitem:disabled radio:checked:disabled { -gtk-icon-source: url("assets/menu-bullet-disabled.png"); }
+menu menuitem check:checked:hover, menu menuitem check:checked:active,
+.menu menuitem check:checked:hover, .menu menuitem check:checked:active { -gtk-icon-source: url("assets/menu-check-normal.png"); }
+menu menuitem:hover check:checked:hover, menu menuitem:hover check:checked:active { -gtk-icon-source: url("assets/menu-check-selected.png"); }
+menu menuitem:disabled check:checked:disabled { -gtk-icon-source: url("assets/menu-check-disabled.png"); }
+
+menu separator, .menu separator, menu > menuitem.separator {
+  min-height: 1px;
+  margin: 2px 2px 3px;   /* 3 px acima e abaixo da linha e 1 px dos lados, medido (o GTK junta 1 px acima e tira 1 dos lados) */
+  padding: 0;
+  background-color: @xp_btnshadow;
+}
+
+/* Popovers (GTK3/GTK4) com o mesmo aspeto dos menus do XP */
+popover, popover.background {
+  padding: 2px;
+  border: 1px solid @xp_btnshadow;
+  border-radius: 0;
+  background-color: @xp_window;
+  color: @xp_text;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.170), 2px 2px 0 rgba(0, 0, 0, 0.193),
+              3px 3px 0 rgba(0, 0, 0, 0.121), 4px 4px 0 rgba(0, 0, 0, 0.0435);
+}
+/*@gtk4*/
+popover > contents {
+  padding: 2px;
+  border: 1px solid @xp_btnshadow;
+  border-radius: 0;
+  background-color: @xp_window;
+  color: @xp_text;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.170), 2px 2px 0 rgba(0, 0, 0, 0.193),
+              3px 3px 0 rgba(0, 0, 0, 0.121), 4px 4px 0 rgba(0, 0, 0, 0.0435);
+}
+popover, popover.background { padding: 0; border: 0; box-shadow: none; background: none; }
+popover > arrow { background: none; border: 0; }
+/* menus do XP: 1 px de contorno e 2 de folga (no contents), itens de 17 px,
+ * o texto a 17 px da borda do realce e a marca (bolinha, visto) ao meio
+ * desses 17 (o GTK4 punha 6 px à volta dos itens e 4 em cada item) */
+popover.menu stack > box, popover.menu stack > box > box { margin: 0; padding: 0; }
+popover.menu > contents modelbutton, popover.menu > contents row,
+popover.background.menu modelbutton.flat {   /* (mais forte que a regra dos botões planos) */
+  min-height: 0;
+  margin: 0;
+  padding: 1px 6px 1px 0;
+  border-radius: 0;
+}
+popover.menu modelbutton > box { margin: 0; padding: 0; min-width: 17px; }
+popover.menu modelbutton radio.left, popover.menu modelbutton check.left { margin: 0 2px; }
+popover.menu modelbutton label { margin: 0; padding: 0; }
+/* atalhos na cor do texto e a seta preta dos submenus, como no XP */
+popover.menu modelbutton accelerator { color: inherit; opacity: 1; margin-left: 20px; }
+popover.menu modelbutton arrow.right {   /* (fundo: um ícone seria esticado a 16 px) */
+  min-width: 4px;
+  min-height: 7px;
+  margin-left: 10px;
+  -gtk-icon-source: none;
+  -gtk-icon-size: 7px;     /* (um ícone embutido mede sempre isto: 16 por omissão) */
+  opacity: 1;
+  background: url("assets/menu-arrow-right-normal.png") no-repeat center;
+}
+popover.menu modelbutton:hover arrow.right, popover.menu modelbutton:selected arrow.right {
+  background-image: url("assets/menu-arrow-right-selected.png");
+}
+popover.menu modelbutton:disabled arrow.right { background-image: url("assets/menu-arrow-right-disabled.png"); }
+popover.menu modelbutton:hover, popover.menu modelbutton:selected,
+popover.menu row:hover, popover.menu row:selected {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+popover.menu separator { margin: 3px 1px; }   /* separadores de 7 px, 1 px para dentro (medido) */
+/*@end*/
+popover modelbutton, popover.background modelbutton {
+  min-height: 13px;
+  padding: 2px 6px 2px 4px;
+  border-radius: 0;
+  color: @xp_text;
+}
+popover modelbutton:hover, popover.background modelbutton:hover {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+
+/* ---------------------------------------------------------------------
+ * Barra de progresso (Progress): 13 px; blocos de 6 px + 2 px de espaço
+ * ------------------------------------------------------------------- */
+progressbar { padding: 0; min-width: 0; min-height: 0; color: @xp_text; }
+progressbar > text { color: @xp_text; }
+progressbar.horizontal > trough, progressbar trough {
+  min-height: 7px;
+  min-width: 20px;
+  padding: 3px 4px 3px 4px;
+  {{part:progress-track:normal}}
+  box-shadow: none;
+}
+progressbar trough > progress, progressbar progress {
+  min-height: 7px;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("assets/progress-chunk-tile.png");
+  background-repeat: repeat-x;
+  background-position: left center;
+  box-shadow: none;
+}
+progressbar.vertical > trough {
+  min-width: 7px;
+  min-height: 20px;
+  padding: 4px 3px;
+  {{part:progress-track-vert:normal}}
+}
+progressbar.vertical progress {
+  min-width: 7px;
+  background-image: url("assets/progress-chunk-tile-vert.png");
+  background-repeat: repeat-y;
+  background-position: center bottom;
+}
+progressbar.osd { min-height: 3px; }
+progressbar.osd > trough { border-image: none; padding: 0; min-height: 3px; background: none; }
+progressbar.osd progress { min-height: 3px; background-image: none; background-color: @xp_highlight; }
+
+levelbar trough { padding: 2px; border: 1px solid @xp_field_border; background-color: @xp_window; border-radius: 0; }
+levelbar block { min-height: 6px; min-width: 6px; border: 0; border-radius: 0; background-color: #2ED331; }
+levelbar block.empty { background-color: transparent; }
+levelbar block.low { background-color: #FAC458; }
+levelbar block.high, levelbar block.full { background-color: #2ED331; }
+
+/* ---------------------------------------------------------------------
+ * Controlo de deslize (TrackBar): calha de 4 px, cursor 11×21. Sempre o
+ * cursor retangular (TrackBar.Thumb/ThumbVert, o do controlo de volume do
+ * XP), mesmo com marcas só de um lado (a pedido, em vez do pontiagudo)
+ * ------------------------------------------------------------------- */
+scale { min-height: 21px; min-width: 21px; padding: 0 5px; }
+scale.vertical { padding: 5px 0; }
+scale trough {
+  min-height: 4px;
+  min-width: 4px;
+  margin: 0;
+  {{part:trackbar-track:normal}}
+  box-shadow: none;
+}
+scale highlight, scale fill { background: none; border: 0; box-shadow: none; }
+scale slider {
+  min-width: 11px;
+  min-height: 21px;
+  margin: -9px -6px;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("assets/trackbar-thumb-normal.png");
+  box-shadow: none;
+  /*@gtk4*/transform: none;/*@end*/  /* o libadwaita roda-o 45° quando há marcas */
+}
+scale slider:hover { background-image: url("assets/trackbar-thumb-hover.png"); }
+scale slider:active { background-image: url("assets/trackbar-thumb-active.png"); }
+scale slider:disabled { background-image: url("assets/trackbar-thumb-disabled.png"); }
+scale.vertical slider {
+  min-width: 21px;
+  min-height: 11px;
+  margin: -6px -9px;
+  background-image: url("assets/trackbar-thumb-vert-normal.png");
+}
+scale.vertical slider:hover { background-image: url("assets/trackbar-thumb-vert-hover.png"); }
+scale.vertical slider:active { background-image: url("assets/trackbar-thumb-vert-active.png"); }
+scale.vertical slider:disabled { background-image: url("assets/trackbar-thumb-vert-disabled.png"); }
+scale marks, scale mark { color: #A1A192; }
+scale mark indicator { min-height: 1px; min-width: 1px; background-color: #A1A192; color: #A1A192; }
+scale value { color: @xp_text; }
+
+/* ---------------------------------------------------------------------
+ * Interruptor: o XP não os tinha — as opções de ligar/desligar eram caixas
+ * de verificação —, por isso é desenhado como a caixa do Luna (13×13, com
+ * os mesmos estados) e o cursor fica invisível
+ * ------------------------------------------------------------------- */
+switch {
+  min-width: 13px;
+  min-height: 13px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  outline-offset: 1px;
+  box-shadow: none;
+  background-color: transparent;
+  background-image: url("assets/check-unchecked-normal.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  color: transparent;
+  font-size: 0;
+}
+switch:hover { background-image: url("assets/check-unchecked-hover.png"); }
+switch:disabled { background-color: transparent; background-image: url("assets/check-unchecked-disabled.png"); }
+switch:checked { background-color: transparent; background-image: url("assets/check-checked-normal.png"); }
+switch:checked:hover { background-image: url("assets/check-checked-hover.png"); }
+switch:checked:disabled { background-image: url("assets/check-checked-disabled.png"); }
+switch slider, switch > slider {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: none;
+  box-shadow: none;
+  opacity: 0;
+}
+switch image { color: transparent; -gtk-icon-source: none; min-width: 0; min-height: 0; margin: 0; padding: 0; }
+/*@gtk4*/
+switch image { -gtk-icon-size: 1px; }
+/*@end*/
+
+/* ---------------------------------------------------------------------
+ * Listas e árvores (ListView/TreeView)
+ * ------------------------------------------------------------------- */
+treeview.view {
+  /*@gtk3*/-GtkTreeView-grid-line-width: 0; -GtkTreeView-tree-line-width: 1; -GtkTreeView-tree-line-pattern: '\1\1';/*@end*/
+  border-left-color: #A0A0A0;
+  border-top-color: #A0A0A0;
+  outline-offset: -1px;
+}
+/*@gtk4*/
+treeview.view { border-left-color: #A0A0A0; border-top-color: #A0A0A0; }
+/*@end*/
+treeview.view:selected, treeview.view:selected:focus { color: @xp_highlight_text; background-color: @xp_highlight; }
+treeview.view.expander {
+  min-width: 9px;
+  min-height: 9px;
+  -gtk-icon-source: url("assets/tree-expander-closed.png");
+  color: transparent;
+}
+treeview.view.expander:checked { -gtk-icon-source: url("assets/tree-expander-open.png"); }
+treeview.view.progressbar { background-image: url("assets/progress-chunk-tile.png"); border: 0; }
+treeview.view.trough { background-color: @xp_window; border: 1px solid @xp_field_border; }
+treeview.view header button, columnview > header > button, treeview > header > button {
+  min-height: 15px;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 6px 2px 6px;
+  {{part:header-item:normal}}
+  color: @xp_text;
+  box-shadow: none;
+}
+/* (o GTK4 do Nautilus usa columnview: a linha laranja ao passar o rato também) */
+treeview.view header button:hover, treeview > header > button:hover,
+columnview > header > button:hover { {{state:header-item:hover}} }
+treeview.view header button:active, treeview > header > button:active,
+columnview > header > button:active { {{state:header-item:active}} }
+treeview.view header button:last-child { {{state:header-item:normal}} }
+treeview.view header button arrow { min-width: 8px; min-height: 8px; -gtk-icon-source: url("assets/menu-arrow-down-disabled.png"); }
+treeview.view header button.dnd { background-color: @xp_highlight; color: @xp_highlight_text; }
+treeview.view acceleditor > label { background-color: @xp_highlight; }
+treeview entry, treeview entry.flat { border: 1px solid #000000; padding: 0 1px; background-color: @xp_window; }
+
+list, listview, .view row { background-color: @xp_window; color: @xp_text; }
+list row, listview > row, row { padding: 1px 2px; border: 0; border-radius: 0; outline-offset: -1px; }
+list row:selected, listview > row:selected, row:selected,
+flowbox > flowboxchild:selected, gridview > child:selected {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+row.activatable:hover:not(:selected) { background-color: transparent; }
+list.content, list.boxed-list, .boxed-list {
+  border: 1px solid @xp_field_border;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------
+ * Barras de ferramentas, estado, painéis, expansores, barras de informação
+ * ------------------------------------------------------------------- */
+toolbar, .toolbar, .primary-toolbar, actionbar > revealer > box, searchbar > revealer > box {
+  padding: 2px;
+  border: 0;
+  border-radius: 0;
+  background-color: @xp_btnface;
+  box-shadow: none;
+}
+toolbar separator, .toolbar separator { min-width: 1px; margin: 3px 4px; background-color: #CAC6AF; }
+statusbar {
+  padding: 2px 4px;
+  border-top: 1px solid #D8D2BD;
+  background-color: @xp_btnface;
+  color: @xp_text;
+}
+paned > separator, paned.horizontal > separator, paned.vertical > separator {
+  min-width: 4px;
+  min-height: 4px;
+  margin: 0;
+  background: @xp_btnface;
+  border: 0;
+  -gtk-icon-source: none;
+}
+expander title > arrow, expander > title > arrow, expander arrow {
+  min-width: 9px;
+  min-height: 9px;
+  -gtk-icon-source: url("assets/tree-expander-closed.png");
+}
+expander title > arrow:checked, expander arrow:checked { -gtk-icon-source: url("assets/tree-expander-open.png"); }
+infobar { border: 0; }
+infobar > revealer > box, infobar.info > revealer > box, infobar.warning > revealer > box,
+infobar.question > revealer > box, infobar.error > revealer > box {
+  padding: 4px 6px;
+  border-bottom: 1px solid #C2C0A8;
+  background-color: @xp_infobk;
+  color: @xp_text;
+}
+infobar.error > revealer > box { background-color: #FFE1E1; }
+
+spinner { color: @xp_highlight; }
+calendar {
+  padding: 2px;
+  border: 1px solid @xp_field_border;
+  border-radius: 0;
+  background-color: @xp_window;
+  color: @xp_text;
+}
+calendar:selected, calendar.view:selected { background-color: @xp_highlight; color: @xp_highlight_text; border-radius: 0; }
+calendar.header { border-bottom: 1px solid @xp_field_border; }
+calendar.highlight { color: @xp_groupbox_text; }
+calendar:indeterminate { color: @xp_graytext; }
+
+/* Barra lateral (Explorador): o painel de tarefas azul do XP (ExplorerBar) */
+.sidebar, placessidebar, stacksidebar, .navigation-sidebar {
+  background-color: #7A96DF;
+  background-image: linear-gradient(to bottom, #7BA2E7, #6375D6);
+  color: @xp_text;
+  border: 0;
+}
+placessidebar row, .sidebar row, stacksidebar row {
+  min-height: 18px;
+  padding: 1px 6px;
+  background: none;
+  color: #FFFFFF;
+}
+placessidebar row label, .sidebar row label { color: #FFFFFF; }
+placessidebar row:hover label, .sidebar row:hover label { text-decoration-line: underline; }
+placessidebar row:selected, .sidebar row:selected, stacksidebar row:selected {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+placessidebar > viewport.frame, .sidebar.view { border: 0; }
+
+/* Caminho do seletor de ficheiros: botões de barra de ferramentas */
+.path-bar button label, .path-bar button image { padding: 0 1px; }
+
+/* Etiquetas de ligação */
+*:link, button:link, button:visited { color: #0000FF; }
+*:visited { color: #800080; }
+*:link:hover { text-decoration-line: underline; }
+
+/* Diálogos */
+messagedialog .dialog-action-box, dialog .dialog-action-area, .dialog-action-area { padding: 8px; }
+messagedialog .titlebar, messagedialog.csd .titlebar { min-height: 0; }
+messagedialog .dialog-action-box button, .dialog-action-area button { min-width: 61px; }

@@ -1,0 +1,479 @@
+{
+ "strings": {
+  "2": "Erro",
+  "13": "&Mais janelas...",
+  "14": "Memória insuficiente para criar o mapa de bits. Feche uma ou mais aplicações para aumentar a memória disponível.",
+  "700": "&Abrir IME",
+  "701": "&Fechar IME",
+  "702": "&Abrir teclado virtual",
+  "703": "&Fechar teclado virtual",
+  "705": "&Nova conversão",
+  "706": "Encerrar",
+  "707": "Desligado",
+  "708": "Reiniciar",
+  "709": "Desconhecido",
+  "710": "Janelas",
+  "711": "Se encerrar este computador remoto, ninguém poderá utilizá-lo até que alguém na localização remota o reinicie manualmente.\n\nDeseja prosseguir com o encerramento?",
+  "712": "Existem outras pessoas ligadas a este computador remoto. Se encerrar o Windows poderá fazer com que estas percam dados. Será também necessário que alguém na localização remota reinicie manualmente o computador.\n\nDeseja prosseguir com o encerramento?",
+  "713": "Existem outras pessoas com sessão iniciada neste computador. Se encerrar o Windows poderá fazer com que estas percam dados.\n\nDeseja prosseguir com o encerramento?",
+  "714": "Existem outras pessoas com sessão iniciada neste computador. Se reiniciar o Windows poderá fazer com que estas percam dados.\n\nDeseja prosseguir com o reinicio?",
+  "800": "OK",
+  "801": "Cancelar",
+  "802": "&Abortar",
+  "803": "&Repetir",
+  "804": "&Ignorar",
+  "805": "&Sim",
+  "806": "&Não",
+  "807": "&Fechar",
+  "808": "Ajuda",
+  "809": "&Tentar nova.",
+  "810": "&Continuar",
+  "900": "Minimizar",
+  "901": "Maximizar",
+  "902": "Aumentar",
+  "903": "Diminuir",
+  "904": "Ajuda",
+  "905": "Fechar",
+  "8250": "Hardware: Manutenção (não planeada)",
+  "8251": "Hardware: Manutenção (planeada)",
+  "8252": "Hardware: Instalação (não planeada)",
+  "8253": "Hardware: Instalação (planeada)",
+  "8254": "Sistema operativo: Actualização (não planeada)",
+  "8255": "Sistema operativo: Actualização (planeada)",
+  "8256": "Sistema operativo: Reconfiguração (não planeada)",
+  "8257": "Sistema operativo: Reconfiguração (planeada)",
+  "8258": "Aplicação: Sem resposta",
+  "8259": "Aplicação: Instável",
+  "8260": "Aplicação: Manutenção (não planeada)",
+  "8261": "Outra (Não planeada)",
+  "8262": "Outra (Planeada)",
+  "8263": "Falha no sistema: erro fatal",
+  "8264": "Falha de energia: fio não ligado",
+  "8265": "Falha de energia: ambiente",
+  "8266": "Outra falha: sistema sem resposta",
+  "8267": "Desconhecido",
+  "8268": "Aplicação: Manutenção (planeada)",
+  "8269": "Não foi possível encontrar um título para esta razão",
+  "8275": "Reinicio ou encerramento para reparar hardware no sistema.",
+  "8276": "Reinicio ou encerramento para começar ou concluir a instalação de hardware.",
+  "8277": "Reinicio ou encerramento para actualizar o sistema operativo.",
+  "8278": "Reinicio ou encerramento para alterar a configuração do sistema operativo.",
+  "8279": "Reinicio ou encerramento para resolver problemas de uma aplicação que não responde.",
+  "8280": "Reinicio ou encerramento para resolver problemas de uma aplicação instável.",
+  "8281": "Um reinicio ou um encerramento necessário para uma aplicação.",
+  "8282": "Um encerramento ou reinicio devido a uma razão desconhecida",
+  "8283": "O computador apresentou um evento de falha de ecrã azul.",
+  "8284": "O computador foi desligado.",
+  "8285": "Houve falha de corrente.",
+  "8286": "O sistema deixou de responder.",
+  "8287": "Reinicio ou encerramento para efectuar manutenção planeada numa aplicação."
+ },
+ "dialogs": {},
+ "menus": {
+  "1": [
+   {
+    "id": 0,
+    "text": "",
+    "flags": 129,
+    "items": [
+     {
+      "id": 772,
+      "text": "An&ular",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 768,
+      "text": "Cort&ar",
+      "flags": 0
+     },
+     {
+      "id": 769,
+      "text": "&Copiar",
+      "flags": 0
+     },
+     {
+      "id": 770,
+      "text": "Co&lar",
+      "flags": 0
+     },
+     {
+      "id": 771,
+      "text": "Elimina&r",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 177,
+      "text": "Seleccionar &tudo",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 32768,
+      "text": "&Ordem de leitura da direita para a esquerda",
+      "flags": 0
+     },
+     {
+      "id": 32769,
+      "text": "&Mostrar caracteres de controlo Unicode",
+      "flags": 0
+     },
+     {
+      "id": 32787,
+      "text": "&Inserir carácter de controlo Unicode",
+      "flags": 129,
+      "items": [
+       {
+        "id": 32772,
+        "text": "LRM \tMarca da &esquerda para a direita",
+        "flags": 0
+       },
+       {
+        "id": 32773,
+        "text": "RLM \tMarca da &direita para a esquerda",
+        "flags": 0
+       },
+       {
+        "id": 32770,
+        "text": "ZWJ \t&União com largura nula",
+        "flags": 0
+       },
+       {
+        "id": 32771,
+        "text": "ZWNJ\t&Separador de largura nula",
+        "flags": 0
+       },
+       {
+        "id": 32774,
+        "text": "LRE \tInício de &incorporação da esquerda para a direita",
+        "flags": 0
+       },
+       {
+        "id": 32775,
+        "text": "RLE \tInício de incorporação da direita para a es&querda",
+        "flags": 0
+       },
+       {
+        "id": 32776,
+        "text": "LRO \tInício de substitui&ção da esquerda para a direita",
+        "flags": 0
+       },
+       {
+        "id": 32777,
+        "text": "RLO \t&Forçar escrita da direita para a esquerda",
+        "flags": 0
+       },
+       {
+        "id": 32778,
+        "text": "PDF \t&Restaurar direcção de escrita inicial",
+        "flags": 0
+       },
+       {
+        "id": 32779,
+        "text": "NADS\tSubstituição de for&matos de dígitos nacionais",
+        "flags": 0
+       },
+       {
+        "id": 32780,
+        "text": "NODS\tFormatos de dígitos &nominais (europeus)",
+        "flags": 0
+       },
+       {
+        "id": 32781,
+        "text": "ASS \tA&ctivar inversão simétrica",
+        "flags": 0
+       },
+       {
+        "id": 32782,
+        "text": "ISS \tInibir in&versão simétrica",
+        "flags": 0
+       },
+       {
+        "id": 32783,
+        "text": "AAFS\tAc&tivar formação árabe",
+        "flags": 0
+       },
+       {
+        "id": 32784,
+        "text": "IAFS\tIni&bir formação árabe",
+        "flags": 0
+       },
+       {
+        "id": 32785,
+        "text": "RS  \tSeparador de registos (Separador de b&locos)",
+        "flags": 0
+       },
+       {
+        "id": 32786,
+        "text": "US  \tSeparador de unidades (Separador de se&gmentos)",
+        "flags": 128
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "4": [
+   {
+    "id": null,
+    "text": "",
+    "flags": 144,
+    "items": [
+     {
+      "id": 8,
+      "text": "O &que é isto?",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "16": [
+   {
+    "id": null,
+    "text": " ",
+    "flags": 144,
+    "items": [
+     {
+      "id": 61728,
+      "text": "Resta&urar",
+      "flags": 0
+     },
+     {
+      "id": 61456,
+      "text": "&Mover",
+      "flags": 0
+     },
+     {
+      "id": 61440,
+      "text": "Dimensi&onar",
+      "flags": 0
+     },
+     {
+      "id": 61472,
+      "text": "Mi&nimizar",
+      "flags": 0
+     },
+     {
+      "id": 61488,
+      "text": "Ma&ximizar",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 61536,
+      "text": "&Fechar\tAlt+F4",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "32": [
+   {
+    "id": null,
+    "text": "-",
+    "flags": 144,
+    "items": [
+     {
+      "id": 61728,
+      "text": "Resta&urar",
+      "flags": 0
+     },
+     {
+      "id": 61456,
+      "text": "&Mover",
+      "flags": 0
+     },
+     {
+      "id": 61440,
+      "text": "Dimensi&onar",
+      "flags": 0
+     },
+     {
+      "id": 61472,
+      "text": "Mi&nimizar",
+      "flags": 1
+     },
+     {
+      "id": 61488,
+      "text": "Ma&ximizar",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 61536,
+      "text": "&Fechar\tCtrl+F4",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 61504,
+      "text": "&Seguinte\tCtrl+F6",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "48": [
+   {
+    "id": null,
+    "text": " ",
+    "flags": 144,
+    "items": [
+     {
+      "id": 61456,
+      "text": "&Mover",
+      "flags": 0
+     },
+     {
+      "id": 61536,
+      "text": "&Fechar\tAlt+F4",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "64": [
+   {
+    "id": null,
+    "text": "",
+    "flags": 144,
+    "items": [
+     {
+      "id": 4100,
+      "text": "Deslocar ecrã para aqui",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 4102,
+      "text": "Margem esquerda",
+      "flags": 0
+     },
+     {
+      "id": 4103,
+      "text": "Margem direita",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 4098,
+      "text": "Página à esquerda",
+      "flags": 0
+     },
+     {
+      "id": 4099,
+      "text": "Página à direita",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 4096,
+      "text": "Deslocar ecrã para a esquerda",
+      "flags": 0
+     },
+     {
+      "id": 4097,
+      "text": "Deslocar ecrã para a direita",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "80": [
+   {
+    "id": null,
+    "text": "",
+    "flags": 144,
+    "items": [
+     {
+      "id": 4100,
+      "text": "Deslocar ecrã para aqui",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 4102,
+      "text": "Superior",
+      "flags": 0
+     },
+     {
+      "id": 4103,
+      "text": "Inferior",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 4098,
+      "text": "Uma página acima",
+      "flags": 0
+     },
+     {
+      "id": 4099,
+      "text": "Uma página abaixo",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 4096,
+      "text": "Deslocar ecrã para cima",
+      "flags": 0
+     },
+     {
+      "id": 4097,
+      "text": "Deslocar ecrã para baixo",
+      "flags": 128
+     }
+    ]
+   }
+  ]
+ }
+}

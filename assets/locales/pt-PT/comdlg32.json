@@ -1,0 +1,3058 @@
+{
+ "strings": {
+  "256": "O ficheiro existe",
+  "257": "%s já existe.\nDeseja substituí-lo?",
+  "258": "A sair",
+  "259": "Tem a certeza de que pretende sair?",
+  "368": "G&uardar em:",
+  "369": "&Guardar",
+  "370": "A&brir",
+  "371": "&Imprimir",
+  "384": "Abrir",
+  "385": "Guardar como",
+  "386": "&Guardar ficheiro como:",
+  "387": "A unidade %c: não existe.\nCertifique-se de que especificou a unidade correcta.",
+  "388": "O Windows não consegue ler a unidade %c:. Certifique-se de que existe um disco na unidade e que o disco está formatado e sem erros.",
+  "389": "Era esperado um disco diferente na unidade %c:. Introduza o disco apropriado.",
+  "390": "O disco na unidade %c: não está formatado;\nIntroduza um disco formatado e tente novamente.",
+  "391": "%s\nNão é possível localizar este ficheiro.\nCertifique-se de que o nome do ficheiro está correcto.",
+  "392": "%s\nO caminho não existe.\nCertifique-se de que o caminho está correcto.",
+  "393": "%s\nEste nome de ficheiro não é válido.",
+  "394": "%s\nEste ficheiro já está a ser utilizado.\nUtilize um novo nome de ficheiro ou feche o ficheiro que está a ser utilizado por outro programa.",
+  "395": "%s\nEste ficheiro não pode ser acedido.\nCertifique-se de que possui privilégios de segurança na unidade da rede.",
+  "396": "%s\nEste ficheiro existe e é só de leitura.\nUtilize um nome de ficheiro diferente.",
+  "398": "%s\nEste nome de ficheiro é um nome de dispositivo reservado.\nUtilize um nome de ficheiro diferente.",
+  "399": "O disco %c: está protegido contra escrita.\nNão é possível guardar um ficheiro num disco protegido contra escrita.",
+  "400": "Este directório da unidade %c está cheio.\nUtilize outro directório ou unidade.",
+  "401": "Não é possível abrir %s. Já se encontra aberto o máximo de ficheiros.\nPara abrir este ficheiro, feche um outro ficheiro ou programa.",
+  "402": "%s\nEste ficheiro não existe.\n\nDeseja criar o ficheiro?",
+  "403": "%s\nEste ficheiro está numa unidade da rede com privilégios de criação mas não de modificação.\n\nPeça ao administrador desta rede para mudar esta condição.",
+  "404": "Não é possível seleccionar a unidade %c:.",
+  "405": "O serviço de rede não está a responder.",
+  "406": "%s\nNão tem permissão para abrir este ficheiro. \n\n Obtenha permissão com o seu proprietário ou com o administrador.",
+  "407": "%s\nNão tem permissão para abrir este directório. \n\n Obtenha permissão com o seu proprietário ou com o administrador.",
+  "408": "O Windows não consegue ler a unidade CD ROM em %c:. Verifique que a porta da unidade está fechada e que está inserido um disco válido de dados.",
+  "409": "Rede...",
+  "410": "R&ede...",
+  "411": "Mais do que um ficheiro tem o nome '%s'.\n\nEscolha um da lista de ficheiros.",
+  "412": "Guardar com o &tipo:",
+  "418": "&Nome do objecto:",
+  "419": "Objectos do &tipo:",
+  "420": "Não pode guardar nesta pasta que especificou. Escolha outra localização.",
+  "421": "Não pode guardar no local do URL que especificou. Escolha outra localização.",
+  "422": "'%s' já não está disponível. Feche a caixa de diálogo de propriedades e seleccione outra impressora.",
+  "423": "%s\nNão tem permissão para guardar neste directório. \nConsulte o administrador para obter permissão.\n\nPretende guardar na pasta 'Os meus documentos'?",
+  "702": "Um nível acima",
+  "703": "Criar nova pasta",
+  "704": "Listar",
+  "705": "Detalhes",
+  "711": "Menu 'Ver'",
+  "712": "Ir para última pasta visitada",
+  "768": "FileOpen",
+  "769": "FileSave",
+  "770": "ExitChanges",
+  "771": "ChooseColor",
+  "772": "FindText",
+  "773": "ReplaceText",
+  "774": "FormatChar",
+  "775": "FontInfo",
+  "776": "PrintDlg",
+  "777": "PrintSetupDlg",
+  "778": "MultiFileOpen",
+  "1037": "Fechar",
+  "1040": "Preto",
+  "1041": "Mogno",
+  "1042": "Verde",
+  "1043": "Verde-seco",
+  "1044": "Azul-atlântico",
+  "1045": "Púrpura",
+  "1046": "Verde cinza",
+  "1047": "Cinzento",
+  "1048": "Prateado",
+  "1049": "Vermelho",
+  "1050": "Verde lima",
+  "1051": "Amarelo",
+  "1052": "Azul",
+  "1053": "Lilás",
+  "1054": "Azul marinho",
+  "1055": "Branco",
+  "1072": "Alto",
+  "1073": "Médio",
+  "1074": "Baixo",
+  "1075": "Rascunho",
+  "1088": "Impressora:  ",
+  "1089": "Impressora do sistema (",
+  "1090": " em ",
+  "1091": "(actualmente %s)",
+  "1098": "O tamanho tem de ser um número.",
+  "1099": "O tamanho tem de estar entre %d e %d pontos.",
+  "1100": "Este estilo de tipo de letra é simulado no ecrã. Será utilizado na impressão o estilo correspondente mais aproximado.",
+  "1101": "Trata-se de um tipo de letra TrueType. Este tipo de letra será utilizado tanto na impressora como no ecrã.",
+  "1102": "Trata-se de um tipo de letra de impressora. Será utilizado no ecrã o tipo de letra mais parecido do Windows.",
+  "1103": "Trata-se de um tipo de letra de ecrã. Será utilizado na impressão o tipo de letra de impressora correspondente mais aproximado.",
+  "1104": "Este valor não se encontra entre o intervalo de páginas.\nIndique um número entre %u e %u.",
+  "1105": "O valor 'De' não pode ser maior do que o valor 'Até'.",
+  "1106": "O valor 'De' não pode ser vazio e tem de ser positivo.",
+  "1107": "O valor 'Até' não pode ser vazio e tem de ser positivo.",
+  "1108": "As margens sobrepõem-se ou saem do papel.\nIntroduza um tamanho de margens diferente.",
+  "1109": "O valor 'Cópias' não pode ser vazio e tem de ser positivo.",
+  "1110": "Esta impressora não suporta tantas cópias.\nO número de cópia será definido para o máximo da impressora %u.",
+  "1111": "Erro de impressão",
+  "1113": "Não foi possível encontrar a impressora.",
+  "1114": "Não existe memória suficiente para esta operação.",
+  "1115": "Ocorreu um erro durante esta operação.",
+  "1116": "Controlador de impressora desconhecido.\nCertifique-se de que existe um controlador instalado em %s.",
+  "1117": "O intervalo de página não é válido.\nIntroduza números entre %u e %u.",
+  "1118": "Introduziu demasiados intervalos de páginas. Pode introduzir um total de %u intervalos de páginas.",
+  "1119": "A sintaxe para o intervalo de páginas não é válida.\nIntroduza um único número de página ou um único intervalo de páginas. Por exemplo, 5-12.",
+  "1120": "A sintaxe para o intervalo de páginas não é válida.\nIntroduza números das páginas e/ou intervalos de páginas separados por vírgulas. Por exemplo, 1,3,5-12.",
+  "1121": "Antes de poder realizar tarefas relacionadas com a impressão, tais como configuração de páginas ou imprimir um documento tem de instalar uma impressora. Deseja instalar uma impressora agora?",
+  "1123": "Antes de poder imprimir, tem de seleccionar uma impressora.\nSe tiver de instalar uma impressora, faça duplo clique sobre o ícone 'Adicionar impressora' ou clique no botão 'Localizar impressora...' localizado no separador 'Geral' desta caixa de diálogo.",
+  "1124": "Imprimir",
+  "1125": "Não tem permissão para utilizar a impressora seleccionada. Se precisar de acesso, contacte o administrador de rede.",
+  "1136": "Trata-se de um tipo de letra OpenType. Será utilizado este tipo de letra na impressora e no ecrã.",
+  "1137": "Trata-se de um tipo de letra OpenType. Este tipo de letra será utilizado na impressora e no ecrã.",
+  "1138": "Trata-se de um tipo de letra PostScript. Este tipo de letra será utilizado na impressora e no ecrã.",
+  "1280": "Tipos de letra",
+  "1281": "Não há tipos de letra instalados.\nAbra a pasta 'Tipos de letra' no painel de controlo para instalar os tipos de letra.",
+  "1282": "Não existe qualquer tipo de letra com esse nome.\nEscolha um da lista de tipos de letra.",
+  "1283": "Este tipo de letra não está disponível com esse estilo.\nEscolha um da lista de estilos.",
+  "1284": "Normal",
+  "1285": "Negrito",
+  "1286": "Itálico",
+  "1287": "Negrito Itálico",
+  "1288": "(nenhum)",
+  "1536": "Preparada",
+  "1537": "Parada; ",
+  "1538": "Erro; ",
+  "1539": "Eliminação pendente; ",
+  "1540": "Papel encravado; ",
+  "1541": "Sem papel; ",
+  "1542": "Alimentação manual; ",
+  "1543": "Problema de papel; ",
+  "1544": "Offline; ",
+  "1545": "E/S activa; ",
+  "1546": "Ocupada; ",
+  "1547": "A imprimir; ",
+  "1548": "Gaveta de saída do papel cheia; ",
+  "1549": "Não disponível; ",
+  "1550": "A aguardar; ",
+  "1551": "A processar; ",
+  "1552": "A inicializar; ",
+  "1553": "A aquecer; ",
+  "1554": "Pouco toner; ",
+  "1555": "Sem toner; ",
+  "1556": "Ponteado da página; ",
+  "1557": "Intervenção do utilizador; ",
+  "1558": "Sem memória; ",
+  "1559": "Porta aberta; ",
+  "1582": "Impressora predefinida; ",
+  "1583": "%lu documentos em espera",
+  "1584": "A&s %lu páginas",
+  "1585": "Margens (polegadas)",
+  "1586": "Margens (milímetros)",
+  "1587": "\"",
+  "1588": "mm",
+  "1589": "Selecção automática",
+  "1600": "Geral",
+  "1601": "Imprimir",
+  "1792": "AaBbYyZz",
+  "1793": "AaBbYyZz",
+  "1794": "Symbol",
+  "1869": "AaBbYyZz",
+  "1920": "Aaあぁアァ亜宇",
+  "1921": "가나다AaBbYyZz",
+  "1922": "가나다AaBbYyZz",
+  "1926": "微软中文软件",
+  "1928": "中文字型範例",
+  "1953": "AaBbΑαΒβ",
+  "1954": "AaBbĞğŞş",
+  "1955": "AaBbƠơƯư",
+  "1969": "AaBbנסשת",
+  "1970": "AaBbابجدهوز",
+  "1971": "AaBbعمنخروكم",
+  "1978": "AaBbYyZz",
+  "1996": "AaBbБбФф",
+  "2014": "AaBbอักษรไทย",
+  "2030": "AaBbÁáÔô",
+  "2047": "AaBbøñý",
+  "2063": "माता",
+  "2065": "ਮਾਤਾ",
+  "2066": "માતા",
+  "2068": "அம்மா",
+  "2069": "అమ్మ",
+  "2070": "ಅಮ್ಮ"
+ },
+ "dialogs": {
+  "100": {
+   "title": "Geral",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    312,
+    199
+   ],
+   "style": 2429034692,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Seleccionar impressora",
+     "x": 7,
+     "y": 7,
+     "w": 299,
+     "h": 110,
+     "style": 1342177287
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "",
+     "x": 7,
+     "y": 118,
+     "w": 299,
+     "h": 73,
+     "style": 1073741831
+    },
+    {
+     "cls": "ListBox",
+     "id": 1000,
+     "text": "",
+     "x": 14,
+     "y": 17,
+     "w": 284,
+     "h": 53,
+     "style": 1083179267
+    },
+    {
+     "cls": "Static",
+     "id": 1004,
+     "text": "Estado:",
+     "x": 14,
+     "y": 76,
+     "w": 35,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Edit",
+     "id": 1005,
+     "text": "",
+     "x": 64,
+     "y": 76,
+     "w": 73,
+     "h": 12,
+     "style": 1342179456
+    },
+    {
+     "cls": "Static",
+     "id": 1006,
+     "text": "Localização:",
+     "x": 14,
+     "y": 88,
+     "w": 41,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Edit",
+     "id": 1007,
+     "text": "",
+     "x": 64,
+     "y": 89,
+     "w": 152,
+     "h": 12,
+     "style": 1342179456
+    },
+    {
+     "cls": "Static",
+     "id": 1008,
+     "text": "Comentário:",
+     "x": 14,
+     "y": 102,
+     "w": 38,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Edit",
+     "id": 1009,
+     "text": "",
+     "x": 64,
+     "y": 102,
+     "w": 152,
+     "h": 12,
+     "style": 1342179456
+    },
+    {
+     "cls": "Button",
+     "id": 1002,
+     "text": "Imprimir para &ficheiro",
+     "x": 142,
+     "y": 77,
+     "w": 80,
+     "h": 10,
+     "style": 1342373891
+    },
+    {
+     "cls": "Button",
+     "id": 1010,
+     "text": "P&referências",
+     "x": 228,
+     "y": 74,
+     "w": 74,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1003,
+     "text": "&Localizar impressora...",
+     "x": 228,
+     "y": 92,
+     "w": 74,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Static",
+     "id": 1011,
+     "text": "Seleccionar impressora",
+     "x": 7,
+     "y": 65,
+     "w": 74,
+     "h": 8,
+     "style": 1073873024
+    }
+   ]
+  },
+  "101": {
+   "title": "Geral",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    333,
+    218
+   ],
+   "style": 2429034692,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Seleccionar impressora",
+     "x": 7,
+     "y": 7,
+     "w": 322,
+     "h": 104,
+     "style": 1342177287
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "",
+     "x": 7,
+     "y": 118,
+     "w": 322,
+     "h": 93,
+     "style": 1073741831
+    },
+    {
+     "cls": "ListBox",
+     "id": 1000,
+     "text": "",
+     "x": 14,
+     "y": 17,
+     "w": 293,
+     "h": 53,
+     "style": 1083179267
+    },
+    {
+     "cls": "Static",
+     "id": 1004,
+     "text": "Estado:",
+     "x": 14,
+     "y": 75,
+     "w": 38,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1005,
+     "text": "",
+     "x": 50,
+     "y": 76,
+     "w": 114,
+     "h": 8,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1006,
+     "text": "Localização:",
+     "x": 14,
+     "y": 87,
+     "w": 41,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1007,
+     "text": "",
+     "x": 56,
+     "y": 86,
+     "w": 158,
+     "h": 8,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1008,
+     "text": "Comentário:",
+     "x": 14,
+     "y": 98,
+     "w": 38,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1009,
+     "text": "",
+     "x": 56,
+     "y": 96,
+     "w": 158,
+     "h": 8,
+     "style": 1342308492
+    },
+    {
+     "cls": "Button",
+     "id": 1002,
+     "text": "I&mprimir para ficheiro",
+     "x": 165,
+     "y": 76,
+     "w": 80,
+     "h": 10,
+     "style": 1342373891
+    },
+    {
+     "cls": "Button",
+     "id": 1010,
+     "text": "&Preferências",
+     "x": 247,
+     "y": 73,
+     "w": 77,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1003,
+     "text": "&Localizar impressora...",
+     "x": 247,
+     "y": 92,
+     "w": 77,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Static",
+     "id": 1011,
+     "text": "Seleccionar impressora",
+     "x": 7,
+     "y": 65,
+     "w": 74,
+     "h": 8,
+     "style": 1073873024
+    }
+   ]
+  },
+  "400": {
+   "title": "",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    0,
+    0
+   ],
+   "style": 1342178380,
+   "controls": []
+  },
+  "401": {
+   "title": "Tipo de letra",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    287,
+    196
+   ],
+   "style": 2160599236,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "&Tipo de letra:",
+     "x": 7,
+     "y": 7,
+     "w": 42,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 7,
+     "y": 16,
+     "w": 98,
+     "h": 76,
+     "style": 1344342865
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Estilo do tipo de letra:",
+     "x": 110,
+     "y": 7,
+     "w": 68,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 110,
+     "y": 16,
+     "w": 74,
+     "h": 76,
+     "style": 1344340033
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "Ta&manho:",
+     "x": 189,
+     "y": 7,
+     "w": 33,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1138,
+     "text": "",
+     "x": 190,
+     "y": 16,
+     "w": 36,
+     "h": 76,
+     "style": 1344342865
+    },
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Efeitos",
+     "x": 7,
+     "y": 97,
+     "w": 98,
+     "h": 72,
+     "style": 1342308359
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "&Rasurado",
+     "x": 13,
+     "y": 110,
+     "w": 49,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1041,
+     "text": "&Sublinhado",
+     "x": 13,
+     "y": 123,
+     "w": 51,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Static",
+     "id": 1091,
+     "text": "&Cor:",
+     "x": 13,
+     "y": 136,
+     "w": 30,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1139,
+     "text": "",
+     "x": 13,
+     "y": 146,
+     "w": 82,
+     "h": 100,
+     "style": 1352729171
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "Exemplo",
+     "x": 110,
+     "y": 97,
+     "w": 116,
+     "h": 43,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1092,
+     "text": "AaBbYyZz",
+     "x": 118,
+     "y": 111,
+     "w": 100,
+     "h": 23,
+     "style": 1073873025
+    },
+    {
+     "cls": "Static",
+     "id": 1093,
+     "text": "",
+     "x": 7,
+     "y": 172,
+     "w": 219,
+     "h": 20,
+     "style": 1342177408
+    },
+    {
+     "cls": "Static",
+     "id": 1094,
+     "text": "Scr&ipt:",
+     "x": 110,
+     "y": 147,
+     "w": 30,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1140,
+     "text": "",
+     "x": 110,
+     "y": 157,
+     "w": 116,
+     "h": 30,
+     "style": 1352729171
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 231,
+     "y": 16,
+     "w": 45,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 231,
+     "y": 32,
+     "w": 45,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1026,
+     "text": "&Aplicar",
+     "x": 231,
+     "y": 48,
+     "w": 45,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "Aj&uda",
+     "x": 231,
+     "y": 64,
+     "w": 45,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1074,
+     "text": "Eixos:",
+     "x": 7,
+     "y": 200,
+     "w": 200,
+     "h": 210,
+     "style": 1342308359
+    },
+    {
+     "cls": "ScrollBar",
+     "id": 1168,
+     "text": "",
+     "x": 70,
+     "y": 217,
+     "w": 100,
+     "h": 10,
+     "style": 1342242816
+    },
+    {
+     "cls": "ScrollBar",
+     "id": 1169,
+     "text": "",
+     "x": 70,
+     "y": 237,
+     "w": 100,
+     "h": 10,
+     "style": 1342242816
+    },
+    {
+     "cls": "ScrollBar",
+     "id": 1170,
+     "text": "",
+     "x": 70,
+     "y": 257,
+     "w": 100,
+     "h": 10,
+     "style": 1342242816
+    },
+    {
+     "cls": "ScrollBar",
+     "id": 1171,
+     "text": "",
+     "x": 70,
+     "y": 277,
+     "w": 100,
+     "h": 10,
+     "style": 1342242816
+    },
+    {
+     "cls": "ScrollBar",
+     "id": 1172,
+     "text": "",
+     "x": 70,
+     "y": 297,
+     "w": 100,
+     "h": 10,
+     "style": 1342242816
+    },
+    {
+     "cls": "ScrollBar",
+     "id": 1173,
+     "text": "",
+     "x": 70,
+     "y": 317,
+     "w": 100,
+     "h": 10,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 1098,
+     "text": "",
+     "x": 25,
+     "y": 217,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1099,
+     "text": "",
+     "x": 25,
+     "y": 237,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1100,
+     "text": "",
+     "x": 25,
+     "y": 257,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1101,
+     "text": "",
+     "x": 25,
+     "y": 277,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1102,
+     "text": "",
+     "x": 25,
+     "y": 297,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1103,
+     "text": "",
+     "x": 25,
+     "y": 317,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 180,
+     "y": 217,
+     "w": 20,
+     "h": 10,
+     "style": 1350633600
+    },
+    {
+     "cls": "Edit",
+     "id": 1153,
+     "text": "",
+     "x": 180,
+     "y": 237,
+     "w": 20,
+     "h": 10,
+     "style": 1350633600
+    },
+    {
+     "cls": "Edit",
+     "id": 1154,
+     "text": "",
+     "x": 180,
+     "y": 257,
+     "w": 20,
+     "h": 10,
+     "style": 1350633600
+    },
+    {
+     "cls": "Edit",
+     "id": 1155,
+     "text": "",
+     "x": 180,
+     "y": 277,
+     "w": 20,
+     "h": 10,
+     "style": 1350633600
+    },
+    {
+     "cls": "Edit",
+     "id": 1156,
+     "text": "",
+     "x": 180,
+     "y": 297,
+     "w": 20,
+     "h": 10,
+     "style": 1350633600
+    },
+    {
+     "cls": "Edit",
+     "id": 1157,
+     "text": "",
+     "x": 180,
+     "y": 317,
+     "w": 20,
+     "h": 10,
+     "style": 1350633600
+    },
+    {
+     "cls": "Static",
+     "id": 1105,
+     "text": "",
+     "x": 70,
+     "y": 207,
+     "w": 40,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1106,
+     "text": "",
+     "x": 70,
+     "y": 227,
+     "w": 40,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1107,
+     "text": "",
+     "x": 70,
+     "y": 247,
+     "w": 40,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1108,
+     "text": "",
+     "x": 70,
+     "y": 267,
+     "w": 40,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1109,
+     "text": "",
+     "x": 70,
+     "y": 287,
+     "w": 40,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1110,
+     "text": "",
+     "x": 70,
+     "y": 307,
+     "w": 40,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1112,
+     "text": "",
+     "x": 130,
+     "y": 207,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1113,
+     "text": "",
+     "x": 130,
+     "y": 227,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1114,
+     "text": "",
+     "x": 130,
+     "y": 247,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1115,
+     "text": "",
+     "x": 130,
+     "y": 267,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1116,
+     "text": "",
+     "x": 130,
+     "y": 287,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    },
+    {
+     "cls": "Static",
+     "id": 1118,
+     "text": "",
+     "x": 130,
+     "y": 307,
+     "w": 40,
+     "h": 10,
+     "style": 1342308354
+    }
+   ]
+  },
+  "1536": {
+   "title": "Abrir",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    293,
+    135
+   ],
+   "style": 2160599236,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&Nome do ficheiro:",
+     "x": 6,
+     "y": 6,
+     "w": 105,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 6,
+     "y": 16,
+     "w": 105,
+     "h": 12,
+     "style": 1350632576
+    },
+    {
+     "cls": "ListBox",
+     "id": 1120,
+     "text": "",
+     "x": 6,
+     "y": 32,
+     "w": 105,
+     "h": 68,
+     "style": 1352732755
+    },
+    {
+     "cls": "Static",
+     "id": 65535,
+     "text": "&Pastas:",
+     "x": 122,
+     "y": 6,
+     "w": 108,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "",
+     "x": 122,
+     "y": 16,
+     "w": 108,
+     "h": 9,
+     "style": 1342308480
+    },
+    {
+     "cls": "ListBox",
+     "id": 1121,
+     "text": "",
+     "x": 122,
+     "y": 32,
+     "w": 108,
+     "h": 68,
+     "style": 1352732755
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Listar ficheiros do tipo:",
+     "x": 6,
+     "y": 104,
+     "w": 105,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 6,
+     "y": 114,
+     "w": 105,
+     "h": 96,
+     "style": 1344340035
+    },
+    {
+     "cls": "Static",
+     "id": 1091,
+     "text": "&Unidades:",
+     "x": 122,
+     "y": 104,
+     "w": 108,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 122,
+     "y": 114,
+     "w": 108,
+     "h": 68,
+     "style": 1344340819
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 237,
+     "y": 6,
+     "w": 50,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 237,
+     "y": 24,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 237,
+     "y": 46,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "&Só de leitura",
+     "x": 235,
+     "y": 68,
+     "w": 53,
+     "h": 12,
+     "style": 1342373891
+    }
+   ]
+  },
+  "1537": {
+   "title": "Abrir",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    293,
+    135
+   ],
+   "style": 2160599236,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&Nome do ficheiro:",
+     "x": 6,
+     "y": 6,
+     "w": 105,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 6,
+     "y": 16,
+     "w": 105,
+     "h": 12,
+     "style": 1350632576
+    },
+    {
+     "cls": "ListBox",
+     "id": 1120,
+     "text": "",
+     "x": 6,
+     "y": 32,
+     "w": 105,
+     "h": 68,
+     "style": 1352734803
+    },
+    {
+     "cls": "Static",
+     "id": 65535,
+     "text": "&Pastas:",
+     "x": 122,
+     "y": 6,
+     "w": 106,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "",
+     "x": 122,
+     "y": 16,
+     "w": 106,
+     "h": 9,
+     "style": 1342308480
+    },
+    {
+     "cls": "ListBox",
+     "id": 1121,
+     "text": "",
+     "x": 122,
+     "y": 32,
+     "w": 106,
+     "h": 68,
+     "style": 1352732755
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Listar ficheiros do tipo:",
+     "x": 6,
+     "y": 104,
+     "w": 105,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 6,
+     "y": 114,
+     "w": 105,
+     "h": 96,
+     "style": 1344340035
+    },
+    {
+     "cls": "Static",
+     "id": 1091,
+     "text": "&Unidades:",
+     "x": 122,
+     "y": 104,
+     "w": 106,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 122,
+     "y": 114,
+     "w": 106,
+     "h": 68,
+     "style": 1344340819
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 237,
+     "y": 6,
+     "w": 50,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 237,
+     "y": 24,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 237,
+     "y": 46,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "&Só de leitura",
+     "x": 236,
+     "y": 68,
+     "w": 54,
+     "h": 10,
+     "style": 1342373891
+    }
+   ]
+  },
+  "1538": {
+   "title": "Imprimir",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    288,
+    186
+   ],
+   "style": 2429034692,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1075,
+     "text": "Impressora",
+     "x": 8,
+     "y": 4,
+     "w": 272,
+     "h": 84,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1093,
+     "text": "&Nome:",
+     "x": 16,
+     "y": 20,
+     "w": 36,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1139,
+     "text": "",
+     "x": 52,
+     "y": 18,
+     "w": 152,
+     "h": 152,
+     "style": 1344471299
+    },
+    {
+     "cls": "Button",
+     "id": 1025,
+     "text": "&Propriedades...",
+     "x": 212,
+     "y": 17,
+     "w": 60,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Static",
+     "id": 1095,
+     "text": "Estado:",
+     "x": 16,
+     "y": 36,
+     "w": 36,
+     "h": 10,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1099,
+     "text": "",
+     "x": 60,
+     "y": 36,
+     "w": 216,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1094,
+     "text": "Tipo:",
+     "x": 16,
+     "y": 48,
+     "w": 36,
+     "h": 10,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1098,
+     "text": "",
+     "x": 61,
+     "y": 48,
+     "w": 215,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1097,
+     "text": "Localização:",
+     "x": 16,
+     "y": 60,
+     "w": 41,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1101,
+     "text": "",
+     "x": 61,
+     "y": 60,
+     "w": 215,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1096,
+     "text": "Comentário:",
+     "x": 16,
+     "y": 72,
+     "w": 38,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1100,
+     "text": "",
+     "x": 61,
+     "y": 72,
+     "w": 133,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "&Imprimir para ficheiro",
+     "x": 197,
+     "y": 72,
+     "w": 80,
+     "h": 10,
+     "style": 1342373891
+    },
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Intervalo de impressão",
+     "x": 8,
+     "y": 92,
+     "w": 144,
+     "h": 64,
+     "style": 1342308359
+    },
+    {
+     "cls": "Button",
+     "id": 1056,
+     "text": "&Todas",
+     "x": 16,
+     "y": 106,
+     "w": 64,
+     "h": 12,
+     "style": 1342308356
+    },
+    {
+     "cls": "Button",
+     "id": 1058,
+     "text": "Pá&ginas",
+     "x": 16,
+     "y": 122,
+     "w": 41,
+     "h": 10,
+     "style": 1342177284
+    },
+    {
+     "cls": "Button",
+     "id": 1057,
+     "text": "S&elecção",
+     "x": 16,
+     "y": 138,
+     "w": 64,
+     "h": 12,
+     "style": 1342177284
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&de:",
+     "x": 59,
+     "y": 124,
+     "w": 11,
+     "h": 8,
+     "style": 1342308354
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 74,
+     "y": 122,
+     "w": 26,
+     "h": 12,
+     "style": 1350770688
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&até:",
+     "x": 102,
+     "y": 124,
+     "w": 16,
+     "h": 8,
+     "style": 1342308354
+    },
+    {
+     "cls": "Edit",
+     "id": 1153,
+     "text": "",
+     "x": 120,
+     "y": 122,
+     "w": 26,
+     "h": 12,
+     "style": 1350770688
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "Cópias",
+     "x": 160,
+     "y": 92,
+     "w": 120,
+     "h": 64,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1092,
+     "text": "Número de &cópias:",
+     "x": 168,
+     "y": 108,
+     "w": 68,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1154,
+     "text": "",
+     "x": 236,
+     "y": 106,
+     "w": 32,
+     "h": 12,
+     "style": 1350770688
+    },
+    {
+     "cls": "Static",
+     "id": 1086,
+     "text": "",
+     "x": 165,
+     "y": 124,
+     "w": 76,
+     "h": 24,
+     "style": 1342308867
+    },
+    {
+     "cls": "Button",
+     "id": 1041,
+     "text": "Ag&rupar",
+     "x": 233,
+     "y": 130,
+     "w": 41,
+     "h": 10,
+     "style": 1342373891
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 180,
+     "y": 164,
+     "w": 48,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 232,
+     "y": 164,
+     "w": 48,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "Aj&uda",
+     "x": 8,
+     "y": 164,
+     "w": 48,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1539": {
+   "title": "Configurar impressão",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    288,
+    178
+   ],
+   "style": 2429034692,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1075,
+     "text": "Impressora",
+     "x": 8,
+     "y": 4,
+     "w": 272,
+     "h": 84,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1093,
+     "text": "&Nome:",
+     "x": 16,
+     "y": 20,
+     "w": 36,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 52,
+     "y": 18,
+     "w": 152,
+     "h": 152,
+     "style": 1344471299
+    },
+    {
+     "cls": "Button",
+     "id": 1025,
+     "text": "&Propriedades...",
+     "x": 212,
+     "y": 17,
+     "w": 60,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Static",
+     "id": 1095,
+     "text": "Estado:",
+     "x": 16,
+     "y": 36,
+     "w": 36,
+     "h": 10,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1099,
+     "text": "",
+     "x": 63,
+     "y": 36,
+     "w": 213,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1094,
+     "text": "Tipo:",
+     "x": 16,
+     "y": 48,
+     "w": 36,
+     "h": 10,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1098,
+     "text": "",
+     "x": 63,
+     "y": 48,
+     "w": 213,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1097,
+     "text": "Localização:",
+     "x": 16,
+     "y": 60,
+     "w": 41,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1101,
+     "text": "",
+     "x": 63,
+     "y": 60,
+     "w": 213,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Static",
+     "id": 1096,
+     "text": "Comentário:",
+     "x": 16,
+     "y": 72,
+     "w": 38,
+     "h": 8,
+     "style": 1342308480
+    },
+    {
+     "cls": "Static",
+     "id": 1100,
+     "text": "",
+     "x": 63,
+     "y": 72,
+     "w": 213,
+     "h": 10,
+     "style": 1342308492
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "Papel",
+     "x": 8,
+     "y": 92,
+     "w": 164,
+     "h": 56,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Tamanho:",
+     "x": 16,
+     "y": 108,
+     "w": 36,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 52,
+     "y": 106,
+     "w": 112,
+     "h": 112,
+     "style": 1344471299
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&Origem:",
+     "x": 16,
+     "y": 128,
+     "w": 36,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1138,
+     "text": "",
+     "x": 52,
+     "y": 126,
+     "w": 112,
+     "h": 112,
+     "style": 1344471299
+    },
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Orientação",
+     "x": 180,
+     "y": 92,
+     "w": 100,
+     "h": 56,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1084,
+     "text": "",
+     "x": 190,
+     "y": 112,
+     "w": 18,
+     "h": 20,
+     "style": 1342308355
+    },
+    {
+     "cls": "Button",
+     "id": 1056,
+     "text": "&Vertical",
+     "x": 224,
+     "y": 106,
+     "w": 52,
+     "h": 12,
+     "style": 1342373892
+    },
+    {
+     "cls": "Button",
+     "id": 1057,
+     "text": "&Horizontal",
+     "x": 224,
+     "y": 126,
+     "w": 52,
+     "h": 12,
+     "style": 1342177284
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 180,
+     "y": 156,
+     "w": 48,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 232,
+     "y": 156,
+     "w": 48,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 8,
+     "y": 156,
+     "w": 48,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1540": {
+   "title": "Localizar",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    252,
+    63
+   ],
+   "style": 2160599236,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 65535,
+     "text": "&Localizar:",
+     "x": 4,
+     "y": 8,
+     "w": 42,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 47,
+     "y": 7,
+     "w": 128,
+     "h": 12,
+     "style": 1350762624
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "Ap&enas palavras inteiras",
+     "x": 4,
+     "y": 26,
+     "w": 90,
+     "h": 12,
+     "style": 1342373891
+    },
+    {
+     "cls": "Button",
+     "id": 1041,
+     "text": "Maiúsculas/mi&núsculas",
+     "x": 4,
+     "y": 42,
+     "w": 88,
+     "h": 12,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Direcção",
+     "x": 99,
+     "y": 26,
+     "w": 76,
+     "h": 28,
+     "style": 1342308359
+    },
+    {
+     "cls": "Button",
+     "id": 1056,
+     "text": "&Cima",
+     "x": 107,
+     "y": 38,
+     "w": 28,
+     "h": 12,
+     "style": 1342308361
+    },
+    {
+     "cls": "Button",
+     "id": 1057,
+     "text": "&Baixo",
+     "x": 140,
+     "y": 38,
+     "w": 31,
+     "h": 12,
+     "style": 1342177289
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "Localizar &seguinte",
+     "x": 180,
+     "y": 5,
+     "w": 68,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 180,
+     "y": 23,
+     "w": 68,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 180,
+     "y": 45,
+     "w": 68,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1541": {
+   "title": "Substituir",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    251,
+    94
+   ],
+   "style": 2160599236,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 65535,
+     "text": "&Localizar:",
+     "x": 4,
+     "y": 9,
+     "w": 48,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 56,
+     "y": 7,
+     "w": 114,
+     "h": 12,
+     "style": 1350762624
+    },
+    {
+     "cls": "Static",
+     "id": 65535,
+     "text": "S&ubstituir por:",
+     "x": 4,
+     "y": 26,
+     "w": 48,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1153,
+     "text": "",
+     "x": 56,
+     "y": 24,
+     "w": 114,
+     "h": 12,
+     "style": 1350762624
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "Ap&enas palavras inteiras",
+     "x": 5,
+     "y": 46,
+     "w": 161,
+     "h": 12,
+     "style": 1342373891
+    },
+    {
+     "cls": "Button",
+     "id": 1041,
+     "text": "Maiúsculas/mi&núsculas",
+     "x": 5,
+     "y": 63,
+     "w": 164,
+     "h": 12,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "L&ocalizar seguinte",
+     "x": 176,
+     "y": 4,
+     "w": 70,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 1024,
+     "text": "&Substituir",
+     "x": 176,
+     "y": 21,
+     "w": 70,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1025,
+     "text": "Substituir &tudo",
+     "x": 176,
+     "y": 38,
+     "w": 70,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 176,
+     "y": 55,
+     "w": 70,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 176,
+     "y": 75,
+     "w": 70,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1543": {
+   "title": "Tipo de letra",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    271,
+    197
+   ],
+   "style": 2160599236,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "&Tipo de letra:",
+     "x": 7,
+     "y": 7,
+     "w": 66,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 7,
+     "y": 16,
+     "w": 98,
+     "h": 76,
+     "style": 1344342865
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Estilo do tipo de letra:",
+     "x": 110,
+     "y": 7,
+     "w": 67,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 110,
+     "y": 16,
+     "w": 68,
+     "h": 76,
+     "style": 1344340033
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "Ta&manho:",
+     "x": 182,
+     "y": 7,
+     "w": 33,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1138,
+     "text": "",
+     "x": 182,
+     "y": 16,
+     "w": 30,
+     "h": 76,
+     "style": 1344342865
+    },
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Efeitos",
+     "x": 7,
+     "y": 97,
+     "w": 98,
+     "h": 72,
+     "style": 1342308359
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "&Rasurado",
+     "x": 13,
+     "y": 110,
+     "w": 85,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1041,
+     "text": "&Sublinhado",
+     "x": 13,
+     "y": 123,
+     "w": 85,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Static",
+     "id": 1091,
+     "text": "&Cor:",
+     "x": 13,
+     "y": 136,
+     "w": 30,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1139,
+     "text": "",
+     "x": 13,
+     "y": 146,
+     "w": 82,
+     "h": 100,
+     "style": 1352729171
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "Exemplo",
+     "x": 110,
+     "y": 97,
+     "w": 104,
+     "h": 48,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1092,
+     "text": "AaBbYyZz",
+     "x": 114,
+     "y": 108,
+     "w": 95,
+     "h": 32,
+     "style": 1073873025
+    },
+    {
+     "cls": "Static",
+     "id": 1093,
+     "text": "",
+     "x": 7,
+     "y": 177,
+     "w": 196,
+     "h": 20,
+     "style": 1342177408
+    },
+    {
+     "cls": "Static",
+     "id": 1094,
+     "text": "Scr&ipt:",
+     "x": 110,
+     "y": 147,
+     "w": 30,
+     "h": 9,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1140,
+     "text": "",
+     "x": 110,
+     "y": 157,
+     "w": 104,
+     "h": 30,
+     "style": 1352729171
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 218,
+     "y": 16,
+     "w": 45,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 218,
+     "y": 32,
+     "w": 45,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1026,
+     "text": "&Aplicar",
+     "x": 218,
+     "y": 48,
+     "w": 45,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "Aju&da",
+     "x": 218,
+     "y": 64,
+     "w": 45,
+     "h": 14,
+     "style": 1342373888
+    }
+   ]
+  },
+  "1546": {
+   "title": "Configurar página",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    240,
+    240
+   ],
+   "style": 2429034692,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1080,
+     "text": "",
+     "x": 80,
+     "y": 8,
+     "w": 80,
+     "h": 80,
+     "style": 1342308358
+    },
+    {
+     "cls": "Static",
+     "id": 1081,
+     "text": "",
+     "x": 160,
+     "y": 12,
+     "w": 4,
+     "h": 80,
+     "style": 1342308357
+    },
+    {
+     "cls": "Static",
+     "id": 1082,
+     "text": "",
+     "x": 84,
+     "y": 88,
+     "w": 80,
+     "h": 4,
+     "style": 1342308357
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "Papel",
+     "x": 8,
+     "y": 96,
+     "w": 224,
+     "h": 56,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Tamanho:",
+     "x": 16,
+     "y": 112,
+     "w": 36,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 64,
+     "y": 110,
+     "w": 160,
+     "h": 160,
+     "style": 1344471299
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&Origem:",
+     "x": 16,
+     "y": 132,
+     "w": 36,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1138,
+     "text": "",
+     "x": 64,
+     "y": 130,
+     "w": 160,
+     "h": 160,
+     "style": 1344471299
+    },
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Orientação",
+     "x": 8,
+     "y": 156,
+     "w": 64,
+     "h": 56,
+     "style": 1342308359
+    },
+    {
+     "cls": "Button",
+     "id": 1056,
+     "text": "&Vertical",
+     "x": 16,
+     "y": 170,
+     "w": 49,
+     "h": 12,
+     "style": 1342373892
+    },
+    {
+     "cls": "Button",
+     "id": 1057,
+     "text": "&Horizontal",
+     "x": 16,
+     "y": 190,
+     "w": 50,
+     "h": 12,
+     "style": 1342177284
+    },
+    {
+     "cls": "Button",
+     "id": 1075,
+     "text": "Margens",
+     "x": 80,
+     "y": 156,
+     "w": 152,
+     "h": 56,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1102,
+     "text": "&Esquerda:",
+     "x": 86,
+     "y": 172,
+     "w": 35,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1155,
+     "text": "",
+     "x": 127,
+     "y": 170,
+     "w": 28,
+     "h": 12,
+     "style": 1350762496
+    },
+    {
+     "cls": "Static",
+     "id": 1103,
+     "text": "&Direita:",
+     "x": 163,
+     "y": 172,
+     "w": 27,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1157,
+     "text": "",
+     "x": 192,
+     "y": 170,
+     "w": 34,
+     "h": 12,
+     "style": 1350762496
+    },
+    {
+     "cls": "Static",
+     "id": 1104,
+     "text": "&Superior:",
+     "x": 86,
+     "y": 192,
+     "w": 33,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1156,
+     "text": "",
+     "x": 127,
+     "y": 190,
+     "w": 28,
+     "h": 12,
+     "style": 1350762496
+    },
+    {
+     "cls": "Static",
+     "id": 1105,
+     "text": "&Inferior:",
+     "x": 163,
+     "y": 192,
+     "w": 27,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1158,
+     "text": "",
+     "x": 192,
+     "y": 190,
+     "w": 34,
+     "h": 12,
+     "style": 1350762496
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 72,
+     "y": 220,
+     "w": 50,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 126,
+     "y": 220,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1026,
+     "text": "I&mpressora...",
+     "x": 181,
+     "y": 220,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 8,
+     "y": 220,
+     "w": 48,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1547": {
+   "title": "Abrir",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    300,
+    165
+   ],
+   "style": 2462589124,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1091,
+     "text": "&Procurar em:",
+     "x": 7,
+     "y": 6,
+     "w": 42,
+     "h": 8,
+     "style": 1342308608
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 56,
+     "y": 3,
+     "w": 148,
+     "h": 100,
+     "style": 1344340499
+    },
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "",
+     "x": 206,
+     "y": 3,
+     "w": 88,
+     "h": 16,
+     "style": 1073741824
+    },
+    {
+     "cls": "ListBox",
+     "id": 1120,
+     "text": "",
+     "x": 4,
+     "y": 20,
+     "w": 292,
+     "h": 85,
+     "style": 1083179779
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&Nome do ficheiro:",
+     "x": 5,
+     "y": 112,
+     "w": 64,
+     "h": 8,
+     "style": 1342308608
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 69,
+     "y": 111,
+     "w": 161,
+     "h": 12,
+     "style": 1350631552
+    },
+    {
+     "cls": "ComboBoxEx32",
+     "id": 1148,
+     "text": "",
+     "x": 69,
+     "y": 111,
+     "w": 161,
+     "h": 150,
+     "style": 1344340034
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "Ficheiros do &tipo:",
+     "x": 5,
+     "y": 131,
+     "w": 65,
+     "h": 8,
+     "style": 1342308608
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 69,
+     "y": 129,
+     "w": 161,
+     "h": 53,
+     "style": 1344339971
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "Ab&rir em modo só de leitura",
+     "x": 69,
+     "y": 148,
+     "w": 161,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "A&brir",
+     "x": 242,
+     "y": 110,
+     "w": 50,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 242,
+     "y": 128,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "&Ajuda",
+     "x": 242,
+     "y": 145,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1549": {
+   "title": "",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    280,
+    75
+   ],
+   "style": 1073742916,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1072,
+     "text": "Intervalo de páginas",
+     "x": 0,
+     "y": 0,
+     "w": 156,
+     "h": 73,
+     "style": 1342308359
+    },
+    {
+     "cls": "Button",
+     "id": 1056,
+     "text": "&Todas",
+     "x": 7,
+     "y": 10,
+     "w": 58,
+     "h": 10,
+     "style": 1342308356
+    },
+    {
+     "cls": "Button",
+     "id": 1057,
+     "text": "S&elecção",
+     "x": 7,
+     "y": 22,
+     "w": 49,
+     "h": 10,
+     "style": 1342177284
+    },
+    {
+     "cls": "Button",
+     "id": 1058,
+     "text": "&Página actual",
+     "x": 58,
+     "y": 22,
+     "w": 58,
+     "h": 10,
+     "style": 1342177284
+    },
+    {
+     "cls": "Button",
+     "id": 1059,
+     "text": "Página&s:",
+     "x": 7,
+     "y": 34,
+     "w": 42,
+     "h": 10,
+     "style": 1342177284
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 58,
+     "y": 33,
+     "w": 86,
+     "h": 12,
+     "style": 1350762624
+    },
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "Introduza os números das páginas e/ou intervalo de páginas separados por vírgulas. Por exemplo, 1,5-12",
+     "x": 6,
+     "y": 47,
+     "w": 144,
+     "h": 24,
+     "style": 1208090624
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "Introduza um único número de página ou um único intervalo de páginas. Por exemplo, 5-12",
+     "x": 6,
+     "y": 47,
+     "w": 144,
+     "h": 24,
+     "style": 1208090624
+    },
+    {
+     "cls": "Button",
+     "id": 1073,
+     "text": "",
+     "x": 161,
+     "y": 0,
+     "w": 118,
+     "h": 73,
+     "style": 1342308359
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "Nú&mero de cópias:",
+     "x": 164,
+     "y": 11,
+     "w": 61,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1153,
+     "text": "",
+     "x": 232,
+     "y": 10,
+     "w": 25,
+     "h": 12,
+     "style": 1350770688
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "Agr&upar",
+     "x": 166,
+     "y": 35,
+     "w": 39,
+     "h": 10,
+     "style": 1342373891
+    },
+    {
+     "cls": "Static",
+     "id": 1084,
+     "text": "",
+     "x": 206,
+     "y": 33,
+     "w": 67,
+     "h": 36,
+     "style": 1342308867
+    }
+   ]
+  },
+  "1552": {
+   "title": "Abrir",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    385,
+    238
+   ],
+   "style": 2462589124,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1091,
+     "text": "Procurar &em:",
+     "x": 4,
+     "y": 7,
+     "w": 57,
+     "h": 8,
+     "style": 1342308608
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1137,
+     "text": "",
+     "x": 66,
+     "y": 4,
+     "w": 174,
+     "h": 300,
+     "style": 1344340499
+    },
+    {
+     "cls": "Static",
+     "id": 1088,
+     "text": "",
+     "x": 248,
+     "y": 4,
+     "w": 80,
+     "h": 14,
+     "style": 1073741824
+    },
+    {
+     "cls": "ToolbarWindow32",
+     "id": 1184,
+     "text": "",
+     "x": 4,
+     "y": 22,
+     "w": 58,
+     "h": 208,
+     "style": 1342253900
+    },
+    {
+     "cls": "ListBox",
+     "id": 1120,
+     "text": "",
+     "x": 66,
+     "y": 22,
+     "w": 310,
+     "h": 156,
+     "style": 1083179779
+    },
+    {
+     "cls": "Static",
+     "id": 1090,
+     "text": "&Nome do ficheiro:",
+     "x": 67,
+     "y": 187,
+     "w": 64,
+     "h": 8,
+     "style": 1342308608
+    },
+    {
+     "cls": "Edit",
+     "id": 1152,
+     "text": "",
+     "x": 137,
+     "y": 184,
+     "w": 176,
+     "h": 12,
+     "style": 1350631552
+    },
+    {
+     "cls": "ComboBoxEx32",
+     "id": 1148,
+     "text": "",
+     "x": 137,
+     "y": 184,
+     "w": 176,
+     "h": 150,
+     "style": 1344340034
+    },
+    {
+     "cls": "Static",
+     "id": 1089,
+     "text": "&Ficheiros do tipo:",
+     "x": 67,
+     "y": 203,
+     "w": 66,
+     "h": 8,
+     "style": 1342308608
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1136,
+     "text": "",
+     "x": 137,
+     "y": 201,
+     "w": 176,
+     "h": 100,
+     "style": 1344339971
+    },
+    {
+     "cls": "Button",
+     "id": 1040,
+     "text": "Ab&rir em modo só de leitura",
+     "x": 137,
+     "y": 217,
+     "w": 176,
+     "h": 8,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "&Abrir",
+     "x": 326,
+     "y": 184,
+     "w": 50,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 326,
+     "y": 200,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 1038,
+     "text": "Aj&uda",
+     "x": 326,
+     "y": 218,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    }
+   ]
+  }
+ },
+ "menus": {}
+}

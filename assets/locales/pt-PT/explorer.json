@@ -1,0 +1,727 @@
+{
+ "strings": {
+  "300": "Abre a pasta 'Os meus documentos', onde pode armazenar cartas, relatórios, notas e outros tipos de documentos.",
+  "301": "Mostra os documentos e pastas abertos recentemente.",
+  "302": "Abre a pasta 'A minha música', onde pode armazenar música e outros ficheiros de áudio.",
+  "303": "Abre a pasta 'As minhas imagens', onde pode armazenar fotos digitais, imagens e outros gráficos.",
+  "304": "Dá acesso a, e informação acerca de, discos rígidos, câmaras, scanners e outro hardware ligado ao computador.",
+  "305": "Dá acesso a, e informação acerca de, pastas e ficheiros noutros computadores.",
+  "306": "Liga a outros computadores, redes e à Internet.",
+  "307": "Fornece opções para que possa personalizar o aspecto e funcionalidade do computador, adicionar ou remover programas e configurar ligações de rede e contas de utilizadores.",
+  "509": "Explorador do Windows",
+  "510": "Menu 'Iniciar'",
+  "513": "Windows",
+  "515": "Não foi possível carregar ou executar '%1' especificado no registo. Certifique-se de que o ficheiro existe no computador ou remova a respectiva referência do registo.",
+  "518": "Barra de tarefas",
+  "524": "Ambiente de trabalho",
+  "529": "Não existe memória suficiente para concluir esta operação.",
+  "530": "Não é possível executar o comando.\nA pasta '%1' foi removida.",
+  "531": "'O meu computador' ou o 'Explorador do Windows' ainda não foram correctamente inicializados. Tente novamente mais tarde.",
+  "533": "Clique aqui para iniciar",
+  "534": "An&ular %s",
+  "535": "Em cascata",
+  "536": "Em mosaico",
+  "537": "Minimizar todas",
+  "538": "O Windows está a ser executado em modo de segurança.\n\nEste modo de diagnóstico especial do Windows permite-lhe corrigir um problema que pode ser causado pelas suas definições de hardware ou de rede. Certifique-se de que estas definições estão correctas no 'Painel de controlo' e, em seguida, tente iniciar o Windows novamente. Enquanto em modo de segurança, alguns dispositivos podem não estar disponíveis.",
+  "539": "O Windows está a ser executado em modo de segurança.\n\nEste modo de diagnóstico especial do Windows permite-lhe corrigir um problema que pode ser causado pelas suas definições de hardware ou de rede. Certifique-se de que estas definições estão correctas no 'Painel de controlo' e, em seguida, tente iniciar o Windows novamente. Enquanto em modo de segurança, alguns dispositivos podem não estar disponíveis.\n\nPara continuar a trabalhar em modo de segurança, clique em 'Sim'. Se preferir utilizar a opção 'Restauro do sistema' para repor um estado anterior do computador, clique em 'Não'.",
+  "542": "Ocultar",
+  "543": "Mostrar ícones escondidos",
+  "578": "Iniciar",
+  "579": "Ocorreu um erro interno e uma das janelas que estava a utilizar foi fechada.",
+  "580": "Restrições",
+  "581": "Esta operação foi cancelada devido a restrições existentes neste computador. Contacte o administrador do sistema.",
+  "590": "Ocultar os ícones de notificação inactivos...",
+  "591": "Para ver os ícones ocultos, clique neste botão.",
+  "593": "Área de notificação",
+  "594": "Aplicações em execução",
+  "595": "Iniciar",
+  "603": "A aplicação está demasiado ocupada ou não pode responder ao seu pedido de encerramento.",
+  "604": "Se forçar o encerramento poderá causar a perda de dados por parte da aplicação. Pretende forçar o encerramento?",
+  "701": "O Windows não conseguiu alterar as definições de visualização para a nova configuração. Reponha o estado anterior do computador, encerre o Windows e reinicie o computador na configuração pretendida.",
+  "702": "Se continuar, poderá ocorrer um problema com as definições de visualização. Para mudar com segurança para uma nova configuração, deve encerrar o Windows e reiniciar o computador na configuração pretendida. Ainda assim pretende continuar?",
+  "705": "Já existe uma barra de ferramentas oculta neste lado do ecrã.\nSó pode ter uma barra de ferramentas oculta automaticamente em cada lado.",
+  "711": "Não pode largar um item num botão na barra de tarefas.\n\nContudo, se arrastar o item sobre um botão sem largar o botão do rato, a janela irá abrir logo a seguir, permitindo-lhe arrastar o item dentro de uma janela.",
+  "716": " (Comum)",
+  "717": "Esta versão de pré-lançamento do \"Internet Explorer 4.0\" expirou. Actualize para a última versão do \"Internet Explorer 4.0\" a partir de WWW.MICROSOFT.COM/PORTUGAL",
+  "718": "Abrir 'All &Users'",
+  "719": "E&xplorar 'All Users'",
+  "720": "P&ropriedades",
+  "722": "Executar",
+  "730": "&Terminar sessão...",
+  "731": "&Desligar o computador...",
+  "732": "helpctr.exe>-FromStartHelp",
+  "733": "<no title>",
+  "800": "Clique no botão 'Iniciar'",
+  "801": "Pode aceder a todos os seus programas, documentos e definições a partir do menu 'Iniciar'. Clique no botão 'Iniciar' para começar.",
+  "810": "Propriedades do menu 'Iniciar' e da barra de tarefas",
+  "811": "Definições de visualização",
+  "812": "A resolução do ecrã e a profundidade de cor do computador estão actualmente definidas para um nível muito baixo. Pode obter uma melhor visualização aumentando estas definições. Para o fazer, clique neste botão.",
+  "821": "Veja uma apresentação do Windows XP",
+  "822": "Para saber mais acerca das novas funcionalidades do Windows XP agora, clique aqui. Para ver a apresentação mais tarde, clique em 'Todos os programas' no menu 'Iniciar' e, em seguida, clique em 'Acessórios'.",
+  "850": "&Mostrar as janelas abertas",
+  "851": "|Ir para||",
+  "1000": "Nome",
+  "1001": "Comportamento",
+  "1002": "Ocultar quando inactivo",
+  "1003": "Ocultar sempre",
+  "1004": "Mostrar sempre",
+  "1311": "Personalizar o menu 'Iniciar'",
+  "1403": "Itens actuais",
+  "1404": "Itens antigos",
+  "7000": "Abre uma janela onde pode escolher opções de procura e trabalhar com os resultados da procura.",
+  "7001": "Abre uma localização central para tópicos de ajuda, tutoriais, resolução de problemas e outros serviços de suporte.",
+  "7003": "Abre um programa, pasta, documento ou Web site.",
+  "7004": "Abre o browser da Internet.",
+  "7005": "Abre o programa de correio electrónico para que possa enviar ou ler uma mensagem.",
+  "7012": "|D&esancorar|&Terminar sessão|Ence&rrar|Desl&igar||",
+  "7013": "|D&esancorar|&Terminar sessão|Ence&rrar|Desl&igar||",
+  "7014": "Retira o computador portátil de uma estação de ancoragem.",
+  "7015": "Fornece opções para fechar os programas e terminar sessão ou para deixar os programas em execução e mudar de utilizador.",
+  "7016": "Fornece opções para desligar ou reiniciar o computador ou para activar os modos 'Suspender' ou 'Hibernar'.",
+  "7017": "Desliga a sessão. Pode ligar novamente à sessão quando iniciar à sessão novamente.",
+  "7020": "Pro&curar",
+  "7021": "&Ajuda e suporte",
+  "7022": "&Segurança do Windows",
+  "7023": "E&xecutar...",
+  "7024": "Internet",
+  "7025": "Correio electrónico",
+  "8224": "O item que seleccionou esta indisponível. Pode ter sido movido, ter um nome diferente ou removido. Deseja removê-lo da lista?",
+  "8225": "Remover &de 'Esta lista'",
+  "8226": "&Todos os programas",
+  "8227": "Apresenta uma lista de programas no computador.",
+  "8229": "Novos programas instalados.",
+  "8230": "Se desejar colocar ícones da Internet ou de 'Correio electrónico' no menu 'Iniciar', clique com o botão do lado direito no menu 'Iniciar', clique em 'Propriedades', 'Personalizar' e seleccione a caixa de verificação adequada.",
+  "8231": "Alguns itens não podem ser mostrados",
+  "8232": "Não existe espaço suficiente para mostrar todos os itens que adicionou ao menu 'Iniciar'. Para os mostrar, escolha ícones menores, um número menor de itens ou desassocie alguns itens.",
+  "8233": "&Ligar a",
+  "8234": "&Painel de controlo",
+  "8235": "&Favoritos",
+  "8236": "&Documentos recentes",
+  "8256": "440",
+  "8257": "380",
+  "8258": "40",
+  "8259": "30",
+  "8260": "40",
+  "8272": "&Mostrar no ambiente de trabalho"
+ },
+ "dialogs": {
+  "9": {
+   "title": "Personalizar o menu 'Iniciar' clássico",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    232,
+    240
+   ],
+   "style": 2429034696,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 300,
+     "text": "Menu 'Iniciar'",
+     "x": 8,
+     "y": 7,
+     "w": 218,
+     "h": 114,
+     "style": 1342177287
+    },
+    {
+     "cls": "Static",
+     "id": 650,
+     "text": 257,
+     "x": 19,
+     "y": 17,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Static",
+     "id": 651,
+     "text": "Pode personalizar o menu 'Iniciar' adicionando ou removendo itens.",
+     "x": 48,
+     "y": 17,
+     "w": 108,
+     "h": 39,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 1126,
+     "text": "&Adicionar...",
+     "x": 162,
+     "y": 18,
+     "w": 53,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1127,
+     "text": "&Remover...",
+     "x": 162,
+     "y": 33,
+     "w": 53,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1128,
+     "text": "A&vançadas",
+     "x": 162,
+     "y": 49,
+     "w": 53,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1124,
+     "text": "&Ordenar",
+     "x": 162,
+     "y": 65,
+     "w": 53,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 652,
+     "text": 108,
+     "x": 20,
+     "y": 85,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Static",
+     "id": 653,
+     "text": "Para remover os registos dos documentos, programas e Web sites acedidos recentemente, clique em 'Limpar'.",
+     "x": 49,
+     "y": 85,
+     "w": 108,
+     "h": 33,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 1125,
+     "text": "&Limpar",
+     "x": 162,
+     "y": 94,
+     "w": 53,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 1132,
+     "text": "Opções avança&das do menu 'Iniciar':",
+     "x": 8,
+     "y": 129,
+     "w": 150,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "SysTreeView32",
+     "id": 1123,
+     "text": "De&finições do menu 'Iniciar'",
+     "x": 8,
+     "y": 139,
+     "w": 218,
+     "h": 72,
+     "style": 1350631425
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 122,
+     "y": 220,
+     "w": 50,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 176,
+     "y": 220,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "20": {
+   "title": "Aviso de nome de ficheiro",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    272,
+    81
+   ],
+   "style": 2160593096,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 5,
+     "text": "&Ignorar",
+     "x": 213,
+     "y": 60,
+     "w": 52,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 1006,
+     "text": "&Mudar o nome",
+     "x": 157,
+     "y": 60,
+     "w": 52,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": "",
+     "x": 6,
+     "y": 51,
+     "w": 258,
+     "h": 1,
+     "style": 1342177296
+    },
+    {
+     "cls": "Button",
+     "id": 4610,
+     "text": "&Não efectuar esta verificação no arranque",
+     "x": 4,
+     "y": 62,
+     "w": 149,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": 32515,
+     "x": 7,
+     "y": 7,
+     "w": 21,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Static",
+     "id": 1007,
+     "text": "Existe um ficheiro ou uma pasta no computador denominado \"%s\" que pode fazer com que determinadas aplicações não funcionem correctamente. A mudança de nome para \"%s\" poderá resolver este problema. Pretende mudar o nome agora?",
+     "x": 34,
+     "y": 7,
+     "w": 224,
+     "h": 37,
+     "style": 1342308352
+    }
+   ]
+  },
+  "1036": {
+   "title": "Avançadas",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    251,
+    198
+   ],
+   "style": 1220542528,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 4294967295,
+     "text": "Definições do menu 'Iniciar' ",
+     "x": 7,
+     "y": 7,
+     "w": 238,
+     "h": 42,
+     "style": 1342177287
+    },
+    {
+     "cls": "Button",
+     "id": 1306,
+     "text": "A&brir submenus quando parar sobre eles com o rato",
+     "x": 14,
+     "y": 21,
+     "w": 224,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1326,
+     "text": "Realçar os &programas instalados recentemente",
+     "x": 14,
+     "y": 35,
+     "w": 224,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": "Itens do &menu 'Iniciar':",
+     "x": 7,
+     "y": 53,
+     "w": 238,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "SysTreeView32",
+     "id": 1123,
+     "text": "StartMenuSe&ttings",
+     "x": 7,
+     "y": 63,
+     "w": 238,
+     "h": 67,
+     "style": 1350631425
+    },
+    {
+     "cls": "Button",
+     "id": 1313,
+     "text": "Documentos recentes ",
+     "x": 7,
+     "y": 133,
+     "w": 238,
+     "h": 56,
+     "style": 1342177287
+    },
+    {
+     "cls": "Static",
+     "id": 1312,
+     "text": "Seleccione esta opção para obter acesso rápido aos documentos que abriu mais recentemente. Limpar esta lista não elimina os documentos.",
+     "x": 14,
+     "y": 144,
+     "w": 224,
+     "h": 21,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 1308,
+     "text": "Listar os meus documentos mais &recentes",
+     "x": 14,
+     "y": 168,
+     "w": 154,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Button",
+     "id": 1309,
+     "text": "&Limpar a lista",
+     "x": 182,
+     "y": 168,
+     "w": 55,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  }
+ },
+ "menus": {
+  "204": [
+   {
+    "id": 0,
+    "text": "",
+    "flags": 129,
+    "items": [
+     {
+      "id": 4294967295,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 504,
+      "text": "&Programas",
+      "flags": 1,
+      "items": [
+       {
+        "id": 513,
+        "text": "(Vazio)    ",
+        "flags": 128
+       }
+      ]
+     },
+     {
+      "id": 507,
+      "text": "Fa&voritos",
+      "flags": 1,
+      "items": [
+       {
+        "id": 4294967295,
+        "text": "(Vazio)    ",
+        "flags": 128
+       }
+      ]
+     },
+     {
+      "id": 501,
+      "text": "Doc&umentos",
+      "flags": 1,
+      "items": [
+       {
+        "id": 514,
+        "text": "(Vazio)    ",
+        "flags": 128
+       }
+      ]
+     },
+     {
+      "id": 508,
+      "text": "D&efinições",
+      "flags": 1,
+      "items": [
+       {
+        "id": 505,
+        "text": "&Painel de controlo",
+        "flags": 0
+       },
+       {
+        "id": 4294967295,
+        "text": "",
+        "flags": 0
+       },
+       {
+        "id": 5001,
+        "text": "&Segurança do Windows...",
+        "flags": 0
+       },
+       {
+        "id": 557,
+        "text": "&Ligações de rede",
+        "flags": 0
+       },
+       {
+        "id": 510,
+        "text": "&Impressoras e faxes",
+        "flags": 0
+       },
+       {
+        "id": 413,
+        "text": "&Barra de tarefas e menu 'Iniciar'",
+        "flags": 128
+       }
+      ]
+     },
+     {
+      "id": 520,
+      "text": "Pro&curar",
+      "flags": 1,
+      "items": [
+       {
+        "id": 4294967295,
+        "text": "",
+        "flags": 128
+       }
+      ]
+     },
+     {
+      "id": 503,
+      "text": "&Ajuda e suporte",
+      "flags": 0
+     },
+     {
+      "id": 401,
+      "text": "E&xecutar...",
+      "flags": 0
+     },
+     {
+      "id": 450,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 553,
+      "text": "&Sincronizar",
+      "flags": 0
+     },
+     {
+      "id": 402,
+      "text": "&Terminar sessão de %s...",
+      "flags": 0
+     },
+     {
+      "id": 5000,
+      "text": "Des&ligar...",
+      "flags": 0
+     },
+     {
+      "id": 410,
+      "text": "Desanc&orar",
+      "flags": 0
+     },
+     {
+      "id": 506,
+      "text": "Ence&rrar...",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "205": [
+   {
+    "id": null,
+    "text": "",
+    "flags": 144,
+    "items": [
+     {
+      "id": 408,
+      "text": "Acertar data/&hora",
+      "flags": 0
+     },
+     {
+      "id": 421,
+      "text": "&Personalizar notificações...",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 403,
+      "text": "Janelas em &cascata",
+      "flags": 0
+     },
+     {
+      "id": 404,
+      "text": "&Janelas em mosaico horizontalmente",
+      "flags": 0
+     },
+     {
+      "id": 405,
+      "text": "Janelas em mosaico &verticalmente",
+      "flags": 0
+     },
+     {
+      "id": 407,
+      "text": "&Mostrar o ambiente de trabalho",
+      "flags": 0
+     },
+     {
+      "id": 416,
+      "text": "An&ular",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 420,
+      "text": "&Gestor de tarefas",
+      "flags": 0
+     },
+     {
+      "id": 0,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 424,
+      "text": "Bloquear a barra de &tarefas",
+      "flags": 0
+     },
+     {
+      "id": 413,
+      "text": "Propriedade&s",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "210": [
+   {
+    "id": 4294967295,
+    "text": "",
+    "flags": 129,
+    "items": [
+     {
+      "id": 403,
+      "text": "Em casca&ta",
+      "flags": 0
+     },
+     {
+      "id": 404,
+      "text": "Em mosaico na &horizontal",
+      "flags": 0
+     },
+     {
+      "id": 405,
+      "text": "Em mosaico na &vertical",
+      "flags": 0
+     },
+     {
+      "id": 311,
+      "text": "&Minimizar grupo",
+      "flags": 0
+     },
+     {
+      "id": 4294967295,
+      "text": "",
+      "flags": 0
+     },
+     {
+      "id": 48913,
+      "text": "&Fechar grupo",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "211": [
+   {
+    "id": 4294967295,
+    "text": "",
+    "flags": 129,
+    "items": [
+     {
+      "id": 32754,
+      "text": "Propriedade&s",
+      "flags": 128
+     }
+    ]
+   }
+  ],
+  "6000": [
+   {
+    "id": 4294967295,
+    "text": "",
+    "flags": 0
+   },
+   {
+    "id": 1,
+    "text": "&Mostrar todas as ligações",
+    "flags": 128
+   }
+  ]
+ }
+}

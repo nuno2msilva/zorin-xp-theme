@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Zorin XP: aviso de novo separador",
+  "description": "No modo compacto, a beira esquerda da janela pisca a laranja (como um botão da barra de tarefas do XP a pedir atenção) quando se abre um separador em segundo plano; com a barra lateral à vista, pisca o próprio separador.",
+  "version": "1.3",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zorin-xp-ie-tabflash@zorin-xp.local"
+    }
+  },
+  "experiment_apis": {
+    "zxpTabFlash": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "api.js",
+        "events": ["startup"],
+        "paths": [["zxpTabFlash"]]
+      }
+    }
+  }
+}

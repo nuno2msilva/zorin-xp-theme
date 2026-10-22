@@ -1,0 +1,657 @@
+/*@gtk4*/
+/* =====================================================================
+ * Apps libadwaita. Este CSS também é carregado como folha de utilizador
+ * (~/.config/gtk-4.0/gtk.css), por cima do Adwaita do libadwaita: aqui
+ * anulam-se os cantos arredondados, "pílulas" e cartões do Adwaita e
+ * aplicam-se os equivalentes do XP.
+ * =================================================================== */
+window, window.background, window.csd, window.solid-csd, dialog-host > dialog.floating sheet {
+  border-radius: 8px 8px 0 0;
+}
+window.maximized, window.fullscreen, window.tiled, window.tiled-left, window.tiled-right,
+window.tiled-top, window.tiled-bottom { border-radius: 0; }
+window.background { background-color: @xp_btnface; color: @xp_text; }
+.background { background-color: @xp_btnface; }
+
+/* Barra de título com 30 px como no XP: o Adwaita põe 6/7 px de padding na
+ * caixa interior, min-height 47 px (37 nas decorações por omissão), margens de
+ * -1 px, contorno interior e esbate o conteúdo das janelas inativas */
+headerbar, headerbar.default-decoration { min-height: 21px; margin-left: 0; margin-right: 0; box-shadow: none; }
+headerbar > windowhandle > box, headerbar.default-decoration > windowhandle > box { padding: 0; min-height: 0; }
+headerbar:backdrop > windowhandle { filter: none; }
+headerbar button.image-button, headerbar menubutton > button, headerbar splitbutton > button {
+  min-height: 15px;
+  padding: 2px 4px 3px;
+}
+
+/* Moldura de 4 px (FrameLeft/Right/Bottom) nas janelas libadwaita: vai no
+ * dialog-host (só existe no libadwaita; a janela do mutter-x11-frames não o
+ * tem) e as barras de topo estendem-se por cima das colunas, como no XP */
+window.csd > dialog-host {
+  border-style: solid;
+  border-width: 0 4px 4px 4px;
+  border-image: url("assets/frame-csd-focused.png") 0 4 4 4 stretch;
+  border-image-width: 0 4px 4px 4px;
+}
+window.csd:backdrop > dialog-host { border-image-source: url("assets/frame-csd-unfocused.png"); }
+window.csd.maximized > dialog-host, window.csd.fullscreen > dialog-host, window.csd.tiled > dialog-host,
+window.csd.tiled-left > dialog-host, window.csd.tiled-right > dialog-host,
+window.csd.tiled-top > dialog-host, window.csd.tiled-bottom > dialog-host {
+  border-width: 0;
+  border-image: none;
+}
+window.csd > dialog-host toolbarview > .top-bar headerbar { margin-left: -4px; margin-right: -4px; }
+window.csd > dialog-host .sidebar-pane toolbarview > .top-bar headerbar { margin-right: 0; }
+window.csd > dialog-host .content-pane toolbarview > .top-bar headerbar { margin-left: 0; }
+window.csd.maximized > dialog-host toolbarview > .top-bar headerbar,
+window.csd.tiled > dialog-host toolbarview > .top-bar headerbar { margin-left: 0; margin-right: 0; }
+
+/* AdwToolbarView: as barras de topo/fundo são legendas XP ou barras de ferramentas */
+toolbarview > .top-bar, toolbarview > .bottom-bar { background: none; box-shadow: none; }
+/* com mais de uma barra em cima (legenda + pesquisa) o libadwaita junta
+ * 3 px por cima e por baixo: a legenda descia em relação à do lado */
+toolbarview > .top-bar .collapse-spacing, toolbarview > .bottom-bar .collapse-spacing { padding-top: 0; padding-bottom: 0; }
+toolbarview > .bottom-bar { background-color: @xp_btnface; border-top: 1px solid #D8D2BD; }
+toolbarview > .top-bar.raised, toolbarview > .bottom-bar.raised { box-shadow: none; }
+.flat headerbar, headerbar.flat {
+  {{part:caption:focused}}
+}
+
+/* Botões: aspeto XP mesmo nas variantes do Adwaita */
+button.suggested-action, button.destructive-action, button.pill, button.opaque,
+button.raised, splitbutton > button, splitbutton > menubutton > button,
+menubutton > button:not(.flat) {
+  {{part:button:normal}}
+  color: @xp_text;
+  border-radius: 0;
+  box-shadow: none;
+}
+button.suggested-action { {{state:button:default}} }
+button.suggested-action:hover, button.destructive-action:hover, button.pill:hover,
+splitbutton > button:hover, menubutton > button:not(.flat):hover { {{state:button:hover}} }
+button.suggested-action:active, button.destructive-action:active, button.pill:active,
+splitbutton > button:active, menubutton > button:not(.flat):active,
+menubutton > button:checked { {{state:button:active}} }
+button.suggested-action:disabled, button.destructive-action:disabled, button.pill:disabled {
+  {{state:button:disabled}}
+  color: @xp_disabled_text;
+}
+button.pill { padding: 3px 16px; }
+button.circular, button.osd { border-radius: 0; }
+button.osd { background-color: rgba(0, 0, 0, 0.6); color: #FFFFFF; border-image: none; }
+
+/* Listas e cartões (AdwPreferencesGroup, boxed-list, AdwActionRow) */
+.card, list.boxed-list, .boxed-list, listview.card {
+  border: 1px solid @xp_field_border;
+  border-radius: 0;
+  background-color: @xp_window;
+  box-shadow: none;
+}
+list.boxed-list > row, .boxed-list > row {
+  border-bottom: 1px solid #EEEDE5;
+  border-radius: 0;
+  padding: 2px 6px;
+}
+list.boxed-list > row:last-child { border-bottom: 0; }
+row.activatable:hover { background-color: #F1F5FB; }
+row.activatable:active { background-color: #E1EAF8; }
+row:selected { background-color: @xp_highlight; color: @xp_highlight_text; }
+row .title { font-weight: normal; }
+row .subtitle { color: #444444; font-size: 8pt; }
+preferencesgroup > box > box.header > box > label.heading,
+preferencesgroup .heading, .heading { font-weight: bold; color: @xp_groupbox_text; }
+/* Grupos convertidos em caixas de grupo do XP (src/zorin-taskbar-xp/prefs.js),
+ * medidas numa folha do XP: contorno #D0D0BF de cantos arredondados, título
+ * Tahoma 8 azul com o traço centrado nele, intervalo de 3 px de cada lado e
+ * a 7 px do canto; 12 px entre caixas, conteúdo a 10 px do contorno */
+window.zxp-property-sheet preferencespage > scrolledwindow > viewport > clamp > box { margin: 10px 8px; border-spacing: 12px; }
+.zxp-gb-tl, .zxp-gb-tr { margin-top: 7px; border-top: 1px solid #D0D0BF; }
+.zxp-gb-tl { min-width: 6px; border-left: 1px solid #D0D0BF; border-top-left-radius: 3px; }
+.zxp-gb-tr { border-right: 1px solid #D0D0BF; border-top-right-radius: 3px; }
+label.zxp-gb-title { padding: 0 3px; color: @xp_groupbox_text; }
+.zxp-groupbox > .zxp-gb-body {
+  padding: 1px 9px 9px 9px;
+  border: 1px solid #D0D0BF;
+  border-top: 0;
+  border-radius: 0 0 3px 3px;
+}
+.zxp-groupbox.untitled > .zxp-gb-body { padding-top: 9px; border-top: 1px solid #D0D0BF; border-radius: 3px; }
+.zxp-gb-body list.boxed-list { border: 0; background: none; }
+.zxp-gb-body list.boxed-list > row { border: 0; padding: 0; background: none; }
+.zxp-gb-body list.boxed-list > row > box.header { margin: 0; min-height: 26px; }
+.zxp-gb-body list.boxed-list > row > box.header > box.title { margin: 3px 0; }
+.title-1, .title-2, .title-3, .title-4 { font-family: "Trebuchet MS", Tahoma, sans-serif; color: @xp_groupbox_text; }
+.dim-label, label.dim-label { color: #444444; opacity: 1; }
+
+/* Campos (AdwEntryRow, AdwSpinRow, AdwComboRow) */
+row.entry, row.spin, row.combo { padding: 2px 6px; }
+row.entry > box > editablelabel, row.entry text { background: none; }
+
+/* Separadores de vistas (AdwViewSwitcher / AdwTabBar). Nas janelas de
+ * preferências do libadwaita ficam na barra de título: separadores do XP só
+ * com texto (Tahoma 8 normal, como nas folhas de propriedades), compactos e
+ * assentes no fundo da legenda azul; o selecionado é 3 px mais alto e 2 px
+ * mais largo de cada lado (medidas do XP) */
+viewswitcher button.toggle, tabbar tab {
+  border-radius: 0;
+  {{part:tab:normal}}
+  min-height: 0;
+  padding: 0 6px;
+  color: @xp_text;
+  font-weight: normal;
+  box-shadow: none;
+}
+viewswitcher button.toggle:checked, tabbar tab:selected { {{state:tab-top:checked}} }
+viewswitcher button.toggle:hover:not(:checked), tabbar tab:hover:not(:selected) { {{state:tab:hover}} }
+headerbar viewswitcher { margin-bottom: -3px; border-spacing: 0; }
+headerbar viewswitcher button.toggle { margin: 6px 0 0 0; }
+headerbar viewswitcher button.toggle:checked { margin: 3px -2px 0 -2px; }
+viewswitcher button.toggle > stack > box.wide { padding: 0; border-spacing: 0; }
+/* (o libadwaita impõe ~120 px de largura natural a cada separador: ficam com
+ * largura fixa e centrados, como os separadores TCS_FIXEDWIDTH do XP) */
+viewswitcher button.toggle > stack > box.wide > indicatorbin { opacity: 0; margin-right: -16px; }
+viewswitcher button.toggle label { font-weight: normal; }
+
+/* Definições da zorin-taskbar como folha de propriedades do XP (ver
+ * src/zorin-taskbar-xp/prefs.js): título à esquerda, a 6 px da borda */
+window.zxp-property-sheet headerbar .title { padding: 0; margin: 0 0 0 1px; }
+/* Nautilus como Explorador (src/nautilus-xp): ícone e nome da pasta na
+ * legenda, com 4 px entre os dois, como no XP */
+window.zxp-explorer headerbar .zxp-explorer-title { border-spacing: 4px; margin: 0; padding: 0; }
+window.zxp-explorer headerbar .zxp-explorer-title .title { padding: 0; margin: 1px 0 0 -4px; }
+
+/* Barra lateral (AdwNavigationSplitView / Definições) — painel claro como o XP */
+.navigation-sidebar, .sidebar-pane, navigation-view.sidebar {
+  background-image: none;
+  background-color: @xp_window;
+  color: @xp_text;
+}
+.navigation-sidebar > row, .navigation-sidebar row {
+  border-radius: 0;
+  margin: 0;
+  padding: 3px 6px;
+  color: @xp_text;
+}
+.navigation-sidebar > row:selected, .navigation-sidebar row:selected {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+.navigation-sidebar label { color: inherit; }
+/* Vistas divididas (Definições, …): a barra da barra lateral e a do
+ * conteúdo formam uma só legenda do XP — metade esquerda com o canto
+ * esquerdo, metade direita com o direito, sem traço entre as duas; o título
+ * da barra lateral ("Definições") some e fica o da página */
+navigation-split-view > .sidebar-pane headerbar, overlay-split-view > .sidebar-pane headerbar { {{part:caption-split-left:focused}} }
+navigation-split-view > .sidebar-pane headerbar:backdrop, overlay-split-view > .sidebar-pane headerbar:backdrop { {{state:caption-split-left:unfocused}} }
+navigation-split-view > .content-pane headerbar, overlay-split-view > .content-pane headerbar { {{part:caption-split-right:focused}} }
+navigation-split-view > .content-pane headerbar:backdrop, overlay-split-view > .content-pane headerbar:backdrop { {{state:caption-split-right:unfocused}} }
+.maximized navigation-split-view > .sidebar-pane headerbar, .maximized navigation-split-view > .content-pane headerbar,
+.maximized overlay-split-view > .sidebar-pane headerbar, .maximized overlay-split-view > .content-pane headerbar { {{part:caption-max:focused}} }
+.maximized navigation-split-view > .sidebar-pane headerbar:backdrop, .maximized navigation-split-view > .content-pane headerbar:backdrop,
+.maximized overlay-split-view > .sidebar-pane headerbar:backdrop, .maximized overlay-split-view > .content-pane headerbar:backdrop { {{state:caption-max:unfocused}} }
+navigation-split-view > .sidebar-pane headerbar .title { color: transparent; text-shadow: none; }
+
+/* Diálogos (AdwAlertDialog / AdwDialog) */
+dialog.alert .message-area, dialog .dialog-contents { background-color: @xp_btnface; }
+dialog.floating sheet, dialog.alert sheet { border-radius: 0; box-shadow: 0 0 0 1px @xp_btnshadow; }
+dialog.alert .response-area > button { border-radius: 0; margin: 4px; }
+
+/* Interruptores (AdwSwitchRow) e toasts */
+toast {
+  border-radius: 0;
+  border: 1px solid #000000;
+  background-color: @xp_infobk;
+  color: @xp_text;
+  margin: 12px;
+}
+toast > widget > button { color: @xp_text; }
+banner > revealer > widget { background-color: @xp_infobk; color: @xp_text; }
+
+/* Placeholders (AdwStatusPage) */
+statuspage > scrolledwindow > viewport > box > clamp > box > .title { color: @xp_groupbox_text; }
+
+/* O libadwaita põe o texto dos botões (e das listas pendentes) a negrito;
+ * no XP é Tahoma 8 normal */
+button, button label, buttoncontent > box > label, button.font > box > box > label { font-weight: normal; }
+
+/* Folha de propriedades da zorin-taskbar (src/zorin-taskbar-xp/prefs.js) */
+/* deslizador numa linha própria, por baixo do título */
+.zxp-gb-body list.boxed-list > row > box.header.zxp-slider-row { border-spacing: 0; padding-bottom: 4px; }
+.zxp-slider-row > .suffixes { margin-left: 12px; }
+/* barra de deslocamento com setas (o GTK4 não as tem) */
+.zxp-vscroll > button.zxp-scroll-arrow {
+  min-width: 17px;
+  min-height: 17px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  box-shadow: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+}
+.zxp-vscroll > button.up { background-image: url("assets/scroll-arrow-up-normal.png"); }
+.zxp-vscroll > button.up:hover { background-image: url("assets/scroll-arrow-up-hover.png"); }
+.zxp-vscroll > button.up:active { background-image: url("assets/scroll-arrow-up-active.png"); }
+.zxp-vscroll > button.up:disabled { background-image: url("assets/scroll-arrow-up-disabled.png"); }
+.zxp-vscroll > button.down { background-image: url("assets/scroll-arrow-down-normal.png"); }
+.zxp-vscroll > button.down:hover { background-image: url("assets/scroll-arrow-down-hover.png"); }
+.zxp-vscroll > button.down:active { background-image: url("assets/scroll-arrow-down-active.png"); }
+.zxp-vscroll > button.down:disabled { background-image: url("assets/scroll-arrow-down-disabled.png"); }
+.zxp-vscroll > scrollbar { margin: 0; }
+/* OK / Cancelar / Aplicar: 75 × 23 */
+.zxp-dialog-buttons > button { min-height: 17px; }
+/* setas ↑ ↓ soltas, sem botão (glifo das barras de deslocamento em azul) */
+button.zxp-arrow {
+  min-width: 13px;
+  min-height: 13px;
+  padding: 0;
+  margin: 0 1px;
+  border: 0;
+  border-image: none;
+  box-shadow: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+button.zxp-arrow.up { background-image: url("assets/arrow-glyph-up-normal.png"); }
+button.zxp-arrow.up:hover { background-image: url("assets/arrow-glyph-up-hover.png"); }
+button.zxp-arrow.down { background-image: url("assets/arrow-glyph-down-normal.png"); }
+button.zxp-arrow.down:hover { background-image: url("assets/arrow-glyph-down-hover.png"); }
+button.zxp-arrow.up:disabled { background-image: url("assets/arrow-glyph-up-disabled.png"); }
+button.zxp-arrow.down:disabled { background-image: url("assets/arrow-glyph-down-disabled.png"); }
+.zxp-slider-row > .suffixes > .zxp-radios { margin-top: 2px; }
+
+/* =====================================================================
+ * Nautilus como Explorador do XP (src/nautilus-xp/zorin_xp_explorer.py),
+ * medido numa captura do Explorador maximizado: menus 22 px | linha
+ * #D8D2BD + branca | ferramentas 38 px (ícones de 24 em y = 7, o 1.º em
+ * x = 8) | linha | endereço 22 px com sombra em baixo | painel de tarefas
+ * de 250 px (shellstyle.dll: degradê #7BA2E7 → #6375D6, secções a 12 px,
+ * cabeçalho azul #215DC6 a negrito, corpo #D6DFF7 com contorno branco)
+ * ===================================================================== */
+window.zxp-explorer .zxp-explorer-menubar {
+  min-height: 22px;
+  padding-left: 1px;
+  background-color: #F1EFE7;
+  border-bottom: 1px solid #D8D2BD;
+}
+window.zxp-explorer .zxp-explorer-menubar menubar { background: none; padding: 0; margin: 0; min-height: 0; }
+/* bandeira do Windows: quadrado branco de 40×22 com o traço #D8D2BD à esquerda */
+window.zxp-explorer .zxp-explorer-brand {
+  min-width: 40px;
+  background-color: #FFFFFF;
+  border-left: 1px solid #D8D2BD;
+}
+window.zxp-explorer .zxp-explorer-brand-flag { margin: 0 9px 0 9px; }
+window.zxp-explorer .zxp-explorer-menubar menubar > item {
+  min-height: 0;
+  padding: 4px 8px 3px 8px;
+  margin: 0;
+  border-radius: 0;
+  color: @xp_text;
+}
+window.zxp-explorer .zxp-explorer-menubar menubar > item:hover,
+window.zxp-explorer .zxp-explorer-menubar menubar > item:selected {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+window.zxp-explorer .zxp-explorer-toolbar {
+  min-height: 38px;
+  padding: 0 0 0 3px;
+  background-image: linear-gradient(to bottom, #F0EFE8, #EEEDE0);
+  border-top: 1px solid #FFFFFF;
+  border-bottom: 1px solid #D8D2BD;
+}
+window.zxp-explorer .zxp-explorer-toolbar > button {
+  min-height: 0;
+  margin: 1px 0;
+  padding: 5px 6px 5px 5px;
+}
+window.zxp-explorer .zxp-explorer-toolbar > button label { padding: 0; }
+/* posições medidas no XP: Avançar a 2 px de Retroceder, Acima colado */
+window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-forward { margin-left: 2px; }
+window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-up { margin-left: -2px; }
+window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-forward image.zxp-dropdown.split { margin-left: 5px; }
+window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-folders { margin-right: 4px; }
+window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-views { margin-left: 1px; }
+/* o libadwaita esbate os botões inativos: no XP só o ícone fica cinzento */
+window.zxp-explorer .zxp-explorer-toolbar > button:disabled,
+window.zxp-explorer .zxp-explorer-toolbar > button:disabled > box > image { filter: none; opacity: 1; }
+window.zxp-explorer .zxp-explorer-toolbar > button:disabled label { color: #ACA899; }
+/* setinha de lista pendente (Retroceder, Avançar, Vistas) */
+window.zxp-explorer .zxp-explorer-toolbar image.zxp-dropdown { -gtk-icon-size: 5px; min-width: 5px; }
+window.zxp-explorer .zxp-explorer-toolbar image.zxp-dropdown.split { margin: 0 0 0 6px; }
+window.zxp-explorer .zxp-explorer-toolbar image.zxp-dropdown.attached { margin: 0 0 0 -2px; }
+window.zxp-explorer .zxp-explorer-toolbar > separator {
+  min-width: 1px;
+  margin: 5px 1px 5px 0;
+  background-color: #CAC6AF;
+}
+window.zxp-explorer .zxp-explorer-address {
+  min-height: 22px;
+  padding: 0 6px 0 5px;
+  border-top: 1px solid #FFFFFF;
+  background-image: linear-gradient(to bottom, #EFEFE9, #ECEBE3 80%, #E9E8DD 86%, #E0DFD0 92%, #CDCABB);
+}
+window.zxp-explorer .zxp-explorer-address > label.dim-label { color: #716F64; opacity: 1; margin-right: 0; }
+window.zxp-explorer .zxp-explorer-address > entry {
+  min-height: 20px;
+  margin: 0;
+  padding: 0 1px 0 3px;
+}
+window.zxp-explorer .zxp-explorer-address > entry > image { margin: 0; padding: 0; opacity: 1; }
+window.zxp-explorer .zxp-explorer-address > entry > image.left { margin-right: 3px; }
+window.zxp-explorer .zxp-explorer-address > entry > image.right { -gtk-icon-size: 18px; min-width: 15px; }
+window.zxp-explorer .zxp-explorer-address > button { min-height: 0; margin: 0; padding: 0 3px 0 1px; }
+
+/* painel de tarefas: os locais do Nautilus numa secção do XP */
+window.zxp-explorer .zxp-taskpane {
+  background-image: linear-gradient(to bottom, #7BA2E7, #6375D6);
+  border: 0;
+  box-shadow: none;
+}
+window.zxp-explorer .zxp-taskpane > .top-bar, window.zxp-explorer .zxp-taskpane revealer,
+window.zxp-explorer .zxp-taskpane windowhandle { background: none; }
+window.zxp-explorer .zxp-taskpane-scroller, window.zxp-explorer .zxp-taskpane-scroller > viewport { background: none; }
+/* secções a 12 px do topo, 11/15 px dos lados, 15 px entre elas */
+window.zxp-explorer .zxp-taskpane-sections { margin: 12px 15px 12px 11px; border-spacing: 15px; }
+window.zxp-explorer button.zxp-taskpane-header {
+  min-height: 25px;
+  margin: 0;
+  padding: 0 1px 0 14px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: url("assets/explorer-section-header.png") 0 0 / 100% 100% no-repeat;
+  color: #215DC6;
+}
+window.zxp-explorer button.zxp-taskpane-header:hover { color: #428EFF; }
+window.zxp-explorer button.zxp-taskpane-header label { font-weight: bold; }
+window.zxp-explorer .zxp-taskpane-arrow { margin: 1px 0 0 0; }
+window.zxp-explorer .zxp-taskpane-section > .zxp-taskpane-body {
+  padding: 7px 12px 10px 14px;
+  background-image: none;
+  background-color: #D6DFF7;
+  border: 1px solid #FFFFFF;
+  border-top: 0;
+  color: @xp_text;
+}
+window.zxp-explorer .zxp-taskpane-body > scrolledwindow,
+window.zxp-explorer .zxp-taskpane-body viewport { background: none; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row {
+  min-height: 0;
+  margin: 4px 0 0 0;
+  padding: 0;
+  background: none;
+  color: #215DC6;
+}
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row:hover { color: #428EFF; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row:hover label { text-decoration-line: underline; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row:selected label { font-weight: bold; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row > revealer,
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row > revealer > box { padding: 0; margin: 0; border-spacing: 0; min-height: 16px; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row image.sidebar-icon { margin: 0 6px 0 0; padding: 0; -gtk-icon-style: regular; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > row label.sidebar-label { padding: 0; margin: 0; }
+window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > separator {
+  min-height: 0;
+  margin: 4px 0 0 0;
+  background: none;
+}
+/* tarefas: ligações azuis (#215DC6), #428EFF sublinhado ao passar o rato */
+window.zxp-explorer .zxp-taskpane-body > button.zxp-task {
+  min-height: 16px;
+  margin: 4px 0 0 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: none;
+  box-shadow: none;
+  color: #215DC6;
+}
+window.zxp-explorer .zxp-taskpane-body > button.zxp-task:hover { color: #428EFF; }
+window.zxp-explorer .zxp-taskpane-body > button.zxp-task:hover label { text-decoration-line: underline; }
+window.zxp-explorer .zxp-taskpane-body > button.zxp-task label { padding: 0; }
+/* detalhes: nome a negrito, linha em branco antes das propriedades */
+window.zxp-explorer .zxp-taskpane-body label.zxp-details-name { font-weight: bold; margin-top: 2px; }
+window.zxp-explorer .zxp-taskpane-body label.zxp-details-first { margin-top: 6px; }
+window.zxp-explorer .zxp-taskpane-body picture.zxp-details-preview { margin: 4px 0 2px 0; }
+
+/* Mosaicos (vista do XP): células deitadas de 218 × 56 — ícone de 48 à
+ * esquerda, nome e legendas (tipo, tamanho) a cinzento ao lado */
+window.zxp-explorer .nautilus-grid-view gridview { padding: 8px 4px; border-spacing: 0; }
+window.zxp-explorer .nautilus-grid-view gridview > child,
+window.zxp-explorer .nautilus-grid-view #NautilusViewCell { border-radius: 0; }
+window.zxp-explorer .zxp-tiles gridview > child { min-width: 218px; min-height: 56px; }
+window.zxp-explorer .zxp-tiles #NautilusViewCell { padding: 0 0 0 3px; }
+/* o texto 9 px depois do ícone e 1 px acima do centro, como no XP */
+window.zxp-explorer .zxp-tiles gridview > child .icon-ui-labels-box { margin: -1px 0 1px -1px; }
+window.zxp-explorer .zxp-tiles #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
+window.zxp-explorer .zxp-tiles gridview > child label.caption { color: #808080; }
+
+/* Miniaturas como no XP (medidas em capturas): a imagem em 96x96 com a
+ * moldura de 1 px #ECE9D8 desenhada por cima da orla (outline, que fica por
+ * cima da imagem); selecionada, a orla aparece e a moldura passa a azul,
+ * 3 px por fora, sem tingir a imagem. Colunas de 125 px (src/nautilus-xp:
+ * _thumb_cells, _tile_columns), linhas de 139, o nome com 121 px */
+window.zxp-explorer .nautilus-grid-view clamp.zxp-thumb-frame {
+  min-width: 96px;
+  min-height: 96px;
+  background-color: #FFFFFF;
+  outline: 1px solid #ECE9D8;
+  outline-offset: -1px;
+}
+window.zxp-explorer .nautilus-grid-view gridview > child:selected clamp.zxp-thumb-frame {
+  outline: 3px solid @xp_highlight;
+  outline-offset: 0;
+}
+/* sem o foco na vista (a escrever o nome, noutra parte da janela) ou com a
+ * janela inativa: a moldura de 3 px fica bege, como no XP */
+window.zxp-explorer .nautilus-grid-view gridview:not(:focus-within) > child:selected clamp.zxp-thumb-frame,
+window.zxp-explorer:backdrop .nautilus-grid-view gridview > child:selected clamp.zxp-thumb-frame {
+  outline: 3px solid #ECE9D8;
+  outline-offset: 0;
+}
+window.zxp-explorer .zxp-thumbs #NautilusViewCell { padding: 0 2px; }
+window.zxp-explorer .zxp-thumbs gridview > child { min-height: 139px; }
+/* o nome 8 px abaixo da moldura (até ao topo das letras), como no XP; o
+ * nome inteiro do item com foco passa por cima da linha de baixo em vez de a
+ * empurrar (margem de baixo negativa: até 3 linhas; uma margem maior daria
+ * tamanho negativo aos nomes de uma linha) */
+window.zxp-explorer .zxp-thumbs .icon-ui-labels-box { margin-top: -1px; margin-bottom: -12px; }
+/* sem o estilo de miniatura do Nautilus (xadrez, cantos, contorno): nas
+ * Miniaturas a moldura é a do XP, nos Ícones e Mosaicos ficam os ícones */
+window.zxp-explorer .nautilus-grid-view picture.thumbnail,
+window.zxp-explorer .nautilus-list-view picture.thumbnail { background: none; box-shadow: none; border-radius: 0; }
+/* nem a sombra que o Nautilus põe em todos os ícones e imagens (filter:
+ * drop-shadow; nas Miniaturas parecia uma moldura grossa à volta da imagem) */
+window.zxp-explorer .nautilus-grid-view picture,
+window.zxp-explorer .nautilus-list-view picture { filter: none; }
+/* linhas de 13 px nos nomes e legendas, como a Tahoma 8 no XP; as legendas
+ * com a letra do nome (o Nautilus aumenta-as) */
+window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label { line-height: 13px; }
+window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.caption { font-size: 11px; }
+/* Ícones: o nome 7 px abaixo do ícone (até ao topo das letras), como no XP */
+window.zxp-explorer .zxp-icons .icon-ui-labels-box { margin-top: -2px; margin-bottom: -11px; }
+/* Ícones como no XP: ícones de 32, colunas de 75 px, nome com 71 px */
+window.zxp-explorer .zxp-icons #NautilusViewCell { padding: 0 2px; }
+window.zxp-explorer .zxp-icons gridview > child { min-height: 75px; }
+
+/* Detalhes / Lista (vista de lista do Nautilus) como no Explorador: linhas de
+ * 17 px, ícone de 16 a 4 px da margem, sem cantos nem espaços entre linhas */
+window.zxp-explorer .nautilus-list-view columnview { padding-left: 4px; padding-right: 0; }
+window.zxp-explorer .nautilus-list-view columnview > listview {
+  padding: 0;
+  margin-left: -4px;
+  margin-right: 0;
+  border-spacing: 0;
+}
+window.zxp-explorer .nautilus-list-view columnview > listview > row {
+  min-height: 17px;
+  margin-left: 4px;
+  margin-right: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+window.zxp-explorer .nautilus-list-view #NautilusViewCell,
+window.zxp-explorer .nautilus-list-view.compact #NautilusViewCell { padding: 0; min-height: 0; }
+window.zxp-explorer .nautilus-list-view columnview > listview > row > cell { min-height: 0; padding: 0; }
+window.zxp-explorer .nautilus-list-view #NautilusViewCell box,
+window.zxp-explorer .nautilus-list-view #NautilusViewCell label,
+window.zxp-explorer .nautilus-list-view #NautilusViewCell image,
+window.zxp-explorer .nautilus-list-view #NautilusViewCell picture { min-height: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
+window.zxp-explorer .nautilus-list-view columnview > header > button { color: @xp_text; }
+/* a seta de ordenação só ocupa espaço na coluna ordenada, como no XP */
+window.zxp-explorer .nautilus-list-view columnview > header > button > box { border-spacing: 0; }
+window.zxp-explorer .nautilus-list-view columnview > header > button sort-indicator.unsorted { -gtk-icon-size: 1px; min-width: 0; opacity: 0; }
+window.zxp-explorer .nautilus-list-view columnview > header > button sort-indicator.ascending,
+window.zxp-explorer .nautilus-list-view columnview > header > button sort-indicator.descending { margin-left: 6px; margin-right: 2px; }
+/* o cabeçalho do XP vai até ao fim da janela: o cabeçalho do GTK só tem a
+ * largura das colunas, por isso o resto da faixa é pintado por baixo, na
+ * lista, com as cores medidas no XP (#EBEADB e 3 linhas de sombra) */
+window.zxp-explorer .nautilus-list-view columnview {
+  background-image: linear-gradient(to bottom, #EEEAD8 0, #EEEAD8 17px, #E2DECD 17px, #E2DECD 18px,
+                                    #D6D2C2 18px, #D6D2C2 19px, #CBC7B8 19px, #CBC7B8 20px, transparent 20px);
+  background-size: 100% 20px;
+  background-repeat: no-repeat;
+}
+/* linhas sem fundo próprio: por baixo fica a coluna ordenada a cinzento
+ * (src/nautilus-xp: _sort_band) */
+window.zxp-explorer .nautilus-list-view columnview > listview > row,
+window.zxp-explorer .nautilus-list-view columnview > listview > row > cell { background-color: transparent; }
+/* (a Lista não tem cabeçalho: nem a faixa) */
+window.zxp-explorer .zxp-list .nautilus-list-view columnview { background-image: none; }
+window.zxp-explorer .nautilus-list-view columnview > header > button label {
+  color: @xp_text;
+  opacity: 1;
+  font-family: Tahoma, sans-serif;
+  font-size: 8.25pt;
+  font-weight: normal;
+}
+window.zxp-explorer .nautilus-list-view .dim-label { opacity: 1; }
+/* folga de 6 px nas células de texto das colunas (Tamanho, Tipo, Data) */
+window.zxp-explorer .nautilus-list-view #NautilusViewCell label.numeric { margin-left: 6px; margin-right: 6px; color: @xp_text; }
+/* seleção nos Detalhes/Lista: só o nome fica realçado, como no XP */
+window.zxp-explorer .nautilus-list-view columnview > listview > row:selected { background: none; color: @xp_text; }
+window.zxp-explorer .nautilus-list-view columnview > listview > row:selected label { color: @xp_text; }
+window.zxp-explorer .nautilus-list-view columnview > listview > row:selected .column-name-labels-box > box > label {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+  padding: 0 1px;
+}
+/* secções especiais (Música, Imagens, Vídeos): cabeçalho azul (110) com o
+ * ícone de 32 px a sair 9 px por cima, título branco a 32 px da borda; corpo
+ * #EFF3FF com a marca de água ao canto */
+window.zxp-explorer button.zxp-taskpane-header.special {
+  margin-top: 9px;
+  background-image: url("assets/explorer-special-header.png");
+  color: #FFFFFF;
+}
+window.zxp-explorer button.zxp-taskpane-header.special:hover { color: #428EFF; }
+window.zxp-explorer button.zxp-taskpane-header.special label { margin-left: 18px; }
+window.zxp-explorer .zxp-special-icon { margin: 0 0 0 2px; }
+window.zxp-explorer .zxp-taskpane-section > .zxp-taskpane-body.special { background-color: #EFF3FF; background-repeat: no-repeat; background-position: right bottom; }
+window.zxp-explorer .zxp-taskpane-body.zxp-wm-music { background-image: url("assets/explorer-music-section.png"); }
+window.zxp-explorer .zxp-taskpane-body.zxp-wm-pictures { background-image: url("assets/explorer-pictures-section.png"); }
+window.zxp-explorer .zxp-taskpane-body.zxp-wm-videos { background-image: url("assets/explorer-videos-section.png"); }
+/* fundo branco fixo no contentor da vista (a lista e a grelha transparentes
+ * por cima): a marca de água fica presa ao canto, não se desloca */
+window.zxp-explorer .nautilus-grid-view, window.zxp-explorer .nautilus-list-view { background-color: #FFFFFF; }
+window.zxp-explorer .nautilus-grid-view gridview, window.zxp-explorer .nautilus-grid-view scrolledwindow,
+window.zxp-explorer .nautilus-list-view scrolledwindow, window.zxp-explorer .nautilus-list-view columnview,
+window.zxp-explorer .nautilus-list-view columnview > listview { background-color: transparent; }
+/* marca de água grande no canto inferior direito da área dos ficheiros (no
+ * contentor da vista: a lista dos Detalhes só tem a largura das colunas) */
+window.zxp-explorer .zxp-wm-music .nautilus-grid-view, window.zxp-explorer .zxp-wm-music .nautilus-list-view {
+  background-image: url("assets/explorer-music-view.png");
+  background-position: right bottom;
+  background-repeat: no-repeat;
+}
+window.zxp-explorer .zxp-wm-pictures .nautilus-grid-view, window.zxp-explorer .zxp-wm-pictures .nautilus-list-view {
+  background-image: url("assets/explorer-pictures-view.png");
+  background-position: right bottom;
+  background-repeat: no-repeat;
+}
+window.zxp-explorer .zxp-wm-videos .nautilus-grid-view, window.zxp-explorer .zxp-wm-videos .nautilus-list-view {
+  background-image: url("assets/explorer-videos-view.png");
+  background-position: right bottom;
+  background-repeat: no-repeat;
+}
+window.zxp-explorer .zxp-taskpane-body > button.zxp-task:disabled,
+window.zxp-explorer .zxp-taskpane-body > button.zxp-task:disabled label { color: #ACA899; filter: none; opacity: 1; }
+/* caixa de mudar o nome por cima do item (como no XP, medida: contorno
+ * preto de 1 px, sem relevo, 17 px de altura, o texto no sítio do nome):
+ * centrada (Ícones, Miniaturas) com 5 px de cada lado; à esquerda (Mosaicos)
+ * com 4 px antes e 15 depois; na Lista e nos Detalhes com 2 px antes, para
+ * não tocar no ícone (no XP tocava) */
+window.zxp-explorer entry.zxp-rename {
+  min-height: 0;
+  padding: 0 5px;
+  border: 1px solid #000000;
+  border-radius: 0;
+  border-image: none;
+  box-shadow: none;
+  outline: none;
+  background-color: #FFFFFF;
+  color: #000000;
+}
+window.zxp-explorer entry.zxp-rename.zxp-rename-left { padding: 0 15px 0 4px; }
+window.zxp-explorer entry.zxp-rename.zxp-rename-list { padding: 0 15px 0 2px; }
+/* (a linha da Tahoma no GTK tem 15 px: 15 + o contorno = os 17 do XP) */
+window.zxp-explorer entry.zxp-rename > text { padding: 0; min-height: 0; }
+window.zxp-explorer entry.zxp-rename > text > selection { background-color: @xp_highlight; color: @xp_highlight_text; }
+/* (nomes compridos nos Ícones/Miniaturas: caixa de várias linhas) */
+window.zxp-explorer scrolledwindow.zxp-rename {
+  padding: 0 5px;
+  border: 1px solid #000000;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  background-color: #FFFFFF;
+}
+window.zxp-explorer scrolledwindow.zxp-rename textview,
+window.zxp-explorer scrolledwindow.zxp-rename textview > text { background-color: #FFFFFF; color: #000000; padding: 0; }
+window.zxp-explorer scrolledwindow.zxp-rename textview > text > selection { background-color: @xp_highlight; color: @xp_highlight_text; }
+/* seleção na grelha (Miniaturas, Mosaicos, Ícones) como no XP: a célula
+ * não muda de fundo; o nome fica realçado (azul, branco); o ícone fica
+ * misturado com o azul de realce (src/nautilus-xp: _blend, píxel a píxel
+ * como no XP); com a janela inativa, o nome em cinzento claro e o ícone normal */
+window.zxp-explorer .nautilus-grid-view gridview > child:selected,
+window.zxp-explorer .nautilus-grid-view gridview > child:selected #NautilusViewCell { background: none; box-shadow: none; outline: 0; }
+window.zxp-explorer .nautilus-grid-view gridview > child:selected .icon-ui-labels-box > label:first-child,
+window.zxp-explorer .nautilus-list-view columnview > listview > row:selected .column-name-labels-box > box > label {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+window.zxp-explorer .nautilus-grid-view gridview > child:selected label.caption { color: #808080; background: none; }
+window.zxp-explorer .nautilus-grid-view gridview:not(:focus-within) > child:selected .icon-ui-labels-box > label:first-child,
+window.zxp-explorer .nautilus-list-view columnview:not(:focus-within) > listview > row:selected .column-name-labels-box > box > label,
+window.zxp-explorer:backdrop .nautilus-grid-view gridview > child:selected .icon-ui-labels-box > label:first-child,
+window.zxp-explorer:backdrop .nautilus-list-view columnview > listview > row:selected .column-name-labels-box > box > label {
+  background-color: #ECE9D8;
+  color: @xp_text;
+}
+/* o realce do nome rente às letras como no XP: 2 px dos lados, 1 px em cima
+ * e em baixo (sem mexer no sítio do texto) */
+window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.zxp-name { padding: 1px 2px; margin: -1px -2px; }
+/* (nas Miniaturas o texto fica 1 px mais acima no realce, como no XP) */
+window.zxp-explorer .zxp-thumbs .icon-ui-labels-box > label.zxp-name { padding: 0 2px 2px; }
+/* sem o sombreado ao passar o rato pelos itens (o XP não tem) */
+window.zxp-explorer .nautilus-grid-view gridview > child:hover,
+window.zxp-explorer .nautilus-grid-view gridview > child:hover #NautilusViewCell,
+window.zxp-explorer .nautilus-list-view columnview > listview > row:hover,
+window.zxp-explorer .nautilus-list-view columnview > listview > row:hover > cell { background: none; box-shadow: none; }
+/* sem o contorno de foco do GTK à volta das linhas e células (o XP não tem) */
+window.zxp-explorer .nautilus-list-view columnview > listview > row,
+window.zxp-explorer .nautilus-grid-view gridview > child { outline: none; }
+/* sem o contorno de foco à volta da vista inteira */
+window.zxp-explorer .nautilus-grid-view gridview, window.zxp-explorer .nautilus-list-view columnview,
+window.zxp-explorer .nautilus-list-view columnview > listview { outline: none; }
+/*@end*/

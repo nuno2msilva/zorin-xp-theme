@@ -1,0 +1,88 @@
+/* Título das janelas: Trebuchet MS Bold 10 pt (13 px), branco com sombra
+ * 1,1 #0A1883; inativo #D8E4F8 sem sombra (Window / InactiveCaptionText) */
+.zxp-title {
+  font-family: "Trebuchet MS";
+  font-weight: bold;
+  font-size: 13px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #0a1883;
+}
+.zxp-title-inactive {
+  color: #d8e4f8;
+  text-shadow: none;
+}
+
+/* Ecrãs de boas-vindas / estado do XP (logonui.exe, UIFILE 1000); tamanhos
+   em px arredondados como o GDI do XP (14 pt = 19 px, 8 pt = 11 px, 36 pt = 48 px) */
+.zxp-screen { background-color: rgb(90,126,220); }
+.zxp-screen-top { background-color: rgb(0,48,156); }
+.zxp-screen-bottom {
+  background-gradient-direction: horizontal;
+  background-gradient-start: rgb(57,52,173);
+  background-gradient-end: rgb(0,48,156);
+}
+.zxp-screen-status {
+  text-align: right;
+  font-family: "Arial", sans-serif;
+  font-size: 19px;
+  color: rgb(239,247,255);
+}
+.zxp-screen-welcome, .zxp-screen-welcome-shadow {
+  font-family: "Arial", sans-serif;
+  font-size: 48px;
+  font-weight: bold;
+  font-style: italic;
+  color: rgb(239,247,255);
+}
+.zxp-screen-welcome-shadow { color: rgb(49,81,181); }
+.zxp-screen-name {
+  font-family: "Tahoma", sans-serif;
+  font-size: 19px;
+  color: rgb(239,247,255);
+}
+.zxp-screen-tile-status {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: rgb(239,247,255);
+}
+
+/* >>> xpDialog (o build copia este bloco para a extensão do ecrã de boas-vindas) */
+/* Desligar o computador / Terminar sessão (msgina 20100, shell32 1089):
+   título Franklin Gothic 14, rótulos Tahoma 8 (msgina 20125..20128) */
+.zxp-dialog { border: 1px solid rgb(23,48,99); }
+.zxp-dialog-title {
+  font-family: "Franklin Gothic XP", "Franklin Gothic Medium", sans-serif;
+  font-size: 19px;
+  color: white;
+}
+.zxp-dialog-label {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: white;
+}
+.zxp-dialog-label.disabled { color: rgb(140,160,210); }
+.zxp-dialog-cancel {
+  background-image: url("logon/images/button-normal.png");
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  color: black;
+  padding: 0;
+}
+.zxp-dialog-cancel:focus { background-image: url("logon/images/button-default.png"); }
+.zxp-dialog-cancel:hover { background-image: url("logon/images/button-hover.png"); }
+.zxp-dialog-cancel:active { background-image: url("logon/images/button-active.png"); }
+
+.zxp-tooltip-title {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: black;
+}
+.zxp-tooltip-text {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  color: black;
+}
+/* <<< xpDialog */

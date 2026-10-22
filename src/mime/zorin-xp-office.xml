@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Zorin XP: tipos do Office que o sistema não conhece (eram "application/octet-stream"),
+     para terem o ícone e o nome que tinham na VM do XP de referência (HKCR\<ProgID>,
+     Office 2010 em inglês). Instalado em ~/.local/share/mime pelo install.sh (icons). -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-msaccess-accdb">
+    <comment>Microsoft Access Database</comment>
+    <sub-class-of type="application/vnd.ms-access"/>
+    <glob pattern="*.accdb"/>
+  </mime-type>
+  <mime-type type="application/x-msaccess-accde">
+    <comment>Microsoft Access ACCDE Database</comment>
+    <sub-class-of type="application/vnd.ms-access"/>
+    <glob pattern="*.accde"/>
+  </mime-type>
+  <mime-type type="application/x-msaccess-accdt">
+    <comment>Microsoft Access Template</comment>
+    <sub-class-of type="application/vnd.ms-access"/>
+    <glob pattern="*.accdt"/>
+  </mime-type>
+  <mime-type type="application/x-msaccess-mde">
+    <comment>Microsoft Access MDE Database</comment>
+    <sub-class-of type="application/vnd.ms-access"/>
+    <glob pattern="*.mde"/>
+  </mime-type>
+  <mime-type type="application/onenote">
+    <comment>Microsoft OneNote Section</comment>
+    <glob pattern="*.one"/>
+  </mime-type>
+  <mime-type type="application/x-onenote-toc">
+    <comment>Microsoft OneNote Table Of Contents</comment>
+    <sub-class-of type="application/onenote"/>
+    <glob pattern="*.onetoc2"/>
+  </mime-type>
+  <mime-type type="application/vnd.ms-outlook">
+    <comment>Outlook Item</comment>
+    <glob pattern="*.msg"/>
+  </mime-type>
+  <mime-type type="application/vnd.ms-outlook-pst">
+    <comment>Outlook Data File</comment>
+    <glob pattern="*.pst"/>
+  </mime-type>
+</mime-info>

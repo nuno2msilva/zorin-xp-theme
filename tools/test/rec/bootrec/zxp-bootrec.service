@@ -1,0 +1,13 @@
+[Unit]
+Description=Zorin XP: gravação do ecrã durante um arranque (uma vez)
+DefaultDependencies=no
+After=local-fs.target
+ConditionPathExists=/var/tmp/zxp-bootrec/arm
+
+[Service]
+Type=simple
+ExecStart=/var/tmp/zxp-bootrec/rec.sh
+TimeoutStopSec=3
+
+[Install]
+WantedBy=sysinit.target

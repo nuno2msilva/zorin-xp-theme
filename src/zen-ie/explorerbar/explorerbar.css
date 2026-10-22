@@ -1,0 +1,191 @@
+/*
+ * Barra do Explorador do IE6 (Favoritos / Histórico) no Zen — o conteúdo do
+ * painel lateral. O título ("Favoritos" + ×) é o cabeçalho da barra lateral
+ * do Firefox, estilizado no ie.css.
+ */
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #fff;
+    color: #000;
+    font: 11px "ZXP Tahoma", sans-serif;
+    user-select: none;
+    cursor: default;
+}
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* faixa de botões ("Adicionar... Organizar..."), medida numa captura do XP:
+   22 px do fundo das bandas (as 9 linhas de cima a dobrar, as 4 de baixo
+   fixas) e 3 px do fundo (a 1.ª linha esticada) antes da linha da lista;
+   ícone a 7 px da beira, texto 5 px depois do ícone */
+#toolbar {
+    flex: none;
+    display: flex;
+    align-items: flex-start;
+    box-sizing: border-box;
+    height: 25px;
+    padding: 0 2px 3px;
+    /* (no XP a banda dos botões acaba 1 px antes da beira: a última coluna
+       é o fundo, com um ponto branco em cima) */
+    background:
+        linear-gradient(#fff, #fff) 100% 0 / 1px 1px no-repeat,
+        url("img/rebar-bottom.png") 0 18px / calc(100% - 1px) 4px no-repeat,
+        url("img/rebar-top.png") 0 0 / calc(100% - 1px) 18px no-repeat,
+        url("img/rebar-row.png") 0 0 / 100% 100% no-repeat;
+    image-rendering: pixelated;
+}
+.tb {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    height: 22px;
+    box-sizing: border-box;
+    padding: 0 4px 0 1px;
+    line-height: 15px;                    /* (o texto 1 px abaixo do cimo, como no XP) */
+    border: 3px solid transparent;
+    image-rendering: auto;
+    white-space: nowrap;
+}
+.tb > i {
+    width: 18px;
+    height: 16px;
+    background: var(--icon) no-repeat;
+}
+.tb:hover > i { background-image: var(--icon-hot); }
+.tb:hover { border-image: url("img/toolbar-button-hover.png") 4 fill / 3px stretch; }
+.tb:is(:hover:active, .on) { border-image: url("img/toolbar-button-active.png") 4 fill / 3px stretch; }
+.tb .arrow {
+    align-self: center;
+    width: 5px;
+    height: 3px;
+    margin-left: 2px;
+    background: url("img/arrow.png");
+}
+
+/* a lista: branca, só a linha #aca899 por cima (captura do XP); linhas de
+   20 px, 2 px para dentro dos lados, a seleção na linha toda; ícone a 6 px
+   do início da linha, texto 3 px depois (as mesmas medidas nos separadores) */
+#list {
+    flex: 1;
+    overflow: auto;
+    padding: 1px 2px 0;
+    border-top: 1px solid #aca899;
+    outline: none;
+}
+.row {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 4px 0 calc(6px + var(--depth, 0) * 19px);
+    white-space: nowrap;
+}
+.row > img {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-right: 3px;
+}
+.row > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    top: -1px;                            /* (como no XP: 6 px até ao cimo das maiúsculas) */
+}
+.row:hover > span {
+    color: #0066cc;
+    text-decoration: underline;
+}
+.row.sel { background: #ece9d8; }
+#list:focus .row.sel {
+    background: #316ac5;
+}
+#list:focus .row.sel > span { color: #fff; }
+.row > input {
+    flex: 1;
+    min-width: 0;
+    height: 16px;
+    padding: 0 2px;
+    border: 1px solid #000;
+    font: inherit;
+    outline: none;
+}
+.empty {
+    padding: 4px 6px;
+    color: #000;
+}
+
+/* caixas que aparecem por baixo da faixa (Adicionar, Organizar, Procurar) */
+.box {
+    flex: none;
+    padding: 6px;
+    background: #ece9d8;
+    border-bottom: 1px solid #aca899;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.box[hidden] { display: none; }
+.box label { display: block; margin-bottom: 2px; }
+.box input[type="text"], .box select {
+    width: 100%;
+    box-sizing: border-box;
+    height: 21px;
+    padding: 1px 3px;
+    border: 1px solid #7f9db9;
+    background: #fff;
+    font: inherit;
+    color: #000;
+    outline: none;
+}
+.box .buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+button {
+    min-width: 75px;
+    height: 23px;
+    padding: 0 6px;
+    font: inherit;
+    color: #000;
+    background: none;
+    border: none;
+    /* (sem rebordo: a imagem pinta-se pela largura da própria imagem) */
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch;
+    box-sizing: border-box;
+}
+button:hover { border-image-source: url("img/button-hover.png"); }
+button:hover:active { border-image-source: url("img/button-active.png"); }
+
+/* menu "Ver" (como os menus do XP) */
+.menu {
+    position: absolute;
+    z-index: 5;
+    padding: 2px;
+    background: #fff;
+    border: 1px solid #aca899;
+    box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
+}
+.menu[hidden] { display: none; }
+.menu > div {
+    height: 17px;
+    line-height: 17px;
+    padding: 0 20px 0 18px;
+    white-space: nowrap;
+    position: relative;
+}
+.menu > div.on::before {
+    content: "•";
+    position: absolute;
+    left: 6px;
+    font-weight: bold;
+}
+.menu > div:hover {
+    background: #316ac5;
+    color: #fff;
+}

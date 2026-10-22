@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<title>Adicionar aos Favoritos</title>
+<style>
+/* o diálogo "Adicionar aos Favoritos" do IE6 */
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #ece9d8;
+    color: #000;
+    font: 11px "ZXP Tahoma", sans-serif;
+    user-select: none;
+    cursor: default;
+}
+body { padding: 10px 11px; box-sizing: border-box; }
+#top, #name-row, #more { margin-right: 92px; }      /* (a coluna dos botões à direita) */
+#top { display: flex; gap: 12px; }
+#top > img { width: 24px; height: 24px; flex: none; margin-top: 2px; }
+#top p { margin: 3px 0 8px; line-height: 13px; }
+.check { display: flex; align-items: center; gap: 5px; color: #aca899; }
+.check i { flex: none; width: 13px; height: 13px; background: url("img/check-unchecked-disabled.png"); }
+#name-row { display: flex; align-items: center; gap: 8px; margin: 10px 92px 0 36px; }
+#name { flex: 1; height: 21px; box-sizing: border-box; padding: 2px 3px; border: 1px solid #7f9db9;
+        background: #fff; font: inherit; color: #000; outline: none; user-select: text; }
+#buttons { position: absolute; right: 11px; top: 10px; display: flex; flex-direction: column; gap: 6px; }
+button {
+    width: 75px; height: 23px; padding: 0;
+    border: none; background: none; font: inherit; color: #000;
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch;
+}
+button:hover { border-image-source: url("img/button-hover.png"); }
+button:hover:active { border-image-source: url("img/button-active.png"); }
+button.default { border-image-source: url("img/button-default.png"); }
+button:disabled { border-image-source: url("img/button-disabled.png"); color: #aca899; }
+#more[hidden] { display: none; }
+#more { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+#tree {
+    height: 150px; overflow: auto;
+    border: 1px solid #7f9db9; background: #fff;
+    padding: 1px 0;
+    outline: none;
+}
+.row { display: flex; align-items: center; height: 18px; padding-left: calc(3px + var(--depth, 0) * 19px); white-space: nowrap; }
+.row img { width: 16px; height: 16px; margin-right: 4px; }
+.row span { padding: 1px 2px; }
+.row.sel span { background: #316ac5; color: #fff; }
+.row input { height: 16px; border: 1px solid #000; font: inherit; padding: 0 2px; }
+</style>
+</head>
+<body>
+<div id="top">
+    <img src="img/ebar-add-icon.png" alt="">
+    <div>
+        <p>O Internet Explorer irá adicionar esta página à sua lista de Favoritos.</p>
+        <label class="check"><i></i>Tornar disponível offline</label>
+    </div>
+</div>
+<div id="buttons">
+    <button class="default" id="ok">OK</button>
+    <button id="cancel">Cancelar</button>
+    <button id="createin">Criar em &gt;&gt;</button>
+    <button id="newfolder" hidden>Nova pasta...</button>
+</div>
+<div id="name-row"><label for="name">Nome:</label><input id="name" type="text"></div>
+<div id="more" hidden>
+    <label>Criar em:</label>
+    <div id="tree" tabindex="0"></div>
+</div>
+<script src="addfavorite.js"></script>
+</body>
+</html>

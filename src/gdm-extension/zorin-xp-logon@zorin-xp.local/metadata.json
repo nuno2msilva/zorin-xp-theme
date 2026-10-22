@@ -1,0 +1,8 @@
+{
+  "uuid": "zorin-xp-logon@zorin-xp.local",
+  "name": "Zorin XP — Ecrã de boas-vindas",
+  "description": "O ecrã de início de sessão (GDM) e o ecrã bloqueado passam a ser o ecrã de boas-vindas do Windows XP (logonui.exe). Substitui os diálogos do GNOME; a autenticação é a do GNOME/GDM.",
+  "shell-version": ["46"],
+  "session-modes": ["user", "unlock-dialog", "gdm"],
+  "version": 2
+}

@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Zorin XP: pasta de cada sítio",
+  "description": "A janela Guardar como abre na última pasta usada nesse sítio; num sítio novo, nas Transferências (sem a última pasta global do Zen).",
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zorin-xp-ie-lastdir@zorin-xp.local"
+    }
+  },
+  "experiment_apis": {
+    "zxpLastDir": {
+      "schema": "schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "api.js",
+        "events": ["startup"],
+        "paths": [["zxpLastDir"]]
+      }
+    }
+  }
+}

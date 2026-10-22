@@ -1,0 +1,300 @@
+/*
+ * Texto desenhado como o GDI do XP: cada letra avança a largura inteira que o
+ * hinting TrueType lhe dá (tabela gdi-metrics.json, gerada por
+ * tools/lib/gdimetrics.py a partir das letras do XP), sem kerning; a altura da
+ * linha é a das métricas Windows da letra. O Pango do GNOME usa as larguras
+ * sem hinting — o mesmo texto fica com outros espaços entre as letras.
+ *
+ * XpLabel faz de St.Label: a letra, o tamanho, o peso, o estilo, a cor, o
+ * alinhamento (text-align) e o sublinhado (text-decoration) vêm do CSS; cada
+ * letra é desenhada com o Pango no seu lugar. Quebra de linha por palavras e
+ * reticências "..." como o DrawText. Partilhado pelas duas extensões.
+ */
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Pango from 'gi://Pango';
+import PangoCairo from 'gi://PangoCairo';
+import St from 'gi://St';
+
+const DIR = GLib.path_get_dirname(GLib.filename_from_uri(import.meta.url)[0]);
+const ELLIPSIS = '...';
+
+let _table = null;
+function table() {
+    if (!_table) {
+        try {
+            _table = JSON.parse(new TextDecoder().decode(
+                GLib.file_get_contents(`${DIR}/gdi-metrics.json`)[1]));
+        } catch (e) {
+            logError(e, 'Zorin XP: larguras das letras');
+            _table = {};
+        }
+    }
+    return _table;
+}
+
+// ficheiro de letra do XP correspondente à descrição do CSS
+function fontFile(family, bold, italic) {
+    const f = family.toLowerCase();
+    if (f.startsWith('tahoma'))
+        return bold ? 'tahomabd' : 'tahoma';
+    if (f.startsWith('arial'))
+        return bold && italic ? 'arialbi' : bold ? 'arialbd' : italic ? null : 'arial';
+    if (f.startsWith('franklin'))
+        return italic ? 'framdit' : 'framd';
+    if (f.startsWith('trebuchet'))
+        return bold ? 'trebucbd' : 'trebuc';
+    return null;
+}
+
+// medidas de uma letra/tamanho: as do XP, ou medidas pelo Pango (arredondadas)
+class Font {
+    constructor(desc) {
+        this.family = (desc.get_family() || 'Sans').split(',')[0].trim();
+        let px = desc.get_size() / Pango.SCALE;
+        if (!desc.get_size_is_absolute())
+            px = px * 96 / 72;
+        this.px = Math.round(px);
+        this.desc = desc.copy();
+        this.desc.set_family(this.family);
+        this.desc.set_absolute_size(this.px * Pango.SCALE);
+        const bold = desc.get_weight() >= Pango.Weight.SEMIBOLD;
+        const italic = desc.get_style() !== Pango.Style.NORMAL;
+        const file = fontFile(this.family, bold, italic);
+        this.m = file ? table()[`${file}|${this.px}`] : null;
+        this.italic = italic;
+        this._cache = new Map();
+        if (!this.m) {
+            const ctx = this._layout().get_context();
+            const fm = ctx.get_metrics(this.desc, null);
+            this.m = {
+                a: Math.round(fm.get_ascent() / Pango.SCALE),
+                d: Math.round(fm.get_descent() / Pango.SCALE),
+                ul: Math.max(1, Math.round(-fm.get_underline_position() / Pango.SCALE)),
+                ut: Math.max(1, Math.round(fm.get_underline_thickness() / Pango.SCALE)),
+                adv: {},
+            };
+        }
+        this.height = this.m.a + this.m.d;
+    }
+
+    _layout() {
+        const fm = PangoCairo.FontMap.get_default();
+        const ctx = fm.create_context();
+        const l = Pango.Layout.new(ctx);
+        l.set_font_description(this.desc);
+        return l;
+    }
+
+    advance(ch) {
+        const known = this.m.adv[ch.codePointAt(0)];
+        if (known !== undefined)
+            return known;
+        let w = this._cache.get(ch);
+        if (w === undefined) {
+            const l = this._layout();
+            l.set_text(ch, -1);
+            w = l.get_pixel_extents()[1].width;
+            this._cache.set(ch, w);
+        }
+        return w;
+    }
+
+    width(s) {
+        let w = 0;
+        for (const ch of s)
+            w += this.advance(ch);
+        return w;
+    }
+
+    // DT_WORDBREAK: quebra nos espaços; uma palavra maior que a linha é cortada
+    wrap(text, maxW) {
+        const out = [];
+        for (const para of text.split('\n')) {
+            let line = '';
+            for (const tok of para.split(/( +)/)) {
+                if (!tok)
+                    continue;
+                const cand = line + tok;
+                if (line && this.width(cand.trimEnd()) > maxW) {
+                    out.push(line.trimEnd());
+                    line = tok.trimStart();
+                } else {
+                    line = cand;
+                }
+                while (this.width(line) > maxW && line.length > 1) {
+                    let cut = line.length - 1;
+                    while (cut > 1 && this.width(line.slice(0, cut)) > maxW)
+                        cut--;
+                    out.push(line.slice(0, cut));
+                    line = line.slice(cut);
+                }
+            }
+            out.push(line.trimEnd());
+        }
+        return out;
+    }
+
+    // DT_END_ELLIPSIS
+    ellipsize(s, maxW) {
+        if (this.width(s) <= maxW)
+            return s;
+        const ew = this.width(ELLIPSIS);
+        let t = s;
+        while (t && this.width(t) + ew > maxW)
+            t = [...t].slice(0, -1).join('');
+        return t + ELLIPSIS;
+    }
+}
+
+export const XpLabel = GObject.registerClass({
+    Properties: {
+        'text': GObject.ParamSpec.string('text', null, null, GObject.ParamFlags.READWRITE, ''),
+    },
+}, class XpLabel extends St.DrawingArea {
+    // wrap: quebra de linha; ellipsize: "..." no fim se não couber;
+    // yAlign: 'start' ou 'center' dentro da altura dada
+    _init({text = '', wrap = false, ellipsize = true, yAlign = 'start', ...props} = {}) {
+        super._init(props);
+        this._text = text ?? '';
+        this._wrap = wrap;
+        this._ellipsize = ellipsize;
+        this._yAlign = yAlign;
+        this._font = null;
+        this.connect('style-changed', () => {
+            this._font = null;
+            this.queue_relayout();
+            this.queue_repaint();
+        });
+        this.connect('repaint', () => {
+            try {
+                this._repaint();
+            } catch (e) {
+                logError(e, 'Zorin XP: texto');
+            }
+        });
+    }
+
+    get text() {
+        return this._text;
+    }
+
+    set text(v) {
+        v ??= '';
+        if (v === this._text)
+            return;
+        this._text = v;
+        this.queue_relayout();
+        this.queue_repaint();
+        this.notify('text');
+    }
+
+    get lineWrap() {
+        return this._wrap;
+    }
+
+    set lineWrap(v) {
+        this._wrap = v;
+        this.queue_relayout();
+    }
+
+    _getFont() {
+        if (!this._font) {
+            const node = this.peek_theme_node();
+            if (!node)
+                return null;
+            this._font = new Font(node.get_font());
+        }
+        return this._font;
+    }
+
+    // largura do texto numa linha só (sem a margem do itálico)
+    get textWidth() {
+        const f = this._getFont();
+        if (!f)
+            return 0;
+        return Math.max(0, ...this._text.split('\n').map(l => f.width(l)));
+    }
+
+    // o itálico passa para lá da última largura (o GDI desenha-o na mesma)
+    _overhang(f) {
+        return f.italic ? Math.ceil(f.px / 4) : 0;
+    }
+
+    vfunc_get_preferred_width(forHeight) {
+        const node = this.get_theme_node();
+        const f = this._getFont();
+        if (!f)
+            return [0, 0];
+        const nat = this.textWidth + this._overhang(f);
+        let min = nat;
+        if (this._wrap)
+            min = Math.max(0, ...this._text.split(/\s+/).map(w => f.width(w)));
+        else if (this._ellipsize)
+            min = 0;
+        return node.adjust_preferred_width(min, nat);
+    }
+
+    vfunc_get_preferred_height(forWidth) {
+        const node = this.get_theme_node();
+        const f = this._getFont();
+        if (!f)
+            return [0, 0];
+        const w = forWidth < 0 ? -1 : node.adjust_for_width(forWidth);
+        const n = this._wrap && w >= 0 ? f.wrap(this._text, w).length : this._text.split('\n').length;
+        const h = n * f.height;
+        return node.adjust_preferred_height(h, h);
+    }
+
+    _repaint() {
+        const f = this._getFont();
+        if (!f || !this._text)
+            return;
+        const node = this.get_theme_node();
+        const cr = this.get_context();
+        const [W, H] = this.get_surface_size();
+        const box = node.get_content_box(new Clutter.ActorBox({x1: 0, y1: 0, x2: W, y2: H}));
+        const cw = box.x2 - box.x1 - this._overhang(f);
+        let lines = this._wrap ? f.wrap(this._text, cw) : this._text.split('\n');
+        if (!this._wrap && this._ellipsize)
+            lines = lines.map(l => f.ellipsize(l, cw));
+        const c = node.get_foreground_color();
+        cr.setSourceRGBA(c.red / 255, c.green / 255, c.blue / 255, c.alpha / 255);
+        const align = node.get_text_align();
+        const underline = node.get_text_decoration() & St.TextDecoration.UNDERLINE;
+        let y = box.y1;
+        if (this._yAlign === 'center')
+            y += Math.floor((box.y2 - box.y1 - lines.length * f.height) / 2);
+        const layout = PangoCairo.create_layout(cr);
+        layout.set_font_description(f.desc);
+        for (const line of lines) {
+            const lw = f.width(line);
+            let x = box.x1;
+            if (align === St.TextAlign.RIGHT)
+                x = box.x1 + cw - lw;
+            else if (align === St.TextAlign.CENTER)
+                x = box.x1 + Math.floor((cw - lw) / 2);
+            const x0 = x;
+            for (const ch of line) {
+                if (ch !== ' ') {
+                    layout.set_text(ch, -1);
+                    cr.moveTo(x, y + f.m.a - layout.get_baseline() / Pango.SCALE);
+                    PangoCairo.show_layout(cr, layout);
+                }
+                x += f.advance(ch);
+            }
+            if (underline) {
+                cr.rectangle(x0, y + f.m.a + f.m.ul, lw, f.m.ut);
+                cr.fill();
+            }
+            y += f.height;
+        }
+        cr.$dispose();
+    }
+});
+
+// como St.Label, para os ecrãs do XP
+export function label(styleClass, text = '', {wrap = false, ...props} = {}) {
+    return new XpLabel({style_class: styleClass, text, wrap, ...props});
+}

@@ -1,0 +1,2678 @@
+#!/usr/bin/env python3
+"""Zorin XP — a janela "Abrir" / "Guardar como" do Windows XP.
+
+Serviço de portal (org.freedesktop.impl.portal.FileChooser) que o
+xdg-desktop-portal usa em vez da janela do GNOME: serve as aplicações
+flatpak, os browsers e, com GTK_USE_PORTAL=1 / GDK_DEBUG=portals, todas as
+aplicações GTK. A janela segue o modelo 1552 do comdlg32.dll (posições,
+textos), com a barra de locais, a barra de ferramentas e as cinco vistas do
+XP (Miniaturas, Mosaicos, Ícones, Lista, Detalhes), o menu do botão direito,
+os nomes editados no sítio, as caixas de mensagem do XP e a pega de
+redimensionar no canto. O tamanho e a vista ficam guardados de uma vez para
+a outra (~/.local/share/zorin-xp/filechooser.json).
+
+Se algo correr mal ao abrir a janela, o pedido passa para a janela do GNOME
+(org.freedesktop.impl.portal.desktop.gnome): nenhuma aplicação fica sem
+conseguir abrir ou guardar.
+
+Teste sem o portal:  zorin-xp-filechooser --test open|save|folder|multi [pasta [nome]]
+(ZXP_FC_SCRIPT=<ficheiro.py> corre um guião de teste com a janela em `dlg`)
+"""
+import fnmatch
+import json
+import locale
+import os
+import re
+import shutil
+import sys
+import time
+
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "3.0")
+gi.require_version("PangoCairo", "1.0")
+from gi.repository import Gdk, GdkPixbuf, Gio, GLib, GObject, Gtk, Pango, PangoCairo  # noqa: E402
+import cairo  # noqa: E402
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(HERE, "data")
+BUS_NAME = "org.freedesktop.impl.portal.desktop.zorinxp"
+OBJ_PATH = "/org/freedesktop/portal/desktop"
+FALLBACK = "org.freedesktop.impl.portal.desktop.gnome"
+IDLE_EXIT_S = 300
+STATE_FILE = os.path.join(GLib.get_user_data_dir(), "zorin-xp", "filechooser.json")
+SOUNDS = os.path.join(GLib.get_user_data_dir(), "sounds", "WindowsXP", "xp")
+
+IFACE = """<node><interface name="org.freedesktop.impl.portal.FileChooser">%s</interface></node>""" % "".join(
+    f"""<method name="{m}"><arg type="o" name="handle" direction="in"/><arg type="s" name="app_id" direction="in"/>
+<arg type="s" name="parent_window" direction="in"/><arg type="s" name="title" direction="in"/>
+<arg type="a{{sv}}" name="options" direction="in"/><arg type="u" name="response" direction="out"/>
+<arg type="a{{sv}}" name="results" direction="out"/></method>""" for m in ("OpenFile", "SaveFile", "SaveFiles"))
+REQUEST = """<node><interface name="org.freedesktop.impl.portal.Request"><method name="Close"/></interface></node>"""
+
+
+def load(name, default):
+    try:
+        with open(os.path.join(DATA, name), encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return default
+
+
+S = load("strings.json", {})
+TEST_REPLY = False
+TEST = False           # (modo de teste: a janela conta como ativa)
+LAYOUT = load("layout.json", {"size": [578, 387], "controls": {}})
+
+
+def t(key, default=""):
+    return S.get(key) or default
+
+
+def fmt(text, *args):
+    """Os %1, %2!ls! das cadeias do Windows."""
+    return re.sub(r"%(\d)(?:![^!]*!)?", lambda m: str(args[int(m.group(1)) - 1])
+                  if int(m.group(1)) <= len(args) else "", text)
+
+
+def mnemonic(text):
+    """'G&uardar em:' -> 'G_uardar em:' (GTK); '&&' -> '&'."""
+    return text.replace("_", "__").replace("&&", "\x00").replace("&", "_").replace("\x00", "&")
+
+
+def plain(text):
+    return text.replace("&&", "\x00").replace("&", "").replace("\x00", "&")
+
+
+def special(kind):
+    p = GLib.get_user_special_dir(kind)
+    return p if p and os.path.isdir(p) else None
+
+
+HOME = os.path.expanduser("~")
+DESKTOP = special(GLib.UserDirectory.DIRECTORY_DESKTOP) or HOME
+DOCUMENTS = special(GLib.UserDirectory.DIRECTORY_DOCUMENTS) or HOME
+DOWNLOADS = special(GLib.UserDirectory.DIRECTORY_DOWNLOAD) or os.path.join(HOME, "Downloads")
+PICTURES = special(GLib.UserDirectory.DIRECTORY_PICTURES) or os.path.join(HOME, "Imagens")
+NETWORK = os.path.join(GLib.get_user_runtime_dir(), "gvfs")
+# a barra de locais: sem "Recentes" (não se guarda lá) nem "Os meus locais na
+# rede"; com "As minhas imagens" e as Transferências
+PLACES = (DESKTOP, DOCUMENTS, HOME, PICTURES, DOWNLOADS)
+
+
+def place_name(path):
+    names = {DOWNLOADS: os.path.basename(DOWNLOADS), PICTURES: t("pictures", "As minhas imagens")}
+    names.update({DESKTOP: t("desktop", "Ambiente de trabalho"), DOCUMENTS: t("documents", "Os meus documentos"),
+                  HOME: t("computer", "O meu computador"), NETWORK: t("network", "Os meus locais na rede"),
+                  "/": t("localDisk", "Disco local")})
+    return names.get(path)
+
+
+def place_icon(path):
+    icons = {DOWNLOADS: "folder-download", PICTURES: "folder-pictures"}
+    icons.update({DESKTOP: "user-desktop", DOCUMENTS: "folder-documents", HOME: "user-home",
+                  NETWORK: "network-workgroup", "/": "drive-harddisk"})
+    return icons.get(path)
+
+
+def host_path(path):
+    """Os caminhos do portal de documentos (/run/user/N/doc/<id>/...), que é o
+    que as aplicações flatpak (o Zen) conhecem, -> o caminho verdadeiro. A
+    pasta <id> contém só o ficheiro exportado: corresponde à pasta dele."""
+    root = os.path.join(GLib.get_user_runtime_dir(), "doc") + os.sep
+    if not path or not path.startswith(root):
+        return path
+    parts = path[len(root):].split(os.sep)
+    if parts[0] == "by-app" and len(parts) >= 3:
+        parts = parts[2:]
+    doc_id, tail = parts[0], os.sep.join(parts[1:])
+    try:
+        bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        res = bus.call_sync("org.freedesktop.portal.Documents", "/org/freedesktop/portal/documents",
+                            "org.freedesktop.portal.Documents", "Info", GLib.Variant("(s)", (doc_id,)),
+                            GLib.VariantType("(aya{sas})"), Gio.DBusCallFlags.NONE, 2000, None)
+        host = bytes(res.unpack()[0]).rstrip(b"\0").decode("utf-8", "replace")
+    except (GLib.Error, TypeError, ValueError):
+        return path
+    if not host:
+        return path
+    return os.path.join(os.path.dirname(host), tail) if tail else os.path.dirname(host)
+
+
+ICONS = Gtk.IconTheme.get_default()
+_icon_cache = {}
+_blend_cache = {}
+
+
+def icon_pixbuf(names, size):
+    if isinstance(names, str):
+        names = [names]
+    key = (tuple(names), size)
+    if key not in _icon_cache:
+        info = ICONS.choose_icon(list(names) + ["text-x-generic"], size, Gtk.IconLookupFlags.FORCE_SIZE)
+        _icon_cache[key] = info.load_icon() if info else None
+    return _icon_cache[key]
+
+
+def file_icon(path, is_dir, ctype, size):
+    if is_dir:
+        pi = place_icon(path)
+        if pi:
+            return icon_pixbuf(pi, size)
+        for kind, name in ((GLib.UserDirectory.DIRECTORY_PICTURES, "folder-pictures"),
+                           (GLib.UserDirectory.DIRECTORY_MUSIC, "folder-music"),
+                           (GLib.UserDirectory.DIRECTORY_VIDEOS, "folder-videos"),
+                           (GLib.UserDirectory.DIRECTORY_DOWNLOAD, "folder-download")):
+            if special(kind) == path:
+                return icon_pixbuf(name, size)
+        return icon_pixbuf("folder", size)
+    icon = Gio.content_type_get_icon(ctype or "application/octet-stream")
+    names = icon.get_names() if isinstance(icon, Gio.ThemedIcon) else []
+    return icon_pixbuf(names + ["unknown"], size)
+
+
+# seleção como no XP (ImageList ILD_BLEND50, medida numa captura do XP): os
+# píxeis com alfa >= 128 ficam a meio caminho da cor de realce, no alfa
+# pré-multiplicado e arredondado para cima (pode passar do alfa: ao desenhar
+# satura, como no XP); os outros (sombras) ficam iguais
+HIGHLIGHT = (0x31, 0x6A, 0xC5)
+FACE = (0xEC, 0xE9, 0xD8)
+GREY = (0x80, 0x80, 0x80)
+SORTED_BG = (0xF7, 0xF7, 0xF7)        # a coluna pela qual se ordena (Detalhes)
+
+
+def rgb(c):
+    return c[0] / 255, c[1] / 255, c[2] / 255
+
+
+def blended(pb):
+    """A imagem do ícone selecionado (cairo, pré-multiplicada)."""
+    if pb is None:
+        return None
+    hit = _blend_cache.get(pb)
+    if hit is not None:
+        return hit[0]
+    if not pb.get_has_alpha():
+        pb = pb.add_alpha(False, 0, 0, 0)
+    w, h, rs = pb.get_width(), pb.get_height(), pb.get_rowstride()
+    src = pb.get_pixels()
+    stride = cairo.ImageSurface.format_stride_for_width(cairo.FORMAT_ARGB32, w)
+    out = bytearray(stride * h)
+    hr, hg, hb = HIGHLIGHT
+    for y in range(h):
+        for x in range(w):
+            i = y * rs + x * 4
+            r, g, b, a = src[i], src[i + 1], src[i + 2], src[i + 3]
+            r, g, b = (r * a + 127) // 255, (g * a + 127) // 255, (b * a + 127) // 255
+            if a >= 128:
+                r, g, b = (r + hr + 1) >> 1, (g + hg + 1) >> 1, (b + hb + 1) >> 1
+            o = y * stride + x * 4
+            out[o], out[o + 1], out[o + 2], out[o + 3] = b, g, r, a
+    s = cairo.ImageSurface.create_for_data(out, cairo.FORMAT_ARGB32, w, h, stride)
+    _blend_cache[pb] = (s, out)         # (os dados têm de viver com a imagem)
+    return s
+
+
+def human_size(n):
+    kb = max(1, (n + 1023) // 1024) if n else 0
+    return t("kb", "%s KB").replace("%s", f"{kb:,}".replace(",", "."))
+
+
+class Entry:
+    __slots__ = ("name", "path", "is_dir", "ctype", "size", "mtime", "cache")
+
+    def __init__(self, name, path, is_dir, ctype, size, mtime):
+        self.name, self.path, self.is_dir, self.ctype, self.size, self.mtime = name, path, is_dir, ctype, size, mtime
+        self.cache = {}
+
+    def icon(self, size):
+        key = ("icon", size)
+        if key not in self.cache:
+            self.cache[key] = file_icon(self.path, self.is_dir, self.ctype, size)
+        return self.cache[key]
+
+    def type_name(self):
+        if self.is_dir:
+            return t("folderType", "Pasta de ficheiros")
+        if "type" not in self.cache:
+            text = Gio.content_type_get_description(self.ctype) if self.ctype else ""
+            self.cache["type"] = text[:1].upper() + text[1:]
+        return self.cache["type"]
+
+
+def make_entry(path):
+    try:
+        st = os.stat(path)
+    except OSError:
+        return None
+    name = os.path.basename(path)
+    is_dir = os.path.isdir(path)
+    ctype = None if is_dir else Gio.content_type_guess(name, None)[0]
+    return Entry(name, path, is_dir, ctype, st.st_size, st.st_mtime)
+
+
+def list_dir(path, show_hidden=False):
+    try:
+        names = os.listdir(path)
+    except OSError:
+        return []
+    # ~/.hidden: os nomes que o Ficheiros também esconde (ex.: os atalhos com
+    # os nomes antigos das pastas pessoais)
+    try:
+        with open(os.path.join(path, ".hidden"), encoding="utf-8") as f:
+            hidden = set(f.read().splitlines())
+    except OSError:
+        hidden = set()
+    out = []
+    for name in names:
+        if (name.startswith(".") or name in hidden) and not show_hidden:
+            continue
+        e = make_entry(os.path.join(path, name))
+        if e:
+            out.append(e)
+    return out
+
+
+# "Dispor ícones por": pastas sempre primeiro, como no XP; a data com as mais
+# recentes primeiro
+SORT_KEYS = ("name", "size", "type", "mtime")
+SORT_DESC = {"name": False, "size": False, "type": False, "mtime": True}
+
+
+def sort_entries(entries, key, desc):
+    def k(e):
+        name = locale.strxfrm(e.name.lower())
+        if key == "size":
+            return (0 if e.is_dir else e.size, name)
+        if key == "type":
+            return (locale.strxfrm(e.type_name().lower()), name)
+        if key == "mtime":
+            return (e.mtime, name)
+        return (name,)
+    dirs = sorted((e for e in entries if e.is_dir), key=k, reverse=desc)
+    files = sorted((e for e in entries if not e.is_dir), key=k, reverse=desc)
+    return dirs + files
+
+
+def matches(entry, flt):
+    """flt: (nome, [(0, glob) | (1, mime)]) — as pastas aparecem sempre."""
+    if entry.is_dir or not flt:
+        return True
+    for kind, pat in flt[1]:
+        if kind == 0 and fnmatch.fnmatch(entry.name.lower(), pat.lower()):
+            return True
+        if kind == 1 and entry.ctype and Gio.content_type_is_a(entry.ctype, Gio.content_type_from_mime_type(pat) or pat):
+            return True
+    return False
+
+
+def xp_wrap(text, width, measure, lines=2):
+    """text em até `lines` linhas de `width` px, como o DrawText do XP com
+    DT_WORDBREAK | DT_END_ELLIPSIS: parte nos espaços; uma palavra mais larga
+    que a linha é cortada com "..." e acaba ali; a última linha leva o resto
+    do texto, cortado no fim. lines=None: o texto inteiro (o nome do item com
+    foco no XP), com as palavras compridas partidas onde a linha acaba."""
+    if measure(text) <= width:
+        return text
+
+    def fits(s):                        # o maior começo de s que cabe (>= 1)
+        lo, hi = 1, len(s)
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if measure(s[:mid]) <= width:
+                lo = mid
+            else:
+                hi = mid - 1
+        return lo
+
+    def cut(s):
+        if measure(s) <= width:
+            return s
+        lo, hi = 0, len(s)
+        while lo < hi:                  # o maior começo que cabe com "..."
+            mid = (lo + hi + 1) // 2
+            if measure(s[:mid].rstrip() + "...") <= width:
+                lo = mid
+            else:
+                hi = mid - 1
+        return s[:lo].rstrip() + "..."
+    out = []
+    rest = text
+    while rest and (lines is None or len(out) < lines):
+        if lines is not None and len(out) == lines - 1:
+            out.append(cut(rest))
+            break
+        words = rest.split(" ")
+        line = words[0]
+        if measure(line) > width:
+            if lines is None:
+                n = fits(line)
+                out.append(line[:n])
+                rest = rest[n:]
+                continue
+            out.append(cut(line))
+            break
+        i = 1
+        while i < len(words) and measure(line + " " + words[i]) <= width:
+            line += " " + words[i]
+            i += 1
+        out.append(line)
+        rest = " ".join(words[i:])
+    return "\n".join(out)
+
+
+def play_sound(file=None, event=None):
+    """Um som do esquema do XP, se os sons de eventos estiverem ligados."""
+    try:
+        if not Gio.Settings.new("org.gnome.desktop.sound").get_boolean("event-sounds"):
+            return
+    except Exception:
+        return
+    args = ["canberra-gtk-play"] + (["-f", file] if file else ["-i", event])
+    if file and not os.path.exists(file):
+        return
+    try:
+        GLib.spawn_async(args, flags=GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.STDOUT_TO_DEV_NULL |
+                         GLib.SpawnFlags.STDERR_TO_DEV_NULL)
+    except GLib.Error:
+        pass
+
+
+# ---------------------------------------------------------------- texto do XP
+LINE = 13          # Tahoma 8 no XP: linhas de 13 px...
+ASCENT = 11        # ... com a linha de base a 11 px do topo
+
+
+def draw_text(cr, widget, text, x, top, color):
+    lay = widget.create_pango_layout(text)
+    cr.set_source_rgb(*rgb(color))
+    cr.move_to(x, top + ASCENT - lay.get_baseline() // Pango.SCALE)
+    PangoCairo.show_layout(cr, lay)
+
+
+def line_attrs():
+    attrs = Pango.AttrList()
+    attrs.insert(Pango.attr_line_height_new_absolute(LINE * Pango.SCALE))
+    return attrs
+
+
+# ---------------------------------------------------------------- vistas
+VIEWS = ("thumbnails", "tiles", "icons", "list", "details")
+DEFAULT_VIEW = "list"
+# as grelhas do Explorador do XP (a mesma vista da janela de ficheiros),
+# medidas em capturas: os itens a partir de (2, 2); Miniaturas 125 x 139 com
+# a moldura de 96 em (14, 6) e o nome 99 px abaixo dela; Mosaicos 218 x 56,
+# o ícone de 48 em (1, 4), o texto a 53 px, 2 px acima do meio; Ícones
+# 75 x 75, o ícone de 32 em (21, 4), o nome a 40 px (7 px abaixo do ícone até
+# ao topo das letras)
+GRID = {"thumbnails": (125, 139), "tiles": (218, 56), "icons": (75, 75)}
+GRID_MARGIN = 2
+NAME_W = {"thumbnails": 121, "icons": 71}
+NAME_TOP = {"thumbnails": 105, "icons": 40}
+THUMB_FRAME = (14, 6)
+ICON_AT = {"icons": (21, 4), "tiles": (1, 4)}
+TILE_TEXT_X, TILE_TEXT_W = 53, 159
+DETAIL_TEXT_X = 24                    # o nome nos Detalhes (ícone de 16 a 4 px)
+COLUMN_WIDTHS = {"name": 179, "size": 97, "type": 119, "mtime": 121}
+PLACE_H, PLACE_TEXT_W = 71, 83          # botões da barra de locais
+
+
+class ItemCell(Gtk.CellRenderer):
+    """Um item das Miniaturas, Mosaicos ou Ícones, desenhado como no XP."""
+    entry = GObject.Property(type=object)
+
+    def __init__(self, dlg):
+        super().__init__()
+        self.dlg = dlg
+
+    def do_get_request_mode(self):
+        return Gtk.SizeRequestMode.CONSTANT_SIZE
+
+    def do_get_preferred_width(self, widget):
+        w = GRID.get(self.dlg.view_mode, (75, 75))[0]
+        return w, w
+
+    def do_get_preferred_height(self, widget):
+        h = GRID.get(self.dlg.view_mode, (75, 75))[1]
+        return h, h
+
+    def do_get_preferred_height_for_width(self, widget, width):
+        return self.do_get_preferred_height(widget)
+
+    def do_get_preferred_width_for_height(self, widget, height):
+        return self.do_get_preferred_width(widget)
+
+    def do_render(self, cr, widget, background_area, cell_area, flags):
+        self.dlg.draw_item(cr, widget, cell_area, self.props.entry,
+                           bool(flags & Gtk.CellRendererState.SELECTED))
+
+
+class NameCell(Gtk.CellRenderer):
+    """O nome nos Detalhes: ícone e nome, com o realce só no nome (XP)."""
+    entry = GObject.Property(type=object)
+
+    def __init__(self, dlg):
+        super().__init__()
+        self.dlg = dlg
+
+    def do_get_preferred_width(self, widget):
+        return 40, COLUMN_WIDTHS["name"]
+
+    def do_get_preferred_height(self, widget):
+        return 16, 16
+
+    def do_get_preferred_height_for_width(self, widget, width):
+        return 16, 16
+
+    def do_render(self, cr, widget, background_area, cell_area, flags):
+        self.dlg.draw_name_cell(cr, widget, background_area, self.props.entry,
+                                bool(flags & Gtk.CellRendererState.SELECTED))
+
+
+class TreeNameCell(Gtk.CellRendererText):
+    """O nome na árvore da "Procurar pasta": o realce só no texto (o GTK não
+    pinta o fundo das células selecionadas), azul com o foco, bege sem."""
+
+    def __init__(self, dlg):
+        super().__init__(xpad=2, ypad=1)
+        self.dlg = dlg
+
+    def do_render(self, cr, widget, background_area, cell_area, flags):
+        hidden = self.dlg.editing_text_hidden(self.props.text)
+        selected = bool(flags & Gtk.CellRendererState.SELECTED)
+        focus = self.dlg.get_focus() is widget and (self.dlg.is_active() or TEST)
+        if selected and not hidden:
+            cr.set_source_rgb(*rgb(HIGHLIGHT if focus else FACE))
+            w = self.dlg._measure(widget, self.props.text or "") + 2 * self.props.xpad
+            cr.rectangle(cell_area.x, background_area.y + 1, min(w, cell_area.width), background_area.height - 2)
+            cr.fill()
+        self.set_property("foreground-rgba", Gdk.RGBA(1, 1, 1, 1) if selected and focus else Gdk.RGBA(0, 0, 0, 1))
+        if not hidden:
+            Gtk.CellRendererText.do_render(self, cr, widget, background_area, cell_area,
+                                           Gtk.CellRendererState(int(flags) & ~int(Gtk.CellRendererState.SELECTED)))
+
+
+class AnchorFixed(Gtk.Fixed):
+    """Posições do modelo de diálogo, com a ancoragem do XP ao redimensionar:
+    a lista estica, a linha de baixo acompanha o fundo, os botões a direita.
+    O tamanho é o do modelo mais o que a pega do canto acrescentou (grow);
+    a caixa do nome a editar fica por cima de tudo (editor)."""
+
+    def __init__(self, base_w, base_h):
+        super().__init__()
+        self.base = (base_w, base_h)
+        self.grow = [0, 0]
+        self.items = []          # (widget, (x, y, w, h), anchors "lrtb", stretch "wh")
+        self.editor = None       # (widget, [x, y, w, h])
+
+    def place(self, widget, rect, anchor="lt", stretch=""):
+        self.put(widget, rect[0], rect[1])
+        self.items.append((widget, rect, anchor, stretch))
+
+    # (no XP o tamanho do modelo é também o mínimo)
+    def do_get_preferred_width(self):
+        w = self.base[0] + self.grow[0]
+        return w, w
+
+    def do_get_preferred_height(self):
+        h = self.base[1] + self.grow[1]
+        return h, h
+
+    def do_size_allocate(self, alloc):
+        self.set_allocation(alloc)
+        dw = alloc.width - self.base[0]
+        dh = alloc.height - self.base[1]
+        for w, (x, y, cw, ch), anchor, stretch in self.items:
+            if not w.get_visible():
+                continue
+            nx = x + (dw if "r" in anchor and "l" not in anchor else 0)
+            ny = y + (dh if "b" in anchor and "t" not in anchor else 0)
+            nw = cw + (dw if "w" in stretch else 0)
+            nh = ch + (dh if "h" in stretch else 0)
+            _min, nat = w.get_preferred_height_for_width(max(1, nw)) if ch <= 0 else (0, nh)
+            r = Gdk.Rectangle()
+            r.x, r.y, r.width, r.height = alloc.x + nx, alloc.y + ny, max(1, nw), max(1, nat if ch <= 0 else nh)
+            w.size_allocate(r)
+        if self.editor:
+            w, (x, y, cw, ch) = self.editor
+            w.get_preferred_width()     # (o GTK quer o pedido antes da alocação)
+            r = Gdk.Rectangle()
+            r.x, r.y, r.width, r.height = alloc.x + x, alloc.y + y, max(1, cw), max(1, ch)
+            w.size_allocate(r)
+
+
+CSS = """
+/* barra de locais (medida numa captura do XP): moldura de 2 px — fora
+   #E6E4D3 em cima/à esquerda e #CAC7B9 em baixo/à direita, dentro branca —,
+   botões de 71 px, o ícone 5 px abaixo do topo, o texto logo por baixo */
+.zxp-places, .zxp-places viewport { background-color: rgb(249, 248, 243); }
+.zxp-places { border-style: solid; border-width: 1px; border-radius: 0;
+  border-color: rgb(230, 228, 211) rgb(202, 199, 185) rgb(202, 199, 185) rgb(230, 228, 211);
+  box-shadow: inset 0 0 0 1px white; padding: 1px; }
+.zxp-places viewport { border: none; box-shadow: none; }
+.zxp-places button { border: 1px solid transparent; border-radius: 0; background: none; padding: 4px 0 0 0; box-shadow: none; min-height: 0; }
+.zxp-places button:hover { border-color: rgb(127, 157, 185); background-color: rgb(255, 255, 255); }
+.zxp-places button:active, .zxp-places button.zxp-current { border-color: rgb(127, 157, 185); background-color: rgb(225, 229, 238); }
+.zxp-places label { color: black; }
+/* barra de ferramentas: botões planos de 23 x 22, ícone a (3, 3) */
+.zxp-tool { border: 1px solid transparent; border-radius: 3px; background: none; padding: 2px 3px 2px 2px; box-shadow: none; min-height: 0; min-width: 0; }
+.zxp-tool:hover { border-color: rgb(206, 206, 195); background-color: rgb(255, 255, 255); }
+.zxp-view, .zxp-view viewport { background-color: white; }
+/* Lista: o realce só no nome (o ícone fica misturado com o azul), cinzento
+   sem o foco na lista, como no XP */
+.zxp-view flowboxchild, .zxp-view flowboxchild:selected { padding: 0 6px 0 1px; border-radius: 0; min-height: 17px; background: none; color: black; outline-style: none; }
+.zxp-view flowboxchild label { padding: 0 1px; color: black; }
+.zxp-view flowboxchild label.zxp-sel { background-color: rgb(49, 106, 197); color: white; }
+.zxp-view flowboxchild label.zxp-sel-dim { background-color: rgb(236, 233, 216); color: black; }
+/* Miniaturas, Mosaicos e Ícones: tudo desenhado pela vista (ItemCell) */
+iconview.zxp-items { background-color: white; color: black; outline-style: none; }
+iconview.zxp-items.cell, iconview.zxp-items.cell:selected, iconview.zxp-items:selected {
+  background-color: white; background-image: none; border-color: transparent; outline-style: none; }
+/* Detalhes: linhas de 17 px; o realce é desenhado no nome (NameCell) */
+treeview.zxp-details { -GtkTreeView-vertical-separator: 1; -GtkTreeView-horizontal-separator: 0; outline-style: none; }
+treeview.zxp-details:selected, treeview.zxp-details:selected:focus, treeview.zxp-details:selected:backdrop {
+  background-color: white; color: black; }
+/* "Procurar pasta": linhas de 18 px, o realce é desenhado só no nome */
+treeview.zxp-browse { -GtkTreeView-vertical-separator: 0; outline-style: none; }
+treeview.zxp-browse:selected, treeview.zxp-browse:selected:focus, treeview.zxp-browse:selected:backdrop {
+  background-color: white; color: black; }
+/* a caixa do nome a editar, como no XP: moldura preta de 1 px, fundo branco */
+entry.zxp-rename { min-height: 0; padding: 0 5px; border: 1px solid #000; border-radius: 0; border-image: none;
+  box-shadow: none; outline: none; background-color: #FFF; background-image: none; color: #000; }
+entry.zxp-rename.zxp-rename-left { padding: 0 15px 0 4px; }
+entry.zxp-rename.zxp-rename-list { padding: 0 15px 0 2px; }
+entry.zxp-rename selection, textview.zxp-rename text selection { background-color: rgb(49, 106, 197); color: #FFF; }
+frame.zxp-rename > border { border: 1px solid #000; border-radius: 0; border-image: none; box-shadow: none; }
+frame.zxp-rename, textview.zxp-rename, textview.zxp-rename text { background-color: #FFF; color: #000; }
+/* caixas de mensagem do XP */
+.zxp-msgbox-text { color: black; }
+.zxp-msgbox button { min-height: 0; min-width: 0; padding: 0; }
+"""
+
+
+class XpFileDialog(Gtk.Window):
+    def __init__(self, kind, title, options, on_done, parent_window=""):
+        save = kind in ("save", "savefiles")
+        # o título do XP, nunca o da aplicação ("Guardar imagem do Zen...")
+        super().__init__(title=t("saveTitle", "Guardar como") if save else t("openTitle", "Abrir"))
+        self.kind = kind                      # open | save | savefiles
+        self.options = options
+        self.on_done = on_done
+        self.directory = bool(options.get("directory")) or kind == "savefiles"
+        self.multiple = bool(options.get("multiple")) and kind == "open"
+        self.filters = list(options.get("filters") or [])
+        self.history = []
+        self.state = self._load_state()
+        self.view_mode = self.state.get("view") if self.state.get("view") in VIEWS else DEFAULT_VIEW
+        sort = self.state.get("sort") or []
+        self.sort = (sort[0], bool(sort[1])) if len(sort) == 2 and sort[0] in SORT_KEYS else ("name", False)
+        self.cwd = None
+        self.entries = []
+        self._finished = False
+        self._edit = None
+        self._wcache = {}
+        self._thumb_queue = []
+        self._thumb_idle = 0
+        self.set_modal(bool(options.get("modal", True)))
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_skip_taskbar_hint(False)
+        # (só pela pega do canto inferior direito, como no XP)
+        self.set_resizable(False)
+        self.connect("delete-event", lambda *_: self.finish(1) or True)
+        self.connect("key-press-event", self._on_key)
+        self.connect("set-focus", lambda *_: GLib.idle_add(self._focus_changed))
+        self.connect("notify::is-active", lambda *_: self._focus_changed())
+        self._parent_window = parent_window
+        self.connect("realize", self._set_transient)
+
+        prov = Gtk.CssProvider()
+        prov.load_from_data(CSS.encode())
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), prov,
+                                                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        bw, bh = LAYOUT["size"]
+        c = {int(k): v for k, v in LAYOUT["controls"].items()}
+        self.box = AnchorFixed(bw, bh)
+        self.add(self.box)
+
+        # "Guardar em:" / "Procurar em:" e a lista de locais
+        look_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("saveIn") if save else t("lookIn", "Procurar &em:")))
+        look_lbl.set_xalign(1)          # (no XP encosta à caixa)
+        self.look = Gtk.ComboBox()
+        self.look_store = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str, int)
+        self.look.set_model(self.look_store)
+        self._popup = False
+        rp = Gtk.CellRendererPixbuf()
+        rt = Gtk.CellRendererText()
+        rt.set_property("ellipsize", Pango.EllipsizeMode.END)
+        self.look.pack_start(rp, False)
+        self.look.pack_start(rt, True)
+        self.look.add_attribute(rp, "pixbuf", 0)
+        self.look.add_attribute(rt, "text", 1)
+        self.look.set_cell_data_func(rp, self._indent)
+        self.look.connect("notify::popup-shown", self._on_popup)
+        self.look_changed = self.look.connect("changed", self._on_look)
+        look_lbl.set_mnemonic_widget(self.look)
+        r = c.get(1091, [6, 11, 85, 13])
+        self.box.place(look_lbl, [r[0], r[1] - 1, r[2], r[3] + 2])
+        r = c.get(1137, [99, 7, 261, 22])
+        self.box.place(self.look, [r[0], r[1] - 1, r[2], 22])
+
+        # barra de ferramentas
+        tb = Gtk.Box(spacing=0)
+        self.btn_back = self._tool("back", t("back"), self.go_back)
+        self.btn_up = self._tool("up", t("upOneLevel"), self.go_up)
+        self.btn_new = self._tool("newfolder", t("newFolderTip"), self.new_folder)
+        self.btn_views = self._tool("views", t("viewMenu"), self._views_menu, arrow=True)
+        for b in (self.btn_back, self.btn_up, self.btn_new, self.btn_views):
+            tb.pack_start(b, False, False, 0)
+        r = c.get(1088, [372, 7, 120, 23])
+        self.box.place(tb, [r[0], r[1], r[2], 22])
+
+        # barra de locais
+        places = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.place_buttons = {}
+        for path in PLACES:
+            places.pack_start(self._place_button(path), False, False, 0)
+        # (cortada pela moldura, como no XP, quando não cabe)
+        clip = Gtk.ScrolledWindow()
+        clip.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.EXTERNAL)
+        clip.add(places)
+        clip.get_style_context().add_class("zxp-places")
+        r = c.get(1184, [6, 36, 87, 338])
+        self.box.place(clip, r, "lt", "h")
+
+        # lista de ficheiros: Lista (FlowBox), Detalhes (TreeView) e as três
+        # grelhas (IconView com os itens desenhados à XP)
+        self.store = Gtk.ListStore(object)
+        self.stack = Gtk.Stack()
+        sel_mode = Gtk.SelectionMode.MULTIPLE if self.multiple else Gtk.SelectionMode.SINGLE
+
+        self.icons = Gtk.IconView(model=self.store)
+        self.icons.get_style_context().add_class("zxp-items")
+        self.item_cell = ItemCell(self)
+        self.icons.pack_start(self.item_cell, False)
+        self.icons.add_attribute(self.item_cell, "entry", 0)
+        for prop in ("spacing", "row-spacing", "column-spacing", "item-padding"):
+            self.icons.set_property(prop, 0)
+        self.icons.set_margin(GRID_MARGIN)
+        self.icons.set_selection_mode(sel_mode)
+        self.icons.connect("item-activated", lambda iv, p: self.activate_entry(self.store[p][0]))
+        self.icons.connect("selection-changed", lambda *_: self._on_select())
+        self.icons.connect("button-press-event", self._on_view_button)
+        sw_icons = Gtk.ScrolledWindow()
+        sw_icons.add(self.icons)
+        self.stack.add_named(sw_icons, "items")
+
+        self.flow = Gtk.FlowBox(orientation=Gtk.Orientation.VERTICAL, homogeneous=True,
+                                column_spacing=0, row_spacing=0, valign=Gtk.Align.FILL,
+                                halign=Gtk.Align.START, activate_on_single_click=False)
+        self.flow.set_selection_mode(sel_mode)
+        self.flow.set_max_children_per_line(10000)
+        self.flow.connect("child-activated", lambda _f, ch: self.activate_entry(ch.entry))
+        self.flow.connect("selected-children-changed", lambda *_: (self._sync_list_sel(), self._on_select()))
+        self.flow.connect("button-press-event", self._on_view_button)
+        self.sw_list = Gtk.ScrolledWindow()
+        self.sw_list.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
+        self.sw_list.add(self.flow)
+        self.sw_list.get_style_context().add_class("zxp-view")
+        self.flow.set_hadjustment(self.sw_list.get_hadjustment())
+        self.stack.add_named(self.sw_list, "list")
+
+        self.tree = Gtk.TreeView(model=self.store)
+        self.tree.get_style_context().add_class("zxp-details")
+        self.tree.set_rubber_banding(self.multiple)
+        self.tree.get_selection().set_mode(sel_mode)
+        self.tree.connect("row-activated", lambda tv, p, col: self.activate_entry(self.store[p][0]))
+        self.tree.get_selection().connect("changed", lambda *_: self._on_select())
+        self.tree.connect("button-press-event", self._on_view_button)
+        self.tree.connect_after("draw", self._tree_band)
+        self.columns = {}
+        self.name_col = Gtk.TreeViewColumn(t("colName", "Nome"))
+        nc = NameCell(self)
+        self.name_col.pack_start(nc, True)
+        self.name_col.add_attribute(nc, "entry", 0)
+        self.columns["name"] = self.name_col
+        for key, title in (("size", t("colSize", "Tamanho")), ("type", t("colType", "Tipo")),
+                           ("mtime", t("colModified", "Data da modificação"))):
+            cr = Gtk.CellRendererText(xpad=6, ypad=0)
+            cr.set_property("ellipsize", Pango.EllipsizeMode.END)
+            if key == "size":
+                cr.set_property("xalign", 1.0)
+            col = Gtk.TreeViewColumn(title, cr)
+            col.set_cell_data_func(cr, self._detail_text, key)
+            self.columns[key] = col
+        for key, col in self.columns.items():
+            col.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
+            col.set_fixed_width(COLUMN_WIDTHS[key])
+            col.set_resizable(True)
+            col.set_clickable(True)
+            col.connect("clicked", lambda _c, k=key: self.sort_by(k, toggle=True))
+            self.tree.append_column(col)
+        sw_tree = Gtk.ScrolledWindow()
+        sw_tree.add(self.tree)
+        self.stack.add_named(sw_tree, "details")
+        for view in (self.icons, self.flow, self.tree):
+            view.connect("focus-in-event", lambda *_: self._focus_changed())
+            view.connect("focus-out-event", lambda *_: self._focus_changed())
+
+        frame = Gtk.Frame()
+        frame.set_shadow_type(Gtk.ShadowType.IN)
+        frame.add(self.stack)
+        r = c.get(1120, [99, 36, 465, 254])
+        self.box.place(frame, r, "lt", "wh")
+
+        # nome do ficheiro / tipo / botões
+        name_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("fileName", "&Nome do ficheiro:")))
+        name_lbl.set_xalign(0)
+        self.name = Gtk.ComboBoxText.new_with_entry()
+        self.entry = self.name.get_child()
+        self.entry.set_activates_default(True)
+        name_lbl.set_mnemonic_widget(self.entry)
+        r = c.get(1090, [101, 304, 96, 13])
+        self.box.place(name_lbl, [r[0], r[1], r[2] + 10, r[3]], "lb")
+        r = c.get(1148, [206, 299, 264, 20])
+        self.box.place(self.name, [r[0], r[1] - 1, r[2], 22], "lb", "w")
+
+        type_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("saveAsType") if kind == "save"
+                                                        else t("filesOfType", "Ficheiros do &tipo:")))
+        type_lbl.set_xalign(0)
+        self.types = Gtk.ComboBoxText()
+        for flt in self.filters:
+            self.types.append_text(flt[0])
+        cur = options.get("current_filter")
+        idx = next((i for i, f in enumerate(self.filters) if cur and f[0] == cur[0]), 0)
+        if self.filters:
+            self.types.set_active(idx)
+        if not self.filters or self.directory:
+            self.types.set_sensitive(False)
+        self.types.connect("changed", lambda *_: self.refresh())
+        type_lbl.set_mnemonic_widget(self.types)
+        r = c.get(1089, [101, 330, 99, 13])
+        self.box.place(type_lbl, [r[0], r[1], r[2] + 10, r[3]], "lb")
+        r = c.get(1136, [206, 327, 264, 22])
+        self.box.place(self.types, [r[0], r[1] - 1, r[2], 22], "lb", "w")
+
+        accept = options.get("accept_label") or (t("saveButton", "&Guardar") if kind == "save"
+                                                 else t("openButton", "A&brir"))
+        self.btn_ok = Gtk.Button.new_with_mnemonic(mnemonic(accept))
+        self.btn_ok.set_can_default(True)
+        self.btn_ok.connect("clicked", lambda *_: self.accept())
+        self.btn_cancel = Gtk.Button.new_with_mnemonic(mnemonic(t("cancel", "Cancelar")))
+        self.btn_cancel.connect("clicked", lambda *_: self.finish(1))
+        r = c.get(1, [489, 299, 75, 23])
+        self.box.place(self.btn_ok, r, "rb")
+        r = c.get(2, [489, 325, 75, 23])
+        self.box.place(self.btn_cancel, r, "rb")
+        self.set_default(self.btn_ok)
+
+        # opções extra da aplicação ("choices"), por baixo, como os modelos do XP
+        self.choices = {}
+        extra = 0
+        for ch_id, label, opts, default in options.get("choices") or []:
+            row = Gtk.Box(spacing=8)
+            if opts:
+                cb = Gtk.ComboBoxText()
+                for oid, olabel in opts:
+                    cb.append(oid, olabel)
+                cb.set_active_id(default or opts[0][0])
+                lab = Gtk.Label(label=label)
+                lab.set_xalign(0)
+                row.pack_start(lab, False, False, 0)
+                row.pack_start(cb, True, True, 0)
+                self.choices[ch_id] = ("combo", cb)
+            else:
+                cb = Gtk.CheckButton(label=label)
+                cb.set_active(default == "true")
+                row.pack_start(cb, False, False, 0)
+                self.choices[ch_id] = ("check", cb)
+            self.box.place(row, [c.get(1090, [101])[0], bh + extra - 4, 380, 24], "lb")
+            extra += 26
+        if extra:
+            self.box.base = (bw, bh + extra)
+
+        # a pega de redimensionar (SBS_SIZEGRIP: 17 x 17 no canto, a imagem
+        # do tema em baixo à esquerda dela)
+        self.grip = Gtk.EventBox()
+        self.grip.add(Gtk.Image.new_from_file(os.path.join(DATA, "sizegrip.png")))
+        self.grip.get_child().set_halign(Gtk.Align.START)
+        self.grip.get_child().set_valign(Gtk.Align.END)
+        self.grip.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK |
+                             Gdk.EventMask.BUTTON1_MOTION_MASK)
+        self.grip.connect("realize", lambda w: w.get_window().set_cursor(
+            Gdk.Cursor.new_from_name(w.get_display(), "se-resize")))
+        self.grip.connect("button-press-event", self._grip_press)
+        self.grip.connect("motion-notify-event", self._grip_motion)
+        self._grip = None
+        self.box.place(self.grip, [bw - 17, bh + extra - 17, 17, 17], "rb")
+
+        # o tamanho da última vez
+        size = self.state.get("size") or []
+        if len(size) == 2:
+            self.box.grow = [max(0, int(size[0]) - bw), max(0, int(size[1]) - (bh + extra))]
+            self._clamp_grow()
+
+        # a vista da última vez
+        self.set_view(self.view_mode, remember=False)
+
+        # pasta inicial e nome: a que a aplicação pede (o Zen lembra-se da
+        # pasta de cada sítio), senão as Transferências (Guardar) ou Os meus
+        # documentos (Abrir)
+        start = None
+        cf = options.get("current_file")
+        if cf:
+            p = host_path(bytes(cf).rstrip(b"\0").decode("utf-8", "replace"))
+            start = os.path.dirname(p)
+            self.entry.set_text(os.path.basename(p))
+        fo = options.get("current_folder")
+        if fo:
+            start = host_path(bytes(fo).rstrip(b"\0").decode("utf-8", "replace"))
+        if options.get("current_name"):
+            self.entry.set_text(options["current_name"])
+        for p in (start, DOWNLOADS if save else DOCUMENTS, DOCUMENTS, HOME):
+            if p and os.path.isdir(p):
+                self.navigate(p, remember=False)
+                break
+        self.show_all()
+        if kind == "save":
+            # o XP seleciona o nome todo
+            self.entry.grab_focus()
+            self.entry.select_region(0, -1)
+
+    # ------------------------------------------------------------ estado
+    @staticmethod
+    def _load_state():
+        try:
+            with open(STATE_FILE, encoding="utf-8") as f:
+                st = json.load(f)
+            return st if isinstance(st, dict) else {}
+        except (OSError, ValueError):
+            return {}
+
+    def _save_state(self):
+        self.state.update({"view": self.view_mode, "sort": list(self.sort),
+                           "size": [self.box.base[0] + self.box.grow[0], self.box.base[1] + self.box.grow[1]]})
+        try:
+            os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+            tmp = STATE_FILE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(self.state, f)
+            os.replace(tmp, STATE_FILE)
+        except OSError:
+            pass
+
+    # ------------------------------------------------------------ peças
+    def _set_transient(self, *_):
+        pw = self._parent_window or ""
+        if pw.startswith("x11:"):
+            try:
+                gi.require_version("GdkX11", "3.0")
+                from gi.repository import GdkX11
+                xid = int(pw[4:], 16)
+                foreign = GdkX11.X11Window.foreign_new_for_display(Gdk.Display.get_default(), xid)
+                if foreign:
+                    self.get_window().set_transient_for(foreign)
+            except Exception:
+                pass
+
+    def _tool(self, name, tip, callback, arrow=False):
+        btn = Gtk.Button()
+        btn.get_style_context().add_class("zxp-tool")
+        btn.set_relief(Gtk.ReliefStyle.NONE)
+        btn.set_focus_on_click(False)
+        box = Gtk.Box(spacing=2)
+        img = Gtk.Image.new_from_file(os.path.join(DATA, f"tb-{name}-normal.png"))
+        box.pack_start(img, False, False, 0)
+        if arrow:
+            # a seta do botão (BTNS_WHOLEDROPDOWN): triângulo preto de 5 x 3
+            surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, 5, 3)
+            cr = cairo.Context(surf)
+            cr.set_source_rgb(0, 0, 0)
+            for i in range(3):
+                cr.rectangle(i, i, 5 - 2 * i, 1)
+            cr.fill()
+            arr = Gtk.Image.new_from_surface(surf)
+            arr.set_valign(Gtk.Align.START)
+            arr.set_margin_top(7)
+            box.pack_start(arr, False, False, 0)
+        btn.add(box)
+        btn.set_tooltip_text(plain(tip) if tip else None)
+        btn.img, btn.icon = img, name
+
+        def state(*_):
+            st = "disabled" if not btn.get_sensitive() else ("hot" if btn.get_state_flags() & Gtk.StateFlags.PRELIGHT else "normal")
+            img.set_from_file(os.path.join(DATA, f"tb-{name}-{st}.png"))
+        btn.connect("state-flags-changed", state)
+        btn.connect("clicked", lambda b: callback(b) if arrow else callback())
+        return btn
+
+    def _place_button(self, path):
+        btn = Gtk.Button()
+        btn.set_relief(Gtk.ReliefStyle.NONE)
+        btn.set_focus_on_click(False)
+        v = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        img = Gtk.Image.new_from_pixbuf(icon_pixbuf(place_icon(path), 32))
+        # (até 2 linhas de 83 px, partidas como o DrawText do XP)
+        lab = Gtk.Label(label=xp_wrap(place_name(path), PLACE_TEXT_W, lambda s: self._measure(self, s), 2))
+        lab.set_justify(Gtk.Justification.CENTER)
+        lab.set_attributes(line_attrs())
+        v.pack_start(img, False, False, 0)
+        v.pack_start(lab, False, False, 0)
+        btn.add(v)
+        btn.set_size_request(-1, PLACE_H)
+        btn.set_sensitive(os.path.isdir(path))
+        btn.connect("clicked", lambda *_: self.navigate(path))
+        self.place_buttons[path] = btn
+        return btn
+
+    def _indent(self, layout, cell, model, it, data=None):
+        cell.set_property("xpad", model[it][3] * 10 + 2 if self._popup else 2)
+
+    def _on_popup(self, *_):
+        self._popup = self.look.get_property("popup-shown")
+        self.look.queue_draw()
+
+    # ------------------------------------------------------------ pega do canto
+    def _clamp_grow(self):
+        mon = None
+        try:
+            display = Gdk.Display.get_default()
+            win = self.get_window()
+            mon = display.get_monitor_at_window(win) if win else display.get_primary_monitor()
+        except Exception:
+            pass
+        area = mon.get_workarea() if mon is not None else None
+        if area is not None and area.width > self.box.base[0] and area.height > self.box.base[1]:
+            self.box.grow[0] = min(self.box.grow[0], max(0, area.width - self.box.base[0] - 8))
+            self.box.grow[1] = min(self.box.grow[1], max(0, area.height - self.box.base[1] - 40))
+        self.box.grow = [max(0, self.box.grow[0]), max(0, self.box.grow[1])]
+
+    def _grip_press(self, _w, ev):
+        if ev.button == 1 and ev.type == Gdk.EventType.BUTTON_PRESS:
+            self._grip = (ev.x_root, ev.y_root, list(self.box.grow))
+        return True
+
+    def _grip_motion(self, _w, ev):
+        if not self._grip:
+            return False
+        x0, y0, (gw, gh) = self._grip
+        new = [max(0, gw + int(ev.x_root - x0)), max(0, gh + int(ev.y_root - y0))]
+        if new != self.box.grow:
+            self.box.grow = new
+            self._clamp_grow()
+            self.box.queue_resize()
+        return True
+
+    # ------------------------------------------------------------ vistas
+    def _views_menu(self, button):
+        menu = self._view_submenu()
+        menu.attach_to_widget(button, None)
+        menu.show_all()
+        menu.popup_at_widget(button, Gdk.Gravity.SOUTH_WEST, Gdk.Gravity.NORTH_WEST, None)
+
+    def _view_submenu(self):
+        menu = Gtk.Menu()
+        group = None
+        for mode in VIEWS:
+            default = {"thumbnails": "Miniat&uras", "tiles": "&Mosaicos", "icons": "Í&cones",
+                       "list": "&Lista", "details": "Detal&hes"}[mode]
+            item = Gtk.RadioMenuItem.new_with_mnemonic_from_widget(group, mnemonic(t(mode, default)))
+            group = item
+            item.set_active(self.view_mode == mode)
+            item.connect("toggled", lambda it, m=mode: it.get_active() and self.set_view(m))
+            menu.append(item)
+        return menu
+
+    def view_widget(self):
+        return {"list": self.flow, "details": self.tree}.get(self.view_mode, self.icons)
+
+    def focus_view(self):
+        """O foco na lista (na Lista, no item selecionado: a FlowBox não o
+        guarda ela própria)."""
+        if self.view_mode == "list":
+            sel = self.flow.get_selected_children()
+            ch = sel[0] if sel else self.flow.get_child_at_index(0)
+            if ch is not None:
+                ch.grab_focus()
+            return
+        self.view_widget().grab_focus()
+
+    def set_view(self, mode, remember=True):
+        sel = self.selected() if self.cwd else []
+        self.finish_edit(True)
+        self.view_mode = mode
+        if mode in GRID:
+            self.icons.set_item_width(GRID[mode][0])
+            self.icons.queue_resize()
+            self.icons.queue_draw()
+        # (o GtkStack ignora páginas ainda escondidas: antes do show_all da
+        # janela ficava a primeira, a das grelhas, vazia na Lista/Detalhes)
+        page = self.stack.get_child_by_name("items" if mode in GRID else mode)
+        page.show_all()
+        self.stack.set_visible_child(page)
+        if sel:
+            GLib.idle_add(lambda: self.select_entries(sel) and False)
+        if remember:
+            self._save_state()
+
+    def _view_focused(self, widget=None):
+        widget = widget or self.view_widget()
+        foc = self.get_focus()
+        return bool(foc is not None and (self.is_active() or TEST) and (foc is widget or foc.is_ancestor(widget)))
+
+    def _focus_changed(self):
+        self._sync_list_sel()
+        self.icons.queue_draw()
+        self.tree.queue_draw()
+        return False
+
+    def _measure(self, widget, text):
+        w = self._wcache.get(text)
+        if w is None:
+            w = self._wcache[text] = widget.create_pango_layout(text).get_pixel_size()[0]
+        return w
+
+    def _wrap(self, widget, text, width, lines):
+        key = (text, width, lines)
+        out = self._wcache.get(key)
+        if out is None:
+            out = self._wcache[key] = xp_wrap(text, width, lambda s: self._measure(widget, s), lines)
+        return out
+
+    def _is_cursor(self, e):
+        ok, path, _cell = self.icons.get_cursor()
+        return bool(ok and path is not None and self.store[path][0] is e)
+
+    def _draw_icon(self, cr, e, size, x, y, blend):
+        pb = e.icon(size)
+        if pb is None:
+            return
+        if blend:
+            cr.set_source_surface(blended(pb), x, y)
+        else:
+            Gdk.cairo_set_source_pixbuf(cr, pb, x, y)
+        cr.paint()
+
+    def _tile_lines(self, e):
+        """Mosaicos: imagens com as dimensões e o tipo, os outros ficheiros
+        com o tipo e o tamanho, as pastas só com o nome (como no XP)."""
+        if e.is_dir:
+            return []
+        kind = e.type_name()
+        if (e.ctype or "").startswith("image/"):
+            dims = e.cache.get("dims")
+            if dims is None:
+                try:
+                    fmt_, w, h = GdkPixbuf.Pixbuf.get_file_info(e.path)
+                    dims = f"{w} x {h}" if fmt_ is not None and w > 0 and h > 0 else ""
+                except (GLib.Error, TypeError):
+                    dims = ""
+                e.cache["dims"] = dims
+            if dims:
+                return [dims, kind]
+        return [kind, human_size(e.size)]
+
+    @staticmethod
+    def _tile_top(captions):
+        return (GRID["tiles"][1] - LINE * (1 + captions)) // 2 - 2
+
+    def draw_item(self, cr, widget, area, e, selected):
+        mode = self.view_mode
+        if e is None or mode not in GRID:
+            return
+        focus = self._view_focused(widget)
+        x, y = area.x, area.y
+        cr.save()
+        if mode == "thumbnails":
+            # a moldura de 96 x 96 (1 px #ECE9D8 por cima da orla); selecionada,
+            # 3 px azuis por fora (bege sem o foco)
+            fx, fy = x + THUMB_FRAME[0], y + THUMB_FRAME[1]
+            cr.set_source_rgb(1, 1, 1)
+            cr.rectangle(fx, fy, 96, 96)
+            cr.fill()
+            pb = self._thumb(e)
+            if pb is not None:
+                w, h = pb.get_width(), pb.get_height()
+                Gdk.cairo_set_source_pixbuf(cr, pb, fx + (96 - w) // 2, fy + (96 - h) // 2)
+                cr.rectangle(fx, fy, 96, 96)
+                cr.fill()
+            else:
+                self._draw_icon(cr, e, 48, fx + 24, fy + 24, False)
+            if selected:
+                cr.set_source_rgb(*rgb(HIGHLIGHT if focus else FACE))
+                cr.set_line_width(3)
+                cr.rectangle(fx - 1.5, fy - 1.5, 99, 99)
+            else:
+                cr.set_source_rgb(*rgb(FACE))
+                cr.set_line_width(1)
+                cr.rectangle(fx + 0.5, fy + 0.5, 95, 95)
+            cr.stroke()
+            self._draw_name(cr, widget, e, x + 2, y + NAME_TOP[mode], NAME_W[mode], selected, focus, thumbs=True)
+        elif mode == "icons":
+            self._draw_icon(cr, e, 32, x + ICON_AT[mode][0], y + ICON_AT[mode][1], selected and focus)
+            self._draw_name(cr, widget, e, x + 2, y + NAME_TOP[mode], NAME_W[mode], selected, focus)
+        else:
+            self._draw_icon(cr, e, 48, x + ICON_AT[mode][0], y + ICON_AT[mode][1], selected and focus)
+            caps = self._tile_lines(e)
+            top = y + self._tile_top(len(caps))
+            tx = x + TILE_TEXT_X
+            name = self._wrap(widget, e.name, TILE_TEXT_W, 1)
+            if selected:
+                cr.set_source_rgb(*rgb(HIGHLIGHT if focus else FACE))
+                cr.rectangle(tx - 2, top - 1, self._measure(widget, name) + 4, LINE + 2)
+                cr.fill()
+            draw_text(cr, widget, name, tx, top, (255, 255, 255) if selected and focus else (0, 0, 0))
+            for i, cap in enumerate(caps):
+                draw_text(cr, widget, self._wrap(widget, cap, TILE_TEXT_W, 1), tx, top + (i + 1) * LINE, GREY)
+        cr.restore()
+
+    def _draw_name(self, cr, widget, e, x, top, width, selected, focus, thumbs=False):
+        """O nome debaixo do ícone: até 2 linhas, ao centro; o do item com o
+        foco inteiro, por cima do que estiver por baixo (como no XP)."""
+        full = focus and self._is_cursor(e)
+        lines = self._wrap(widget, e.name, width, None if full else 2).split("\n")
+        ws = [self._measure(widget, ln) for ln in lines]
+        tw = max(ws)
+        if selected:
+            cr.set_source_rgb(*rgb(HIGHLIGHT if focus else FACE))
+            # (nas Miniaturas o realce começa rente ao texto e acaba 2 px abaixo)
+            cr.rectangle(x + (width - tw) // 2 - 2, top if thumbs else top - 1, tw + 4, LINE * len(lines) + 2)
+            cr.fill()
+        color = (255, 255, 255) if selected and focus else (0, 0, 0)
+        for i, ln in enumerate(lines):
+            draw_text(cr, widget, ln, x + (width - ws[i]) // 2, top + i * LINE, color)
+
+    def draw_name_cell(self, cr, widget, bg, e, selected):
+        if e is None:
+            return
+        cr.save()
+        if self.sort[0] == "name":
+            cr.set_source_rgb(*rgb(SORTED_BG))
+            cr.rectangle(bg.x, bg.y, bg.width, bg.height)
+            cr.fill()
+        focus = self._view_focused(widget)
+        self._draw_icon(cr, e, 16, bg.x + 4, bg.y + (bg.height - 16) // 2, selected and focus)
+        tx = bg.x + DETAIL_TEXT_X
+        name = self._wrap(widget, e.name, max(8, bg.width - DETAIL_TEXT_X - 6), 1)
+        if selected:
+            cr.set_source_rgb(*rgb(HIGHLIGHT if focus else FACE))
+            cr.rectangle(tx - 1, bg.y, self._measure(widget, name) + 2, bg.height)
+            cr.fill()
+        draw_text(cr, widget, name, tx, bg.y + (bg.height - LINE) // 2,
+                  (255, 255, 255) if selected and focus else (0, 0, 0))
+        cr.restore()
+
+    def _detail_text(self, col, cell, model, it, key):
+        e = model[it][0]
+        if key == "size":
+            text = "" if e.is_dir else human_size(e.size)
+        elif key == "type":
+            text = e.type_name()
+        else:
+            text = time.strftime("%d-%m-%Y %H:%M", time.localtime(e.mtime))
+        cell.set_property("text", text)
+        if self.sort[0] == key:
+            cell.set_property("cell-background-rgba", Gdk.RGBA(*rgb(SORTED_BG), 1))
+        else:
+            cell.set_property("cell-background-set", False)
+
+    def _tree_band(self, tree, cr):
+        """A coluna ordenada a cinzento até ao fundo da lista, como no XP."""
+        col = self.columns.get(self.sort[0])
+        if col is None:
+            return False
+        n = len(self.store)
+        if n:
+            r = tree.get_background_area(Gtk.TreePath(n - 1), col)
+            y = tree.convert_bin_window_to_widget_coords(0, r.y + r.height)[1]
+        else:
+            y = tree.convert_bin_window_to_widget_coords(0, 0)[1]
+        x = tree.convert_tree_to_widget_coords(col.get_x_offset(), 0)[0]
+        h = tree.get_allocated_height() - y
+        if h > 0:
+            cr.set_source_rgb(*rgb(SORTED_BG))
+            cr.rectangle(x, y, col.get_width(), h)
+            cr.fill()
+        return False
+
+    def _thumb(self, e):
+        if "thumb" in e.cache:
+            return e.cache["thumb"]
+        e.cache["thumb"] = None
+        if not e.is_dir:
+            self._thumb_queue.append(e)
+            if not self._thumb_idle:
+                self._thumb_idle = GLib.idle_add(self._load_thumbs)
+        return None
+
+    def _load_thumbs(self):
+        t0 = time.monotonic()
+        while self._thumb_queue and time.monotonic() - t0 < 0.03:
+            e = self._thumb_queue.pop(0)
+            e.cache["thumb"] = load_thumb(e)
+        self.icons.queue_draw()
+        if self._thumb_queue:
+            return True
+        self._thumb_idle = 0
+        return False
+
+    # ------------------------------------------------------------ navegação
+    def current_filter(self):
+        i = self.types.get_active()
+        return self.filters[i] if self.filters and i >= 0 else None
+
+    def navigate(self, path, remember=True):
+        path = os.path.abspath(os.path.expanduser(path))
+        if not os.path.isdir(path):
+            return
+        self.finish_edit(True)
+        if remember and self.cwd and self.cwd != path:
+            self.history.append(self.cwd)
+        self.cwd = path
+        self.refresh(keep=False)
+        self._fill_look()
+        self.btn_back.set_sensitive(bool(self.history))
+        self.btn_up.set_sensitive(path != "/")
+        self.btn_new.set_sensitive(os.access(path, os.W_OK))
+        for p, b in self.place_buttons.items():
+            ctx = b.get_style_context()
+            (ctx.add_class if p == path else ctx.remove_class)("zxp-current")
+
+    def go_back(self):
+        if self.history:
+            p = self.history.pop()
+            self.navigate(p, remember=False)
+            self.btn_back.set_sensitive(bool(self.history))
+
+    def go_up(self):
+        if self.cwd and self.cwd != "/":
+            self.navigate(os.path.dirname(self.cwd))
+
+    def _fill_look(self):
+        """Ambiente de trabalho > Os meus documentos / O meu computador > ... /
+        Os meus locais na rede, com o caminho atual no sítio certo."""
+        rows = [(DESKTOP, 0), (DOCUMENTS, 1), (HOME, 1)]
+        mounts = []
+        for m in Gio.VolumeMonitor.get().get_mounts():
+            root = m.get_root().get_path()
+            if root and root != "/":
+                mounts.append((root, m.get_name(), m.get_icon()))
+        rows.append(("/", 2))
+        rows += [(r, 2) for r, _n, _i in mounts]
+        rows.append((NETWORK, 1))
+        # o caminho atual: a partir do local mais próximo que o contenha
+        cur = self.cwd
+        if cur not in [r for r, _ in rows]:
+            anchors = [(r, lvl) for r, lvl in rows if r != NETWORK and
+                       (cur == r or cur.startswith(r.rstrip("/") + "/"))]
+            if anchors:
+                anchor, lvl = max(anchors, key=lambda a: len(a[0]))
+                rel = os.path.relpath(cur, anchor).split(os.sep)
+                chain = []
+                p = anchor
+                for i, part in enumerate(rel):
+                    p = os.path.join(p, part)
+                    chain.append((p, lvl + 1 + i))
+                pos = [r for r, _ in rows].index(anchor) + 1
+                rows[pos:pos] = chain
+        self.look.handler_block(self.look_changed)
+        self.look_store.clear()
+        active = 0
+        names = {r: n for r, n, _i in mounts}
+        for i, (p, lvl) in enumerate(rows):
+            name = place_name(p) or names.get(p) or os.path.basename(p) or p
+            self.look_store.append([file_icon(p, True, None, 16), name, p, lvl])
+            if p == cur:
+                active = i
+        self.look.set_active(active)
+        self.look.handler_unblock(self.look_changed)
+
+    def _on_look(self, *_):
+        it = self.look.get_active_iter()
+        if it:
+            path = self.look_store[it][2]
+            if path != self.cwd:
+                self.navigate(path)
+
+    def refresh(self, keep=True):
+        sel = [e.name for e in self.selected()] if keep else []
+        flt = self.current_filter()
+        entries = [e for e in list_dir(self.cwd) if (not self.directory or e.is_dir) and matches(e, flt)]
+        self.entries = sort_entries(entries, *self.sort)
+        self._thumb_queue.clear()
+        for ch in self.flow.get_children():
+            self.flow.remove(ch)
+        self.store.clear()
+        for e in self.entries:
+            self._add_row(e)
+        self.flow.show_all()
+        self._sync_columns()
+        if sel:
+            self.select_entries([e for e in self.entries if e.name in sel])
+
+    def _add_row(self, e):
+        self.store.append([e])
+        row = Gtk.Box(spacing=2)
+        img = Gtk.Image.new_from_pixbuf(e.icon(16))
+        lab = Gtk.Label(label=e.name)
+        lab.set_xalign(0)
+        row.pack_start(img, False, False, 0)
+        row.pack_start(lab, False, False, 0)
+        child = Gtk.FlowBoxChild()
+        child.add(row)
+        child.entry, child.img, child.lab = e, img, lab
+        self.flow.add(child)
+        child.show_all()
+        return child
+
+    def _sync_columns(self):
+        for key, col in self.columns.items():
+            on = self.sort[0] == key
+            col.set_sort_indicator(on)
+            if on:
+                col.set_sort_order(Gtk.SortType.DESCENDING if self.sort[1] else Gtk.SortType.ASCENDING)
+        self.tree.queue_draw()
+
+    def sort_by(self, key, toggle=False):
+        if toggle and self.sort[0] == key:
+            self.sort = (key, not self.sort[1])
+        else:
+            self.sort = (key, SORT_DESC[key])
+        self.refresh()
+        self._save_state()
+
+    # ------------------------------------------------------------ seleção
+    def selected(self):
+        if self.view_mode == "list":
+            return [ch.entry for ch in self.flow.get_selected_children()]
+        if self.view_mode == "details":
+            model, paths = self.tree.get_selection().get_selected_rows()
+            return [model[p][0] for p in paths]
+        return [self.store[p][0] for p in sorted(self.icons.get_selected_items())]
+
+    def select_entries(self, entries):
+        idx = [self.entries.index(e) for e in entries if e in self.entries]
+        mode = self.view_mode
+        if mode == "list":
+            self.flow.unselect_all()
+            for i in idx:
+                self.flow.select_child(self.flow.get_child_at_index(i))
+            if idx:
+                ch = self.flow.get_child_at_index(idx[0])
+                a = ch.get_allocation()
+                adj = self.sw_list.get_hadjustment()
+                if a.x < adj.get_value() or a.x + a.width > adj.get_value() + adj.get_page_size():
+                    adj.set_value(min(a.x, adj.get_upper() - adj.get_page_size()))
+        elif mode == "details":
+            s = self.tree.get_selection()
+            s.unselect_all()
+            for i in idx:
+                s.select_path(Gtk.TreePath(i))
+            if idx:
+                self.tree.scroll_to_cell(Gtk.TreePath(idx[0]), None, False, 0, 0)
+        else:
+            self.icons.unselect_all()
+            for i in idx:
+                self.icons.select_path(Gtk.TreePath(i))
+            if idx:
+                self.icons.set_cursor(Gtk.TreePath(idx[0]), None, False)
+                self.icons.scroll_to_path(Gtk.TreePath(idx[0]), False, 0, 0)
+        return True
+
+    def _sync_list_sel(self):
+        focus = self._view_focused(self.flow)
+        for ch in self.flow.get_children():
+            sel = ch.is_selected()
+            ctx = ch.lab.get_style_context()
+            (ctx.add_class if sel and focus else ctx.remove_class)("zxp-sel")
+            (ctx.add_class if sel and not focus else ctx.remove_class)("zxp-sel-dim")
+            if sel and focus:
+                ch.img.set_from_surface(blended(ch.entry.icon(16)))
+            else:
+                ch.img.set_from_pixbuf(ch.entry.icon(16))
+
+    def _on_select(self):
+        sel = self.selected()
+        files = [e for e in sel if not e.is_dir]
+        if self.kind == "save" and files:
+            self.entry.set_text(files[0].name)
+        elif self.kind == "open" and not self.directory and files:
+            self.entry.set_text(files[0].name if len(files) == 1 else " ".join(f'"{e.name}"' for e in files))
+
+    def activate_entry(self, e):
+        if e.is_dir:
+            self.navigate(e.path)
+        elif not self.directory:
+            self.entry.set_text(e.name)
+            self.accept()
+
+    # ------------------------------------------------------------ botão direito
+    def _on_view_button(self, view, ev):
+        if ev.type != Gdk.EventType.BUTTON_PRESS or ev.button != 3:
+            return False
+        e = self._entry_at(view, ev)
+        if e is not None and e not in self.selected():
+            self.select_entries([e])
+        elif e is None:
+            self.select_entries([])
+        self.focus_view()
+        menu = self._item_menu(self.selected()) if e is not None else self._background_menu()
+        menu.attach_to_widget(view, None)
+        menu.show_all()
+        menu.popup_at_pointer(ev)
+        return True
+
+    def _entry_at(self, view, ev):
+        if view is self.icons:
+            path = self.icons.get_path_at_pos(int(ev.x), int(ev.y))
+            return self.store[path][0] if path is not None else None
+        if view is self.tree:
+            hit = self.tree.get_path_at_pos(int(ev.x), int(ev.y))
+            return self.store[hit[0]][0] if hit else None
+        ch = self.flow.get_child_at_pos(int(ev.x), int(ev.y))
+        return ch.entry if ch is not None else None
+
+    def _menu_item(self, key, default, callback, bold=False, sensitive=True):
+        text = mnemonic(t(key, default))
+        item = Gtk.MenuItem.new_with_mnemonic(text)
+        if bold:
+            item.get_child().set_markup_with_mnemonic(f"<b>{GLib.markup_escape_text(text)}</b>")
+        item.set_sensitive(sensitive)
+        if callback:
+            item.connect("activate", lambda *_: GLib.idle_add(lambda: callback() and False))
+        return item
+
+    def _background_menu(self):
+        """O menu do fundo da lista, como no XP: Ver, Dispor ícones por,
+        Actualizar, Novo > Pasta (sem Colar/Colar atalho, desativados)."""
+        menu = Gtk.Menu()
+        view = self._menu_item("view", "&Ver", None)
+        view.set_submenu(self._view_submenu())
+        menu.append(view)
+        menu.append(Gtk.SeparatorMenuItem())
+        arrange = self._menu_item("arrange", "&Dispor ícones por", None)
+        sub = Gtk.Menu()
+        # (no XP sem ponto e sem as opções desativadas de agrupar/dispor)
+        for key, label in (("name", t("colName", "Nome")), ("size", t("colSize", "Tamanho")),
+                           ("type", t("colType", "Tipo")), ("mtime", "Modificado")):
+            item = Gtk.MenuItem.new_with_mnemonic(mnemonic(label))
+            item.connect("activate", lambda _it, k=key: self.sort_by(k))
+            sub.append(item)
+        arrange.set_submenu(sub)
+        menu.append(arrange)
+        menu.append(self._menu_item("refresh", "Actuali&zar", lambda: self.refresh()))
+        menu.append(Gtk.SeparatorMenuItem())
+        new = self._menu_item("new", "&Novo", None, sensitive=os.access(self.cwd, os.W_OK))
+        sub = Gtk.Menu()
+        sub.append(self._menu_item("newFolderItem", "&Pasta", self.new_folder))
+        new.set_submenu(sub)
+        menu.append(new)
+        return menu
+
+    def _item_menu(self, sel):
+        """O menu dos itens: "Abrir" (pastas) ou "Seleccionar" (ficheiros) a
+        negrito, Eliminar, Mudar o nome, Propriedades."""
+        menu = Gtk.Menu()
+        files = [e for e in sel if not e.is_dir]
+        writable = os.access(self.cwd, os.W_OK)
+        if len(sel) == 1 and sel[0].is_dir:
+            menu.append(self._menu_item("open", "&Abrir", lambda: self.navigate(sel[0].path), bold=True))
+        elif files and not self.directory:
+            menu.append(self._menu_item("select", "Selecc&ionar", lambda: self._choose(files), bold=True))
+        if menu.get_children():
+            menu.append(Gtk.SeparatorMenuItem())
+        menu.append(self._menu_item("delete", "Elimina&r", lambda: self.delete_selected(), sensitive=writable))
+        menu.append(self._menu_item("rename", "&Mudar o nome", lambda: self.start_edit(sel[0]),
+                                    sensitive=writable and len(sel) == 1))
+        menu.append(Gtk.SeparatorMenuItem())
+        menu.append(self._menu_item("properties", "&Propriedades",
+                                    lambda: self.show_properties([e.path for e in sel])))
+        return menu
+
+    def _choose(self, files):
+        if len(files) == 1:
+            self.activate_entry(files[0])
+        elif self.multiple:
+            self.entry.set_text(" ".join(f'"{e.name}"' for e in files))
+            self.accept()
+
+    def show_properties(self, paths):
+        """As Propriedades do Ficheiros (org.freedesktop.FileManager1)."""
+        uris = [Gio.File.new_for_path(p).get_uri() for p in paths]
+        try:
+            bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+            bus.call("org.freedesktop.FileManager1", "/org/freedesktop/FileManager1",
+                     "org.freedesktop.FileManager1", "ShowItemProperties",
+                     GLib.Variant("(ass)", (uris, "")), None, Gio.DBusCallFlags.NONE, -1, None, None)
+        except GLib.Error:
+            pass
+
+    # ------------------------------------------------------------ nova pasta / eliminar
+    def new_folder(self):
+        if not self.cwd or not os.access(self.cwd, os.W_OK):
+            return
+        base = t("newFolder", "Nova pasta")
+        name, n = base, 2
+        while os.path.lexists(os.path.join(self.cwd, name)):
+            name, n = f"{base} ({n})", n + 1
+        path = os.path.join(self.cwd, name)
+        try:
+            os.mkdir(path)
+        except OSError as err:
+            self.xp_msgbox(self.get_title(), err.strerror or str(err), "error")
+            return
+        e = make_entry(path)
+        if e is None:
+            return
+        # (como no XP: no fim da lista até se actualizar, já a mudar o nome)
+        self.entries.append(e)
+        self._add_row(e)
+        # (depois de a vista arrumar o item novo)
+        GLib.timeout_add(30, lambda: self.start_edit(e) and False)
+
+    def _remove_entry(self, e):
+        if e not in self.entries:
+            return
+        i = self.entries.index(e)
+        self.entries.pop(i)
+        del self.store[i]
+        ch = self.flow.get_child_at_index(i)
+        if ch is not None:
+            self.flow.remove(ch)
+
+    def _update_entry(self, e):
+        if e not in self.entries:
+            return
+        i = self.entries.index(e)
+        it = self.store.get_iter(Gtk.TreePath(i))
+        self.store.row_changed(Gtk.TreePath(i), it)
+        ch = self.flow.get_child_at_index(i)
+        if ch is not None:
+            ch.lab.set_text(e.name)
+            ch.img.set_from_pixbuf(e.icon(16))
+        self._sync_list_sel()
+        self.icons.queue_draw()
+
+    def _trash_has_items(self):
+        try:
+            info = Gio.File.new_for_uri("trash:///").query_info("trash::item-count", Gio.FileQueryInfoFlags.NONE, None)
+            return info.get_attribute_uint32("trash::item-count") > 0
+        except GLib.Error:
+            return False
+
+    def delete_selected(self, permanent=False):
+        """Eliminar com a pergunta do XP (Reciclagem; Shift+Delete: de vez)."""
+        sel = self.selected()
+        if not sel or not os.access(self.cwd, os.W_OK):
+            return
+        name = sel[0].name
+        if len(sel) > 1:
+            title = t("confirmMany", "Confirmar eliminação de vários ficheiros")
+            text = fmt(t("killMany") if permanent else t("askMany"), len(sel))
+            icon = "kill-many" if permanent else None
+        elif sel[0].is_dir:
+            title = t("confirmFolder", "Confirmar eliminação de pasta(s)")
+            text = fmt(t("killFolder"), name, "", t("allContents")) if permanent else fmt(t("askFolder"), name)
+            icon = "kill-folder" if permanent else None
+        else:
+            title = t("confirmFile", "Confirmar eliminação de ficheiro(s)")
+            text = fmt(t("killFile") if permanent else t("askFile"), name)
+            icon = "kill-file" if permanent else None
+        if icon is None:
+            icon = "bin-full" if self._trash_has_items() else "bin-empty"
+        if self.xp_confirm(title, text, icon, many=len(sel) > 1) != 0:
+            return
+        done = False
+        for e in sel:
+            try:
+                if not permanent:
+                    Gio.File.new_for_path(e.path).trash(None)
+                elif e.is_dir and not os.path.islink(e.path):
+                    shutil.rmtree(e.path)
+                else:
+                    os.remove(e.path)
+            except (OSError, GLib.Error) as err:
+                msg = err.message if isinstance(err, GLib.Error) else (err.strerror or str(err))
+                self.xp_msgbox(title, f"{e.name}: {msg}", "error")
+                break
+            self._remove_entry(e)
+            done = True
+        if done and not permanent:
+            play_sound(os.path.join(SOUNDS, "Windows XP Recycle.wav"))
+
+    # ------------------------------------------------------------ mudar o nome no sítio
+    def start_edit(self, e, text=None):
+        """A caixa do nome por cima do item, como no XP (F2, Mudar o nome,
+        Nova pasta): só uma linha nos Mosaicos, Lista e Detalhes; nos Ícones e
+        Miniaturas várias, ao centro, se o nome não couber."""
+        if e not in self.entries:
+            return
+        self.finish_edit(True)
+        self.select_entries([e])
+        GLib.idle_add(self._begin_edit, e, text)
+
+    def _begin_edit(self, e, text):
+        if e not in self.entries or self._finished:
+            return False
+        mode = self.view_mode
+        centred = mode in NAME_W
+        before, after = (5, 5) if centred else ((4, 15) if mode == "tiles" else (2, 15))
+        text = e.name if text is None else text
+        multi = centred and self._measure(self, text) > NAME_W[mode]
+        if multi:
+            tv = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR, justification=Gtk.Justification.CENTER)
+            tv.set_left_margin(before)
+            tv.set_right_margin(after)
+            tv.get_style_context().add_class("zxp-rename")
+            tv.get_buffer().set_text(text)
+            widget = Gtk.Frame()
+            widget.set_shadow_type(Gtk.ShadowType.IN)
+            widget.get_style_context().add_class("zxp-rename")
+            widget.add(tv)
+            editor = tv
+            editor.get_buffer().connect("changed", lambda *_: self._place_editor())
+        else:
+            editor = widget = Gtk.Entry()
+            widget.set_text(text)
+            ctx = widget.get_style_context()
+            ctx.add_class("zxp-rename")
+            if not centred:
+                ctx.add_class("zxp-rename-left" if mode == "tiles" else "zxp-rename-list")
+            widget.set_activates_default(False)
+            editor.connect("changed", lambda *_: self._place_editor())
+            editor.connect("activate", lambda *_: self.finish_edit(True))
+        editor.connect("key-press-event", self._editor_key)
+        editor.connect("focus-out-event", self._editor_focus_out)
+        # (numa janela própria: as vistas têm as suas, que ficariam por cima)
+        holder = Gtk.EventBox()
+        holder.set_visible_window(True)
+        holder.add(widget)
+        holder.connect("realize", lambda w: w.get_window().raise_())
+        widget = holder
+        self._edit = {"entry": e, "widget": widget, "editor": editor, "multi": multi, "mode": mode,
+                      "centred": centred, "before": before, "after": after, "since": time.monotonic(),
+                      "timer": GLib.timeout_add(50, self._follow_editor)}
+        self.box.put(widget, 0, 0)
+        self.box.editor = (widget, [0, 0, 1, 1])
+        self._place_editor()
+        widget.show_all()
+        editor.grab_focus()
+        # o nome sem a extensão fica selecionado, como no XP
+        stem = len(text) if e.is_dir else len(os.path.splitext(text)[0] or text)
+        if multi:
+            buf = editor.get_buffer()
+            buf.select_range(buf.get_start_iter(), buf.get_iter_at_offset(stem))
+        else:
+            editor.select_region(0, stem)
+        return False
+
+    def _editor_text(self):
+        ed = self._edit
+        if ed["multi"]:
+            buf = ed["editor"].get_buffer()
+            return buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
+        return ed["editor"].get_text()
+
+    def _label_geom(self, e):
+        """Onde está o nome do item (coordenadas da janela)."""
+        if e not in self.entries:
+            return None
+        i = self.entries.index(e)
+        mode = self.view_mode
+        if mode in GRID:
+            ok, r = self.icons.get_cell_rect(Gtk.TreePath(i), None)
+            if not ok:
+                return None
+            co = self.icons.translate_coordinates(self.box, r.x, r.y)
+            if co is None:
+                return None
+            bx, by = co
+            if mode in NAME_TOP:
+                return {"centre": bx + 2 + NAME_W[mode] / 2, "top": by + NAME_TOP[mode]}
+            return {"left": bx + TILE_TEXT_X, "top": by + self._tile_top(len(self._tile_lines(e)))}
+        if mode == "details":
+            r = self.tree.get_background_area(Gtk.TreePath(i), self.name_col)
+            wx, wy = self.tree.convert_bin_window_to_widget_coords(r.x, r.y)
+            co = self.tree.translate_coordinates(self.box, wx, wy)
+            if co is None:
+                return None
+            return {"left": co[0] + DETAIL_TEXT_X, "row": co[1], "height": r.height}
+        ch = self.flow.get_child_at_index(i)
+        if ch is None:
+            return None
+        co = ch.lab.translate_coordinates(self.box, 1, 0)
+        cy = ch.translate_coordinates(self.box, 0, 0)
+        if co is None or cy is None:
+            return None
+        return {"left": co[0], "row": cy[1], "height": ch.get_allocated_height()}
+
+    def _place_editor(self):
+        ed = self._edit
+        if not ed:
+            return
+        g = self._label_geom(ed["entry"])
+        if g is None:
+            return
+        text = self._editor_text()
+        mode = ed["mode"]
+        if ed["multi"]:
+            nw = NAME_W[mode]
+            lay = self.create_pango_layout(text or " ")
+            lay.set_width(nw * Pango.SCALE)
+            lay.set_wrap(Pango.WrapMode.WORD_CHAR)
+            w = nw + ed["before"] + ed["after"] + 2
+            h = lay.get_pixel_size()[1] + 2
+            x = g["centre"] - nw / 2 - ed["before"] - 1
+        else:
+            tw = self._measure(self, text)
+            w = tw + ed["before"] + ed["after"] + 2
+            h = 17
+            if ed["centred"]:
+                x = g["centre"] - tw / 2 - ed["before"] - 1
+            else:
+                x = g["left"] - ed["before"] - 1
+        if "row" in g:
+            y = g["row"] + (g["height"] - 17) // 2
+        else:
+            y = g["top"] - 2 + (1 if mode == "thumbnails" else 0)
+        # (sem sair da lista pelos lados)
+        frame = self.stack.get_allocation()
+        x = max(frame.x, min(x, frame.x + frame.width - w))
+        rect = [round(x), round(y), int(w), int(h)]
+        if self.box.editor and self.box.editor[1] != rect:
+            self.box.editor = (ed["widget"], rect)
+            self.box.queue_resize()
+
+    def _follow_editor(self):
+        if not self._edit:
+            return False
+        self._place_editor()
+        return True
+
+    def _editor_key(self, _w, ev):
+        if ev.keyval == Gdk.KEY_Escape:
+            self.finish_edit(False)
+            return True
+        if ev.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            self.finish_edit(True)
+            return True
+        return False
+
+    def _editor_focus_out(self, *_):
+        ed = self._edit
+        if not ed:
+            return False
+        # (logo a seguir a abrir, a vista ainda pode ficar com o foco)
+        if time.monotonic() - ed["since"] < 0.4:
+            GLib.idle_add(lambda: self._edit is ed and ed["editor"].grab_focus() and False)
+            return False
+        GLib.idle_add(lambda: self._edit is ed and self.finish_edit(True))
+        return False
+
+    def finish_edit(self, commit):
+        ed = self._edit
+        if not ed:
+            return
+        self._edit = None
+        GLib.source_remove(ed["timer"])
+        text = (self._editor_text_of(ed) or "").replace("\n", " ").strip()
+        self.box.editor = None
+        ed["widget"].destroy()
+        if not self._finished:
+            self.focus_view()
+        e = ed["entry"]
+        if commit and text and text != e.name:
+            GLib.idle_add(self._apply_rename, e, text)
+
+    @staticmethod
+    def _editor_text_of(ed):
+        if ed["multi"]:
+            buf = ed["editor"].get_buffer()
+            return buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
+        return ed["editor"].get_text()
+
+    def _apply_rename(self, e, new):
+        title = t("renameError", "Erro ao mudar o nome a ficheiro ou pasta")
+        if "/" in new or new in (".", ".."):
+            self.xp_msgbox(title, t("badChars"), "error")
+            self.start_edit(e, new)
+            return False
+        if not e.is_dir and os.path.splitext(e.name)[1].lower() != os.path.splitext(new)[1].lower():
+            if self.xp_msgbox(plain(t("rename", "Mudar o nome")), t("askExtension"), "warning",
+                              ("yes", "no")) != 0:
+                return False
+        target = os.path.join(os.path.dirname(e.path), new)
+        same = os.path.lexists(target) and os.path.samefile(target, e.path)
+        if os.path.lexists(target) and not same:
+            self.xp_msgbox(title, fmt(t("renameFailed"), t("nameExists"), e.name), "error")
+            self.start_edit(e, new)
+            return False
+        try:
+            os.rename(e.path, target)
+        except OSError as err:
+            self.xp_msgbox(title, fmt(t("renameFailed"), err.strerror or str(err), e.name), "error")
+            return False
+        e.name, e.path = new, target
+        e.ctype = None if e.is_dir else Gio.content_type_guess(new, None)[0]
+        e.cache.clear()
+        self._update_entry(e)
+        self._on_select()
+        return False
+
+    # ------------------------------------------------------------ caixas do XP
+    def _modal(self, title, fixed, buttons, default, escape=None):
+        """Mostra uma caixa e espera pela resposta (o índice do botão)."""
+        win = Gtk.Window(title=title, transient_for=self, modal=True, resizable=False)
+        win.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        win.set_skip_taskbar_hint(True)
+        win.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
+        win.get_style_context().add_class("zxp-msgbox")
+        win.add(fixed)
+        result = [None]
+        loop = GLib.MainLoop()
+
+        def answer(i):
+            if result[0] is None:
+                result[0] = i
+                win.destroy()
+                loop.quit()
+        for i, b in enumerate(buttons):
+            b.connect("clicked", lambda _b, i=i: answer(i))
+        win.connect("delete-event", lambda *_: (escape is not None and answer(escape)) or True)
+        win.connect("key-press-event", lambda _w, ev: (answer(escape), True)[1]
+                    if ev.keyval == Gdk.KEY_Escape and escape is not None else False)
+        buttons[default].set_can_default(True)
+        win.set_default(buttons[default])
+        win.show_all()
+        buttons[default].grab_focus()
+        if TEST_REPLY:      # (só no modo de teste: responde sozinho)
+            GLib.timeout_add(1500, lambda: answer(default) or False)
+        loop.run()
+        return result[0]
+
+    def _msg_label(self, text):
+        lab = Gtk.Label(label=text, xalign=0, yalign=0)
+        lab.set_attributes(line_attrs())
+        lab.get_style_context().add_class("zxp-msgbox-text")
+        return lab
+
+    def xp_msgbox(self, title, text, icon="warning", buttons=("ok",), default=0):
+        """Uma MessageBox do user32 (MB_ICONEXCLAMATION | MB_YESNO, ...): margem
+        de 11 px, o ícone e o texto ao meio um do outro, o texto a 62 px, os
+        botões de 75 x 23 (6 px entre eles) ao centro, 17 px abaixo."""
+        play_sound(event={"warning": "dialog-warning", "error": "dialog-error",
+                          "info": "dialog-information"}.get(icon, "dialog-warning"))
+        # (o texto partido nas palavras a 5/8 da largura do ecrã, como no user32)
+        limit = 640
+        try:
+            limit = Gdk.Display.get_default().get_primary_monitor().get_workarea().width * 5 // 8
+        except Exception:
+            pass
+        lines = [xp_wrap(par, limit, lambda s: self._measure(self, s), None) if par else ""
+                 for par in text.replace("\r\n", "\n").split("\n")]
+        lines = "\n".join(lines).split("\n")
+        tw = max(self._measure(self, ln) for ln in lines) if lines else 0
+        th = LINE * len(lines)
+        tih = max(32, th)
+        bw = len(buttons) * 75 + (len(buttons) - 1) * 6
+        cw = max(62 + tw + 8, bw + 22)
+        by = 11 + tih + 17
+        fixed = Gtk.Fixed()
+        fixed.set_size_request(cw, by + 23 + 11)
+        fixed.put(Gtk.Image.new_from_file(os.path.join(DATA, f"msg-{icon}.png")), 11, 11 + (tih - 32) // 2)
+        lab = self._msg_label("\n".join(lines))
+        lab.set_size_request(tw, th)
+        fixed.put(lab, 62, 11 + (tih - th) // 2)
+        btns = []
+        x = (cw - bw) // 2
+        for key in buttons:
+            b = Gtk.Button.new_with_mnemonic(mnemonic(t(key, {"ok": "OK", "yes": "&Sim", "no": "&Não"}[key])))
+            b.set_size_request(75, 23)
+            fixed.put(b, x, by)
+            btns.append(b)
+            x += 81
+        escape = len(buttons) - 1 if buttons == ("ok",) else None
+        return self._modal(title, fixed, btns, default, escape)
+
+    def xp_confirm(self, title, text, icon, many=False):
+        """A confirmação de eliminar do shell32 (diálogos 1011-1013, Tahoma 8 =
+        1,5 px por unidade): 412 x 127 (vários: 412 x 97), o ícone em (15, 15),
+        o texto ao lado, Sim / Não em baixo à direita. 0 = Sim."""
+        fixed = Gtk.Fixed()
+        fixed.set_size_request(412, 97 if many else 127)
+        fixed.put(Gtk.Image.new_from_file(os.path.join(DATA, f"msg-{icon}.png")), 15, 15)
+        width = 336 if many else 330
+        wrapped = "\n".join(xp_wrap(par, width, lambda s: self._measure(self, s), None) if par else ""
+                            for par in text.split("\n"))
+        lab = self._msg_label(wrapped)
+        fixed.put(lab, 62 if many else 57, 21 if many else 15)
+        btns = []
+        for key, x in ((("yes", 220), ("no", 315)) if many else (("yes", 236), ("no", 322))):
+            b = Gtk.Button.new_with_mnemonic(mnemonic(t(key, {"yes": "&Sim", "no": "&Não"}[key])))
+            b.set_size_request(87 if many else 80, 23)
+            fixed.put(b, x, 63 if many else 93)
+            btns.append(b)
+        return self._modal(title, fixed, btns, 0, escape=1)
+
+    # ------------------------------------------------------------ teclado
+    def _on_key(self, _w, ev):
+        if self._edit:
+            return False
+        state = ev.state & Gtk.accelerator_get_default_mod_mask()
+        in_view = self._view_focused()
+        key = ev.keyval
+        if key == Gdk.KEY_Escape:
+            self.finish(1)
+            return True
+        if key == Gdk.KEY_F5:
+            self.refresh()
+            return True
+        if in_view and key in (Gdk.KEY_Delete, Gdk.KEY_KP_Delete):
+            self.delete_selected(permanent=bool(state & Gdk.ModifierType.SHIFT_MASK))
+            return True
+        if in_view and key == Gdk.KEY_F2:
+            sel = self.selected()
+            if len(sel) == 1 and os.access(self.cwd, os.W_OK):
+                self.start_edit(sel[0])
+            return True
+        if in_view and (key == Gdk.KEY_Menu or (key == Gdk.KEY_F10 and state & Gdk.ModifierType.SHIFT_MASK)):
+            sel = self.selected()
+            menu = self._item_menu(sel) if sel else self._background_menu()
+            menu.attach_to_widget(self.view_widget(), None)
+            menu.show_all()
+            menu.popup_at_widget(self.view_widget(), Gdk.Gravity.NORTH_WEST, Gdk.Gravity.NORTH_WEST, None)
+            return True
+        if key == Gdk.KEY_BackSpace and not self.entry.has_focus():
+            self.go_up()
+            return True
+        return False
+
+    # ------------------------------------------------------------ resposta
+    def _names(self):
+        text = self.entry.get_text().strip()
+        if '"' in text:
+            return [p for p in text.split('"') if p.strip()]
+        return [text] if text else []
+
+    def accept(self):
+        self.finish_edit(True)
+        names = self._names()
+        title = self.get_title()
+        if self.directory:
+            sel = [e for e in self.selected() if e.is_dir]
+            if names and os.path.isdir(os.path.join(self.cwd, names[0])) and not sel:
+                target = os.path.join(self.cwd, names[0])
+            else:
+                target = sel[0].path if sel else self.cwd
+            if self.kind == "savefiles":
+                files = [bytes(f).rstrip(b"\0").decode("utf-8", "replace") for f in self.options.get("files") or []]
+                uris = [Gio.File.new_for_path(os.path.join(target, os.path.basename(f))).get_uri() for f in files]
+            else:
+                uris = [Gio.File.new_for_path(target).get_uri()]
+            self.finish(0, uris)
+            return
+        if not names:
+            sel = [e for e in self.selected() if not e.is_dir]
+            names = [e.name for e in sel]
+            if not names:
+                return
+        paths = []
+        for n in names:
+            p = os.path.expanduser(n)
+            paths.append(p if os.path.isabs(p) else os.path.join(self.cwd, p))
+        if len(paths) == 1 and os.path.isdir(paths[0]):
+            self.navigate(paths[0])
+            self.entry.set_text("" if self.kind == "open" else os.path.basename(self.options.get("current_name") or ""))
+            return
+        if self.kind == "save":
+            p = paths[0]
+            if not os.path.isdir(os.path.dirname(p)):
+                self.xp_msgbox(title, t("pathNotFound", "%s\nO caminho não existe.").replace("%s", p))
+                return
+            if os.path.exists(p):
+                text = t("replace", "%s já existe.\nDeseja substituí-lo?").replace("%s", os.path.basename(p))
+                if self.xp_msgbox(title, text, "warning", ("yes", "no")) != 0:
+                    return
+            self.finish(0, [Gio.File.new_for_path(p).get_uri()])
+            return
+        for p in paths:
+            if not os.path.exists(p):
+                self.xp_msgbox(title, t("notFound", "%s\nNão é possível localizar este ficheiro.")
+                               .replace("%s", os.path.basename(p)))
+                return
+        self.finish(0, [Gio.File.new_for_path(p).get_uri() for p in paths])
+
+    def finish(self, response, uris=None):
+        if self._finished:
+            return
+        self.finish_edit(False)
+        self._finished = True
+        self._save_state()
+        results = {}
+        if response == 0:
+            results["uris"] = GLib.Variant("as", uris or [])
+            flt = self.current_filter()
+            if flt:
+                results["current_filter"] = GLib.Variant("(sa(us))", (flt[0], [tuple(x) for x in flt[1]]))
+            if self.choices:
+                ch = []
+                for cid, (kind, w) in self.choices.items():
+                    ch.append((cid, (w.get_active_id() or "") if kind == "combo" else ("true" if w.get_active() else "false")))
+                results["choices"] = GLib.Variant("a(ss)", ch)
+            results["writable"] = GLib.Variant("b", True)
+        self.hide()
+        self.on_done(response, results)
+        self.destroy()
+
+
+class XpBrowseFolder(Gtk.Window):
+    """A "Procurar pasta" do XP (SHBrowseForFolder com BIF_NEWDIALOGSTYLE e
+    BIF_EDITBOX; shell32, diálogo 1087), para escolher pastas ("Abrir pasta"
+    dos editores e IDEs, SaveFiles): o texto da aplicação em cima, a árvore a
+    partir do Ambiente de trabalho (linhas pontilhadas, +/-), "Pasta:",
+    "Criar nova pasta" (com o nome editado na árvore), OK / Cancelar e a pega
+    no canto."""
+    # (o que é igual na janela de ficheiros)
+    _measure = XpFileDialog._measure
+    _modal = XpFileDialog._modal
+    _msg_label = XpFileDialog._msg_label
+    xp_msgbox = XpFileDialog.xp_msgbox
+    _set_transient = XpFileDialog._set_transient
+    _clamp_grow = XpFileDialog._clamp_grow
+    _grip_press = XpFileDialog._grip_press
+    _grip_motion = XpFileDialog._grip_motion
+    _load_state = staticmethod(XpFileDialog._load_state)
+
+    COLS = (GdkPixbuf.Pixbuf, str, str, bool)      # ícone, nome, caminho, já lido
+
+    def __init__(self, kind, title, options, on_done, parent_window=""):
+        super().__init__(title=t("browseTitle", "Procurar pasta"))
+        self.kind, self.options, self.on_done = kind, options, on_done
+        self._finished = False
+        self._wcache = {}
+        self._parent_window = parent_window
+        self._grip = None
+        self._editing = None
+        self.state = self._load_state()
+        self.set_modal(bool(options.get("modal", True)))
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_resizable(False)
+        self.connect("delete-event", lambda *_: self.finish(1) or True)
+        self.connect("key-press-event", self._on_key)
+        self.connect("realize", self._set_transient)
+        prov = Gtk.CssProvider()
+        prov.load_from_data(CSS.encode())
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), prov,
+                                                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        lay = load("layout-browse.json", {"size": [318, 288], "controls": {}})
+        bw, bh = lay["size"]
+        c = {int(k): v for k, v in lay["controls"].items()}
+        self.box = AnchorFixed(bw, bh)
+        self.add(self.box)
+
+        # o texto que a aplicação pôs (lpszTitle), até 3 linhas
+        r = c.get(14146, [15, 11, 288, 39])
+        desc = self._msg_label(xp_wrap(title or "", r[2], lambda s: self._measure(self, s), 3))
+        self.box.place(desc, r, "lt", "w")
+
+        self.store = Gtk.TreeStore(*self.COLS)
+        self.tree = Gtk.TreeView(model=self.store, headers_visible=False)
+        self.tree.get_style_context().add_class("zxp-browse")
+        self.tree.set_enable_tree_lines(True)
+        col = Gtk.TreeViewColumn()
+        cp = Gtk.CellRendererPixbuf(xpad=0, ypad=0)
+        col.pack_start(cp, False)
+        col.add_attribute(cp, "pixbuf", 0)
+        # (sem esticar: o realce fica só no nome, como no XP)
+        self.name_cell = TreeNameCell(self)
+        col.pack_start(self.name_cell, False)
+        col.add_attribute(self.name_cell, "text", 1)
+        self.name_col = col
+        self.tree.append_column(col)
+        self.tree.set_expander_column(col)
+        self.tree.connect("row-expanded", lambda tv, it, p: self._load(it))
+        self.tree.connect("focus-in-event", lambda *_: self.tree.queue_draw())
+        self.tree.connect("focus-out-event", lambda *_: self.tree.queue_draw())
+        self.tree.get_selection().connect("changed", lambda *_: self._on_select())
+        sw = Gtk.ScrolledWindow()
+        sw.set_shadow_type(Gtk.ShadowType.IN)
+        sw.add(self.tree)
+        self.box.place(sw, c.get(14145, [15, 57, 288, 148]), "lt", "wh")
+
+        lab = Gtk.Label.new_with_mnemonic(mnemonic(t("browseFolder", "Pasta:")))
+        lab.set_xalign(0)
+        self.box.place(lab, c.get(14152, [15, 224, 45, 13]), "lb")
+        self.folder = Gtk.Entry()
+        self.folder.set_activates_default(True)
+        lab.set_mnemonic_widget(self.folder)
+        self.box.place(self.folder, c.get(14148, [68, 218, 236, 23]), "lb", "w")
+
+        self.btn_new = Gtk.Button.new_with_mnemonic(mnemonic(t("browseNewFolder", "Criar &nova pasta")))
+        self.btn_new.connect("clicked", lambda *_: self.new_folder())
+        self.box.place(self.btn_new, c.get(14150, [15, 254, 105, 23]), "lb")
+        self.btn_ok = Gtk.Button.new_with_mnemonic(mnemonic(t("ok", "OK")))
+        self.btn_ok.set_can_default(True)
+        self.btn_ok.connect("clicked", lambda *_: self.accept())
+        self.box.place(self.btn_ok, c.get(1, [147, 254, 75, 23]), "rb")
+        btn_cancel = Gtk.Button.new_with_mnemonic(mnemonic(t("cancel", "Cancelar")))
+        btn_cancel.connect("clicked", lambda *_: self.finish(1))
+        self.box.place(btn_cancel, c.get(2, [228, 254, 75, 23]), "rb")
+        self.set_default(self.btn_ok)
+
+        self.grip = Gtk.EventBox()
+        self.grip.add(Gtk.Image.new_from_file(os.path.join(DATA, "sizegrip.png")))
+        self.grip.get_child().set_halign(Gtk.Align.START)
+        self.grip.get_child().set_valign(Gtk.Align.END)
+        self.grip.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON1_MOTION_MASK)
+        self.grip.connect("realize", lambda w: w.get_window().set_cursor(
+            Gdk.Cursor.new_from_name(w.get_display(), "se-resize")))
+        self.grip.connect("button-press-event", self._grip_press)
+        self.grip.connect("motion-notify-event", self._grip_motion)
+        self.box.place(self.grip, [bw - 17, bh - 17, 17, 17], "rb")
+        size = self.state.get("browseSize") or []
+        if len(size) == 2:
+            self.box.grow = [max(0, int(size[0]) - bw), max(0, int(size[1]) - bh)]
+            self._clamp_grow()
+
+        # Ambiente de trabalho > Os meus documentos, O meu computador (as
+        # pastas pessoais, o disco e as unidades ligadas), Os meus locais na
+        # rede e as pastas do ambiente de trabalho
+        self.root = self._add(None, DESKTOP, place_name(DESKTOP), lazy=False)
+        self.docs = self._add(self.root, DOCUMENTS, place_name(DOCUMENTS))
+        self.computer = self._add(self.root, HOME, place_name(HOME))
+        if os.path.isdir(NETWORK):
+            self._add(self.root, NETWORK, place_name(NETWORK))
+        for name, path in self._subfolders(DESKTOP):
+            self._add(self.root, path, name)
+        self.store.set_value(self.root, 3, True)
+        self.tree.expand_row(self.store.get_path(self.root), False)
+
+        start = None
+        fo = options.get("current_folder")
+        if fo:
+            start = host_path(bytes(fo).rstrip(b"\0").decode("utf-8", "replace"))
+        self.show_all()
+        self.select_folder(start if start and os.path.isdir(start) else DOCUMENTS)
+        self.tree.grab_focus()
+
+    # ------------------------------------------------------------ árvore
+    def _subfolders(self, path):
+        try:
+            names = os.listdir(path)
+        except OSError:
+            return []
+        try:
+            with open(os.path.join(path, ".hidden"), encoding="utf-8") as f:
+                hidden = set(f.read().splitlines())
+        except OSError:
+            hidden = set()
+        out = [(n, os.path.join(path, n)) for n in names
+               if not n.startswith(".") and n not in hidden and os.path.isdir(os.path.join(path, n))]
+        out.sort(key=lambda x: locale.strxfrm(x[0].lower()))
+        return out
+
+    @staticmethod
+    def _has_subfolders(path):
+        try:
+            with os.scandir(path) as it:
+                for i, d in enumerate(it):
+                    if i > 400:
+                        return True         # (pastas enormes: o + fica, como no XP)
+                    if not d.name.startswith(".") and d.is_dir():
+                        return True
+        except OSError:
+            pass
+        return False
+
+    def _add(self, parent, path, name, icon=None, lazy=True):
+        pb = icon or file_icon(path, True, None, 16)
+        it = self.store.append(parent, [pb, name, path, False])
+        if lazy and self._has_subfolders(path) or path == HOME:
+            self.store.append(it, [None, "", "", True])      # (o +)
+        return it
+
+    def _load(self, it):
+        if self.store[it][3]:
+            return
+        self.store[it][3] = True
+        path = self.store[it][2]
+        child = self.store.iter_children(it)
+        while child is not None:
+            if not self.store[child][2]:
+                self.store.remove(child)
+                break
+            child = self.store.iter_next(child)
+        skip = (DESKTOP, DOCUMENTS) if path == HOME else ()
+        for name, p in self._subfolders(path):
+            if p not in skip:
+                self._add(it, p, name)
+        if path == HOME:
+            # o disco e as unidades ligadas, como as unidades do XP
+            self._add(it, "/", place_name("/"))
+            for m in Gio.VolumeMonitor.get().get_mounts():
+                root = m.get_root().get_path()
+                if root and root != "/":
+                    info = ICONS.lookup_by_gicon(m.get_icon(), 16, Gtk.IconLookupFlags.FORCE_SIZE)
+                    self._add(it, root, m.get_name(), info.load_icon() if info else None)
+
+    def _children(self, it):
+        child = self.store.iter_children(it)
+        while child is not None:
+            yield child
+            child = self.store.iter_next(child)
+
+    def select_folder(self, path):
+        """Abre a árvore até à pasta (a partir do local mais próximo)."""
+        path = os.path.abspath(path)
+        self._load(self.computer)
+        anchors = [(DESKTOP, self.root), (DOCUMENTS, self.docs), (HOME, self.computer)]
+        anchors += [(self.store[ch][2], ch) for ch in self._children(self.computer)
+                    if self.store[ch][2] and not self.store[ch][2].startswith(HOME + os.sep)]
+        best = None
+        for p, it in anchors:
+            if path == p or path.startswith(p.rstrip(os.sep) + os.sep):
+                if best is None or len(p) > len(best[0]):
+                    best = (p, it)
+        if best is None:
+            best = (DOCUMENTS, self.docs)
+        cur_path, it = best
+        rest = os.path.relpath(path, cur_path).split(os.sep) if path != cur_path else []
+        for part in rest:
+            if part in (".", ""):
+                continue
+            self._load(it)
+            nxt = next((ch for ch in self._children(it) if self.store[ch][2] == os.path.join(cur_path, part)), None)
+            if nxt is None:
+                break
+            self.tree.expand_to_path(self.store.get_path(it))
+            cur_path, it = os.path.join(cur_path, part), nxt
+        tp = self.store.get_path(it)
+        if tp.get_depth() > 1:
+            parent = tp.copy()
+            parent.up()
+            self.tree.expand_to_path(parent)
+        self.tree.get_selection().select_path(tp)
+        self.tree.set_cursor(tp, None, False)
+        self.tree.scroll_to_cell(tp, None, True, 0.5, 0)
+
+    def selected_path(self):
+        model, it = self.tree.get_selection().get_selected()
+        return (model[it][2], it) if it is not None else (None, None)
+
+    def _on_select(self):
+        path, it = self.selected_path()
+        if it is not None:
+            self.folder.set_text(self.store[it][1])
+            self.btn_new.set_sensitive(bool(path) and os.access(path, os.W_OK))
+        self.tree.queue_draw()
+
+    # ------------------------------------------------------------ nova pasta
+    def new_folder(self):
+        path, it = self.selected_path()
+        if not path or not os.access(path, os.W_OK):
+            return
+        base = t("newFolder", "Nova pasta")
+        name, n = base, 2
+        while os.path.lexists(os.path.join(path, name)):
+            name, n = f"{base} ({n})", n + 1
+        new = os.path.join(path, name)
+        self._load(it)                  # (antes de a criar: senão aparecia duas vezes)
+        try:
+            os.mkdir(new)
+        except OSError as err:
+            self.xp_msgbox(self.get_title(), err.strerror or str(err), "error")
+            return
+        child = self._add(it, new, name)
+        tp = self.store.get_path(child)
+        self.tree.expand_to_path(self.store.get_path(it))
+        self.tree.get_selection().select_path(tp)
+        self.tree.set_cursor(tp, None, False)
+        self.tree.scroll_to_cell(tp, None, False, 0, 0)
+        GLib.timeout_add(50, lambda: self._start_edit(tp))
+
+    def editing_text_hidden(self, text):
+        """(o nome do item a editar não se desenha: fica a caixa por cima)"""
+        return self._editing is not None and self._editing.get("text") == text
+
+    def _start_edit(self, tp, text=None):
+        """O nome editado no sítio, na árvore (como no XP): uma caixa de uma
+        linha, rente ao nome, que cresce ao escrever."""
+        self._end_edit(False)
+        it = self.store.get_iter(tp)
+        name = self.store[it][1]
+        ent = Gtk.Entry()
+        ent.set_text(name if text is None else text)
+        ent.get_style_context().add_class("zxp-rename")
+        ent.get_style_context().add_class("zxp-rename-list")
+        holder = Gtk.EventBox()
+        holder.set_visible_window(True)
+        holder.add(ent)
+        holder.connect("realize", lambda w: w.get_window().raise_())
+        self._editing = {"ref": Gtk.TreeRowReference.new(self.store, tp), "entry": ent, "holder": holder,
+                         "text": name, "since": time.monotonic()}
+        ent.connect("changed", lambda *_: self._place_edit())
+        ent.connect("activate", lambda *_: self._end_edit(True))
+        ent.connect("key-press-event", self._edit_key)
+        ent.connect("focus-out-event", self._edit_focus_out)
+        self.box.put(holder, 0, 0)
+        self.box.editor = (holder, [0, 0, 1, 1])
+        self._place_edit()
+        holder.show_all()
+        ent.grab_focus()
+        ent.select_region(0, -1)
+        self._editing["timer"] = GLib.timeout_add(50, lambda: self._editing is not None and (self._place_edit() or True))
+        self.tree.queue_draw()
+        return False
+
+    def _place_edit(self):
+        ed = self._editing
+        if not ed or not ed["ref"].valid():
+            return
+        tp = ed["ref"].get_path()
+        cell = self.tree.get_cell_area(tp, self.name_col)
+        bg = self.tree.get_background_area(tp, self.name_col)
+        off = self.name_col.cell_get_position(self.name_cell)
+        x0 = cell.x + (off[0] if off else 0) + 2          # (o texto, depois do xpad)
+        wx, wy = self.tree.convert_bin_window_to_widget_coords(x0, bg.y)
+        co = self.tree.translate_coordinates(self.box, wx, wy)
+        if co is None:
+            return
+        tw = self._measure(self, ed["entry"].get_text())
+        w = tw + 2 + 15 + 2
+        rect = [co[0] - 2 - 1, co[1] + (bg.height - 17) // 2, w, 17]
+        if self.box.editor and self.box.editor[1] != rect:
+            self.box.editor = (ed["holder"], rect)
+            self.box.queue_resize()
+
+    def _edit_key(self, _w, ev):
+        if ev.keyval == Gdk.KEY_Escape:
+            self._end_edit(False)
+            return True
+        return False
+
+    def _edit_focus_out(self, *_):
+        ed = self._editing
+        if ed is None:
+            return False
+        if time.monotonic() - ed["since"] < 0.4:
+            GLib.idle_add(lambda: self._editing is ed and ed["entry"].grab_focus() and False)
+            return False
+        GLib.idle_add(lambda: self._editing is ed and self._end_edit(True))
+        return False
+
+    def _end_edit(self, commit=False):
+        ed, self._editing = self._editing, None
+        if ed is None:
+            return
+        GLib.source_remove(ed["timer"]) if ed.get("timer") else None
+        text = ed["entry"].get_text()
+        self.box.editor = None
+        ed["holder"].destroy()
+        self.tree.grab_focus()
+        self.tree.queue_draw()
+        if commit and ed["ref"].valid():
+            GLib.idle_add(lambda: self._rename(ed["ref"], text) and False)
+
+    def _rename(self, ref, text):
+        it = self.store.get_iter(ref.get_path())
+        old = self.store[it][2]
+        new = text.replace("\n", " ").strip()
+        if not new or new == os.path.basename(old):
+            return
+        title = t("renameError", "Erro ao mudar o nome a ficheiro ou pasta")
+        target = os.path.join(os.path.dirname(old), new)
+        if "/" in new or new in (".", ".."):
+            self.xp_msgbox(title, t("badChars"), "error")
+            self._start_edit(ref.get_path(), new)
+            return
+        if os.path.lexists(target) and not os.path.samefile(target, old):
+            self.xp_msgbox(title, fmt(t("renameFailed"), t("nameExists"), os.path.basename(old)), "error")
+            self._start_edit(ref.get_path(), new)
+            return
+        try:
+            os.rename(old, target)
+        except OSError as err:
+            self.xp_msgbox(title, fmt(t("renameFailed"), err.strerror or str(err), os.path.basename(old)), "error")
+            return
+        self.store[it][1], self.store[it][2] = new, target
+        self._on_select()
+
+    # ------------------------------------------------------------ resposta
+    def _on_key(self, _w, ev):
+        if self._editing is not None:
+            return False
+        if ev.keyval == Gdk.KEY_Escape:
+            self.finish(1)
+            return True
+        if ev.keyval == Gdk.KEY_F2 and self.tree.has_focus():
+            path, it = self.selected_path()
+            if path and it is not None and self.store.iter_parent(it) is not None and \
+                    os.access(os.path.dirname(path), os.W_OK) and path not in PLACES:
+                self._start_edit(self.store.get_path(it))
+            return True
+        return False
+
+    def accept(self):
+        self._end_edit(True)
+        path, it = self.selected_path()
+        text = self.folder.get_text().strip()
+        if it is not None and text and text != self.store[it][1]:
+            cand = os.path.expanduser(text)
+            cand = cand if os.path.isabs(cand) else os.path.join(path or HOME, cand)
+            if not os.path.isdir(cand):
+                self.xp_msgbox(self.get_title(), t("pathNotFound", "%s\nO caminho não existe.").replace("%s", cand))
+                return
+            path = cand
+        if not path or not os.path.isdir(path):
+            return
+        if self.kind == "savefiles":
+            files = [bytes(f).rstrip(b"\0").decode("utf-8", "replace") for f in self.options.get("files") or []]
+            uris = [Gio.File.new_for_path(os.path.join(path, os.path.basename(f))).get_uri() for f in files]
+        else:
+            uris = [Gio.File.new_for_path(path).get_uri()]
+        self.finish(0, uris)
+
+    def finish(self, response, uris=None):
+        if self._finished:
+            return
+        self._end_edit(False)
+        self._finished = True
+        self.state = self._load_state()
+        self.state["browseSize"] = [self.box.base[0] + self.box.grow[0], self.box.base[1] + self.box.grow[1]]
+        try:
+            os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+            tmp = STATE_FILE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(self.state, f)
+            os.replace(tmp, STATE_FILE)
+        except OSError:
+            pass
+        results = {}
+        if response == 0:
+            results["uris"] = GLib.Variant("as", uris or [])
+            results["writable"] = GLib.Variant("b", True)
+        self.hide()
+        self.on_done(response, results)
+        self.destroy()
+
+
+def load_thumb(e):
+    """A miniatura do XP: a imagem reduzida para caber em 96 x 96 (as
+    pequenas não crescem); de outros tipos, a miniatura que o GNOME já fez."""
+    path = None
+    try:
+        info = Gio.File.new_for_path(e.path).query_info("thumbnail::path", Gio.FileQueryInfoFlags.NONE, None)
+        path = info.get_attribute_byte_string("thumbnail::path")
+    except GLib.Error:
+        pass
+    src = path or (e.path if (e.ctype or "").startswith("image/") else None)
+    if not src:
+        return None
+    try:
+        fmt_, w, h = GdkPixbuf.Pixbuf.get_file_info(src)
+        if fmt_ is None or w <= 0 or h <= 0:
+            return None
+        if w * h > 4_000_000:
+            pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, 96, 96, True)
+        else:
+            pb = GdkPixbuf.Pixbuf.new_from_file(src)
+        pb = pb.apply_embedded_orientation() or pb
+        w, h = pb.get_width(), pb.get_height()
+        if w > 96 or h > 96:
+            k = min(96 / w, 96 / h)
+            pb = pb.scale_simple(max(1, round(w * k)), max(1, round(h * k)), GdkPixbuf.InterpType.HYPER)
+        return pb
+    except (GLib.Error, TypeError):
+        return None
+
+
+# ---------------------------------------------------------------- portal
+class Portal:
+    def __init__(self, loop):
+        self.loop = loop
+        self.active = 0
+        self.conn = None
+        self._idle = 0
+
+    def start(self):
+        Gio.bus_own_name(Gio.BusType.SESSION, BUS_NAME, Gio.BusNameOwnerFlags.NONE,
+                         self._on_bus, None, lambda *_: self.loop.quit())
+
+    def _on_bus(self, conn, _name):
+        self.conn = conn
+        node = Gio.DBusNodeInfo.new_for_xml(IFACE)
+        conn.register_object(OBJ_PATH, node.interfaces[0], self._on_call, None, None)
+        self._arm_idle()
+
+    def _arm_idle(self):
+        if self._idle:
+            GLib.source_remove(self._idle)
+        self._idle = GLib.timeout_add_seconds(IDLE_EXIT_S, self._maybe_exit)
+
+    def _maybe_exit(self):
+        self._idle = 0
+        if not self.active:
+            self.loop.quit()
+            return False
+        self._arm_idle()
+        return False
+
+    def _on_call(self, conn, sender, path, iface, method, params, inv):
+        handle, app_id, parent, title, options = params.unpack()
+        kind = {"OpenFile": "open", "SaveFile": "save", "SaveFiles": "savefiles"}[method]
+        try:
+            self._show(kind, handle, parent, title, options, inv)
+        except Exception as e:      # janela do GNOME em vez desta
+            print(f"zorin-xp-filechooser: {e}; a usar a do GNOME", file=sys.stderr)
+            self._fallback(method, params, inv)
+
+    def _fallback(self, method, params, inv):
+        def done(conn, res):
+            try:
+                inv.return_value(conn.call_finish(res))
+            except GLib.Error as e:
+                inv.return_gerror(e)
+        self.conn.call(FALLBACK, OBJ_PATH, "org.freedesktop.impl.portal.FileChooser", method, params,
+                       GLib.VariantType("(ua{sv})"), Gio.DBusCallFlags.NONE, -1, None, done)
+
+    def _show(self, kind, handle, parent, title, options, inv):
+        reg = [0]
+        dialog = [None]
+
+        def done(response, results):
+            self.active -= 1
+            if reg[0]:
+                self.conn.unregister_object(reg[0])
+                reg[0] = 0
+            inv.return_value(GLib.Variant("(ua{sv})", (response, results)))
+            self._arm_idle()
+
+        def on_request(conn, sender, path, iface, method, params, rinv):
+            rinv.return_value(None)
+            if dialog[0]:
+                dialog[0].finish(2)
+
+        req = Gio.DBusNodeInfo.new_for_xml(REQUEST)
+        try:
+            reg[0] = self.conn.register_object(handle, req.interfaces[0], on_request, None, None)
+        except GLib.Error:
+            reg[0] = 0
+        self.active += 1
+        try:
+            cls = XpBrowseFolder if kind == "savefiles" or options.get("directory") else XpFileDialog
+            dialog[0] = cls(kind, title, options, done, parent)
+        except Exception:
+            self.active -= 1
+            if reg[0]:
+                self.conn.unregister_object(reg[0])
+            raise
+        dialog[0].present()
+
+
+def shot(widget, path):
+    """(teste) Desenha o conteúdo de uma janela num PNG, sem o ecrã."""
+    child = widget.get_child() if isinstance(widget, Gtk.Window) else widget
+    a = child.get_allocation()
+    surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, a.width, a.height)
+    cr = cairo.Context(surf)
+    cr.set_source_rgb(*rgb(FACE))
+    cr.paint()
+    child.draw(cr)
+    surf.write_to_png(path)
+
+
+def main():
+    try:
+        locale.setlocale(locale.LC_ALL, "")
+    except locale.Error:
+        pass
+    if len(sys.argv) >= 3 and sys.argv[1] == "--test":
+        kind = {"open": "open", "save": "save", "folder": "open", "multi": "open"}[sys.argv[2]]
+        opts = {"filters": [("Imagens", [(1, "image/*")]), ("Todos os ficheiros", [(0, "*")])],
+                "current_name": "sem título.png" if kind == "save" else "",
+                "directory": sys.argv[2] == "folder", "multiple": sys.argv[2] == "multi"}
+        if len(sys.argv) > 3 and sys.argv[3]:
+            opts["current_folder"] = sys.argv[3].encode() + b"\0"
+
+        def done(r, res):
+            print(r, {k: v.unpack() for k, v in res.items()})
+            Gtk.main_quit()
+        global TEST
+        TEST = True
+        # (fora da sessão não há as definições do GNOME: as do tema XP)
+        st = Gtk.Settings.get_default()
+        st.set_property("gtk-icon-theme-name", "WindowsXP")
+        st.set_property("gtk-font-name", "Tahoma 8.25")
+        global ICONS
+        ICONS = Gtk.IconTheme.get_default()
+        _icon_cache.clear()
+        if opts["directory"]:
+            dlg = XpBrowseFolder(kind, os.environ.get("ZXP_FC_TITLE", "Seleccione uma pasta:"), opts, done)
+        else:
+            dlg = XpFileDialog(kind, "", opts, done)
+        if len(sys.argv) > 4:
+            # (teste: escreve o nome e carrega no botão)
+            global TEST_REPLY
+            TEST_REPLY = True
+
+            def go():
+                dlg.entry.set_text(sys.argv[4])
+                dlg.accept()
+                return False
+            GLib.timeout_add(2000, go)
+        script = os.environ.get("ZXP_FC_SCRIPT")
+        if script:
+            with open(script, encoding="utf-8") as f:
+                code = f.read()
+            GLib.timeout_add(500, lambda: exec(code, {"dlg": dlg, "Gtk": Gtk, "Gdk": Gdk, "GLib": GLib,
+                                                      "shot": shot, "os": os}) and False)
+        Gtk.main()
+        return
+    loop = GLib.MainLoop()
+    Portal(loop).start()
+    loop.run()
+
+
+if __name__ == "__main__":
+    main()

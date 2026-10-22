@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="explorerbar.css">
+<style>
+    .tb.add { --icon: url("img/ebar-add.png"); --icon-hot: url("img/ebar-add-hot.png"); }
+    .tb.organize { --icon: url("img/ebar-organize.png"); --icon-hot: url("img/ebar-organize-hot.png"); }
+</style>
+</head>
+<body>
+<div id="toolbar">
+    <div class="tb add" id="add"><i></i>Adicionar...</div>
+    <div class="tb organize" id="organize"><i></i>Organizar...</div>
+</div>
+<div class="box" id="orgbox" hidden>
+    <div>Para criar uma pasta, clique em Criar pasta. Para mudar o nome ou eliminar um item, seleccione-o e clique em Mudar o nome ou Eliminar.</div>
+    <div class="buttons">
+        <button id="newfolder">Criar pasta</button><button id="rename">Mudar o nome</button>
+        <button id="delete">Eliminar</button><button id="orgclose">Fechar</button>
+    </div>
+</div>
+<div id="list" tabindex="0"></div>
+<script src="explorerbar.js"></script>
+<script src="sidebar.js"></script>
+</body>
+</html>

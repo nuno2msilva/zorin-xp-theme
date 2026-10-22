@@ -1,0 +1,523 @@
+/*
+ * Zorin XP — Luna (Azul)
+ * Gerado a partir do luna.msstyles do Windows XP por tools/build.py.
+ * Tokens: {{slice:NOME}} = margens de corte (topo dir base esq) do INI,
+ *         {{bw:NOME}}    = as mesmas margens em px.
+ * Blocos marcados com @gtk3 / @gtk4 … @end são condicionais (ver tools/builders/gtktheme.py).
+ */
+
+/* ---------------------------------------------------------------------
+ * Cores do sistema ([SysMetrics] do NORMALBLUE_INI)
+ * ------------------------------------------------------------------- */
+@define-color xp_btnface #ECE9D8;        /* Btnface / MenuBar */
+@define-color xp_window #FFFFFF;         /* Window / Menu */
+@define-color xp_text #000000;
+@define-color xp_highlight #316AC5;      /* Highlight / MenuHilight */
+@define-color xp_highlight_text #FFFFFF;
+@define-color xp_graytext #ACA899;       /* GrayText / BtnShadow */
+@define-color xp_disabled_text #A1A192;  /* button.pushbutton(disabled) TextColor */
+@define-color xp_btnshadow #ACA899;
+@define-color xp_dkshadow #716F64;       /* DkShadow3d */
+@define-color xp_light #F1EFE2;          /* Light3d */
+@define-color xp_field_border #7F9DB9;   /* edit / listbox / combobox BorderColor */
+@define-color xp_field_disabled #EBEBE4; /* edit(Disabled) FillColor */
+@define-color xp_field_disabled_border #C9C7BA;
+@define-color xp_infobk #FFFFE1;         /* InfoBk (tooltips) */
+@define-color xp_groupbox_text #0046D5;  /* button.groupbox TextColor */
+@define-color xp_caption_text #FFFFFF;
+@define-color xp_caption_inactive_text #D8E4F8;
+@define-color xp_caption_shadow #0A1883;  /* Window TextShadowColor */
+@define-color xp_hotlight #FFC83C;       /* Tab AccentColorHint (laranja) */
+
+/* Nomes usados por aplicações e pelo libadwaita */
+@define-color theme_bg_color @xp_btnface;
+@define-color theme_fg_color @xp_text;
+@define-color theme_base_color @xp_window;
+@define-color theme_text_color @xp_text;
+@define-color theme_selected_bg_color @xp_highlight;
+@define-color theme_selected_fg_color @xp_highlight_text;
+@define-color insensitive_bg_color @xp_btnface;
+@define-color insensitive_fg_color @xp_disabled_text;
+@define-color insensitive_base_color @xp_field_disabled;
+@define-color theme_unfocused_bg_color @xp_btnface;
+@define-color theme_unfocused_fg_color @xp_text;
+@define-color theme_unfocused_base_color @xp_window;
+@define-color theme_unfocused_text_color @xp_text;
+@define-color theme_unfocused_selected_bg_color @xp_highlight;
+@define-color theme_unfocused_selected_fg_color @xp_highlight_text;
+@define-color borders @xp_btnshadow;
+@define-color unfocused_borders @xp_btnshadow;
+@define-color warning_color #C08000;
+@define-color error_color #C00000;
+@define-color success_color #21A121;
+/*@gtk4*/
+@define-color accent_color @xp_highlight;
+@define-color accent_bg_color @xp_highlight;
+@define-color accent_fg_color @xp_highlight_text;
+@define-color destructive_color #C00000;
+@define-color destructive_bg_color #E45D3D;
+@define-color destructive_fg_color #FFFFFF;
+@define-color success_bg_color #21A121;
+@define-color success_fg_color #FFFFFF;
+@define-color warning_bg_color #FAC458;
+@define-color warning_fg_color #000000;
+@define-color error_bg_color #E45D3D;
+@define-color error_fg_color #FFFFFF;
+@define-color window_bg_color @xp_btnface;
+@define-color window_fg_color @xp_text;
+@define-color view_bg_color @xp_window;
+@define-color view_fg_color @xp_text;
+@define-color headerbar_bg_color #0054E3;
+@define-color headerbar_fg_color @xp_caption_text;
+@define-color headerbar_border_color #0054E3;
+@define-color headerbar_backdrop_color #7A96DF;
+@define-color headerbar_shade_color transparent;
+@define-color card_bg_color @xp_window;
+@define-color card_fg_color @xp_text;
+@define-color card_shade_color @xp_btnshadow;
+@define-color dialog_bg_color @xp_btnface;
+@define-color dialog_fg_color @xp_text;
+@define-color popover_bg_color @xp_window;
+@define-color popover_fg_color @xp_text;
+@define-color sidebar_bg_color #7A96DF;
+@define-color sidebar_fg_color @xp_text;
+@define-color shade_color rgba(0, 0, 0, 0.2);
+@define-color scrollbar_outline_color transparent;
+/*@end*/
+
+/* ---------------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------------- */
+* {
+  /*@gtk3*/
+  -GtkScrollbar-has-backward-stepper: true;
+  -GtkScrollbar-has-forward-stepper: true;
+  -GtkWidget-text-handle-width: 16;
+  -GtkWidget-text-handle-height: 16;
+  -GtkDialog-button-spacing: 6;
+  -GtkDialog-action-area-border: 0;
+  -GtkTreeView-expander-size: 9;
+  -GtkTreeView-horizontal-separator: 4;
+  -GtkToolButton-icon-spacing: 4;
+  -GtkTextView-error-underline-color: #FF0000;
+  -GtkCheckButton-indicator-size: 13;
+  -gtk-outline-radius: 0;
+  outline-color: @xp_text;
+  outline-style: dotted;
+  outline-offset: -3px;
+  outline-width: 1px;
+  /*@end*/
+  /*@gtk4*/
+  outline: 0 none transparent;
+  /*@end*/
+  -gtk-secondary-caret-color: @xp_highlight;
+  transition: none;
+}
+/*@gtk4*/
+/* GTK4 desenha o outline sempre; no XP o retângulo de foco só aparece com o teclado */
+*:focus-visible {
+  outline-color: @xp_text;
+  outline-style: dotted;
+  outline-offset: -3px;
+  outline-width: 1px;
+}
+/*@end*/
+
+window, .background {
+  color: @xp_text;
+  background-color: @xp_btnface;
+}
+
+*:disabled, label:disabled {
+  color: @xp_disabled_text;
+}
+
+label.dim-label, .dim-label {
+  opacity: 1;
+  color: #444444;
+}
+
+label.separator {
+  color: @xp_graytext;
+}
+
+label selection, .view selection, text selection, entry selection, textview text selection {
+  color: @xp_highlight_text;
+  background-color: @xp_highlight;
+}
+
+.view, iconview, textview text, treeview.view {
+  color: @xp_text;
+  background-color: @xp_window;
+}
+
+.view:disabled, textview text:disabled {
+  color: @xp_disabled_text;
+  background-color: @xp_field_disabled;
+}
+
+.view:selected, .view text:selected, iconview:selected, flowbox flowboxchild:selected {
+  color: @xp_highlight_text;
+  background-color: @xp_highlight;
+}
+
+/*@gtk3*/
+.view:selected:backdrop { color: @xp_highlight_text; background-color: @xp_highlight; }
+/*@end*/
+
+rubberband, .rubberband {
+  border: 1px solid @xp_highlight;
+  background-color: alpha(@xp_highlight, 0.3);
+}
+
+separator {
+  min-width: 1px;
+  min-height: 1px;
+  background-color: @xp_btnshadow;
+}
+
+/* ---------------------------------------------------------------------
+ * Botões (button.pushbutton)
+ *   SizingMargins 8,8,9,9 · ContentMargins 3 · 5 estados
+ * ------------------------------------------------------------------- */
+button {
+  min-height: 17px;  /* 17 + 2×3 = 23 px, a altura padrão dos botões do XP */
+  min-width: 61px;   /* 75 px de largura mínima, como os botões das caixas de diálogo */
+  padding: 3px 6px;
+  margin: 1px;
+  {{part:button:normal}}
+  box-shadow: none;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+  color: @xp_text;
+  outline-offset: -4px;
+}
+
+button:hover { {{state:button:hover}} }
+button:active, button:checked { {{state:button:active}} }
+button:hover:checked { {{state:button:active}} }
+button.default, button:focus:not(:active):not(:hover):not(:checked) {
+  {{state:button:default}}
+}
+button:disabled, button:disabled:checked {
+  {{state:button:disabled}}
+  color: @xp_disabled_text;
+}
+
+button.image-button { min-width: 15px; padding: 3px 4px; }
+button.text-button.image-button label { padding: 0 2px; }
+button.circular { border-radius: 0; }
+
+/* Botões "planos" = botões de barra de ferramentas (Toolbar.Button) */
+button.flat, toolbar button, .inline-toolbar button, actionbar button.flat,
+filechooser button.flat, .path-bar button, popover.background modelbutton.flat {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  border-image: none;
+  background: none;
+  border: 0;
+  padding: 4px 5px;
+}
+button.flat:hover, toolbar button:hover, .inline-toolbar button:hover, .path-bar button:hover {
+  {{part:toolbar-button:hover}}
+}
+button.flat:active, toolbar button:active, .inline-toolbar button:active, .path-bar button:active {
+  {{part:toolbar-button:active}}
+}
+button.flat:checked, toolbar button:checked, .path-bar button:checked {
+  {{part:toolbar-button:checked}}
+}
+button.flat:checked:hover, toolbar button:checked:hover, .path-bar button:checked:hover {
+  {{part:toolbar-button:checked-hover}}
+}
+button.flat:disabled, toolbar button:disabled { border-image: none; }
+
+/* Botões ligados (.linked) mantêm o aspeto individual do XP */
+.linked > button, .linked > entry { margin: 1px 0; }
+.linked > button + button { margin-left: 1px; }
+
+/* ---------------------------------------------------------------------
+ * Caixas de verificação e botões de opção (TrueSize 13×13)
+ * ------------------------------------------------------------------- */
+check, radio {
+  min-width: 13px;
+  min-height: 13px;
+  margin: 0 5px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+/*@gtk3*/
+checkbutton.text-button, radiobutton.text-button { padding: 1px 0; outline-offset: 0; }
+checkbutton check, radiobutton radio { margin: 0 5px 0 0; }
+/*@end*/
+/*@gtk4*/
+checkbutton { padding: 1px 0; outline-offset: 0; border-spacing: 5px; }
+/*@end*/
+
+check { -gtk-icon-source: url("assets/check-unchecked-normal.png"); }
+check:hover { -gtk-icon-source: url("assets/check-unchecked-hover.png"); }
+check:active { -gtk-icon-source: url("assets/check-unchecked-active.png"); }
+check:disabled { -gtk-icon-source: url("assets/check-unchecked-disabled.png"); }
+check:checked { -gtk-icon-source: url("assets/check-checked-normal.png"); }
+check:checked:hover { -gtk-icon-source: url("assets/check-checked-hover.png"); }
+check:checked:active { -gtk-icon-source: url("assets/check-checked-active.png"); }
+check:checked:disabled { -gtk-icon-source: url("assets/check-checked-disabled.png"); }
+check:indeterminate { -gtk-icon-source: url("assets/check-mixed-normal.png"); }
+check:indeterminate:hover { -gtk-icon-source: url("assets/check-mixed-hover.png"); }
+check:indeterminate:active { -gtk-icon-source: url("assets/check-mixed-active.png"); }
+check:indeterminate:disabled { -gtk-icon-source: url("assets/check-mixed-disabled.png"); }
+
+radio { -gtk-icon-source: url("assets/radio-unchecked-normal.png"); }
+radio:hover { -gtk-icon-source: url("assets/radio-unchecked-hover.png"); }
+radio:active { -gtk-icon-source: url("assets/radio-unchecked-active.png"); }
+radio:disabled { -gtk-icon-source: url("assets/radio-unchecked-disabled.png"); }
+radio:checked { -gtk-icon-source: url("assets/radio-checked-normal.png"); }
+radio:checked:hover { -gtk-icon-source: url("assets/radio-checked-hover.png"); }
+radio:checked:active { -gtk-icon-source: url("assets/radio-checked-active.png"); }
+radio:checked:disabled { -gtk-icon-source: url("assets/radio-checked-disabled.png"); }
+
+/* Nos menus, o XP desenha só o visto/ponto (sem caixa) */
+menu menuitem check, menu menuitem radio, .menu menuitem check, .menu menuitem radio,
+popover modelbutton check, popover modelbutton radio {
+  -gtk-icon-source: none;
+  min-width: 13px;
+  min-height: 13px;
+  margin: 0 4px 0 0;
+}
+menu menuitem check:checked, .menu menuitem check:checked, popover modelbutton check:checked {
+  -gtk-icon-source: -gtk-icontheme("object-select-symbolic");
+}
+menu menuitem radio:checked, .menu menuitem radio:checked, popover modelbutton radio:checked {
+  -gtk-icon-source: -gtk-icontheme("media-record-symbolic");
+  -gtk-icon-transform: scale(0.5);
+}
+/* GTK4: ponto e visto do XP (Marlett), pretos e brancos sobre o realce; as
+ * regras gerais dos botões de opção (radio:hover…) não entram nos menus */
+popover modelbutton radio, popover modelbutton radio:hover, popover modelbutton radio:active,
+popover modelbutton check, popover modelbutton check:hover, popover modelbutton check:active {
+  -gtk-icon-source: none;
+  -gtk-icon-transform: none;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+popover.menu modelbutton radio, popover modelbutton radio,
+popover.menu modelbutton check, popover modelbutton check { -gtk-icon-size: 13px; min-width: 13px; min-height: 13px; }
+popover modelbutton radio:checked, popover modelbutton radio:checked:hover,
+popover modelbutton radio:checked:active { -gtk-icon-source: url("assets/menu-bullet13-normal.png"); -gtk-icon-transform: none; }
+popover modelbutton:hover radio:checked, popover modelbutton:hover radio:checked:hover,
+popover modelbutton:selected radio:checked { -gtk-icon-source: url("assets/menu-bullet13-selected.png"); }
+popover modelbutton check:checked, popover modelbutton check:checked:hover,
+popover modelbutton check:checked:active { -gtk-icon-source: url("assets/menu-check13-normal.png"); }
+popover modelbutton:hover check:checked, popover modelbutton:hover check:checked:hover,
+popover modelbutton:selected check:checked { -gtk-icon-source: url("assets/menu-check13-selected.png"); }
+
+/* ---------------------------------------------------------------------
+ * Campos de texto (edit: BorderFill 1 px #7F9DB9)
+ * ------------------------------------------------------------------- */
+entry, spinbutton:not(.vertical), spinbutton.vertical > entry {
+  min-height: 13px;  /* 13 + 2 + 3 + 2×1 = 20 px, como os campos do XP */
+  padding: 2px 3px 3px;
+  border: 1px solid @xp_field_border;
+  border-radius: 0;
+  background-color: @xp_window;
+  color: @xp_text;
+  box-shadow: none;
+  caret-color: @xp_text;
+}
+entry:disabled, spinbutton:disabled {
+  background-color: @xp_field_disabled;
+  color: @xp_disabled_text;
+}
+entry:focus, entry:focus-within { border-color: @xp_field_border; }
+entry image { color: @xp_text; margin: 0 2px; }
+entry progress { margin: 0 -2px -2px; border-bottom: 2px solid @xp_highlight; background: none; }
+entry.error { color: #C00000; }
+entry.flat { border-color: transparent; background-color: transparent; }
+
+/* ---------------------------------------------------------------------
+ * Listas pendentes (Combobox): 22 px = borda 1 + 1 branco + botão 15×18
+ * (botão + glifo pré-desenhados por tools/builders/gtkassets.py, combo-arrow-*)
+ * ------------------------------------------------------------------- */
+combobox button.combo, dropdown > button, button.dropdown {
+  min-width: 0;
+  min-height: 18px;
+  margin: 1px 0;
+  padding: 1px;
+  border: 1px solid @xp_field_border;
+  border-image: none;
+  border-radius: 0;
+  background-color: @xp_window;
+  background-image: none;
+  color: @xp_text;
+  outline-offset: -2px;
+}
+combobox button.combo:disabled, dropdown > button:disabled {
+  border-color: @xp_field_disabled_border;
+  background-color: @xp_field_disabled;
+}
+combobox button.combo cellview, combobox button.combo > box > label, dropdown > button label { margin: 0 0 0 2px; }
+/* com foco, o XP realça o texto selecionado (Highlight) */
+combobox button.combo:focus cellview, dropdown > button:focus label {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+}
+combobox arrow, dropdown arrow {
+  min-width: 15px;
+  min-height: 18px;
+  margin: 0 0 0 2px;
+  padding: 0;
+  border: 0;
+  -gtk-icon-source: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("assets/combo-arrow-normal.png");
+}
+combobox button.combo:hover arrow, dropdown > button:hover arrow { background-image: url("assets/combo-arrow-hover.png"); }
+combobox button.combo:checked arrow, combobox button.combo:active arrow,
+dropdown > button:checked arrow { background-image: url("assets/combo-arrow-active.png"); }
+combobox button.combo:disabled arrow, dropdown > button:disabled arrow { background-image: url("assets/combo-arrow-disabled.png"); }
+/* lista pendente editável: entrada + botão num só contorno */
+combobox .linked > entry {
+  min-height: 14px;
+  margin: 1px 0;
+  border-right-width: 0;
+}
+combobox .linked > entry + button.combo {
+  min-width: 0;
+  padding: 1px;
+  border-left-width: 0;
+}
+combobox .linked > entry + button.combo arrow { margin: 0; }
+/* lista desdobrada: caixa de lista com contorno preto */
+combobox window.popup menu, combobox menu, .combo-popup {
+  padding: 0;
+  border: 1px solid #000000;
+}
+combobox menu menuitem { padding: 1px 3px; min-height: 13px; }
+
+/* ---------------------------------------------------------------------
+ * Botões giratórios (Spin)
+ * ------------------------------------------------------------------- */
+spinbutton:not(.vertical) { padding: 0; }
+spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > text {
+  min-width: 28px;
+  margin: 0;
+  padding: 2px 3px;
+  border: 0;
+  background: none;
+}
+spinbutton > button, spinbutton:not(.vertical) > button {
+  min-width: 15px;
+  min-height: 18px;
+  margin: 0 0 0 1px;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  color: transparent;
+  -gtk-icon-source: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url("assets/spin-left-btn-normal.png");
+}
+spinbutton:not(.vertical) > button.up { background-image: url("assets/spin-right-btn-normal.png"); }
+spinbutton:not(.vertical) > button.down:hover { background-image: url("assets/spin-left-btn-hover.png"); }
+spinbutton:not(.vertical) > button.down:active { background-image: url("assets/spin-left-btn-active.png"); }
+spinbutton:not(.vertical) > button.down:disabled { background-image: url("assets/spin-left-btn-disabled.png"); }
+spinbutton:not(.vertical) > button.up:hover { background-image: url("assets/spin-right-btn-hover.png"); }
+spinbutton:not(.vertical) > button.up:active { background-image: url("assets/spin-right-btn-active.png"); }
+spinbutton:not(.vertical) > button.up:disabled { background-image: url("assets/spin-right-btn-disabled.png"); }
+spinbutton:not(.vertical) > button.up { margin-right: 1px; }
+spinbutton:not(.vertical) { padding: 1px 0; }
+spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > text { padding: 1px 3px 2px; }
+
+/* ---------------------------------------------------------------------
+ * Barras de deslocamento (ScrollBar: 17 px, setas, eixo, polegar)
+ * ------------------------------------------------------------------- */
+scrollbar {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+scrollbar.vertical {
+  {{part:scroll-shaft-vert:normal}}
+}
+scrollbar.horizontal {
+  {{part:scroll-shaft-horz:normal}}
+}
+scrollbar.vertical:disabled { {{state:scroll-shaft-vert:disabled}} }
+scrollbar.horizontal:disabled { {{state:scroll-shaft-horz:disabled}} }
+scrollbar trough { padding: 0; margin: 0; border: 0; background: none; }
+scrollbar.vertical trough { min-width: 17px; }
+scrollbar.horizontal trough { min-height: 17px; }
+
+scrollbar slider {
+  margin: 0;
+  border-style: solid;
+  border-width: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+scrollbar.vertical slider {
+  min-width: 17px;
+  min-height: 8px;
+  {{part:scroll-thumb-vert:normal}}
+  background-image: url("assets/scroll-grip-vert-normal.png"), url("assets/scroll-thumb-vert-normal-fill.png");
+  background-size: auto, 100% 100%;
+  background-position: center, left top;
+}
+scrollbar.vertical slider:hover { border-image-source: url("assets/scroll-thumb-vert-hover.png"); background-image: url("assets/scroll-grip-vert-hover.png"), url("assets/scroll-thumb-vert-hover-fill.png"); }
+scrollbar.vertical slider:active { border-image-source: url("assets/scroll-thumb-vert-active.png"); background-image: url("assets/scroll-grip-vert-active.png"), url("assets/scroll-thumb-vert-active-fill.png"); }
+scrollbar.horizontal slider {
+  min-height: 17px;
+  min-width: 8px;
+  {{part:scroll-thumb-horz:normal}}
+  background-image: url("assets/scroll-grip-horz-normal.png"), url("assets/scroll-thumb-horz-normal-fill.png");
+  background-size: auto, 100% 100%;
+  background-position: center, left top;
+}
+scrollbar.horizontal slider:hover { border-image-source: url("assets/scroll-thumb-horz-hover.png"); background-image: url("assets/scroll-grip-horz-hover.png"), url("assets/scroll-thumb-horz-hover-fill.png"); }
+scrollbar.horizontal slider:active { border-image-source: url("assets/scroll-thumb-horz-active.png"); background-image: url("assets/scroll-grip-horz-active.png"), url("assets/scroll-thumb-horz-active-fill.png"); }
+scrollbar slider:disabled { border-image: none; background-image: none; }
+
+scrollbar button {
+  min-width: 17px;
+  min-height: 17px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background-color: transparent;
+  -gtk-icon-source: none;
+  color: transparent;
+}
+scrollbar.vertical button.up { background-image: url("assets/scroll-arrow-up-normal.png"); }
+scrollbar.vertical button.up:hover { background-image: url("assets/scroll-arrow-up-hover.png"); }
+scrollbar.vertical button.up:active { background-image: url("assets/scroll-arrow-up-active.png"); }
+scrollbar.vertical button.up:disabled { background-image: url("assets/scroll-arrow-up-disabled.png"); }
+scrollbar.vertical button.down { background-image: url("assets/scroll-arrow-down-normal.png"); }
+scrollbar.vertical button.down:hover { background-image: url("assets/scroll-arrow-down-hover.png"); }
+scrollbar.vertical button.down:active { background-image: url("assets/scroll-arrow-down-active.png"); }
+scrollbar.vertical button.down:disabled { background-image: url("assets/scroll-arrow-down-disabled.png"); }
+scrollbar.horizontal button.up { background-image: url("assets/scroll-arrow-left-normal.png"); }
+scrollbar.horizontal button.up:hover { background-image: url("assets/scroll-arrow-left-hover.png"); }
+scrollbar.horizontal button.up:active { background-image: url("assets/scroll-arrow-left-active.png"); }
+scrollbar.horizontal button.up:disabled { background-image: url("assets/scroll-arrow-left-disabled.png"); }
+scrollbar.horizontal button.down { background-image: url("assets/scroll-arrow-right-normal.png"); }
+scrollbar.horizontal button.down:hover { background-image: url("assets/scroll-arrow-right-hover.png"); }
+scrollbar.horizontal button.down:active { background-image: url("assets/scroll-arrow-right-active.png"); }
+scrollbar.horizontal button.down:disabled { background-image: url("assets/scroll-arrow-right-disabled.png"); }
+
+/* Canto entre duas barras (ScrollBar.SizeBox = cor do botão) */
+scrolledwindow junction { background-color: @xp_btnface; border: 0; }
+
+/*@gtk3*/
+/* Barras sempre visíveis, como no XP */
+scrollbar.overlay-indicator:not(.dragging):not(.hovering) { opacity: 1; }
+/*@end*/

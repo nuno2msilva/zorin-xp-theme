@@ -1,0 +1,130 @@
+/*
+ * Barras de deslocamento das páginas como as do XP (as do Explorador e do
+ * IE6: ScrollBar do luna.msstyles, as mesmas imagens do tema GTK). Folha de
+ * nível "agent", registada pela extensão src/zen-ie/scrollbars: só a esse
+ * nível se chega às peças da barra (scrollbar, scrollbarbutton, slider,
+ * thumb) — o userContent.css só muda as cores. As imagens vão embutidas
+ * ({{img:...}}, tools/builders/zenie.py) para as páginas não terem de as ler do disco.
+ * (A barra vertical tem o atributo vertical; a horizontal não tem nenhum.)
+ * 17 px; setas com rato por cima / premidas / desativadas; polegar com as
+ * riscas no meio (normal, rato por cima, a arrastar); calha.
+ */
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+/* (a barra em si fica com o desenho do Firefox: com "appearance: none"
+   deixava de ocupar espaço; a calha pinta-se no slider, que a cobre entre as
+   setas) */
+scrollbar {
+  background-color: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+}
+
+slider {
+  appearance: none !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* (o XP estica as imagens repetindo colunas, sem suavizar) */
+slider, thumb, scrollbarbutton { image-rendering: pixelated !important; }
+scrollbar[vertical] slider {
+  background: {{img:scroll-shaft-vert-normal-fill}} 0 0 / 100% 100% no-repeat !important;
+  border-image: {{img:scroll-shaft-vert-normal}} 0 1 / 0 1px stretch !important;
+}
+scrollbar:not([vertical]) slider {
+  background: {{img:scroll-shaft-horz-normal-fill}} 0 0 / 100% 100% no-repeat !important;
+  border-image: {{img:scroll-shaft-horz-normal}} 1 0 / 1px 0 stretch !important;
+}
+scrollbar[vertical]:disabled slider {
+  background-image: {{img:scroll-shaft-vert-disabled-fill}} !important;
+  border-image-source: {{img:scroll-shaft-vert-disabled}} !important;
+}
+scrollbar:not([vertical]):disabled slider {
+  background-image: {{img:scroll-shaft-horz-disabled-fill}} !important;
+  border-image-source: {{img:scroll-shaft-horz-disabled}} !important;
+}
+
+/* o polegar: imagem de 9 partes (margens de 5 px), o meio e as riscas */
+thumb {
+  appearance: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-repeat: no-repeat !important;
+}
+scrollbar[vertical] thumb {
+  min-width: 17px !important;
+  min-height: 8px !important;
+  border-image: {{img:scroll-thumb-vert-normal}} 5 / 5px stretch !important;
+  background-image: {{img:scroll-grip-vert-normal}}, {{img:scroll-thumb-vert-normal-fill}} !important;
+  background-size: auto, 100% 100% !important;
+  background-position: center, left top !important;
+}
+scrollbar[vertical] thumb:hover {
+  border-image-source: {{img:scroll-thumb-vert-hover}} !important;
+  background-image: {{img:scroll-grip-vert-hover}}, {{img:scroll-thumb-vert-hover-fill}} !important;
+}
+scrollbar[vertical] thumb:is(:active, [active="true"]) {
+  border-image-source: {{img:scroll-thumb-vert-active}} !important;
+  background-image: {{img:scroll-grip-vert-active}}, {{img:scroll-thumb-vert-active-fill}} !important;
+}
+scrollbar:not([vertical]) thumb {
+  min-height: 17px !important;
+  min-width: 8px !important;
+  border-image: {{img:scroll-thumb-horz-normal}} 5 / 5px stretch !important;
+  background-image: {{img:scroll-grip-horz-normal}}, {{img:scroll-thumb-horz-normal-fill}} !important;
+  background-size: auto, 100% 100% !important;
+  background-position: center, left top !important;
+}
+scrollbar:not([vertical]) thumb:hover {
+  border-image-source: {{img:scroll-thumb-horz-hover}} !important;
+  background-image: {{img:scroll-grip-horz-hover}}, {{img:scroll-thumb-horz-hover-fill}} !important;
+}
+scrollbar:not([vertical]) thumb:is(:active, [active="true"]) {
+  border-image-source: {{img:scroll-thumb-horz-active}} !important;
+  background-image: {{img:scroll-grip-horz-active}}, {{img:scroll-thumb-horz-active-fill}} !important;
+}
+scrollbar:disabled thumb { visibility: hidden !important; }
+
+/* as setas (17x17, já com o desenho) */
+/* (as barras finas que alguns sítios pedem, scrollbar-width: thin, ficam
+   normais: layout.css.scrollbar-width-thin.disabled, em tools/setup/zenprefs.py —
+   o XP só tinha a de 17 px) */
+scrollbarbutton {
+  appearance: none !important;
+  min-width: 17px !important;
+  min-height: 17px !important;
+  max-width: 17px !important;
+  max-height: 17px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none no-repeat !important;
+}
+scrollbar[vertical] scrollbarbutton[type="decrement"] { background-image: {{img:scroll-arrow-up-normal}} !important; }
+scrollbar[vertical] scrollbarbutton[type="decrement"]:hover { background-image: {{img:scroll-arrow-up-hover}} !important; }
+scrollbar[vertical] scrollbarbutton[type="decrement"]:hover:active { background-image: {{img:scroll-arrow-up-active}} !important; }
+scrollbar[vertical]:disabled scrollbarbutton[type="decrement"] { background-image: {{img:scroll-arrow-up-disabled}} !important; }
+scrollbar[vertical] scrollbarbutton[type="increment"] { background-image: {{img:scroll-arrow-down-normal}} !important; }
+scrollbar[vertical] scrollbarbutton[type="increment"]:hover { background-image: {{img:scroll-arrow-down-hover}} !important; }
+scrollbar[vertical] scrollbarbutton[type="increment"]:hover:active { background-image: {{img:scroll-arrow-down-active}} !important; }
+scrollbar[vertical]:disabled scrollbarbutton[type="increment"] { background-image: {{img:scroll-arrow-down-disabled}} !important; }
+scrollbar:not([vertical]) scrollbarbutton[type="decrement"] { background-image: {{img:scroll-arrow-left-normal}} !important; }
+scrollbar:not([vertical]) scrollbarbutton[type="decrement"]:hover { background-image: {{img:scroll-arrow-left-hover}} !important; }
+scrollbar:not([vertical]) scrollbarbutton[type="decrement"]:hover:active { background-image: {{img:scroll-arrow-left-active}} !important; }
+scrollbar:not([vertical]):disabled scrollbarbutton[type="decrement"] { background-image: {{img:scroll-arrow-left-disabled}} !important; }
+scrollbar:not([vertical]) scrollbarbutton[type="increment"] { background-image: {{img:scroll-arrow-right-normal}} !important; }
+scrollbar:not([vertical]) scrollbarbutton[type="increment"]:hover { background-image: {{img:scroll-arrow-right-hover}} !important; }
+scrollbar:not([vertical]) scrollbarbutton[type="increment"]:hover:active { background-image: {{img:scroll-arrow-right-active}} !important; }
+scrollbar:not([vertical]):disabled scrollbarbutton[type="increment"] { background-image: {{img:scroll-arrow-right-disabled}} !important; }
+
+/* o canto entre as duas barras: cor de botão do XP */
+scrollcorner {
+  appearance: none !important;
+  background: #ece9d8 !important;
+}

@@ -1,0 +1,26 @@
+/* >>> zorin-xp: ícones do ambiente de trabalho como no XP (install.sh) */
+/* legendas: Tahoma 8 pt normal, brancas, 7 px abaixo do ícone (o Zorin
+   deixa 4), com a sombra do XP: esbatida (desvio-padrão 1,5 px = raio 3 no
+   GTK), 1 px para baixo e um pouco mais forte que preto a 100 % (medida na
+   captura de referência: escurece o fundo até ~65 %).
+   (a extensão do Zorin usa peso 600 — na Tahoma é negrito) */
+.file-label, label.file-label:backdrop {
+    font-family: "Tahoma";
+    font-size: 11px;
+    font-weight: normal;
+    color: white;
+    text-shadow: 0 1px 3px black, 0 1px 3px rgba(0, 0, 0, 0.2);
+    margin-top: 3px;
+}
+.file-item { border-radius: 0; }
+.file-item-hover { background-color: transparent; }
+/* selecionado: só a legenda fica com o azul de seleção do XP */
+.desktop-icons-selected, .desktop-icons-keyboard-selected:not(:backdrop) {
+    background-color: transparent;
+    border-color: transparent;
+}
+.desktop-icons-selected .file-label, .desktop-icons-keyboard-selected .file-label {
+    background-color: rgb(49, 106, 197);
+    text-shadow: none;
+}
+/* <<< zorin-xp */

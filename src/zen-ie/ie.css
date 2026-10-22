@@ -1,0 +1,2442 @@
+/*
+ * Zen Browser com o aspeto do Internet Explorer 6 do Windows XP (Luna).
+ * Medidas da captura real do IE6 (Screenshots/ie6-referencia.png), imagens
+ * dos binários do XP (tools/builders/zenie.py). Coordenadas = área da janela.
+ *
+ *   0..21   barra de menus (+ bandeira do Windows à direita)
+ *   22..23  linha entre bandas
+ *   24..61  barra de botões
+ *   62..63  linha entre bandas
+ *   64..85  barra de endereço
+ *   86..    rebordo afundado + barra lateral + página
+ *   fundo   barra de estado (23 px)
+ */
+:root {
+    --ie-rebar: 86px;
+    --ie-status: 23px;
+    --ie-font: 11px "ZXP Tahoma", sans-serif;      /* a Tahoma verdadeira, sem suavização */
+    /* largura das barras laterais (separadores, Favoritos, Histórico): a da
+       barra do Explorador do IE6, medida numa captura do XP (216 px + a
+       divisória de 4 px); fixa, como no XP não se arrastava sem querer */
+    --zxp-bar-width: 216px;
+}
+
+/* ---------- geral ---------- */
+#main-window, #main-window menupopup, #main-window panel {
+    font: var(--ie-font) !important;
+}
+
+#zen-main-app-wrapper {
+    padding: var(--ie-rebar) 0 var(--ie-status) 0 !important;
+    background: #ece9d8 !important;
+}
+
+/* fundo das três bandas: o Rebar do Luna (320x13) esticado sem suavizar
+   (as 4 linhas de baixo fixas), com as linhas entre bandas (y 22 e 62) */
+#zen-main-app-wrapper::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: var(--ie-rebar);
+    background:
+        linear-gradient(#d8d2bd, #d8d2bd) 0 22px / 100% 1px no-repeat,
+        linear-gradient(#fff, #fff) 0 23px / 100% 1px no-repeat,
+        linear-gradient(#d8d2bd, #d8d2bd) 0 62px / 100% 1px no-repeat,
+        linear-gradient(#fff, #fff) 0 63px / 100% 1px no-repeat,
+        url("img/rebar-bottom.png") 0 82px / 100% 4px no-repeat,
+        url("img/rebar-top.png") 0 0 / 100% 82px no-repeat;
+    image-rendering: pixelated;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* o rebordo afundado (WS_EX_CLIENTEDGE) só à volta da página: as barras do
+   Explorador encostam à janela e às bandas, como no IE6 (captura do XP) */
+#browser {
+    padding: 0 !important;
+    background: #ece9d8 !important;
+}
+#tabbrowser-tabpanels {
+    border: 1px solid !important;
+    border-color: #aca899 #ffffff #ffffff #aca899 !important;
+    box-shadow: inset 1px 1px #716f64, inset -1px -1px #f1efe2 !important;
+    padding: 1px !important;
+}
+/* (cada separador está em posição absoluta no tabpanels, por cima do
+   espaço da linha de dentro: 1 px para dentro) */
+#tabbrowser-tabpanels > .browserSidebarContainer { margin: 1px !important; }
+/* com a barra dos separadores fixa ao lado, a página encosta à divisória
+   sem as linhas escuras (como do lado do Favoritos/Histórico e com a barra
+   em modo compacto por cima) */
+:root:not([zen-compact-mode="true"]) #tabbrowser-tabpanels {
+    border-left-width: 0 !important;
+    padding-left: 0 !important;
+    box-shadow: inset 0 1px #716f64, inset -1px -1px #f1efe2 !important;
+}
+:root:not([zen-compact-mode="true"]) #tabbrowser-tabpanels > .browserSidebarContainer { margin-left: 0 !important; }
+
+/* ---------- barra de menus ---------- */
+#toolbar-menubar {
+    display: flex !important;
+    visibility: visible !important;
+    position: fixed !important;
+    inset: 0 0 auto 0 !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    margin: 0 !important;
+    padding: 0 0 0 1px !important;
+    background: none !important;
+    border: none !important;
+    appearance: none !important;
+    z-index: 3;
+    opacity: 1 !important;
+}
+#toolbar-menubar > :is(spacer, .titlebar-buttonbox-container, toolbarspring) {
+    display: none !important;
+}
+#main-menubar > menu {
+    appearance: none !important;
+    height: 22px;
+    margin: 0 !important;
+    padding: 0 8px !important;          /* medido: 8 px de cada lado do texto */
+    color: #000 !important;
+    background: none !important;
+    border: none !important;
+}
+#main-menubar > menu > :is(.menu-text, .menu-icon, .menu-accel) {
+    display: none !important;
+}
+#main-menubar > menu::after {
+    font: var(--ie-font);
+    line-height: 22px;
+}
+/* só os menus do IE (o Firefox junta outros: "Partilha" com o microfone ou a
+   câmara em uso — esses avisos ficam na caixa de endereço) */
+#main-menubar > menu:not(#file-menu, #edit-menu, #view-menu, #bookmarksMenu, #tools-menu, #helpMenu) {
+    display: none !important;
+}
+#file-menu::after { content: "Ficheiro"; }
+#edit-menu::after { content: "Editar"; }
+#view-menu::after { content: "Ver"; }
+#history-menu { display: none !important; }
+#bookmarksMenu::after { content: "Favoritos"; }
+#tools-menu::after { content: "Ferramentas"; }
+#helpMenu::after { content: "Ajuda"; }
+#main-menubar > menu:is([_moz-menuactive="true"], [open]) {
+    background: #316ac5 !important;
+    color: #fff !important;
+}
+
+/* bandeira do Windows (shell32.dll 240: 50 imagens de 22 px) */
+#toolbar-menubar::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 39px;
+    height: 22px;
+    border-left: 1px solid #d8d2bd;
+    background: #fff url("img/throbber.png") no-repeat 10px 0;
+    pointer-events: none;
+}
+:root:has(.tabbrowser-tab[selected][busy]) #toolbar-menubar::after {
+    animation: ie-throbber 2s steps(49) infinite;
+}
+@keyframes ie-throbber {
+    from { background-position: 10px -22px; }
+    to { background-position: 10px -1100px; }
+}
+
+/* ---------- barras de botões e de endereço ---------- */
+#zen-appcontent-navbar-wrapper {
+    position: fixed !important;
+    inset: 24px 0 auto 0 !important;
+    height: 38px !important;
+    z-index: 2;
+    background: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#zen-appcontent-navbar-container, #nav-bar {
+    height: 38px !important;
+    min-height: 38px !important;
+    align-items: flex-start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+#nav-bar-customization-target {
+    height: 38px !important;
+    margin: 0 !important;
+    padding: 0 0 0 4px !important;
+}
+#nav-bar-customization-target > :is(toolbarspring, #vertical-spacer),
+#nav-bar > :is(.titlebar-buttonbox-container, #PanelUI-button) {
+    display: none !important;
+}
+
+/* botões: 36 px de altura, ícone de 24 px a 4 px da esquerda e 6 px do topo */
+#nav-bar .toolbarbutton-1 {
+    appearance: none !important;
+    height: 36px !important;
+    min-width: 32px;
+    margin: 1px 0 1px 0 !important;
+    padding: 6px 4px !important;
+    border: 4px solid transparent;
+    border-image: none;
+    background: none !important;
+    color: #000 !important;
+    box-sizing: border-box;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    opacity: 1 !important;
+}
+#nav-bar .toolbarbutton-1 {
+    padding: 2px 0 !important;      /* + 4 px do rebordo = 6 / 4 */
+}
+#nav-bar .toolbarbutton-1 > :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+#nav-bar .toolbarbutton-1 > .toolbarbutton-text { display: none !important; }
+#nav-bar .toolbarbutton-1 > * { opacity: 1 !important; }   /* o cinzento vem da imagem */
+#nav-bar .toolbarbutton-1:not([disabled]):hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 4px stretch;
+}
+#nav-bar .toolbarbutton-1:not([disabled]):is(:hover:active, [open], [checked]) {
+    border-image: url("img/toolbar-button-active.png") 4 fill / 4px stretch;
+}
+
+/* textos à direita do ícone (Tahoma 8) */
+#back-button::after, #find-button::after, #bookmarks-menu-button::after {
+    font: var(--ie-font);
+    line-height: 24px;
+    margin-inline-start: 4px;
+}
+#back-button::after { content: "Retroceder"; margin-inline-end: 7px; }
+#find-button::after { content: "Procurar"; margin-inline-end: 3px; }
+#bookmarks-menu-button::after { content: "Favoritos"; margin-inline-end: 6px; }
+#nav-bar .toolbarbutton-1[disabled]::after { color: #aca899; }
+
+/* ícones (shell32.dll 204/205) */
+#back-button { list-style-image: url("img/tb-back.png") !important; }
+#back-button:hover { list-style-image: url("img/tb-back-hot.png") !important; }
+#back-button[disabled] { list-style-image: url("img/tb-back-disabled.png") !important; }
+#forward-button { list-style-image: url("img/tb-forward.png") !important; }
+#forward-button:hover { list-style-image: url("img/tb-forward-hot.png") !important; }
+#forward-button[disabled] { list-style-image: url("img/tb-forward-disabled.png") !important; }
+#stop-button, #stop-button[disabled] { list-style-image: url("img/tb-stop.png") !important; }
+#stop-button:hover { list-style-image: url("img/tb-stop-hot.png") !important; }
+#reload-button { list-style-image: url("img/tb-refresh.png") !important; }
+#reload-button:hover { list-style-image: url("img/tb-refresh-hot.png") !important; }
+#home-button { list-style-image: url("img/tb-home.png") !important; }
+#home-button:hover { list-style-image: url("img/tb-home-hot.png") !important; }
+#find-button { list-style-image: url("img/tb-search.png") !important; }
+#find-button:hover { list-style-image: url("img/tb-search-hot.png") !important; }
+#bookmarks-menu-button { list-style-image: url("img/tb-favorites.png") !important; }
+#bookmarks-menu-button:hover { list-style-image: url("img/tb-favorites-hot.png") !important; }
+#history-panelmenu { list-style-image: url("img/tb-history.png") !important; }
+#history-panelmenu:hover { list-style-image: url("img/tb-history-hot.png") !important; }
+#bookmarks-menu-button > .toolbarbutton-menubutton-dropmarker,
+#bookmarks-menu-button > dropmarker { display: none !important; }
+
+/* Parar e Atualizar sempre os dois, como no IE (o Parar nunca fica cinzento) */
+#stop-reload-button {
+    display: flex !important;
+    order: 0;
+}
+#stop-reload-button > :is(#stop-button, #reload-button) {
+    display: flex !important;
+    visibility: visible !important;
+}
+#stop-reload-button > #stop-button { order: -1; }
+
+/* separadores (1 px #cac6af, y 2..35 da banda) depois da Página inicial e do Histórico */
+#nav-bar :is(#home-button, #zorin-xp-ie-history_zorin-xp_local-browser-action) {
+    position: relative;
+    margin-inline-end: 5px !important;
+}
+#home-button::after, #zorin-xp-ie-history_zorin-xp_local-browser-action::after {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 34px;
+    background: #cac6af;
+}
+/* (a posição conta a partir de dentro do rebordo: o botão tem 4 px, a caixa
+   da extensão nenhum) — linha em x+34 e y 2..35 da banda, como no IE */
+#home-button::after { right: -7px; top: -3px; }
+#zorin-xp-ie-history_zorin-xp_local-browser-action::after { right: -3px; top: 2px; }
+
+/* Retroceder e Avançar: a parte da seta (menu do histórico), 5x3 px */
+#back-button, #forward-button { position: relative; }
+#back-button { width: 110px !important; }
+#forward-button { width: 47px !important; }
+#back-button::before, #forward-button::before {
+    content: "";
+    position: absolute;
+    top: 13px;
+    width: 5px;
+    height: 3px;
+    background: url("img/arrow.png");
+}
+#back-button::before { left: 92px; }
+#forward-button::before { left: 33px; }
+:is(#back-button, #forward-button)[disabled]::before { background-image: url("img/arrow-disabled.png"); }
+
+/* ---------- barra de endereço (2.ª linha) ---------- */
+/* fixa na banda de baixo: "Endereço" (x 5), caixa (x 54 .. W-70), "Ir para" */
+#urlbar-container {
+    position: fixed !important;
+    inset: 64px 0 auto 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    box-sizing: border-box !important;
+    align-items: flex-start !important;
+    margin: 0 !important;
+    padding: 0 70px 0 54px !important;
+    z-index: 2;
+}
+#urlbar-container:has(#urlbar[zen-floating-urlbar]) {
+    background: none !important;
+    border-radius: 0 !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    margin: 0 !important;
+}
+#urlbar-container::before {
+    content: "Endereço";
+    position: absolute;
+    left: 5px;
+    top: 0;
+    font: var(--ie-font);
+    line-height: 22px;
+    color: #7f7c73;
+}
+#urlbar-container::after {
+    content: "Ir para";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 65px;
+    height: 22px;
+    padding-left: 23px;
+    box-sizing: border-box;
+    background: url("img/go.png") no-repeat 0 1px;
+    font: var(--ie-font);
+    line-height: 22px;
+    color: #000;
+}
+/* (o Zen põe a barra a "flutuar" a meio da janela num separador novo: no
+   IE fica sempre na banda) */
+/* (aberta, o Firefox põe-na na camada de topo — popover —, onde as
+   coordenadas contam a partir da janela: por isso sempre fixas na banda) */
+#urlbar, #urlbar[breakout], #urlbar[breakout-extend], #urlbar[zen-floating-urlbar] {
+    position: fixed !important;
+    top: 64px !important;
+    left: 54px !important;
+    right: auto !important;
+    width: calc(100vw - 124px) !important;
+    translate: none !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    font-size: inherit !important;
+    z-index: 2 !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    margin: 0 !important;
+    --urlbar-height: 22px !important;
+    --urlbar-toolbar-height: 22px !important;
+}
+#urlbar .urlbar-background {
+    margin: 0 !important;                  /* (o Zen dá-lhe 1 px de margem) */
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff url("img/combo-drop.png") no-repeat right 1px top 1px !important;
+    box-shadow: none !important;
+    outline: none !important;
+    inset: 0 !important;
+}
+/* só o ícone da página e o endereço, como no IE */
+#urlbar :is(#tracking-protection-icon-container, #urlbar-search-button,
+            .urlbar-search-mode-indicator, #page-action-buttons, .urlbar-page-action,
+            #remote-control-box, #trust-icon-container, .search-one-offs) {
+    display: none !important;
+}
+#urlbar .urlbar-input-container {
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 18px 0 3px !important;      /* ícone a 3 px do rebordo, texto a 23 */
+    margin: 0 !important;
+    border: none !important;
+    background: none !important;
+    align-items: center !important;
+}
+/* o ícone da página do IE é o botão do Zen que abre o painel com as opções
+   da página e todas as extensões (#zen-site-data-icon-button). Os avisos
+   (microfone/câmara/localização em uso, permissões, pedidos) passam para o
+   fim da caixa, antes da seta: com a caixa de identidade "display: contents"
+   os filhos dela ordenam-se na própria caixa de endereço. */
+#urlbar #identity-box {
+    display: contents !important;
+}
+#urlbar #identity-icon-box { display: none !important; }
+#urlbar #zen-site-data-icon-button {
+    display: flex !important;         /* (o Zen esconde-o com um separador vazio / a escrever) */
+    order: -1 !important;
+    align-self: center !important;
+    width: 16px !important;
+    min-width: 16px !important;
+    height: 16px !important;
+    margin: 0 -1px 0 0 !important;          /* texto a 23 px do rebordo, como no IE */
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: url("img/page.png") no-repeat 0 0 !important;
+    box-shadow: none !important;
+}
+#urlbar #zen-site-data-icon-button > * { display: none !important; }
+/* (o Zen esconde-a sempre; aqui aparece quando há avisos) */
+#urlbar #identity-permission-box:is([hasPermissions], [hasSharingIcon], [open]) {
+    display: flex !important;
+}
+#urlbar #permissions-granted-icon { display: none !important; }
+#urlbar :is(#identity-permission-box, #notification-popup-box) {
+    order: 5 !important;
+    align-self: center !important;
+    height: 16px !important;
+    margin: 0 0 0 2px !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+}
+#urlbar :is(#identity-permission-box, #notification-popup-box) :is(image, .sharing-icon, .notification-anchor-icon, .blocked-permission-icon) {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 1px !important;
+    padding: 0 !important;
+}
+
+#urlbar-input {
+    font: var(--ie-font) !important;
+    color: #000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+#urlbar-input::placeholder { color: transparent !important; }
+
+/* ---------- barra de estado ---------- */
+#zen-main-app-wrapper::after {
+    content: "Concluído";
+    position: fixed;
+    inset: auto 0 0 0;
+    height: var(--ie-status);
+    padding-left: 21px;
+    font: var(--ie-font);
+    line-height: 25px;
+    color: #000;
+    background:
+        url("img/status-gripper.png") no-repeat right 0 top 0,
+        url("img/status-sep.png") no-repeat right 185px top 0,
+        url("img/status-sep.png") no-repeat right 209px top 0,
+        url("img/status-sep.png") no-repeat right 233px top 0,
+        url("img/status-sep.png") no-repeat right 257px top 0,
+        url("img/status-sep.png") no-repeat right 281px top 0,
+        url("img/status-sep.png") no-repeat right 328px top 0,
+        url("img/status-sep.png") no-repeat right 426px top 0,
+        url("img/page.png") no-repeat 1px 4px,
+        url("img/status-bg.png") repeat-x;
+    /* por baixo do #browser (z-index 1 do Zen), que não chega aqui: o
+       endereço da ligação (#statuspanel, lá dentro) fica por cima */
+    z-index: 0;
+    pointer-events: none;
+}
+:root:has(.tabbrowser-tab[selected][busy]) #zen-main-app-wrapper::after {
+    content: "A abrir a página...";
+}
+
+/* zona: "Internet" com o globo (no body: fora do #browser, que tem a sua
+   própria camada e ficaria por baixo da barra de estado) */
+body::after {
+    content: "Internet";
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    width: 183px;
+    height: var(--ie-status);
+    padding-left: 23px;
+    box-sizing: border-box;
+    font: var(--ie-font);
+    line-height: 25px;
+    color: #000;
+    background: url("img/zone-internet.png") no-repeat 3px 4px;
+    z-index: 4;
+    pointer-events: none;
+}
+
+/* barra de progresso fictícia enquanto carrega: a calha aparece na barra de
+   estado e os blocos verdes (tira de 11) entram da esquerda, um a um */
+:root:has(.tabbrowser-tab[selected][busy]) #zen-main-app-wrapper::after {
+    background:
+        url("img/status-gripper.png") no-repeat right 0 top 0,
+        url("img/progress.png") no-repeat right 329px top 0,
+        url("img/status-sep.png") no-repeat right 185px top 0,
+        url("img/status-sep.png") no-repeat right 209px top 0,
+        url("img/status-sep.png") no-repeat right 233px top 0,
+        url("img/status-sep.png") no-repeat right 257px top 0,
+        url("img/status-sep.png") no-repeat right 281px top 0,
+        url("img/status-sep.png") no-repeat right 328px top 0,
+        url("img/status-sep.png") no-repeat right 426px top 0,
+        url("img/page.png") no-repeat 1px 4px,
+        url("img/status-bg.png") repeat-x;
+}
+body::before {
+    content: "";
+    position: fixed;
+    right: 330px;
+    bottom: 5px;
+    width: 88px;
+    height: 11px;
+    background: url("img/progress-chunks.png") no-repeat -88px 0;
+    z-index: 4;
+    pointer-events: none;
+    visibility: hidden;
+}
+:root:has(.tabbrowser-tab[selected][busy]) body::before {
+    visibility: visible;
+    animation: ie-progress 6s steps(11, end) forwards;
+}
+@keyframes ie-progress {
+    from { background-position: -88px 0; }
+    to { background-position: 0 0; }
+}
+
+/* endereço da ligação por baixo do rato / mensagens de carregamento: no painel
+   principal (o Zen põe translate: 0 no tabbox — mesmo a zero, prenderia o
+   painel fixo ao fundo da página em vez do da janela) */
+#tabbrowser-tabbox { translate: none !important; }
+#statuspanel {
+    position: fixed !important;
+    inset: auto auto 0 0 !important;
+    width: calc(100vw - 430px) !important;
+    max-width: none !important;
+    height: var(--ie-status) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 5 !important;
+    transition: none !important;
+    opacity: 1 !important;
+}
+#statuspanel[inactive] { visibility: hidden !important; }
+#statuspanel-label {
+    margin: 0 !important;
+    padding: 0 0 0 21px !important;
+    height: var(--ie-status) !important;
+    font: var(--ie-font) !important;
+    line-height: 25px !important;
+    color: #000 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: none !important;
+}
+/* só o texto muda: o "Concluído" esconde-se e o endereço aparece no lugar */
+:root:has(#statuspanel:not([inactive])) #zen-main-app-wrapper::after {
+    color: transparent;
+}
+
+/* ---------- barra lateral: como a barra do Explorador do IE (Favoritos) ---------- */
+#navigator-toolbox {
+    background: #fff !important;
+    border-right: 4px solid #ece9d8 !important;     /* divisória da barra */
+    box-shadow: none !important;
+    padding: 0 !important;
+    --zen-toolbox-padding: 0px !important;
+}
+#zen-sidebar-top-buttons { display: none !important; }
+/* largura fixa (a do Zen vinha da barra arrastada; o puxador sai) */
+#navigator-toolbox {
+    --zen-sidebar-width: calc(var(--zxp-bar-width) + 4px) !important;
+    width: calc(var(--zxp-bar-width) + 4px) !important;
+    min-width: calc(var(--zxp-bar-width) + 4px) !important;
+    max-width: calc(var(--zxp-bar-width) + 4px) !important;
+}
+#zen-sidebar-splitter { display: none !important; }
+#navigator-toolbox, #navigator-toolbox * {
+    --zen-workspace-indicator-height: 22px !important;
+    --tab-min-height: 20px !important;
+    --tab-margin-block: 0px !important;
+    --tab-block-margin: 0px !important;
+    --tab-inline-padding: 4px !important;
+}
+#titlebar, #TabsToolbar, #tabbrowser-tabs, #zen-tabs-wrapper, #tabbrowser-arrowscrollbox {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* (o Zen pinta a cor/degradê do espaço por trás da barra: fora) */
+#zen-toolbar-background, #zen-browser-background { display: none !important; }
+
+/* a barra lateral dos separadores arrumada como a barra do Explorador do
+   IE6 (medida numa captura do XP, Favoritos): o título numa faixa de 22 px
+   com o fundo das bandas (a 1.ª linha da imagem esticada: o degradê da
+   esquerda para a direita) e a linha #aca899 por baixo; a faixa de botões de
+   22 px (o fundo das bandas, as 9 linhas de cima a dobrar), 3 px do fundo e
+   outra linha #aca899; a lista logo a seguir, linhas de 20 px */
+#navigator-toolbox zen-workspace { padding-top: 0 !important; }
+
+/* cabeçalho do espaço: o título da barra (como "Histórico"), à esquerda */
+.zen-current-workspace-indicator {
+    box-sizing: border-box !important;
+    height: 23px !important;
+    min-height: 23px !important;
+    max-height: 23px !important;
+    margin: 0 0 27px !important;          /* (a faixa de botões vai por cima: 26 px + 1, como a lista do IE) */
+    padding: 0 22px 0 6px !important;     /* (à direita, o pino) */
+    gap: 3px !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    background: url("img/rebar-row.png") 0 0 / 100% 100% no-repeat !important;
+    image-rendering: pixelated;
+    border: none !important;
+    border-bottom: 1px solid #aca899 !important;
+    border-radius: 0 !important;
+    font: var(--ie-font) !important;
+    color: #000 !important;
+}
+.zen-current-workspace-indicator::before,
+.zen-current-workspace-indicator::after { display: none !important; }
+/* (o Zen põe o ícone por cima do nome com margens negativas) */
+.zen-current-workspace-indicator .zen-current-workspace-indicator-stack {
+    margin: 0 !important;
+}
+.zen-current-workspace-indicator > .zen-workspaces-actions { display: none !important; }
+/* sem a seta de recolher: o ícone fica sempre (recolher e abrir os
+   separadores fixos com um clique continua a ser do Zen) */
+.zen-current-workspace-indicator .zen-current-workspace-indicator-chevron { display: none !important; }
+.zen-current-workspace-indicator .zen-current-workspace-indicator-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 11px !important;
+}
+.zen-current-workspace-indicator .zen-current-workspace-indicator-stack:has(> .zen-current-workspace-indicator-icon:empty) {
+    display: none !important;
+}
+/* o nome: Tahoma 8 (fonte de píxeis), como o título da barra do IE */
+.zen-current-workspace-indicator .zen-current-workspace-indicator-name {
+    position: static !important;
+    padding: 0 !important;
+    flex: 1 !important;
+    width: auto !important;
+    max-width: none !important;
+    font: var(--ie-font) !important;
+    line-height: 13px !important;
+    color: #000 !important;
+    opacity: 1 !important;
+    text-align: start !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* o pino (src/zen-ie/sidebarpin), onde o Histórico tem o ×: o das barras do
+   Explorador do Luna sem cor — espetado com a barra fixa, deitado no modo
+   compacto (a barra esconde-se sozinha); com o rato por cima, a mesma imagem
+   com o realce dos botões planos, como o × */
+#zxp-sidebar-pin {
+    appearance: none !important;
+    position: absolute !important;
+    top: 2px !important;
+    right: 2px !important;
+    z-index: 3 !important;
+    box-sizing: border-box !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    list-style-image: url("img/pin-in.png") !important;
+}
+:root[zen-compact-mode="true"] #zxp-sidebar-pin { list-style-image: url("img/pin-out.png") !important; }
+#zxp-sidebar-pin:hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
+}
+#zxp-sidebar-pin:hover:active {
+    border-image: url("img/toolbar-button-active.png") 4 fill / 2px stretch !important;
+}
+#zxp-sidebar-pin > .toolbarbutton-icon {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -moz-context-properties: none !important;
+}
+#zxp-sidebar-pin > .toolbarbutton-text { display: none !important; }
+
+/* transferências, espaços, novo: a faixa de botões da barra do Explorador
+   ("Adicionar...", "Organizar..."), logo por baixo do título — 22 px do
+   fundo das bandas, 3 px do fundo e a linha da lista; botões de 22 px com
+   ícones de 16 px. Sai do fundo da barra e fica por cima do espaço que o
+   cabeçalho lhe deixa (os espaços deslizam por baixo dela ao mudar) */
+#zen-sidebar-foot-buttons {
+    position: absolute !important;
+    top: 23px !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 2 !important;
+    box-sizing: border-box !important;
+    height: 26px !important;
+    min-height: 26px !important;
+    max-height: 26px !important;
+    margin: 0 !important;
+    padding: 0 2px 4px !important;
+    gap: 0 !important;
+    align-items: center !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background:
+        linear-gradient(#aca899, #aca899) 0 25px / 100% 1px no-repeat,
+        linear-gradient(#fff, #fff) 100% 0 / 1px 1px no-repeat,
+        url("img/rebar-bottom.png") 0 18px / calc(100% - 1px) 4px no-repeat,
+        url("img/rebar-top.png") 0 0 / calc(100% - 1px) 18px no-repeat,
+        url("img/rebar-row.png") 0 0 / 100% 25px no-repeat !important;
+    image-rendering: pixelated;
+}
+#zen-sidebar-foot-buttons :is(.toolbarbutton-1, .subviewbutton) {
+    width: 22px !important;
+    min-width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 3px solid transparent !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    image-rendering: auto;
+}
+#zen-sidebar-foot-buttons :is(.toolbarbutton-1, .subviewbutton) > :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    border-radius: 0 !important;
+}
+#zen-sidebar-foot-buttons :is(.toolbarbutton-1, .subviewbutton):hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 3px stretch !important;
+}
+#zen-sidebar-foot-buttons :is(.toolbarbutton-1, .subviewbutton):is(:hover:active, [open], [active="true"]) {
+    border-image: url("img/toolbar-button-checked.png") 4 fill / 3px stretch !important;
+}
+/* "Limpar" (fecha os separadores não fixos do espaço): um × simples (o das
+   barras do Explorador do IE) em vez do texto, com o realce dos botões
+   planos; sempre à vista e clicável quando há o que fechar (o Zen só o
+   mostrava com o rato por cima da barra lateral) */
+.zen-workspace-close-unpinned-tabs-button {
+    appearance: none !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    margin: 0 2px 0 0 !important;
+    padding: 0 !important;
+    border: 2px solid transparent !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+.zen-workspace-close-unpinned-tabs-button > .toolbarbutton-text { display: none !important; }
+.zen-workspace-close-unpinned-tabs-button[can-close="true"] { pointer-events: auto !important; }
+.zen-workspace-close-unpinned-tabs-button > .toolbarbutton-icon {
+    width: 16px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style-image: url("img/ebar-close.png") !important;
+    -moz-context-properties: none !important;
+    fill: none !important;
+    opacity: 1 !important;
+}
+.zen-workspace-close-unpinned-tabs-button:hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
+}
+.zen-workspace-close-unpinned-tabs-button:hover:active {
+    border-image: url("img/toolbar-button-active.png") 4 fill / 2px stretch !important;
+}
+/* transferências: o ícone de transferência do IE */
+#downloads-button #downloads-indicator-icon {
+    list-style-image: url("img/downloads.png") !important;
+    -moz-context-properties: none !important;
+    fill: none !important;
+}
+/* "+" (Criar espaço, Criar pasta, Nova divisão, Novo separador): só um +
+   preto simples (traço de 2 px, como o ×), botão quadrado como os outros */
+#zen-create-new-button {
+    list-style-image: url("img/plus.png") !important;
+}
+#zen-create-new-button > .toolbarbutton-icon {
+    -moz-context-properties: none !important;
+    fill: none !important;
+}
+#zen-workspaces-button {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    background: none !important;
+    flex: 1 !important;
+    justify-content: center !important;
+}
+/* (o Zen tira cor aos espaços inativos; aqui o ativo é o botão carregado) */
+#zen-workspaces-button .subviewbutton,
+#zen-workspaces-button .subviewbutton * {
+    opacity: 1 !important;
+    filter: none !important;
+}
+#zen-workspaces-button .zen-workspace-icon {
+    font-size: 12px !important;
+    width: 16px !important;
+    height: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+/* separadores: uma linha de 22 px, ícone de 16 px, Tahoma 8 pt (as listas
+   das barras Favoritos e Histórico têm as mesmas medidas) */
+#tabbrowser-tabs .tabbrowser-tab {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#tabbrowser-tabs .tabbrowser-tab .tab-stack {
+    margin: 0 !important;
+}
+#tabbrowser-tabs .tabbrowser-tab .tab-background {
+    margin: 0 2px !important;             /* (a seleção como a da lista do IE: 2 px para dentro) */
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+#tabbrowser-tabs .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
+    background: #ece9d8 !important;
+}
+/* separador novo em segundo plano (barra lateral à vista): pisca como um
+   botão da barra de tarefas do XP a pedir atenção — o botão laranja do Luna
+   (TaskBand.FlashButton) por trás do nome, uma vez, e apaga-se (o mesmo
+   ritmo da faixa do modo compacto); ao escolhê-lo, pára, como no XP. O
+   atributo vem de src/zen-ie/tabflash. */
+#tabbrowser-tabs .tabbrowser-tab[zxp-flash] .tab-background { position: relative !important; }
+#tabbrowser-tabs .tabbrowser-tab[zxp-flash]:not([selected]) .tab-background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-image: url("img/flash-button.png") 4 fill / 4px stretch;
+    animation: zxp-tab-flash 1s linear forwards;
+}
+#tabbrowser-tabs .tabbrowser-tab .tab-content {
+    padding: 0 4px 0 8px !important;
+    gap: 3px;
+}
+/* (o Zen põe 3 px antes e 10 px depois do ícone: o nome ficava a 40 px) */
+#tabbrowser-tabs .tabbrowser-tab :is(.tab-throbber, .tab-icon-pending, .tab-icon-image, .tab-sharing-icon-overlay, .tab-icon-overlay) {
+    margin-inline: 0 !important;
+}
+#tabbrowser-tabs .tabbrowser-tab .tab-label {
+    font: 11px "ZXP Tahoma", sans-serif !important;
+    color: #000 !important;
+}
+#tabbrowser-tabs .tabbrowser-tab:hover .tab-label {
+    color: #0066cc !important;
+    text-decoration: underline !important;
+}
+#tabs-newtab-button {
+    min-height: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    border-radius: 0 !important;
+    font: 11px "ZXP Tahoma", sans-serif !important;
+    color: #000 !important;
+}
+
+/* ---------- barra de endereço: a escrever / editar ---------- */
+/* no IE a caixa não muda com o foco (sem contornos nem sombras) */
+#urlbar:is([focused], [open], [breakout-extend]) .urlbar-background {
+    border: 1px solid #7f9db9 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    inset: 0 !important;
+    background-color: #fff !important;
+}
+#urlbar-input::selection {
+    background: #316ac5 !important;
+    color: #fff !important;
+}
+#urlbar-input { caret-color: #000 !important; }
+
+/* ---------- lista de sugestões: a do preenchimento automático do IE ----------
+   colada por baixo da caixa, mesma largura, branca, rebordo preto de 1 px,
+   uma linha de texto (Tahoma 8) por sugestão, a escolhida a azul do XP */
+#urlbar .urlbarView {
+    position: absolute !important;
+    top: 22px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font: var(--ie-font) !important;
+    z-index: 10;
+}
+#urlbar .urlbarView-body-outer, #urlbar .urlbarView-body-inner, #urlbar .urlbarView-results {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+}
+#urlbar .urlbarView-row {
+    min-height: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+}
+#urlbar .urlbarView-row-inner {
+    min-height: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 3px !important;
+    border-radius: 0 !important;
+    background: none !important;
+    align-items: center !important;
+}
+#urlbar .urlbarView-row:is([selected], :hover) > .urlbarView-row-inner,
+#urlbar .urlbarView-row[selected] {
+    background: #316ac5 !important;
+}
+#urlbar .urlbarView-row:is([selected], :hover) :is(.urlbarView-title, .urlbarView-url, .urlbarView-action) {
+    color: #fff !important;
+}
+#urlbar .urlbarView-row :is(.urlbarView-title, .urlbarView-url, .urlbarView-action) {
+    font: var(--ie-font) !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+}
+/* o IE só mostra o endereço (sem ícones, títulos nem ações) */
+#urlbar .urlbarView-row :is(.urlbarView-favicon, .urlbarView-type-icon, .urlbarView-title-separator,
+                            .urlbarView-action, .urlbarView-button, .urlbarView-row-buttons,
+                            .urlbarView-tags, .urlbarView-userContext) {
+    display: none !important;
+}
+#urlbar .urlbarView-row[has-url] .urlbarView-title { display: none !important; }
+#urlbar .urlbarView-row[has-url] .urlbarView-url {
+    display: block !important;
+    visibility: visible !important;
+}
+#urlbar .urlbarView-no-wrap { gap: 0 !important; }
+#urlbar :is(.search-one-offs, .urlbarView-search-one-offs, .search-panel-one-offs-header),
+#urlbar .urlbarView-row[type="tip"], #urlbar .urlbarView-row[label]::before {
+    display: none !important;
+}
+#urlbar .urlbarView-row strong { font-weight: normal !important; }
+
+/* ---------- modo compacto: esconde só a barra lateral ----------
+   aparece por cima da página, entre as barras do IE e a barra de estado;
+   escondida, não se vê nada: uma faixa invisível de 4 px na beira esquerda
+   da janela (parte da barra, para o rato) fá-la abrir.
+   Esconde-se com "left" e não com "translate" (o do Zen): um elemento
+   deslocado arrasta consigo os fixos lá de dentro — a barra de menus.
+   Aberta, fica exatamente onde fica a barra fixa: encostada à janela, por
+   baixo das bandas, com a mesma largura (o Zen alargava-a 4 px) */
+:root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"]) {
+    top: var(--ie-rebar) !important;
+    bottom: var(--ie-status) !important;
+    width: var(--zen-sidebar-width, 222px) !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    translate: none !important;
+    left: calc(-1 * var(--zen-sidebar-width, 222px) - 6px) !important;
+    transition: left 0.15s ease !important;
+}
+/* (o Zen dá ao #titlebar a largura toda da barra: o título e a faixa de
+   botões passavam por cima da divisória) */
+:root[zen-compact-mode="true"] #navigator-toolbox #titlebar { width: auto !important; }
+:root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"])::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    /* (a barra escondida fica a -(largura + 6 px): a faixa começa na beira
+       da janela, seja qual for a largura) */
+    left: calc(var(--zen-sidebar-width, 220px) + 6px);
+    width: 4px;
+    background: transparent;
+}
+/* novo separador em segundo plano: a beira esquerda (onde está a barra dos
+   separadores escondida) pisca a laranja uma vez e apaga-se, como um
+   botão da barra de tarefas do XP a pedir atenção (TaskBand.FlashButton do
+   luna.msstyles: orla #D37400, brilho #FFB649, corpo #E47B09, sombra
+   #A25500). O atributo vem da extensão src/zen-ie/tabflash. */
+@keyframes zxp-tab-flash {
+    0% { opacity: 0; }
+    10%, 50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+:root[zen-compact-mode="true"][zxp-tab-flash] #navigator-toolbox::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    top: var(--ie-rebar);
+    bottom: var(--ie-status);
+    width: 5px;
+    z-index: 10;
+    pointer-events: none;
+    background: linear-gradient(to right, #d37400 0 1px, #ffb649 1px 2px, #e47b09 2px 4px, #a25500 4px 5px);
+    animation: zxp-tab-flash 1s linear forwards;
+}
+/* (a barra de menus vive dentro da barra lateral: o rato nela ou um menu
+   aberto não a fazem abrir) */
+:root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"]):is(
+    [zen-has-hover], [zen-user-show], [zen-has-empty-tab], [flash-popup],
+    [has-popup-menu], [movingtab], [zen-compact-mode-active]):not(:has(#toolbar-menubar:hover, #main-menubar > menu[open])),
+:root[zen-compact-mode="true"][zen-renaming-tab="true"] #navigator-toolbox:not([animate="true"]) {
+    left: 0 !important;
+}
+
+/* extensões fixas na barra (no lugar de Correio/Imprimir/Editar): botões do
+   IE de 32 px, com o ícone de 16 px da extensão ao centro (a 24 px ficava
+   desfocado: o Firefox reduzia a imagem de 32) */
+#nav-bar .toolbarbutton-badge-stack {
+    display: grid !important;
+    place-items: center !important;
+}
+#nav-bar .toolbarbutton-badge-stack > .toolbarbutton-icon {
+    width: 20px !important;              /* um pouco maior, perto dos 24 px do IE */
+    height: 20px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+#nav-bar .unified-extensions-item {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* o número das extensões (uBlock...): inteiro, por cima do canto do ícone,
+   sem ser cortado pelo botão (a letra de píxeis só existe a 11 px: a 9 px
+   ficava ilegível) */
+#nav-bar .toolbarbutton-1:has(.toolbarbutton-badge-stack),
+#nav-bar .toolbarbutton-badge-stack { overflow: visible !important; }
+#nav-bar .toolbarbutton-badge {
+    grid-area: 1 / 1 !important;
+    place-self: start end !important;
+    box-sizing: border-box !important;
+    min-width: 12px !important;
+    max-width: none !important;
+    height: 11px !important;
+    margin: -3px -5px 0 0 !important;
+    padding: 0 2px !important;
+    overflow: visible !important;
+    border-radius: 2px !important;
+    font: bold 9px/11px Tahoma, sans-serif !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+#statuspanel-inner {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: none !important;
+    width: 100% !important;
+}
+#statuspanel-label { flex: 1 !important; max-width: none !important; }
+
+/* menus da barra de menus: sem coluna de ícones (os do IE não tinham) e as
+   caixas de verificação à direita, para os textos começarem todos no mesmo
+   sítio */
+#main-menubar menupopup :is(menuitem, menu) > .menu-icon {
+    display: none !important;
+}
+#main-menubar menupopup menuitem:is([type="checkbox"], [type="radio"]) > .menu-icon {
+    display: flex !important;
+    order: 10;
+    margin-inline-start: 8px !important;
+}
+
+/* ---------- ecrã inteiro (F11), vídeos em ecrã inteiro e janelas pop-up ----------
+   (pop-up: as dos sites e a janela Localizar — só o conteúdo, como no IE) 
+   a página ocupa o ecrã todo: sem barra de menus, botões, barra lateral nem
+   barra de estado. No F11, ao levar o rato ao topo desce só a banda
+   "Endereço" (uma faixa invisível de 3 px no topo deteta o rato) e fica à
+   vista enquanto se escreve ou a lista de sugestões está aberta. */
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #zen-main-app-wrapper {
+    padding: 0 !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) :is(#zen-main-app-wrapper, body)::before,
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) :is(#zen-main-app-wrapper, body)::after,
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) :is(#toolbar-menubar, #statuspanel) {
+    display: none !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) :is(#browser, #tabbrowser-tabpanels) {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #navigator-toolbox#navigator-toolbox {
+    position: fixed !important;
+    left: calc(-1 * var(--zen-sidebar-width, 222px) - 10px) !important;
+    translate: none !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) :is(#zen-appcontent-navbar-wrapper, #zen-appcontent-navbar-container, #nav-bar) {
+    pointer-events: none !important;
+    background: none !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #nav-bar-customization-target > :not(#urlbar-container),
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #stop-reload-button#stop-reload-button > :is(#stop-button, #reload-button) {
+    visibility: hidden !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #urlbar-container {
+    pointer-events: auto !important;
+    top: -22px !important;
+    height: 25px !important;
+    min-height: 25px !important;
+    max-height: 25px !important;
+    border-bottom: 3px solid transparent !important;
+    background:
+        url("img/rebar-bottom.png") 0 18px / 100% 4px no-repeat,
+        url("img/rebar-top.png") 0 -64px / 100% 82px no-repeat !important;
+    background-clip: padding-box !important;
+    image-rendering: pixelated;
+    transition: top 0.15s ease !important;
+    z-index: 20 !important;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #urlbar {
+    top: -22px !important;
+    transition: top 0.15s ease !important;
+    z-index: 21 !important;
+}
+:root[inFullscreen]:not([inDOMFullscreen]) #urlbar-container:is(:hover, :has(#urlbar:is([focused], [open]))) {
+    top: 0 !important;
+}
+:root[inFullscreen]:not([inDOMFullscreen]) #urlbar-container:is(:hover, :has(#urlbar:is([focused], [open]))) #urlbar {
+    top: 0 !important;
+}
+:root:is([inDOMFullscreen], [popup-window]) #urlbar-container { display: none !important; }
+
+
+/* ---------- Favoritos e Histórico: abrem as barras do Explorador ----------
+   (extensões zorin-xp-ie-favorites / -history: um botão e uma barra cada) */
+:is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .unified-extensions-item-action-button {
+    list-style-image: none !important;
+}
+#nav-bar :is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .toolbarbutton-badge-stack {
+    width: 24px !important;
+    height: 24px !important;
+    background: var(--zxp-icon) no-repeat !important;
+}
+#nav-bar :is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .toolbarbutton-badge-stack > .toolbarbutton-icon { display: none !important; }
+#zorin-xp-ie-find_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-search.png"); }
+#zorin-xp-ie-find_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-search-hot.png"); }
+#zorin-xp-ie-find_zorin-xp_local-browser-action .unified-extensions-item-action-button::after {
+    content: "Procurar";
+    font: var(--ie-font);
+    line-height: 24px;
+    margin-inline: 4px 3px;               /* botão de 80 px, como no IE */
+}
+#zorin-xp-ie-favorites_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-favorites.png"); }
+#zorin-xp-ie-favorites_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-favorites-hot.png"); }
+#zorin-xp-ie-history_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-history.png"); }
+#zorin-xp-ie-history_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-history-hot.png"); }
+#zorin-xp-ie-favorites_zorin-xp_local-browser-action .unified-extensions-item-action-button::after {
+    content: "Favoritos";
+    font: var(--ie-font);
+    line-height: 24px;
+    margin-inline: 4px 4px;               /* botão de 85 px, como no IE */
+}
+/* carregados enquanto a barra está aberta, como no IE */
+:root:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie-favorites_zorin-xp_local-sidebar-action"]) #zorin-xp-ie-favorites_zorin-xp_local-browser-action .unified-extensions-item-action-button,
+:root:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie-history_zorin-xp_local-sidebar-action"]) #zorin-xp-ie-history_zorin-xp_local-browser-action .unified-extensions-item-action-button {
+    border-image: url("img/toolbar-button-checked.png") 4 fill / 4px stretch !important;
+}
+
+/* ---------- a barra do Explorador (lado da página) ---------- */
+#sidebar-box {
+    width: var(--zxp-bar-width) !important;
+    min-width: var(--zxp-bar-width) !important;
+    max-width: var(--zxp-bar-width) !important;
+    background: #fff !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* o título ("Favoritos" + ×): faixa de 22 px com o fundo das bandas (a 1.ª
+   linha da imagem esticada), linha #aca899 — medido numa captura do XP */
+#sidebar-header {
+    height: 23px !important;
+    min-height: 23px !important;
+    margin: 0 !important;
+    padding: 0 2px 0 6px !important;
+    background: url("img/rebar-row.png") 0 0 / 100% 100% no-repeat !important;
+    image-rendering: pixelated;
+    border: none !important;
+    border-bottom: 1px solid #aca899 !important;
+    font: var(--ie-font) !important;
+    color: #000 !important;
+}
+#sidebar-switcher-target {
+    appearance: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    pointer-events: none !important;      /* (o IE não tinha a lista de barras) */
+}
+#sidebar-switcher-target > :is(#sidebar-icon, #sidebar-switcher-arrow),
+#sidebar-throbber { display: none !important; }
+#sidebar-title {
+    font: var(--ie-font) !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#sidebar-close {
+    appearance: none !important;
+    list-style-image: url("img/ebar-close.png") !important;
+    width: 18px !important;
+    height: 16px !important;
+    min-width: 0 !important;
+    align-self: flex-start !important;    /* (no XP o × fica 5 px abaixo do cimo da faixa) */
+    margin: 1px 0 0 !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 0 !important;
+    background: none !important;
+}
+#sidebar-close > .toolbarbutton-icon {
+    width: 16px !important;
+    height: 14px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -moz-context-properties: none !important;
+}
+#sidebar-close:hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
+}
+#sidebar { background: #fff !important; }
+/* a divisória entre a barra e a página (4 px, cor de botão do XP) */
+#sidebar-splitter {
+    width: 4px !important;
+    min-width: 4px !important;
+    margin: 0 !important;
+    border: none !important;
+    background: #ece9d8 !important;
+    opacity: 1 !important;
+    pointer-events: none !important;      /* (largura fixa: não se arrasta) */
+}
+
+/* controlos de multimédia do Zen: sem a barra de progresso (com a barra
+   lateral escondida ela fugia para o topo da janela) */
+.zen-media-progress-hbox { display: none !important; }
+
+/* o leitor como o Windows Media Player 9 do XP (o leitor embutido): a barra
+   prateada com o botão redondo grande de reproduzir/pausa, anterior e
+   seguinte encostados, o mudo; o ícone do sítio (ir para o separador) à
+   direita. Com o rato por cima, o título por cima numa faixa preta, como a
+   área do vídeo do WMP. Imagens: wmploc.dll (tools/builders/zenie.py) */
+.zen-media-card {
+    padding: 0 !important;
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: #000 !important;
+    color: #fff !important;
+    font: 11px "ZXP Tahoma", Tahoma, sans-serif !important;
+}
+.zen-media-card .zen-media-notes,
+.zen-media-card::after { display: none !important; }
+.zen-media-card .zen-media-info-container {
+    background: #000 !important;
+    color: #fff !important;
+}
+.zen-media-card :is(.zen-media-title, .zen-media-artist) {
+    font: 11px "ZXP Tahoma", Tahoma, sans-serif !important;
+    color: #fff !important;
+    height: auto !important;
+    min-height: 13px !important;
+}
+.zen-media-card .zen-media-artist { color: #9cc4f0 !important; opacity: 1 !important; }
+.zen-media-card .zen-media-info-vbox { mask-image: none !important; }
+.zen-media-card .zen-media-info-vbox::before { display: none !important; }
+/* sem botões por cima do título (imagem na imagem, fechar): a faixa preta
+   toda leva ao separador que está a tocar (o Zen já o faz ao carregar em
+   qualquer sítio do cartão que não seja um botão) */
+.zen-media-card .zen-media-buttons-hbox { display: none !important; }
+.zen-media-card .zen-media-info-vbox { width: 100% !important; flex-shrink: 1 !important; }
+.zen-media-card .zen-media-controls-hbox {
+    height: 35px !important;
+    min-height: 35px !important;
+    padding: 0 6px !important;
+    gap: 0 !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    background: url("img/wmp-bar.png") 0 0 / 44px 35px repeat-x !important;
+}
+.zen-media-card .zen-media-playback-buttons {
+    width: auto !important;
+    max-width: none !important;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+}
+.zen-media-card :where(.zen-media-controls-hbox .toolbarbutton-1) {
+    appearance: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 8px 0 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+.zen-media-card :where(.zen-media-controls-hbox .toolbarbutton-1 > .toolbarbutton-icon) {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    -moz-context-properties: none !important;
+    fill: none !important;
+    opacity: 1 !important;
+}
+/* reproduzir/pausa: o redondo grande, primeiro, 3 px abaixo do topo */
+.zen-media-card .zen-media-playpause-button { order: -1 !important; margin: 3px 2px 0 0 !important; }
+.zen-media-card .zen-media-playpause-button > .toolbarbutton-icon { width: 29px !important; height: 29px !important; }
+.zen-media-card .zen-media-playpause-button { list-style-image: url("img/wmp-play.png") !important; }
+.zen-media-card .zen-media-playpause-button:hover { list-style-image: url("img/wmp-play-hover.png") !important; }
+.zen-media-card .zen-media-playpause-button:hover:active { list-style-image: url("img/wmp-play-down.png") !important; }
+.zen-media-card.playing .zen-media-playpause-button { list-style-image: url("img/wmp-pause.png") !important; }
+.zen-media-card.playing .zen-media-playpause-button:hover { list-style-image: url("img/wmp-pause-hover.png") !important; }
+.zen-media-card.playing .zen-media-playpause-button:hover:active { list-style-image: url("img/wmp-pause-down.png") !important; }
+.zen-media-card .zen-media-previoustrack-button { list-style-image: url("img/wmp-prev.png") !important; }
+.zen-media-card .zen-media-previoustrack-button:hover { list-style-image: url("img/wmp-prev-hover.png") !important; }
+.zen-media-card .zen-media-previoustrack-button:hover:active { list-style-image: url("img/wmp-prev-down.png") !important; }
+.zen-media-card .zen-media-previoustrack-button[disabled] { list-style-image: url("img/wmp-prev-disabled.png") !important; }
+.zen-media-card .zen-media-nexttrack-button { list-style-image: url("img/wmp-next.png") !important; }
+.zen-media-card .zen-media-nexttrack-button:hover { list-style-image: url("img/wmp-next-hover.png") !important; }
+.zen-media-card .zen-media-nexttrack-button:hover:active { list-style-image: url("img/wmp-next-down.png") !important; }
+.zen-media-card .zen-media-nexttrack-button[disabled] { list-style-image: url("img/wmp-next-disabled.png") !important; }
+/* mudo: o altifalante, carregado quando está sem som (como no WMP) */
+.zen-media-card .zen-media-mute-button { order: 2 !important; margin-left: 4px !important; list-style-image: url("img/wmp-mute.png") !important; }
+.zen-media-card .zen-media-mute-button:hover { list-style-image: url("img/wmp-mute-hover.png") !important; }
+.zen-media-card[muted] .zen-media-mute-button,
+.zen-media-card .zen-media-mute-button:hover:active { list-style-image: url("img/wmp-mute-down.png") !important; }
+/* o sítio que está a tocar (vai para o separador): à direita, 16 px */
+.zen-media-card .zen-media-focus-button { order: 3 !important; margin: 9px 0 0 auto !important; align-self: flex-start !important; }
+.zen-media-card .zen-media-focus-button > .toolbarbutton-icon { width: 16px !important; height: 16px !important; }
+.zen-media-card .zen-media-playback-buttons { order: 1 !important; }
+
+/* ---------- Procurar (barra de procura): uma faixa do XP ---------- */
+#main-window findbar {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: none !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    border: none !important;
+    border-top: 1px solid #aca899 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    background:
+        url("img/rebar-bottom.png") 0 100% / 100% 4px no-repeat,
+        url("img/rebar-top.png") 0 0 / 100% calc(100% - 4px) no-repeat !important;
+    image-rendering: pixelated;
+    font: var(--ie-font) !important;
+    color: #000 !important;
+    align-items: center !important;
+}
+#main-window findbar[hidden] { display: none !important; }
+#main-window findbar * { image-rendering: auto; }
+#main-window findbar .findbar-container {
+    flex-wrap: nowrap !important;           /* (o mod Better Find Bar quebra a linha) */
+    flex-direction: row !important;
+    gap: 4px !important;
+    align-items: center !important;
+    height: 26px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+#main-window findbar .findbar-container::before {
+    content: "Localizar:";
+    margin-inline: 2px 2px;
+}
+#main-window findbar .findbar-container > hbox {
+    flex: none !important;
+    width: auto !important;
+    gap: 4px !important;
+    align-items: center !important;
+}
+#main-window findbar :is(.findbar-textbox, input) {
+    appearance: none !important;
+    flex: none !important;
+    width: 180px !important;
+    height: 20px !important;
+    margin: 0 !important;
+    padding: 1px 3px !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    outline: none !important;
+    font: var(--ie-font) !important;
+    color: #000 !important;
+}
+#main-window findbar .findbar-textbox[status="notfound"] { background: #fff4f4 !important; }
+/* Anterior / Seguinte: botões do XP com texto */
+#main-window findbar toolbarbutton:is(.findbar-find-previous, .findbar-find-next) {
+    appearance: none !important;
+    min-width: 0 !important;
+    height: 22px !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
+    color: #000 !important;
+    font: var(--ie-font) !important;
+}
+#main-window findbar toolbarbutton:is(.findbar-find-previous, .findbar-find-next):hover {
+    border-image-source: url("img/button-hover.png") !important;
+}
+#main-window findbar toolbarbutton:is(.findbar-find-previous, .findbar-find-next):hover:active {
+    border-image-source: url("img/button-active.png") !important;
+}
+#main-window findbar toolbarbutton:is(.findbar-find-previous, .findbar-find-next) > .toolbarbutton-icon { display: none !important; }
+#main-window findbar .findbar-find-previous::after { content: "Anterior"; }
+#main-window findbar .findbar-find-next::after { content: "Seguinte"; }
+#main-window findbar toolbarseparator { display: none !important; }
+/* caixas de verificação do XP, com os textos em português */
+#main-window findbar checkbox {
+    appearance: none !important;
+    margin: 0 0 0 6px !important;
+    padding: 0 !important;
+    color: #000 !important;
+}
+#main-window findbar checkbox > .checkbox-check {
+    appearance: none !important;
+    width: 13px !important;
+    height: 13px !important;
+    margin: 0 4px 0 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: url("img/check-unchecked-normal.png") !important;
+}
+#main-window findbar checkbox:hover > .checkbox-check { background-image: url("img/check-unchecked-hover.png") !important; }
+#main-window findbar checkbox[checked] > .checkbox-check { background-image: url("img/check-checked-normal.png") !important; }
+#main-window findbar checkbox[checked]:hover > .checkbox-check { background-image: url("img/check-checked-hover.png") !important; }
+#main-window findbar checkbox > .checkbox-label-box > .checkbox-label { font-size: 0 !important; margin: 0 !important; }
+#main-window findbar checkbox > .checkbox-label-box > .checkbox-label::after { font: var(--ie-font); }
+#main-window findbar .findbar-highlight .checkbox-label::after { content: "Realçar tudo"; }
+#main-window findbar .findbar-case-sensitive .checkbox-label::after { content: "Maiúsculas/minúsculas"; }
+#main-window findbar .findbar-match-diacritics .checkbox-label::after { content: "Diacríticos"; }
+#main-window findbar .findbar-entire-word .checkbox-label::after { content: "Palavras inteiras"; }
+#main-window findbar :is(.findbar-find-status, .found-matches) {
+    font: var(--ie-font) !important;
+    color: #000 !important;
+    margin-inline-start: 6px !important;
+}
+#main-window findbar .findbar-closebutton {
+    appearance: none !important;
+    list-style-image: url("img/ebar-close.png") !important;
+    width: 18px !important;
+    height: 16px !important;
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 0 !important;
+    background: none !important;
+    -moz-context-properties: none !important;
+}
+#main-window findbar .findbar-closebutton:hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
+}
+
+/* fechar (×) e descarregar (–) nos separadores: só o desenho, a preto (como o
+   × do título das barras do Explorador), com o realce dos botões planos do XP */
+#tabbrowser-tabs .tabbrowser-tab :is(.tab-close-button, .tab-reset-button) {
+    width: 13px !important;
+    height: 13px !important;
+    min-width: 13px !important;
+    margin: 0 1px 0 2px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    -moz-context-properties: none !important;
+    fill: none !important;
+}
+#tabbrowser-tabs .tab-close-button { list-style-image: url("img/tab-close.png") !important; }
+#tabbrowser-tabs .tab-reset-button { list-style-image: url("img/tab-unload.png") !important; }
+#tabbrowser-tabs .tabbrowser-tab :is(.tab-close-button, .tab-reset-button):hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
+}
+#tabbrowser-tabs .tabbrowser-tab :is(.tab-close-button, .tab-reset-button):hover:active {
+    border-image: url("img/toolbar-button-active.png") 4 fill / 2px stretch !important;
+}
+
+/* ---------- painéis (opções da página / extensões, adicionar favorito) ---------- */
+#zen-unified-site-data-panel, #editBookmarkPanel {
+    --panel-background: #fff !important;
+    --panel-color: #000 !important;
+    --panel-border-color: #aca899 !important;
+    --panel-border-radius: 0px !important;
+    --panel-padding: 0px !important;
+    --arrowpanel-background: #fff !important;
+    --arrowpanel-border-radius: 0px !important;
+    --arrowpanel-border-color: #aca899 !important;
+    --panel-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3) !important;
+    font: var(--ie-font) !important;
+}
+:is(#zen-unified-site-data-panel, #editBookmarkPanel) :is(.zen-squircle-before, .zen-interactive-button)::before,
+:is(#zen-unified-site-data-panel, #editBookmarkPanel) .zen-squircle-before::after {
+    display: none !important;
+}
+:is(#zen-unified-site-data-panel, #editBookmarkPanel) :is(label, description, input, .subviewbutton, button, menulist) {
+    font: var(--ie-font) !important;
+    color: #000 !important;
+}
+
+/* 5. opções da página e extensões: como um painel do XP */
+#zen-site-data-header {
+    gap: 0 !important;
+    padding: 2px !important;
+    margin: 0 !important;
+    background:
+        url("img/rebar-bottom.png") 0 100% / 100% 4px no-repeat,
+        url("img/rebar-top.png") 0 0 / 100% calc(100% - 4px) no-repeat !important;
+    border-bottom: 1px solid #aca899 !important;
+    image-rendering: pixelated;
+}
+#zen-site-data-header > *,
+#zen-site-data-addons :is(.unified-extensions-item-action-button, .subviewbutton, toolbarbutton),
+#zen-site-data-new-addon-button {
+    appearance: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 4px !important;
+    border: 3px solid transparent !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    image-rendering: auto;
+}
+#zen-site-data-header > :is(:hover, [checked], [open]),
+#zen-site-data-addons :is(.unified-extensions-item-action-button, .subviewbutton, toolbarbutton):hover,
+#zen-site-data-new-addon-button:hover {
+    border-image: url("img/toolbar-button-hover.png") 4 fill / 3px stretch !important;
+}
+#zen-site-data-header > [checked] {
+    border-image: url("img/toolbar-button-checked.png") 4 fill / 3px stretch !important;
+}
+.zen-site-data-section {
+    margin: 0 !important;
+    padding: 4px 6px !important;
+    border: none !important;
+    border-bottom: 1px solid #d8d2bd !important;
+    background: none !important;
+}
+.zen-site-data-section-header {
+    margin: 0 0 3px !important;
+    padding: 0 !important;
+}
+.zen-site-data-section-header > label {
+    font-weight: bold !important;
+    color: #000 !important;
+}
+.zen-site-data-section-header > :is(toolbarbutton, button, label:not(:first-child)) {
+    color: #0066cc !important;
+    text-decoration: underline;
+    background: none !important;
+    border: none !important;
+}
+#zen-site-data-settings-list > *, #zen-site-data-boost-list > * {
+    margin: 0 !important;
+    padding: 2px 4px !important;
+    border-radius: 0 !important;
+    background: none !important;
+}
+#zen-site-data-settings-list > *:hover, #zen-site-data-boost-list > *:hover {
+    background: #316ac5 !important;
+}
+#zen-site-data-settings-list > *:hover :is(label, description),
+#zen-site-data-boost-list > *:hover :is(label, description) {
+    color: #fff !important;
+}
+#zen-site-data-settings-list :is(.permission-popup-permission-icon, image) {
+    border-radius: 0 !important;
+    background: none !important;
+}
+#zen-site-data-footer {
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 6px !important;
+    background: #ece9d8 !important;
+    border-top: 1px solid #aca899 !important;
+}
+#zen-site-data-footer > .subviewbutton {
+    appearance: none !important;
+    min-height: 23px !important;
+    height: 23px !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
+}
+#zen-site-data-footer > .subviewbutton:hover { border-image-source: url("img/button-hover.png") !important; }
+#zen-site-data-footer > .subviewbutton:hover:active { border-image-source: url("img/button-active.png") !important; }
+
+/* 6. adicionar / editar favorito: o diálogo "Adicionar aos Favoritos" do IE */
+#editBookmarkPanel {
+    --panel-background: #ece9d8 !important;
+    --arrowpanel-background: #ece9d8 !important;
+    --arrowpanel-border-color: #0831d9 !important;
+    --panel-border-color: #0831d9 !important;
+}
+/* barra de título do Luna */
+#editBookmarkPanel .panel-header {
+    height: 26px !important;
+    min-height: 26px !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    justify-content: flex-start !important;
+    background: url("img/caption-focused-fill.png") 0 0 / 100% 100% no-repeat !important;
+    image-rendering: auto;
+}
+#editBookmarkPanelTitle {
+    font-size: 0 !important;
+    margin: 0 !important;
+}
+#editBookmarkPanelTitle::after {
+    content: "Adicionar aos Favoritos";
+    font: bold 13px "Trebuchet MS", sans-serif;
+    color: #fff;
+    text-shadow: 1px 1px #0a1883;
+}
+#editBookmarkPanelTitle[data-l10n-id*="edit"]::after { content: "Editar favorito"; }
+#editBookmarkHeaderSeparator, #editBookmarkSeparator { display: none !important; }
+/* o Zen põe a pré-visualização ao lado do resto, numa linha (o ::part que
+   o faz não se alcança daqui): a pré-visualização passa para o fim dessa linha
+   e recua para debaixo da barra de título, sem ocupar largura; o resto é a
+   coluna do diálogo */
+#editBookmarkPanel { --panel-width: 380px !important; }
+#editBookmarkPanel > vbox {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+#editBookmarkPanel > vbox > .panel-subview-body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* em vez da pré-visualização do Zen: o ícone e o texto do IE */
+#zenEditBookmarkPanelFaviconContainer {
+    order: 1 !important;
+    align-self: flex-start !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: calc(var(--panel-width) - 22px) !important;
+    height: 26px !important;
+    min-height: 0 !important;
+    margin: 37px 11px 0 calc(11px - var(--panel-width)) !important;
+    padding: 0 0 0 36px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: url("img/add-favorite.png") no-repeat 0 0 !important;
+}
+#zenEditBookmarkPanelFavicon { display: none !important; }
+#zenEditBookmarkPanelFaviconContainer::after {
+    content: "O Internet Explorer irá adicionar esta página à sua lista de Favoritos.";
+    display: block;
+    font: var(--ie-font);
+    color: #000;
+    line-height: 13px;
+    padding-top: 0;
+}
+/* os campos: "Nome:" e companhia numa coluna, as caixas ao lado */
+#editBookmarkPanelContent {
+    display: grid !important;
+    grid-template-columns: max-content 1fr !important;
+    align-items: center !important;
+    gap: 6px 8px !important;
+    margin: 0 !important;
+    padding: 49px 11px 0 47px !important;
+}
+#editBookmarkPanelContent > .zenEditBMPanel_fieldContainer { display: contents !important; }
+#editBookmarkPanelContent label[control] { margin: 0 !important; padding: 0 !important; }
+#editBookmarkPanelContent label[control]::after { content: ":"; }
+#editBookmarkPanelContent :is(#editBMPanel_itemsCountText, #editBMPanel_workspaceList,
+    #editBMPanel_folderTreeRow, #editBMPanel_tagsSelectorRow, .caption-label) {
+    grid-column: 1 / -1;
+}
+#editBookmarkPanelContent > :is(input, hbox, div) { margin: 0 !important; width: auto !important; }
+#editBMPanel_folderTreeRow { padding: 0 !important; gap: 6px !important; }
+#editBMPanel_folderTree {
+    height: 150px !important;
+    margin: 0 !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+}
+#editBMPanel_newFolderBox { justify-content: flex-end !important; }
+/* a árvore de pastas abre-se pelo "Escolher..." da própria lista */
+#editBMPanel_foldersExpander, #editBMPanel_tagsSelectorExpander { display: none !important; }
+/* "Espaços": uma combo do XP, com o botão do Zen como a seta */
+#editBMPanel_workspaceDropdown { position: relative !important; }
+#editBMPanel_workspaceSummary {
+    height: 21px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 20px 0 3px !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    font: var(--ie-font) !important;
+    white-space: nowrap;
+    overflow: hidden;
+}
+#editBookmarkPanel #editBMPanel_workspacesSelectorExpander {
+    position: absolute !important;
+    top: 1px !important;
+    right: 1px !important;
+    width: 15px !important;
+    min-width: 0 !important;
+    height: 19px !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border-image: none !important;
+    background: url("img/combo-drop.png") no-repeat 0 0 / 15px 19px !important;
+    font-size: 0 !important;
+    list-style-image: none !important;
+}
+#editBMPanel_workspacesSelectorExpander > .button-box > :is(image, .button-icon, label) { display: none !important; }
+#editBMPanel_workspaceList {
+    margin: -6px 0 0 !important;
+    padding: 1px 0 !important;
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+#editBMPanel_workspaceList li > label { padding: 1px 4px !important; font: var(--ie-font) !important; color: #000 !important; }
+#editBMPanel_workspaceList li > label:hover { background: #316ac5 !important; color: #fff !important; }
+/* os botões: à direita, como num diálogo */
+#editBookmarkPanel .panel-footer {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 14px 11px 11px !important;
+}
+#editBookmarkPanelDoneButton { order: -1 !important; }
+#editBookmarkPanel :is(input, #editBMPanel_namePicker, #editBMPanel_locationField) {
+    appearance: none !important;
+    box-sizing: border-box !important;
+    height: 21px !important;
+    min-height: 21px !important;
+    padding: 1px 3px !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+#editBookmarkPanel menulist {
+    appearance: none !important;
+    box-sizing: border-box !important;
+    height: 21px !important;
+    min-height: 21px !important;
+    margin: 0 !important;
+    padding: 0 1px 0 3px !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+/* a seta do Zen fica no shadow da lista (onde o userChrome não chega):
+   tapa-a o botão da combo do XP, e o texto deixa de ir a negrito */
+#editBookmarkPanel menulist {
+    position: relative !important;
+    --font-weight-semibold: normal;
+    list-style-image: url("img/folder.png") !important;
+}
+#editBookmarkPanel menulist::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 15px;
+    height: 19px;
+    background: url("img/combo-drop.png") 0 0 / 15px 19px no-repeat;
+}
+#editBookmarkPanel :is(button, .panel-button, .footer-button, toolbarbutton.subviewbutton) {
+    appearance: none !important;
+    min-width: 75px !important;
+    min-height: 23px !important;
+    height: 23px !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
+}
+#editBookmarkPanel :is(button, .panel-button, .footer-button):is([default], .primary) {
+    border-image-source: url("img/button-default.png") !important;
+}
+#editBookmarkPanel :is(button, .panel-button, .footer-button):hover { border-image-source: url("img/button-hover.png") !important; }
+#editBookmarkPanel :is(button, .panel-button, .footer-button):hover:active { border-image-source: url("img/button-active.png") !important; }
+
+/* separadores fixos que saíram do endereço guardado: só o nome (sem a "/"
+   do Zen, o botão de repor, nem o ícone por cima dele) */
+#tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] .tab-reset-pin-button,
+#tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] .zen-tab-sublabel {
+    display: none !important;
+}
+#tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] > .tab-stack > .tab-content > .tab-icon-stack {
+    position: static !important;
+    transform: none !important;
+    margin: 0 !important;
+}
+#tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] .tab-icon-image { opacity: 1 !important; }
+/* separadores não carregados (o Zen tira-os da memória): texto cinzento do XP
+   (como um item desativado), sem transparências — com a fonte de píxeis a
+   transparência deixava as letras "partidas" */
+#tabbrowser-tabs .tabbrowser-tab:is([pending], [discarded]) :is(.tab-label-container, .tab-label, .tab-icon-stack, .tab-icon-image, .tab-content) {
+    opacity: 1 !important;
+    filter: none !important;
+    mask: none !important;
+}
+#tabbrowser-tabs .tabbrowser-tab:is([pending], [discarded]) .tab-label {
+    color: #aca899 !important;
+}
+
+/* ---------- menus (barra de menus e menus de contexto): os do XP ----------
+   (as medidas aprovadas para os menus do ambiente de trabalho: branco, rebordo
+   #aca899, 2 px por dentro, itens de 17 px, texto a 17 px do realce, realce
+   #316ac5, separadores de 7 px) */
+#main-window menupopup {
+    --panel-background: #fff !important;
+    --panel-color: #000 !important;
+    --panel-border-color: #aca899 !important;
+    --panel-border-radius: 0px !important;
+    --panel-padding: 2px !important;
+    --panel-shadow-margin: 4px !important;
+    --panel-shadow: 2px 2px 3px rgba(0, 0, 0, 0.35) !important;
+    --menuitem-padding: 0 !important;
+    --menuitem-border-radius: 0px !important;
+    --menu-border-radius: 0px !important;
+    font: var(--ie-font) !important;
+}
+#main-window menupopup :is(menuitem, menu) {
+    appearance: none !important;
+    min-height: 17px !important;
+    height: 17px !important;
+    margin: 0 !important;
+    padding: 0 17px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    color: #000 !important;
+    font: var(--ie-font) !important;
+}
+#main-window menupopup :is(menuitem, menu) > :is(.menu-text, .menu-iconic-text, label) {
+    margin: 0 !important;
+    padding: 0 !important;
+    font: var(--ie-font) !important;
+    color: inherit !important;
+}
+#main-window menupopup :is(menuitem, menu) > :is(.menu-iconic-left, .menu-icon):not(:is([type="checkbox"], [type="radio"]) > *) {
+    display: none !important;
+}
+#main-window menupopup :is(menuitem, menu) > .menu-accel {
+    margin-inline-start: 24px !important;
+    color: inherit !important;
+}
+#main-window menupopup :is(menuitem, menu):is([_moz-menuactive="true"], [open]):not([disabled="true"]) {
+    background: #316ac5 !important;
+    color: #fff !important;
+}
+#main-window menupopup :is(menuitem, menu)[disabled="true"] { color: #aca899 !important; }
+#main-window menupopup menuseparator {
+    appearance: none !important;
+    height: 7px !important;
+    min-height: 7px !important;
+    margin: 0 1px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: linear-gradient(#aca899, #aca899) 0 3px / 100% 1px no-repeat !important;
+}
+#main-window menupopup menuseparator::before { display: none !important; }
+
+/* ---------- dicas (tooltips): as amarelas do XP ---------- */
+/* fundo #ffffe1, contorno preto de 1 px, Tahoma 8 com 1 px em cima e em baixo
+   e 2 px dos lados — 17 px de altura (captura 171814) — e a sombra do XP à
+   direita e em baixo. A sombra vai nas camadas do fundo, nos 3 px
+   transparentes da direita e de baixo (um box-shadow ficava fora do popup) */
+tooltip {
+    appearance: none !important;
+    margin: 0 !important;
+    padding: 2px 6px 5px 3px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font: 11px/13px "ZXP Tahoma", sans-serif !important;
+    background:
+        linear-gradient(#ffffe1, #ffffe1) 1px 1px / calc(100% - 5px) calc(100% - 5px) no-repeat,
+        linear-gradient(#000, #000) 0 0 / calc(100% - 3px) calc(100% - 3px) no-repeat,
+        linear-gradient(rgb(0 0 0 / 0.22), rgb(0 0 0 / 0.22)) 3px 3px / calc(100% - 3px) calc(100% - 3px) no-repeat,
+        linear-gradient(rgb(0 0 0 / 0.22), rgb(0 0 0 / 0.22)) 2px 2px / calc(100% - 3px) calc(100% - 3px) no-repeat !important;
+}
+tooltip :is(.tooltip-label, description, label) {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #000 !important;
+    font: inherit !important;
+}
+
+/* ---------- alert / confirm / prompt das páginas ---------- */
+/* a caixa de mensagem do IE ("Microsoft Internet Explorer"): uma janela Luna
+   desenhada dentro do próprio diálogo (commonDialog.xhtml), onde está o botão
+   Cancelar que faz de X do título. Cá fora só se tira a caixa do Zen. */
+.content-prompt-dialog .dialogOverlay { background: transparent !important; }
+.content-prompt-dialog .dialogBox {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.content-prompt-dialog .dialogFrame {
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+#commonDialogWindow[subdialog] {
+    width: max-content !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    background: transparent !important;
+}
+#commonDialogWindow[subdialog] dialog#commonDialog {
+    --zxp-dlg: 1;
+    position: relative !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 30px 4px 4px !important;
+    gap: 0 !important;
+    border: none !important;
+    color: #000 !important;
+    font: 11px/13px "ZXP Tahoma", sans-serif !important;
+    background:
+        url("img/caption-left-focused.png") left top / 12px 30px no-repeat,
+        url("img/caption-right-focused.png") right top / 12px 30px no-repeat,
+        /* (o preenchimento também por baixo das pontas: a da esquerda tem um
+           buraco onde as janelas põem o ícone, e aqui não há ícone) */
+        url("img/caption-focused-fill.png") 4px 0 / calc(100% - 8px) 30px no-repeat,
+        url("img/frame-bottom-strip-focused.png") left bottom / 100% 4px no-repeat,
+        url("img/frame-left-strip-focused.png") left 30px / 4px calc(100% - 30px) no-repeat,
+        url("img/frame-right-strip-focused.png") right 30px / 4px calc(100% - 30px) no-repeat,
+        linear-gradient(#ece9d8, #ece9d8) 4px 30px / calc(100% - 8px) calc(100% - 34px) no-repeat !important;
+}
+/* o título (sem ícone: começa onde estaria o ícone) */
+#commonDialogWindow[subdialog] dialog#commonDialog::before {
+    content: "Microsoft Internet Explorer";
+    position: absolute;
+    top: 8px;
+    left: 6px;
+    right: 33px;
+    font: bold 13px "Trebuchet MS", sans-serif;
+    color: #fff;
+    text-shadow: 1px 1px #0a1883;
+    white-space: nowrap;
+    overflow: hidden;
+    pointer-events: none;
+}
+#commonDialogWindow[subdialog] #titleContainer,
+#commonDialogWindow[subdialog] #infoTitle,
+#commonDialogWindow[subdialog] #loginLabel { display: none !important; }
+#commonDialogWindow[subdialog] #dialogGrid {
+    display: block !important;
+    margin: 0 !important;
+    padding: 11px 8px 0 11px !important;
+}
+#commonDialogWindow[subdialog] #infoRow {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* ícone do user32: aviso no alert (MB_ICONEXCLAMATION), pergunta no confirm */
+#commonDialogWindow[subdialog] #iconContainer {
+    display: flex !important;
+    flex: none !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 19px 0 0 !important;
+    padding: 0 !important;
+}
+#commonDialogWindow[subdialog] #infoIcon {
+    display: flex !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin: 0 !important;
+    list-style-image: url("img/mb-warning.png") !important;
+    -moz-context-properties: none !important;
+}
+#commonDialogWindow[subdialog] dialog:is([windowtype="prompt:confirm"], [windowtype="prompt:confirmEx"]) #infoIcon {
+    list-style-image: url("img/mb-question.png") !important;
+}
+/* texto: ao meio do ícone quando é mais baixo, por baixo dele quando não */
+#commonDialogWindow[subdialog] #infoContainer {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#commonDialogWindow[subdialog] #infoBody {
+    max-width: 560px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #000 !important;
+    font: inherit !important;
+    white-space: pre-wrap !important;
+}
+/* os botões (no shadow do <dialog>: as regras vão por uma consulta de estilo) */
+@container style(--zxp-dlg: 1) {
+    .dialog-button-box {
+        justify-content: center !important;
+        gap: 6px !important;
+        margin: 0 !important;
+        padding: 17px 0 11px !important;     /* texto -> botões 17, margem 11 */
+        border: none !important;
+        background: none !important;
+    }
+    .dialog-button-box > .button-spacer { display: none !important; }
+    /* (o xul.css impõe o pack="end": os botões ficam ao meio entre dois espaços) */
+    .dialog-button-box::before, .dialog-button-box::after { content: ""; flex: 1; }
+    .dialog-button-box::before { order: -10; }
+    .dialog-button-box::after { order: 10; }
+    .dialog-button-box > button[dlgtype="accept"] { order: -2 !important; }
+    .dialog-button-box > button {
+        appearance: none !important;
+        min-width: 75px !important;
+        min-height: 23px !important;
+        height: 23px !important;
+        margin: 0 !important;
+        padding: 0 8px !important;
+        border: none !important;
+        border-radius: 0 !important;
+        background: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+        color: #000 !important;
+        font: 11px "ZXP Tahoma", sans-serif !important;
+        border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
+    }
+    .dialog-button-box > button[default] { border-image-source: url("img/button-default.png") !important; }
+    .dialog-button-box > button:hover { border-image-source: url("img/button-hover.png") !important; }
+    .dialog-button-box > button:hover:active { border-image-source: url("img/button-active.png") !important; }
+    .dialog-button-box > button:focus-visible .button-text { outline: 1px dotted #000 !important; outline-offset: 2px !important; }
+    .dialog-button-box > button .button-text { margin: 0 !important; color: #000 !important; font: inherit !important; }
+    /* "Cancelar" em baixo: o botão extra1 (escondido nestes diálogos), que
+       responde como Cancelar — o Cancelar verdadeiro passou para o X */
+    .dialog-button-box > button[dlgtype="extra1"][hidden] { order: -1 !important; }
+    .dialog-button-box:has(> button[dlgtype="cancel"]:not([hidden])) > button[dlgtype="extra1"][hidden] {
+        display: flex !important;
+    }
+    .dialog-button-box > button[dlgtype="extra1"][hidden] .button-text { font-size: 0 !important; }
+    .dialog-button-box > button[dlgtype="extra1"][hidden] .button-text::after {
+        content: "Cancelar";
+        font: 11px "ZXP Tahoma", sans-serif;
+    }
+    /* o X do título */
+    .dialog-button-box > button[dlgtype="cancel"] {
+        display: flex !important;
+        position: absolute !important;
+        top: 5px !important;
+        right: 6px !important;
+        width: 21px !important;
+        min-width: 0 !important;
+        height: 21px !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        border-image: none !important;
+        background: url("img/caption-close-focused-normal.png") no-repeat !important;
+    }
+    .dialog-button-box > button[dlgtype="cancel"]:hover { background-image: url("img/caption-close-focused-hover.png") !important; }
+    .dialog-button-box > button[dlgtype="cancel"]:hover:active { background-image: url("img/caption-close-focused-active.png") !important; }
+    .dialog-button-box > button[dlgtype="cancel"] > * { display: none !important; }
+}
+/* prompt(): a "Linha de comandos do utilizador do Explorer" (shdoclc.dll,
+   diálogo 8131): 482x101 de área, OK e Cancelar à direita, caixa em baixo */
+#commonDialogWindow[subdialog]:has(dialog[windowtype="prompt:prompt"]) {
+    height: 135px !important;
+    min-height: 135px !important;
+}
+#commonDialogWindow[subdialog] dialog#commonDialog[windowtype="prompt:prompt"] {
+    --zxp-prompt: 1;
+    min-height: 135px !important;
+    width: 490px !important;
+    height: 135px !important;
+}
+#commonDialogWindow[subdialog] dialog#commonDialog[windowtype="prompt:prompt"]::before {
+    content: "Linha de comandos do utilizador do Explorer";
+}
+#commonDialogWindow[subdialog] dialog[windowtype="prompt:prompt"] #iconContainer { display: none !important; }
+#commonDialogWindow[subdialog] dialog[windowtype="prompt:prompt"] #dialogGrid { padding: 0 !important; }
+#commonDialogWindow[subdialog] dialog[windowtype="prompt:prompt"] #dialogGrid::before {
+    content: "Linha de comandos de script:";
+    position: absolute;
+    left: 15px;
+    top: 41px;
+}
+#commonDialogWindow[subdialog] dialog[windowtype="prompt:prompt"] #infoContainer {
+    display: block !important;
+    position: absolute !important;
+    left: 15px;
+    top: 63px;
+    width: 374px;
+    height: 29px;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+#commonDialogWindow[subdialog] dialog[windowtype="prompt:prompt"] #loginContainer {
+    display: block !important;
+    position: absolute !important;
+    left: 15px;
+    top: 98px;
+    width: 461px;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#commonDialogWindow[subdialog] #loginTextbox {
+    appearance: none !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 21px !important;
+    margin: 0 !important;
+    padding: 2px 3px !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    font: 11px "ZXP Tahoma", sans-serif !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+@container style(--zxp-prompt: 1) {
+    .dialog-button-box { padding: 0 !important; }
+    .dialog-button-box::before, .dialog-button-box::after { display: none; }
+    .dialog-button-box > button[dlgtype="accept"] { position: absolute !important; left: 400px; top: 41px; }
+    .dialog-button-box > button[dlgtype="extra1"][hidden] { position: absolute !important; left: 400px; top: 69px; }
+}
+
+/* ---------- barra de informações (IE6 SP2) ---------- */
+/* os avisos do separador (pop-up bloqueado...) numa faixa amarela por cima
+   da página, a toda a largura, que a empurra para baixo (o Zen põe-nos num
+   cartão no canto). A posição vem da área da página (anchor), por dentro do
+   rebordo afundado dela (2 px) e sem passar por cima das barras. */
+#tabbrowser-tabpanels { anchor-name: --zxp-page; }
+#tab-notification-deck > .notificationbox-stack[notificationside="top"] {
+    position: fixed !important;
+    position-anchor: --zxp-page;
+    top: calc(anchor(top, var(--ie-rebar)) + 2px) !important;
+    left: calc(anchor(left, 0px) + 2px) !important;
+    right: calc(anchor(right, 0px) + 2px) !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    z-index: 3 !important;
+}
+/* (cada separador está em posição absoluta no tabpanels: o espaço vai dentro) */
+:root:has(#tab-notification-deck > .notificationbox-stack[slot="selected"] > notification-message) #tabbrowser-tabpanels .browserContainer {
+    padding-top: 20px !important;
+}
+:root:has(#tab-notification-deck > .notificationbox-stack[slot="selected"] > notification-message + notification-message) #tabbrowser-tabpanels .browserContainer {
+    padding-top: 40px !important;
+}
+#tab-notification-deck notification-message {
+    --zxp-ib: 1;
+    display: block !important;
+    position: relative !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    background: none !important;
+    font: 11px/13px "ZXP Tahoma", sans-serif !important;
+}
+@container style(--zxp-ib: 1) {
+    .container {
+        display: flex !important;
+        align-items: center !important;
+        position: static !important;
+        box-sizing: border-box !important;
+        min-height: 20px !important;
+        margin: 0 !important;
+        padding: 1px 4px 1px 3px !important;
+        gap: 4px !important;
+        border: none !important;
+        border-bottom: 1px solid #aca899 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: var(--zxp-ib-bg, #ffffe1) !important;
+        color: var(--zxp-ib-fg, #000) !important;
+        font: 11px/13px "ZXP Tahoma", sans-serif !important;
+    }
+    .container::before, .container::after { display: none !important; }
+    .icon-container {
+        align-self: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .icon {
+        width: 16px !important;
+        height: 16px !important;
+        content: var(--zxp-ib-icon, url("img/infobar-warning.png")) !important;
+        -moz-context-properties: none !important;
+    }
+    .content, .text-container, .text-content, .actions {
+        position: static !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        align-items: center !important;
+    }
+    .content { gap: 8px !important; }
+    .text-content { line-height: 13px !important; }
+    .message, .link { color: inherit !important; font: inherit !important; }
+    .text-content::before { content: var(--zxp-ib-text, none); }
+    .message { display: var(--zxp-ib-message, inline) !important; }
+    moz-button.close { display: var(--zxp-ib-close, inline-flex) !important; }
+}
+#tab-notification-deck notification-message .notification-button {
+    appearance: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 18px !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    color: #000 !important;
+    font: 11px "ZXP Tahoma", sans-serif !important;
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
+}
+/* pop-up bloqueado: o texto do IE, e a faixa toda é o botão das opções */
+#tab-notification-deck notification-message[value="popup-blocked"] {
+    --zxp-ib-text: "Uma janela de pop-up foi bloqueada. Para ver esta janela de pop-up ou para opções adicionais, clique aqui...";
+    --zxp-ib-icon: url("img/popup-blocked.png");
+    --zxp-ib-message: none;
+    --zxp-ib-close: none;
+}
+#tab-notification-deck notification-message[value="popup-blocked"]:is(:hover, :has(.notification-button[open])) {
+    --zxp-ib-bg: #316ac5;
+    --zxp-ib-fg: #fff;
+}
+#tab-notification-deck notification-message[value="popup-blocked"] .notification-button-container {
+    position: static !important;
+}
+#tab-notification-deck notification-message[value="popup-blocked"] .notification-button {
+    position: absolute !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    opacity: 0 !important;
+}
+
+/* o menu da faixa, com os textos do IE (xpsp2res.dll, menu 10201): primeiro
+   mostrar as janelas bloqueadas ("Permitir Temporariamente"), depois o resto */
+#blockedPopupOptions > menuitem[popupReportIndex] { order: -2; }
+#blockedPopupOptions > #blockedPopupsSeparator { order: -1; }
+:is(#blockedPopupAllowSite, #blockedPopupEdit) > .menu-text { font-size: 0 !important; }
+:is(#blockedPopupAllowSite, #blockedPopupEdit) > .menu-text::after { font: var(--ie-font); }
+#blockedPopupAllowSite > .menu-text::after { content: "Permitir Sempre Janelas de Pop-up deste Site..."; }
+#blockedPopupEdit > .menu-text::after { content: "Definições de bloqueador de janelas de pop-up..."; }
+
+/* ---------- pedidos de permissão (localização, notificações...) ---------- */
+/* também como a barra de informações: amarela, o aviso, os botões do XP */
+#notification-popup {
+    --panel-background: #ffffe1 !important;
+    --panel-color: #000 !important;
+    --panel-border-color: #aca899 !important;
+    --panel-border-radius: 0px !important;
+    --panel-padding: 0px !important;
+    --arrowpanel-background: #ffffe1 !important;
+    --arrowpanel-border-radius: 0px !important;
+    --arrowpanel-border-color: #aca899 !important;
+    --panel-shadow: none !important;
+    font: var(--ie-font) !important;
+}
+#notification-popup popupnotification {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffe1 !important;
+    color: #000 !important;
+    font: var(--ie-font) !important;
+}
+#notification-popup .popup-notification-body-container {
+    padding: 3px 4px 2px 23px !important;
+    background: url("img/infobar-warning.png") no-repeat 3px 3px !important;
+}
+#notification-popup .popup-notification-body { margin: 0 !important; padding: 0 !important; gap: 2px !important; }
+#notification-popup :is(.popup-notification-description, .popup-notification-description *, label, checkbox, description) {
+    font: var(--ie-font) !important;
+    color: #000 !important;
+}
+#notification-popup .popup-notification-description { line-height: 13px !important; }
+#notification-popup .popup-notification-learnmore-link { color: #0066cc !important; text-decoration: underline !important; }
+#notification-popup .panel-footer {
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 4px 4px 4px 23px !important;
+    justify-content: flex-start !important;
+    background: #ffffe1 !important;
+    border-bottom: 1px solid #aca899 !important;
+}
+#notification-popup .panel-footer .popup-notification-primary-button { order: -1 !important; }
+#notification-popup checkbox .checkbox-check {
+    appearance: none !important;
+    width: 13px !important;
+    height: 13px !important;
+    margin: 0 5px 0 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: url("img/check-unchecked-normal.png") no-repeat !important;
+    -moz-context-properties: none !important;
+}
+#notification-popup checkbox:hover .checkbox-check { background-image: url("img/check-unchecked-hover.png") !important; }
+#notification-popup checkbox[checked] .checkbox-check { background-image: url("img/check-checked-normal.png") !important; }
+#notification-popup checkbox[checked]:hover .checkbox-check { background-image: url("img/check-checked-hover.png") !important; }
+#notification-popup .panel-footer moz-button {
+    --button-min-height: 23px;
+    min-width: 75px !important;
+}
+@container style(--zxp-pn: 1) {
+    button {
+        appearance: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    .button-background {
+        box-sizing: border-box !important;
+        min-width: 75px !important;
+        min-height: 23px !important;
+        height: 23px !important;
+        margin: 0 !important;
+        padding: 0 8px !important;
+        border: none !important;
+        border-radius: 0 !important;
+        background: none !important;
+        box-shadow: none !important;
+        color: #000 !important;
+        font: 11px "ZXP Tahoma", sans-serif !important;
+        border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
+    }
+    button:hover .button-background { border-image-source: url("img/button-hover.png") !important; }
+    button:hover:active .button-background { border-image-source: url("img/button-active.png") !important; }
+    label { color: #000 !important; font: inherit !important; }
+}
+#notification-popup moz-button { --zxp-pn: 1; }
+
+/* ---------- cadeado (ligação segura) na barra de estado ---------- */
+/* no painel pequeno ao lado da zona, como no IE (shdocvw.dll ícone 103) */
+:root:has(#identity-box:is(.verifiedDomain, .verifiedIdentity))::after {
+    content: "";
+    position: fixed;
+    right: 190px;
+    bottom: 3px;
+    width: 16px;
+    height: 16px;
+    background: url("img/status-lock.png") no-repeat;
+    z-index: 4;
+    pointer-events: none;
+}
+:root:is([inFullscreen], [inDOMFullscreen], [popup-window])::after { display: none !important; }

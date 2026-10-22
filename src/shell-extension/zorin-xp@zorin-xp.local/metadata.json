@@ -1,0 +1,7 @@
+{
+  "uuid": "zorin-xp@zorin-xp.local",
+  "name": "Zorin XP",
+  "description": "Completa o tema Windows XP Luna onde o CSS não chega: bordas, ícone e título das janelas com moldura do servidor, e a geometria dos botões da barra de tarefas (ícone 16 px, texto, sem indicadores).",
+  "shell-version": ["46"],
+  "version": 1
+}

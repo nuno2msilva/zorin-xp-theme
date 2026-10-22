@@ -1,0 +1,1661 @@
+{
+ "strings": {
+  "1500": "Apenas %s\\%s (%s) ou um administrador pode desbloquear este computador.",
+  "1501": "Mensagem de início de sessão",
+  "1502": "O nome de utilizador ou a palavra-passe não estão correctos. As letras nas palavras-passe têm de ser escritas utilizando correctamente as maiúsculas e minúsculas.",
+  "1503": "A sua palavra-passe irá expirar em %d dias. Deseja alterá-la agora?",
+  "1504": "A sua palavra-passe expira hoje. Deseja alterá-la agora?",
+  "1505": "O sistema não conseguiu iniciar a sua sessão. Certifique-se que o seu nome de utilizador e domínio estão correctos e, em seguida, introduza a palavra-passe de novo. As letras contidas em palavras-passe têm de ser escritas utilizando correctamente maiúsculas e minúsculas.",
+  "1506": "O sistema não pode iniciar a sua sessão porque o domínio %s não está disponível.",
+  "1507": "A sua palavra-passe expirou e tem de ser alterada.",
+  "1508": "A nova palavra-passe não está de acordo com os requisitos de comprimento mínimo ou de histórico e de complexidade. Escreva uma palavra-passe diferente.",
+  "1509": "Alterar palavra-passe",
+  "1510": "Não tem permissão para alterar a sua palavra-passe.",
+  "1511": "A sua palavra-passe já tem %x dias, mas só pode ser alterada depois de %d dias.",
+  "1512": "As palavras-passe que escreveu não são iguais. Escreva a nova palavra-passe nas duas caixas.",
+  "1513": "A palavra-passe tem de ter pelo menos %hu caracteres e não pode repetir nenhuma das %hu palavras-passe anteriores. Escreva uma palavra-passe diferente.",
+  "1514": "Escreva a palavra-passe que obedeça a estes requisitos em ambas as caixas.",
+  "1515": "A sua palavra-passe foi alterada.",
+  "1516": "Não é possível ao sistema alterar a sua palavra-passe porque o domínio %s não está disponível.",
+  "1517": "Este computador está bloqueado. Apenas %s\\%s (%s) ou um administrador podem desbloqueá-lo.",
+  "1518": "Computador bloqueado.",
+  "1519": "%s iniciou sessão como %s\\%s.",
+  "1520": "Reiniciar o sistema",
+  "1521": "A palavra-passe nesta conta não pode ser alterada neste momento.",
+  "1522": "Não é possível iniciar a sua sessão devido a uma restrição de conta.",
+  "1523": "Não foi possível iniciar sessão no sistema devido ao seguinte erro:\n\n%s\n\nTente novamente ou consulte o administrador de sistema.",
+  "1524": "Mensagem do Windows",
+  "1525": "Não tem permissão para encerrar este computador.",
+  "1526": "Pode desligar o computador.",
+  "1527": "Mensagem de encerramento",
+  "1528": "Este procedimento desligará a sessão do utilizador actual. Qualquer trabalho que não tenha sido guardado perder-se-á.",
+  "1529": "A política local deste sistema não lhe permite a iniciar sessão interactivamente.",
+  "1530": "A sua conta tem restrições de tempo que o impedem de iniciar sessão a esta hora. Tente mais tarde.",
+  "1531": "A sua conta está configurada de modo a impedi-lo de utilizar este computador. Tente outro computador.",
+  "1532": "A sua conta foi desactivada. Contacte o administrador de sistema.",
+  "1533": "Foi desactivado o registo de segurança. Utilize o 'Visualizador de eventos' para reduzir o período de retenção e, de seguida, active o registo de segurança.",
+  "1534": "O ficheiro de registo de segurança está cheio. Tem de desactivar o registo para poder continuar a usar o sistema. No entanto existe um problema que impede a desactivação.",
+  "1535": "O cartão fornecido não foi reconhecido. Verifique se o cartão está inserido correctamente e se está ajustado.",
+  "1536": "O cartão fornecido requer controladores que não estão presentes no sistema. Tente outro cartão.",
+  "1538": "Carregar o perfil do utilizador",
+  "1539": "O perfil não pode ser carregado. Em vez disso, vai ser carregada uma cópia do perfil predefinido.",
+  "1540": "Encerramento de emergência",
+  "1541": "Se continuar, o seu computador será reiniciado e quaisquer dados que não tenham sido guardados perder-se-ão. Use este procedimento apenas como último recurso.",
+  "1542": "Não é possível ao sistema iniciar a sua sessão neste domínio porque falta a palavra-passe do domínio primário do sistema.",
+  "1543": "Não foi possível ao sistema iniciar a sua sessão porque falhou a relação de fidedignidade entre o domínio primário e o domínio de confiança.",
+  "1544": "Não é possível ao sistema iniciar a sua sessão porque falta a conta de computador no seu domínio primário ou a palavra-passe nessa conta não está correcta.",
+  "1550": "Apenas %s\\%s ou um administrador podem desbloquear este computador.",
+  "1551": "Iniciou sessão como %s\\%s.",
+  "1552": "Este computador está bloqueado. Apenas %s\\%s ou um administrador podem desbloqueá-lo.",
+  "1553": "A palavra-passe está incorrecta. Volte a escrever a sua palavra-passe. As letras nas palavras-passe têm de ser escritas utilizando correctamente as maiúsculas e minúsculas.",
+  "1554": "Tem de alterar a sua palavra-passe durante o primeiro início de sessão.",
+  "1555": "Não foi possível ao sistema iniciar a sua sessão. Não foi possível verificar as suas credenciais.",
+  "1556": "Não foi possível desbloquear o sistema. Não foi possível verificar as suas credenciais.",
+  "1557": "A palavra-passe tem de se aplicar a um domínio ou computador específicos. Escreva ou seleccione um domínio na caixa 'Iniciar sessão em'.",
+  "1558": "A palavra-passe é maior do que aquelas que podem ser utilizadas em versões anteriores do Windows, como o Windows 98 ou o Windows 95. Prima 'Cancelar' para introduzir uma nova palavra-passe ou em 'OK' para continuar com esta palavra-passe.",
+  "1559": "Alterar palavra-passe",
+  "1560": "O Windows não pode criar um disco de reposição de palavra-passe para esta conta. Um disco de reposição de palavra-passe pode apenas ser criado para contas locais neste computador.",
+  "1564": "system.scr",
+  "1570": "WINMM",
+  "1571": "waveOutGetNumDevs",
+  "1572": "PlaySound",
+  "1579": "Não é possível alterar a sua palavra-passe porque o computador que seleccionou não é o controlador de domínio do domínio. Escreva o nome do domínio ou o nome do controlador do domínio e tente novamente.",
+  "1580": "O seu sistema está a ser executado sem o ficheiro de paginação de tamanho apropriado. Use a opção de memória virtual da aplicação 'Sistema' no painel de controlo para criar um ficheiro de paginação ou para aumentar o tamanho inicial do seu ficheiro de paginação.",
+  "1581": "Memória virtual limitada",
+  "1582": "Hora de sistema não válida",
+  "1583": "A hora ou a data do seu sistema não são válidas. Use a aplicação 'Data/Hora' no painel de controlo para configurar correctamente a data e a hora do sistema.",
+  "1584": "A sua conta expirou. Contacte o administrador de sistema.",
+  "1585": "Não é possível iniciar a sua sessão porque o serviço de início de sessão não está a ser executado neste computador.",
+  "1586": "Não é possível alterar a palavra-passe nesta conta devido ao seguinte erro:\n\n%d: %s\n\nConsulte o administrador.",
+  "1587": "Não foi possível ao utilizador actual terminar a sessão devido a um erro interno.",
+  "1588": "O Windows não conseguiu ligar a um servidor para confirmar as suas definições de início de sessão. Iniciou a sessão utilizando informações de conta guardadas anteriormente. Se alterou as informações de conta desde a última vez que iniciou sessão, essas alterações não serão reflectidas nesta sessão.",
+  "1589": "A lista de domínios completa não pode ser gerada nesta altura. Alguns domínios podem faltar na lista.",
+  "1590": "O sistema não está completamente instalado. Execute novamente o programa de configuração.",
+  "1591": "Não é possível iniciar a sua sessão porque o seu perfil obrigatório não está disponível. Contacte o administrador.",
+  "1592": "Não é possível iniciar a sua sessão porque não tem acesso à informação dentro do seu perfil obrigatório. Contacte o administrador",
+  "1593": "Não é possível iniciar a sua sessão porque não tem permissão para usar o perfil obrigatório. Contacte o administrador.",
+  "1595": "Não é possível iniciar a sua sessão porque não foi possível carregar o seu perfil. Contacte o administrador.",
+  "1598": "O seu perfil em cache local é mais recente que o seu perfil central. Deseja actualizar o seu perfil central? Se escolher 'Não' as alterações ao seu perfil local serão perdidas.",
+  "1599": "Não é possível carregar o seu perfil central. Em sua vez será carregada a cópia do seu perfil colocado em cache. As possíveis causas deste erro incluem problemas de rede, direitos de segurança insuficientes, perfil danificado ou em falta.",
+  "1600": "Não foi possível actualizar o seu perfil central com a cópia local. A permissão para escrever foi negada. Contacte o administrador.",
+  "1601": "Não é possível iniciar a sua sessão porque não existe espaço suficiente em disco. Contacte o administrador.",
+  "1602": "Não é possível iniciar a sua sessão porque não existe memória suficiente. Contacte o administrador.",
+  "1603": "Não é possível iniciar a sua sessão porque a sua conta foi bloqueada. Contacte o administrador.",
+  "1604": "Não existe espaço em disco suficiente para carregar o seu perfil normal. Elimine alguns ficheiros para libertar espaço e, de seguida, termine e volte a iniciar a sessão.",
+  "1606": "Terminar sessão",
+  "1607": "Se continuar, a sua sessão de Windows terminará e serão perdidos todos os dados que não tenham sido guardados. Utilize esta opção apenas como último recurso.",
+  "1608": "Bem-vindo",
+  "1609": "Não foi possível ler as suas credenciais a partir do smart card. Verifique se o cartão é válido e se está colocado correctamente no leitor.",
+  "1610": "Apenas %s (%s) ou um administrador podem desbloquear este computador.",
+  "1611": "Apenas %s ou um administrador podem desbloquear este computador.",
+  "1612": "Este computador está bloqueado. Apenas %s (%s) ou um administrador podem desbloqueá-lo.",
+  "1613": "Este computador está bloqueado. Apenas %s ou um administrador podem desbloqueá-lo.",
+  "1614": "Iniciou sessão como %s.",
+  "1615": "%s iniciou sessão como %s.",
+  "1616": "Computador bloqueado",
+  "1617": "Bem-vindo ao Windows",
+  "1618": "Iniciar sessão no Windows",
+  "1619": "Desbloquear o computador",
+  "1620": "Apenas o utilizador actual ou um administrador pode desbloquear este computador.",
+  "1621": "A hora actual deste computador e a hora actual da rede são diferentes. Para mais informações sobre as 'Propriedades de data/hora', consulte 'Ajuda e suporte'. Para iniciar sessão, contacte o administrador de sistema.",
+  "1630": "Não foi possível iniciar sessão no sistema. Foi apresentado um PIN incorrecto ao smart card.",
+  "1631": "O sistema não conseguiu iniciar a sessão. O smart card está bloqueado.",
+  "1632": "O sistema não conseguiu iniciar a sessão. O smart card foi removido.",
+  "1633": "O sistema não conseguiu iniciar a sessão. O contentor da chave pedida não existe no smart card.",
+  "1634": "O sistema não conseguiu iniciar a sessão. O certificado pedido não existe no smart card.",
+  "1635": "O sistema não conseguiu iniciar a sessão. O conjunto de chaves pedido não existe no smart card.",
+  "1636": "O sistema não conseguiu iniciar a sessão. Foi detectado um erro de comunicação com o smart card.",
+  "1637": "O sistema não conseguiu iniciar a sessão. Ocorreu um erro ao tentar utilizar o smart card.\nPode encontrar mais detalhes no registo de eventos. Indique este erro ao administrador de sistema.",
+  "1638": "O sistema não conseguiu iniciar a sessão. Este smart card não pode ser utilizado para o autenticar neste domínio.",
+  "1639": "O sistema não conseguiu iniciar a sessão. O servidor que o estava a autenticar indicou um erro (0x%08lX).\nPode encontrar mais detalhes no registo de eventos. Indique este erro ao administrador de sistema.",
+  "1640": "O sistema não conseguiu iniciar a sessão. O servidor que o estava a autenticar indicou um erro.\nPode encontrar mais detalhes no registo de eventos. Indique este erro ao administrador de sistema.",
+  "1641": "O sistema não pode iniciar a sua sessão porque o domínio não está disponível.",
+  "1642": "O sistema não conseguiu iniciar a sessão.\nTente novamente ou consulte o administrador de sistema.",
+  "1643": "O sistema não conseguiu iniciar a sessão. O certificado de smart card utilizado na autenticação foi revogado.",
+  "1644": "O sistema não conseguiu iniciar a sessão.\nUma autoridade de certificação não fidedigna foi detectada durante o processamento do certificado de smart card utilizado na autenticação.",
+  "1645": "O sistema não conseguiu iniciar a sessão.\nNão foi possível determinar o estado de revogação do certificado de smart card utilizado na autenticação.",
+  "1647": "O sistema não conseguiu iniciar a sessão.\nO certificado de smart card utilizado na autenticação não era fidedigno.",
+  "1648": "O sistema não conseguiu iniciar a sessão.\nO certificado de smart card utilizado na autenticação expirou.",
+  "1650": "Não foi possível desbloquear o sistema. Foi apresentado um PIN incorrecto para o smart card.",
+  "1651": "Não foi possível desbloquear o sistema. O smart card está bloqueado.",
+  "1652": "Não foi possível desbloquear o sistema. O smart card foi removido.",
+  "1653": "Não foi possível desbloquear o sistema. O contentor da chave pedida não existe no smart card.",
+  "1654": "Não foi possível desbloquear o sistema. O certificado pedido não existe no smart card.",
+  "1655": "Não foi possível desbloquear o sistema. O conjunto de chaves pedido não existe no smart card.",
+  "1656": "Não foi possível desbloquear o sistema. Foi detectado um erro de comunicação com o smart card.",
+  "1657": "Não foi possível desbloquear o sistema. O certificado de smart card utilizado na autenticação expirou.",
+  "1658": "Não foi possível desbloquear o sistema. O certificado de smart card utilizado na autenticação foi revogado.",
+  "1659": "Não foi possível desbloquear o sistema. Foi detectada uma autoridade de certificação não fidedigna durante o processamento do certificado de smart card utilizado na autenticação.",
+  "1660": "Não foi possível desbloquear o sistema. Não foi possível determinar o estado de revogação do certificado de smart card utilizado na autenticação.",
+  "1661": "Não foi possível desbloquear o sistema. O certificado de smart card utilizado na autenticação não era fidedigno.",
+  "1700": "Administrador",
+  "1701": "O registo de segurança do sistema está cheio.",
+  "1702": "O registo de segurança deste sistema está cheio. Apenas administradores podem iniciar sessão para solucionar o problema.",
+  "1703": "Predefinir",
+  "1800": "&Opções >>",
+  "1801": "&Opções <<",
+  "1802": "&PIN:",
+  "1810": "Prima Ctrl-Alt-Delete para iniciar.",
+  "1811": "Insira o cartão ou prima Ctrl-Alt-Delete para iniciar.",
+  "1812": "Tahoma",
+  "1813": "12",
+  "1815": "Tahoma Bold",
+  "1816": "15",
+  "1819": "Tahoma",
+  "1820": "9",
+  "1821": "%s (este computador)",
+  "1824": "A palavra-passe tem de conter pelo menos %hu caracteres, não pode repetir as %hu palavras-passe anteriores, tem de conter maiúsculas, números ou pontuação e não pode conter sua conta ou nome completo. Escreva uma palavra-passe diferente.",
+  "1825": "A palavra-passe é demasiado longa para este domínio. Escreva uma palavra-passe mais curta.",
+  "1826": "Não é possível iniciar a sessão porque a conta expirou, contacte o administrador.",
+  "1827": "Não é possível iniciar a sessão porque é necessária a utilização de um smart card, contacte o administrador.",
+  "1828": "Prima Ctrl-Alt-End para iniciar.",
+  "1829": "Insira um smart card ou prima Ctrl-Alt-End para iniciar.",
+  "1850": "(Automático)",
+  "1851": " (este computador)",
+  "1852": " (Windows NT 4)",
+  "1853": " (Windows 2000)",
+  "1854": " (Domínio de Kerberos)",
+  "1855": " (Domínio de Kerberos)",
+  "1856": " (Fornecedor de rede)",
+  "2000": "Ocorreu um erro na ligação de início de sessão",
+  "2002": "Ocorreu um erro ao ligar à sessão existente %s (ld %lu)\n\n%s\nSerá criada uma nova sessão.",
+  "2003": "Ocorreu um erro ao desligar o início de sessão",
+  "2004": "Ocorreu um erro ao desligar Id %lu\n\n%s\n",
+  "2005": "Desligar do Windows",
+  "2006": "Este procedimento desligará a sua sessão.\nPode voltar a ligar-se a esta sessão quando voltar a iniciar sessão.",
+  "2007": "Sessão de chamada de retorno móvel",
+  "2008": "Sessão de chamada de retorno",
+  "2009": "O seu privilégio de início de sessão interactivo foi desactivado. Contacte o administrador.",
+  "2010": "Número de telefone inválido",
+  "2011": "Esta sessão não tem um número de chamada de retorno configurado. Tem de configurar um número de chamada de retorno para sessões de chamada de retorno fixa. Notifique o administrador de sistema.",
+  "2012": "Não tem acesso ao início de sessão nesta sessão.",
+  "2013": "Não possui um nível apropriado de encriptação para ter acesso a esta WinStation.",
+  "2016": "Informação sobre o início de sessão (não é para venda)",
+  "2017": "Administradores",
+  "2018": "SYSTEM",
+  "8000": "Encerrar",
+  "8001": "Termina a sessão e encerra o Windows de modo a que possa desligar a energia com segurança.",
+  "8002": "Reiniciar",
+  "8003": "Termina a sessão, encerra o Windows e reinicia o Windows novamente.",
+  "8004": "Suspender",
+  "8005": "Mantém a sua sessão, continuando o computador a ser executado sob baixa energia ainda com os dados em memória.",
+  "8006": "Suspender (com inibição de eventos de activação)",
+  "8007": "Mantém a sua sessão, continuando o computador a ser executado sob baixa energia ainda com os dados em memória.",
+  "8008": "Hibernar",
+  "8009": "Guarda a sessão no disco de modo a que possa desligar a energia com segurança. A sessão será restaurada da próxima vez que iniciar o Windows.",
+  "8010": "Terminar sessão em %s",
+  "8011": "Termina a sessão. O computador não passa para o modo de poupança de energia.",
+  "8012": "Reiniciar no modo de MS-DOS",
+  "8013": "Termina a sessão, encerra o Windows e inicia o modo de MS-DOS.",
+  "8014": "Desligar",
+  "8015": "Desliga a sua sessão. Pode religar a esta sessão quando iniciar sessão novamente.",
+  "8101": "Tahoma",
+  "8102": "13",
+  "8200": "Para iniciar sessão, prima a tecla 'Delete' enquanto mantém premidas as teclas 'Ctrl' e 'Alt'. Esta combinação de teclas é reconhecida apenas pelo Windows, assegurando-lhe com tal acção que a sua palavra-passe está a ser dada apenas ao Windows.\n\nTal aplica-se apenas à sua palavra-passe do Windows ou do domínio. As palavras-passe associadas a páginas da Web ou a aplicações específicas não necessitarão que prima Ctrl-Alt-Delete.",
+  "8201": "Para iniciar sessão, insira o seu smart card ou prima a tecla 'Delete' enquanto mantém premidas as teclas 'Ctrl' e 'Alt'. Esta combinação de teclas é reconhecida apenas pelo Windows, assegurando-lhe com tal acção que a sua palavra-passe está a ser dada apenas ao Windows.\n\nTal aplica-se apenas à sua palavra-passe do Windows ou do domínio. As palavras-passe associadas a páginas da Web ou a aplicações especificas não necessitarão que prima Ctrl-Alt-Delete.",
+  "8202": "Insira o cartão e prima Ctrl+Alt+Delete para desbloquear este computador.",
+  "8207": "Não é possível iniciar sessão com o utilizador especificado devido a um erro crítico do sistema.\n\nTem de iniciar sessão no sistema com uma conta que tenha privilégios administrativos para resolver este problema.",
+  "8208": "O sistema está com muito poucos recursos de memória. Como administrador do computador, utilize as ferramentas administrativas para identificar quaisquer aplicações que estejam a consumir memória em excesso.",
+  "20000": "O anfitrião UI de início de sessão falhou demasiadas vezes.",
+  "20001": "Início de sessão do Windows",
+  "20005": "O Windows não consegue trocar as contas. Tente trocar novamente. Se esta mensagem continuar a aparecer, tem de reiniciar o computador.",
+  "20125": "Franklin Gothic",
+  "20126": "14",
+  "20127": "Tahoma",
+  "20128": "8",
+  "20129": "Encerre o Windows para poder desligar o computador em segurança.",
+  "20130": "Coloca o computador num estado de baixo consumo para poder retomar a sessão do Windows rapidamente.",
+  "20131": "Coloca o computador num estado de baixo consumo para poder retomar a sessão do Windows rapidamente.\n\nPara hibernar, mantenha premida a tecla de Shift.",
+  "20132": "Encerra o Windows e, em seguida, inicia o Windows novamente.",
+  "20133": "Guarda o estado do ambiente de trabalho actual no disco rígido para poder continuar a sessão onde foi deixada e, em seguida, encerra o computador."
+ },
+ "dialogs": {
+  "104": {
+   "title": "Aguarde...",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    156,
+    37
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 101,
+     "text": "Aguarde enquanto a lista de domínio é criada.",
+     "x": 4,
+     "y": 0,
+     "w": 150,
+     "h": 36,
+     "style": 1342308865
+    }
+   ]
+  },
+  "109": {
+   "title": "Ajuda sobre o início de sessão",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    252,
+    217
+   ],
+   "style": 2160591048,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 195,
+     "y": 196,
+     "w": 50,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Edit",
+     "id": 2411,
+     "text": "",
+     "x": 7,
+     "y": 115,
+     "w": 238,
+     "h": 75,
+     "style": 1342179396
+    },
+    {
+     "cls": "SysAnimate32",
+     "id": 2412,
+     "text": "Animate1",
+     "x": 60,
+     "y": 26,
+     "w": 153,
+     "h": 74,
+     "style": 1342177283
+    },
+    {
+     "cls": "Static",
+     "id": 2414,
+     "text": "Utilizar a combinação de teclas Ctrl-Alt-Delete",
+     "x": 7,
+     "y": 7,
+     "w": 238,
+     "h": 14,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2415,
+     "text": "Ctrl",
+     "x": 73,
+     "y": 100,
+     "w": 21,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2416,
+     "text": "Alt",
+     "x": 102,
+     "y": 100,
+     "w": 41,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2417,
+     "text": "Delete",
+     "x": 148,
+     "y": 100,
+     "w": 46,
+     "h": 8,
+     "style": 1342308352
+    }
+   ]
+  },
+  "1400": {
+   "title": "Bem-vindo ao Windows",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    126
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 2420,
+     "text": "Ao pedir esta combinação de teclas no arranque, ajuda a manter o \r\nseu computador seguro. Clique em 'Ajuda' para mais informações.",
+     "x": 7,
+     "y": 98,
+     "w": 228,
+     "h": 16,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2409,
+     "text": "Press C-A-D Message",
+     "x": 63,
+     "y": 71,
+     "w": 204,
+     "h": 20,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2408,
+     "text": 109,
+     "x": 35,
+     "y": 71,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Static",
+     "id": 2407,
+     "text": 110,
+     "x": 7,
+     "y": 71,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Link Window",
+     "id": 2410,
+     "text": "<A>Ajuda</A>",
+     "x": 242,
+     "y": 111,
+     "w": 24,
+     "h": 8,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 2418,
+     "text": "Bem-vindo ao Windows",
+     "x": 0,
+     "y": 64,
+     "w": 273,
+     "h": 62,
+     "style": 1342177287
+    },
+    {
+     "cls": "Button",
+     "id": 2419,
+     "text": "Computador bloqueado",
+     "x": 0,
+     "y": 0,
+     "w": 273,
+     "h": 68,
+     "style": 1342177287
+    },
+    {
+     "cls": "Static",
+     "id": 1752,
+     "text": "Este computador está a ser utilizado e foi bloqueado.",
+     "x": 37,
+     "y": 7,
+     "w": 230,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1902,
+     "text": "Text",
+     "x": 37,
+     "y": 21,
+     "w": 230,
+     "h": 26,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1754,
+     "text": "Prima Ctrl+Alt+Delete para desbloquear este computador.",
+     "x": 37,
+     "y": 52,
+     "w": 230,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2403,
+     "text": 115,
+     "x": 7,
+     "y": 5,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    }
+   ]
+  },
+  "1500": {
+   "title": "Iniciar sessão no Windows",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    175
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1506,
+     "text": "&Nome de utilizador:",
+     "x": 6,
+     "y": 83,
+     "w": 62,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1502,
+     "text": "",
+     "x": 73,
+     "y": 81,
+     "w": 162,
+     "h": 12,
+     "style": 1350631552
+    },
+    {
+     "cls": "Static",
+     "id": 1507,
+     "text": "&Palavra-passe:",
+     "x": 6,
+     "y": 100,
+     "w": 49,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1503,
+     "text": "",
+     "x": 73,
+     "y": 98,
+     "w": 162,
+     "h": 12,
+     "style": 1350631584
+    },
+    {
+     "cls": "Static",
+     "id": 1508,
+     "text": "&Iniciar sessão em:",
+     "x": 6,
+     "y": 117,
+     "w": 58,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1504,
+     "text": "",
+     "x": 73,
+     "y": 115,
+     "w": 162,
+     "h": 144,
+     "style": 1344340227
+    },
+    {
+     "cls": "Button",
+     "id": 1505,
+     "text": "Iniciar sessão utilizando &ligação de acesso telefónico",
+     "x": 56,
+     "y": 134,
+     "w": 182,
+     "h": 10,
+     "style": 1342373891
+    },
+    {
+     "cls": "Static",
+     "id": 2406,
+     "text": "",
+     "x": 6,
+     "y": 148,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 55,
+     "y": 154,
+     "w": 50,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 109,
+     "y": 154,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1501,
+     "text": "&Encerrar...",
+     "x": 163,
+     "y": 154,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1514,
+     "text": "Opções >>",
+     "x": 217,
+     "y": 154,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 2400,
+     "text": "Optional Legal Announcement",
+     "x": 6,
+     "y": 47,
+     "w": 261,
+     "h": 25,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1852,
+     "text": "Este computador está a ser utilizado e foi bloqueado.",
+     "x": 48,
+     "y": 7,
+     "w": 219,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1952,
+     "text": "Não é possível determinar a informação sobre o nome do utilizador.",
+     "x": 48,
+     "y": 21,
+     "w": 219,
+     "h": 19,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2404,
+     "text": "",
+     "x": 13,
+     "y": 7,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Button",
+     "id": 2421,
+     "text": "Desbloquear o computador",
+     "x": 0,
+     "y": 0,
+     "w": 273,
+     "h": 44,
+     "style": 1342177287
+    }
+   ]
+  },
+  "1600": {
+   "title": "Mensagem de início de sessão",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    225,
+    92
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1601,
+     "text": "O Windows não conseguiu ligar a um servidor para confirmar as definições de início de sessão. A sessão foi iniciada utilizando informações de conta anteriormente guardadas.",
+     "x": 60,
+     "y": 7,
+     "w": 158,
+     "h": 32,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1602,
+     "text": "Se tiver alterado as informações da conta desde a última vez que iniciou sessão neste computador, essas alterações não se reflectirão nesta sessão.",
+     "x": 60,
+     "y": 42,
+     "w": 158,
+     "h": 28,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 89,
+     "y": 73,
+     "w": 47,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 1603,
+     "text": "Não &voltar a alertar-me.",
+     "x": 60,
+     "y": 57,
+     "w": 158,
+     "h": 8,
+     "style": 1342242819
+    },
+    {
+     "cls": "Static",
+     "id": 1604,
+     "text": "",
+     "x": 7,
+     "y": 7,
+     "w": 21,
+     "h": 20,
+     "style": 1342177283
+    }
+   ]
+  },
+  "1700": {
+   "title": "Alterar palavra-passe",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    114
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1701,
+     "text": "Nome de &utilizador:",
+     "x": 7,
+     "y": 9,
+     "w": 101,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1702,
+     "text": "",
+     "x": 129,
+     "y": 7,
+     "w": 123,
+     "h": 12,
+     "style": 1350631552
+    },
+    {
+     "cls": "Static",
+     "id": 1703,
+     "text": "&Iniciar sessão em:",
+     "x": 7,
+     "y": 26,
+     "w": 101,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1704,
+     "text": "",
+     "x": 129,
+     "y": 23,
+     "w": 123,
+     "h": 68,
+     "style": 1344340226
+    },
+    {
+     "cls": "Static",
+     "id": 1705,
+     "text": "&Palavra-passe antiga:",
+     "x": 7,
+     "y": 43,
+     "w": 101,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1706,
+     "text": "",
+     "x": 129,
+     "y": 40,
+     "w": 123,
+     "h": 12,
+     "style": 1350631584
+    },
+    {
+     "cls": "Static",
+     "id": 1707,
+     "text": "&Nova palavra-passe:",
+     "x": 7,
+     "y": 59,
+     "w": 101,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1708,
+     "text": "",
+     "x": 129,
+     "y": 57,
+     "w": 123,
+     "h": 12,
+     "style": 1350631584
+    },
+    {
+     "cls": "Static",
+     "id": 1709,
+     "text": "&Confirmar nova palavra-passe:",
+     "x": 7,
+     "y": 75,
+     "w": 101,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1710,
+     "text": "",
+     "x": 129,
+     "y": 73,
+     "w": 123,
+     "h": 12,
+     "style": 1350631584
+    },
+    {
+     "cls": "Static",
+     "id": 2406,
+     "text": "",
+     "x": 9,
+     "y": 87,
+     "w": 29,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Button",
+     "id": 2509,
+     "text": "&Alternativo...",
+     "x": 89,
+     "y": 93,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 154,
+     "y": 92,
+     "w": 47,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 205,
+     "y": 92,
+     "w": 47,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "1800": {
+   "title": "Segurança do Windows",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    119
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1800,
+     "text": "&Bloquear computador",
+     "x": 7,
+     "y": 80,
+     "w": 84,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 1801,
+     "text": "&Terminar sessão...",
+     "x": 95,
+     "y": 80,
+     "w": 84,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1802,
+     "text": "&Encerrar...",
+     "x": 183,
+     "y": 80,
+     "w": 84,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1803,
+     "text": "A&lterar palavra-passe...",
+     "x": 7,
+     "y": 98,
+     "w": 84,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 1804,
+     "text": "&Gestor de tarefas",
+     "x": 95,
+     "y": 98,
+     "w": 84,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 183,
+     "y": 98,
+     "w": 84,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 1805,
+     "text": "Use o 'Gestor de tarefas' para fechar uma aplicação que não esteja a responder.",
+     "x": 7,
+     "y": 65,
+     "w": 264,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 1657,
+     "text": "Informação sobre o início de sessão",
+     "x": 7,
+     "y": 7,
+     "w": 260,
+     "h": 52,
+     "style": 1342177287
+    },
+    {
+     "cls": "Static",
+     "id": 1806,
+     "text": "Nome de início de sessão",
+     "x": 15,
+     "y": 19,
+     "w": 220,
+     "h": 18,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1659,
+     "text": "Data do início de sessão:",
+     "x": 15,
+     "y": 40,
+     "w": 82,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1807,
+     "text": "Data",
+     "x": 103,
+     "y": 40,
+     "w": 130,
+     "h": 8,
+     "style": 1342308352
+    }
+   ]
+  },
+  "1900": {
+   "title": "Computador bloqueado",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    69
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1752,
+     "text": "Este computador está a ser utilizado e foi bloqueado.",
+     "x": 37,
+     "y": 7,
+     "w": 230,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1902,
+     "text": "Text",
+     "x": 37,
+     "y": 21,
+     "w": 230,
+     "h": 26,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1754,
+     "text": "Prima Ctrl+Alt+Delete para desbloquear este computador.",
+     "x": 37,
+     "y": 54,
+     "w": 230,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2403,
+     "text": "",
+     "x": 7,
+     "y": 5,
+     "w": 20,
+     "h": 20,
+     "style": 1342177283
+    }
+   ]
+  },
+  "1950": {
+   "title": "Desbloquear o computador",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    127
+   ],
+   "style": 2428502216,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 1852,
+     "text": "Este computador está a ser utilizado e foi bloqueado.",
+     "x": 48,
+     "y": 7,
+     "w": 219,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1952,
+     "text": "Não é possível determinar a informação 'Nome do utilizador'.",
+     "x": 48,
+     "y": 21,
+     "w": 219,
+     "h": 26,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 1858,
+     "text": "Nome de &utilizador:",
+     "x": 48,
+     "y": 51,
+     "w": 61,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1953,
+     "text": "",
+     "x": 114,
+     "y": 50,
+     "w": 126,
+     "h": 12,
+     "style": 1350631552
+    },
+    {
+     "cls": "Static",
+     "id": 1931,
+     "text": "Pa&lavra-passe:",
+     "x": 48,
+     "y": 69,
+     "w": 61,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 1954,
+     "text": "",
+     "x": 114,
+     "y": 67,
+     "w": 126,
+     "h": 12,
+     "style": 1350631584
+    },
+    {
+     "cls": "Static",
+     "id": 1957,
+     "text": "&Iniciar sessão em:",
+     "x": 48,
+     "y": 86,
+     "w": 61,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 1956,
+     "text": "",
+     "x": 114,
+     "y": 84,
+     "w": 126,
+     "h": 68,
+     "style": 1344340227
+    },
+    {
+     "cls": "Static",
+     "id": 2406,
+     "text": "",
+     "x": 13,
+     "y": 100,
+     "w": 21,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 109,
+     "y": 106,
+     "w": 50,
+     "h": 14,
+     "style": 1342373888
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 163,
+     "y": 106,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 2401,
+     "text": "Opções >>",
+     "x": 217,
+     "y": 106,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 2404,
+     "text": "",
+     "x": 13,
+     "y": 7,
+     "w": 21,
+     "h": 20,
+     "style": 1342177283
+    }
+   ]
+  },
+  "2200": {
+   "title": "Encerrar o Windows",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    248
+   ],
+   "style": 2160593096,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": 22,
+     "x": 13,
+     "y": 7,
+     "w": 29,
+     "h": 20,
+     "style": 1342308355
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": "&Que pretende que o computador faça?",
+     "x": 44,
+     "y": 7,
+     "w": 173,
+     "h": 10,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 2201,
+     "text": "",
+     "x": 44,
+     "y": 20,
+     "w": 173,
+     "h": 57,
+     "style": 1344339971
+    },
+    {
+     "cls": "Static",
+     "id": 2202,
+     "text": "",
+     "x": 44,
+     "y": 40,
+     "w": 173,
+     "h": 27,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 2206,
+     "text": "&Planeado",
+     "x": 43,
+     "y": 100,
+     "w": 42,
+     "h": 10,
+     "style": 1342242819
+    },
+    {
+     "cls": "Static",
+     "id": 2505,
+     "text": "&Opção:",
+     "x": 44,
+     "y": 113,
+     "w": 173,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "ComboBox",
+     "id": 2204,
+     "text": "",
+     "x": 44,
+     "y": 127,
+     "w": 173,
+     "h": 57,
+     "style": 1344339971
+    },
+    {
+     "cls": "Static",
+     "id": 2205,
+     "text": "",
+     "x": 44,
+     "y": 148,
+     "w": 172,
+     "h": 22,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 2504,
+     "text": "&Comentário:",
+     "x": 44,
+     "y": 173,
+     "w": 173,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Edit",
+     "id": 2502,
+     "text": "",
+     "x": 44,
+     "y": 186,
+     "w": 173,
+     "h": 32,
+     "style": 1350631492
+    },
+    {
+     "cls": "Static",
+     "id": 2503,
+     "text": "Seleccione a opção que melhor descreve porque é que quer encerrar o computador",
+     "x": 44,
+     "y": 79,
+     "w": 173,
+     "h": 17,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 2506,
+     "text": "Encerrar registo de eventos",
+     "x": 13,
+     "y": 67,
+     "w": 252,
+     "h": 158,
+     "style": 1342177287
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 109,
+     "y": 226,
+     "w": 50,
+     "h": 14,
+     "style": 1342373889
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 163,
+     "y": 226,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Button",
+     "id": 9,
+     "text": "&Ajuda",
+     "x": 217,
+     "y": 226,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "2250": {
+   "title": "Terminar sessão no Windows",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    204,
+    60
+   ],
+   "style": 2160593096,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 2251,
+     "text": 21,
+     "x": 7,
+     "y": 7,
+     "w": 21,
+     "h": 20,
+     "style": 1342177283
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": "Tem a certeza de que pretende terminar a sessão?",
+     "x": 35,
+     "y": 16,
+     "w": 164,
+     "h": 8,
+     "style": 1342308352
+    },
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "&Terminar sessão",
+     "x": 48,
+     "y": 39,
+     "w": 56,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "&Não",
+     "x": 111,
+     "y": 39,
+     "w": 56,
+     "h": 14,
+     "style": 1342242816
+    }
+   ]
+  },
+  "2450": {
+   "title": "Aguarde...",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    274,
+    26
+   ],
+   "style": 2428502208,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 2451,
+     "text": "",
+     "x": 7,
+     "y": 8,
+     "w": 234,
+     "h": 12,
+     "style": 1342324736
+    }
+   ]
+  },
+  "2507": {
+   "title": "O início de sessão falhou",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    268,
+    114
+   ],
+   "style": 2160593096,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 1,
+     "text": "OK",
+     "x": 77,
+     "y": 88,
+     "w": 50,
+     "h": 14,
+     "style": 1342242817
+    },
+    {
+     "cls": "Button",
+     "id": 2508,
+     "text": "&Repor...",
+     "x": 146,
+     "y": 88,
+     "w": 50,
+     "h": 14,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": "O sistema não conseguiu iniciar sessão. Certifique-se de que o nome de utilizador e domínio estão correctos e, em seguida, escreva a palavra-passe de novo. As letras contidas em palavras-passe têm de ser escritas utilizando correctamente maiúsculas e minúsculas.",
+     "x": 29,
+     "y": 7,
+     "w": 214,
+     "h": 40,
+     "style": 1342308352
+    },
+    {
+     "cls": "Static",
+     "id": 4294967295,
+     "text": "Se se tiver esquecido da palavra-passe e pretender utilizar o disco de reposição de palavras-passe para definir uma nova palavra-passe para a conta, prima 'Repor...'.",
+     "x": 21,
+     "y": 55,
+     "w": 230,
+     "h": 25,
+     "style": 1342308352
+    }
+   ]
+  },
+  "20050": {
+   "title": "Desligar computador",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "style": 2428502208,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 101,
+     "text": "",
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "style": 1342308352
+    }
+   ]
+  },
+  "20051": {
+   "title": "Regressar ao ecrã de boas-vindas",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "style": 2428502208,
+   "controls": [
+    {
+     "cls": "Static",
+     "id": 101,
+     "text": "",
+     "x": 0,
+     "y": 0,
+     "w": 1,
+     "h": 1,
+     "style": 1342308352
+    }
+   ]
+  },
+  "20100": {
+   "title": "",
+   "font": [
+    "MS Shell Dlg",
+    8,
+    0,
+    0
+   ],
+   "size": [
+    208,
+    122
+   ],
+   "style": 2155872834,
+   "controls": [
+    {
+     "cls": "Button",
+     "id": 2,
+     "text": "Cancelar",
+     "x": 161,
+     "y": 103,
+     "w": 40,
+     "h": 12,
+     "style": 1342242816
+    },
+    {
+     "cls": "Static",
+     "id": 20101,
+     "text": "Sinalizador",
+     "x": 176,
+     "y": 0,
+     "w": 32,
+     "h": 26,
+     "style": 1342177293
+    },
+    {
+     "cls": "Static",
+     "id": 20102,
+     "text": "Desligar o computador",
+     "x": 7,
+     "y": 0,
+     "w": 162,
+     "h": 26,
+     "style": 1342177293
+    },
+    {
+     "cls": "Button",
+     "id": 20104,
+     "text": "&Suspender",
+     "x": 36,
+     "y": 49,
+     "w": 22,
+     "h": 20,
+     "style": 1342259211
+    },
+    {
+     "cls": "Button",
+     "id": 20103,
+     "text": "&Desligar",
+     "x": 93,
+     "y": 49,
+     "w": 22,
+     "h": 20,
+     "style": 1342259211
+    },
+    {
+     "cls": "Button",
+     "id": 20105,
+     "text": "R&einiciar",
+     "x": 150,
+     "y": 49,
+     "w": 22,
+     "h": 20,
+     "style": 1342259211
+    },
+    {
+     "cls": "Button",
+     "id": 20106,
+     "text": "&Hibernar",
+     "x": 30093,
+     "y": 30049,
+     "w": 22,
+     "h": 20,
+     "style": 1342193664
+    },
+    {
+     "cls": "Static",
+     "id": 20108,
+     "text": "",
+     "x": 22,
+     "y": 73,
+     "w": 50,
+     "h": 8,
+     "style": 1476395021
+    },
+    {
+     "cls": "Static",
+     "id": 20107,
+     "text": "",
+     "x": 79,
+     "y": 73,
+     "w": 50,
+     "h": 8,
+     "style": 1476395021
+    },
+    {
+     "cls": "Static",
+     "id": 20109,
+     "text": "",
+     "x": 136,
+     "y": 73,
+     "w": 50,
+     "h": 8,
+     "style": 1476395021
+    }
+   ]
+  }
+ },
+ "menus": {}
+}

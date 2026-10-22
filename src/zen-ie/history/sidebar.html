@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="explorerbar.css">
+<style>
+    .tb.view { --icon: url("img/ebar-view.png"); --icon-hot: url("img/ebar-view-hot.png"); }
+    .tb.search { --icon: url("img/ebar-search.png"); --icon-hot: url("img/ebar-search-hot.png"); }
+</style>
+</head>
+<body>
+<div id="toolbar">
+    <div class="tb view" id="view"><i></i>Ver<span class="arrow"></span></div>
+    <div class="tb search" id="search"><i></i>Procurar</div>
+</div>
+<div class="menu" id="viewmenu" hidden>
+    <div data-view="date">Por data</div>
+    <div data-view="site">Por site</div>
+    <div data-view="most">Por mais visitado</div>
+    <div data-view="today">Por ordem de visita hoje</div>
+</div>
+<div class="box" id="searchbox" hidden>
+    <div><label for="query">Procurar:</label><input type="text" id="query"></div>
+    <div class="buttons"><button id="searchnow">Procurar agora</button></div>
+</div>
+<div id="list" tabindex="0"></div>
+<script src="explorerbar.js"></script>
+<script src="sidebar.js"></script>
+</body>
+</html>

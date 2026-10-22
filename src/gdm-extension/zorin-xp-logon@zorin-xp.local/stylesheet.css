@@ -1,0 +1,124 @@
+/* Zorin XP — ecrã de boas-vindas. Cores, tipos de letra e tamanhos do
+   UIFILE 1000 do logonui.exe (rcint 42..47 = 14, 9, 36, 14, 8, 8 pt), em
+   píxeis arredondados como o GDI do XP a 96 ppp: 14 pt = 19 px, 8 pt = 11 px,
+   36 pt = 48 px, 16 pt = 21 px (com 18,67 px o texto sai mais leve). */
+
+.zxp-logon { background-color: rgb(90,126,220); }
+
+.zxp-logon-top { background-color: rgb(0,48,156); }
+
+.zxp-logon-bottom {
+  background-gradient-direction: horizontal;
+  background-gradient-start: rgb(57,52,173);
+  background-gradient-end: rgb(0,48,156);
+}
+
+/* painel esquerdo: arial, rgb(239,247,255) */
+.zxp-logon-help {
+  text-align: right;
+  font-family: "Arial", sans-serif;
+  font-size: 19px;
+  color: rgb(239,247,255);
+}
+.zxp-logon-welcome, .zxp-logon-welcome-shadow {
+  font-family: "Arial", sans-serif;
+  font-size: 48px;
+  font-weight: bold;
+  font-style: italic;
+  color: rgb(239,247,255);
+}
+.zxp-logon-welcome-shadow { color: rgb(49,81,181); }
+
+/* lista de contas: tahoma */
+.zxp-logon-name {
+  font-family: "Tahoma", sans-serif;
+  font-size: 19px;
+  color: rgb(239,247,255);
+}
+.zxp-logon-status {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: rgb(0,48,156);
+}
+.zxp-logon-status:hover { text-decoration: underline; }
+.zxp-logon-status.selected { color: rgb(239,247,255); }
+
+/* ecrã de estado sem contas ("O Windows está a iniciar...") */
+.zxp-logon-status-text {
+  font-family: "Arial", sans-serif;
+  font-size: 19px;
+  color: rgb(239,247,255);
+}
+
+.zxp-logon-instruct {
+  font-family: "Arial", sans-serif;
+  font-size: 11px;
+  color: white;
+}
+
+.zxp-logon-kbd {
+  background-color: rgb(49,106,197);
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  color: white;
+  padding: 0 2px;
+}
+
+/* painel de baixo: tahoma */
+.zxp-logon-power-label {
+  font-family: "Tahoma", sans-serif;
+  font-size: 19px;
+  color: white;
+}
+.zxp-logon-power:hover .zxp-logon-power-label,
+.zxp-logon-power:focus .zxp-logon-power-label { text-decoration: underline; }
+.zxp-logon-power:hover .zxp-logon-power-icon { background-image: url("images/power-hot.png"); }
+.zxp-logon-power-icon { background-image: url("images/power.png"); width: 26px; height: 26px; }
+
+.zxp-logon-bottom-instruct {
+  font-family: "Tahoma", sans-serif;
+  font-size: 12px;  /* Tahoma 9 pt (logonui rcint 43) */
+  color: white;
+}
+
+.zxp-logon-go { background-image: url("images/go.png"); width: 26px; height: 26px; }
+.zxp-logon-go:hover, .zxp-logon-go:focus { background-image: url("images/go-focus.png"); }
+
+/* caixa da palavra-passe (edit 102 do logonui.exe, 163x28; borderthickness 3,3,5,5) */
+.zxp-logon-entry,
+.zxp-logon-entry:hover,
+.zxp-logon-entry:focus {
+  background-color: transparent;
+  background-image: url("images/edit.png");
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  /* (o St centra a linha e a bolinha fica na metade de baixo dela: o texto
+     encosta em cima, ver também translation_y em welcome.js — medido) */
+  padding: 0px 5px 6px 3px;
+  margin: 0;
+  min-height: 0;
+  width: 163px;
+  height: 28px;
+  color: black;
+  caret-color: black;
+  selection-background-color: rgb(49,106,197);
+  selected-color: white;
+  font-family: "Arial", sans-serif;
+  font-size: 21px;
+  transition-duration: 0ms;
+}
+
+/* balão "Esqueceu a palavra-passe?" (dica em balão do XP) */
+.zxp-logon-balloon-title {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: black;
+}
+.zxp-logon-balloon-text {
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  color: black;
+}

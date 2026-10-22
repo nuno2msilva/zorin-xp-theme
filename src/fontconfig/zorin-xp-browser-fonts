@@ -1,0 +1,324 @@
+#!/usr/bin/env python3
+"""Zorin XP — renderização normal de texto para aplicações com motor de browser.
+
+O tema põe FREETYPE_PROPERTIES=truetype:interpreter-version=35 em toda a
+sessão (environment.d): é o interpretador TrueType do XP, que dá ao título
+das janelas (Trebuchet negrito suavizado) a espessura certa. Os motores de
+browser (Chromium/Electron e Gecko) posicionam as letras em frações de píxel
+com as larguras sem hinting, e com o hinting horizontal do v35 o espaçamento
+entre letras fica irregular (no VSCode, ilegível).
+
+Além disso, estes motores usam o tipo de letra do sistema (Tahoma 8,25 no
+tema) para a interface e para "system-ui", e as regras do XP desligam a
+suavização do Tahoma em tamanhos pequenos: com posições fracionárias fica
+serrilhado e ilegível. Nestas aplicações o Tahoma passa a ser o tipo de letra
+original do Zorin (Inter), suavizado.
+
+Este script deteta essas aplicações e aplica-lhes as duas coisas, sem mexer
+nas restantes:
+  - Flatpak: `flatpak override --user --env=...` por aplicação;
+  - lançadores .desktop: cópia em ~/.local/share/applications com
+    `env FREETYPE_PROPERTIES=...` no Exec (os que já lá estão são alterados
+    no sítio, com cópia de segurança);
+  - comandos no PATH (ex.: `code`): pequeno script em ~/.local/bin.
+
+Tudo fica registado em ~/.local/share/zorin-xp/browser-fonts.txt;
+`--undo` desfaz (é o que o rescue/restore.sh chama). Voltar a correr o script
+depois de instalar aplicações novas apanha-as também.
+"""
+import configparser
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+
+HOME = os.path.expanduser('~')
+FT_ENV = 'FREETYPE_PROPERTIES=truetype:interpreter-version=40'
+FC_CONF = os.path.join(HOME, '.config/zorin-xp/browser-fonts.conf')
+ENV = FT_ENV + ' FONTCONFIG_FILE=' + FC_CONF
+FLATPAK_CONF = 'config/fontconfig/conf.d/99-zorin-xp-browser.conf'
+STATE = os.path.join(HOME, '.local/share/zorin-xp')
+LOG = os.path.join(STATE, 'browser-fonts.txt')
+BACKUP = os.path.join(STATE, 'backup/desktop-files')
+USER_APPS = os.path.join(HOME, '.local/share/applications')
+USER_BIN = os.path.join(HOME, '.local/bin')
+MARK = '# zorin-xp-browser-fonts'
+
+# ficheiros que denunciam um motor de browser na pasta do executável
+ENGINE_FILES = ('chrome-sandbox', 'icudtl.dat', 'libxul.so', 'libcef.so', 'resources.pak')
+# lançadores em shell script (ex.: o do Discord, que corre o Electron de ~/.config)
+SCRIPT_HINTS = ('electron', 'chrome', 'chromium', 'firefox', 'libxul', 'updater_bootstrap')
+FLATPAK_BASES = ('org.electronjs.Electron2.BaseApp', 'org.mozilla.firefox.BaseApp',
+                 'org.chromium.Chromium.BaseApp')
+FLATPAK_APPS = ('org.mozilla.firefox', 'org.chromium.Chromium', 'com.google.Chrome',
+                'com.brave.Browser', 'com.microsoft.Edge', 'com.vivaldi.Vivaldi',
+                'com.opera.Opera', 'io.gitlab.librewolf-community', 'org.mozilla.Thunderbird',
+                'com.discordapp.Discord', 'com.visualstudio.code', 'com.slack.Slack',
+                'com.spotify.Client', 'com.github.IsmaelMartinez.teams_for_linux')
+
+
+def log_lines():
+    try:
+        with open(LOG) as f:
+            return [l.rstrip('\n') for l in f if l.strip()]
+    except FileNotFoundError:
+        return []
+
+
+def log_add(line):
+    if line not in log_lines():
+        os.makedirs(STATE, exist_ok=True)
+        with open(LOG, 'a') as f:
+            f.write(line + '\n')
+
+
+def ui_family():
+    """O tipo de letra de interface por omissão do sistema (antes do tema)."""
+    try:
+        import gi
+        gi.require_version('Pango', '1.0')
+        from gi.repository import Gio, Pango
+        src = Gio.SettingsSchemaSource.get_default()
+        key = src.lookup('org.gnome.desktop.interface', True).get_key('font-name')
+        family = Pango.FontDescription.from_string(key.get_default_value().unpack()).get_family()
+        if family and family != 'Tahoma':
+            return family
+    except Exception:
+        pass
+    return 'Sans'
+
+
+def fc_rules():
+    family = ui_family()
+    return f"""
+  <!-- Zorin XP: nas aplicações com motor de browser, o tipo de letra do
+       sistema (Tahoma) passa a {family} e tudo é suavizado -->
+  <match target="pattern">
+    <test name="family"><string>Tahoma</string></test>
+    <edit name="family" mode="assign" binding="strong"><string>{family}</string></edit>
+  </match>
+  <!-- monoespaçada por omissão: a original do Zorin, na variante sem
+       ligaduras (os browsers ligam-nas por omissão) -->
+  <alias binding="strong">
+    <family>monospace</family>
+    <prefer><family>JetBrains Mono NL</family></prefer>
+  </alias>
+  <match target="font">
+    <edit name="antialias" mode="assign"><bool>true</bool></edit>
+    <edit name="hinting" mode="assign"><bool>true</bool></edit>
+    <edit name="hintstyle" mode="assign"><const>hintslight</const></edit>
+    <edit name="rgba" mode="assign"><const>none</const></edit>
+  </match>
+  <!-- "ZXP Tahoma" e "ZXP Verdana" (o aspeto do Internet Explorer no Zen,
+       src/zen-ie): a Tahoma e a Verdana do XP desenhadas em píxeis, já
+       alinhadas à grelha — sem suavização nem hinting -->
+  <match target="font">
+    <test name="family" compare="contains"><string>ZXP Tahoma</string></test>
+    <edit name="antialias" mode="assign"><bool>false</bool></edit>
+    <edit name="hinting" mode="assign"><bool>false</bool></edit>
+    <edit name="autohint" mode="assign"><bool>false</bool></edit>
+  </match>
+  <match target="font">
+    <test name="family" compare="contains"><string>ZXP Verdana</string></test>
+    <edit name="antialias" mode="assign"><bool>false</bool></edit>
+    <edit name="hinting" mode="assign"><bool>false</bool></edit>
+    <edit name="autohint" mode="assign"><bool>false</bool></edit>
+  </match>
+"""
+
+
+def write(path, text):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w') as f:
+        f.write(text)
+
+
+def write_fc_conf():
+    # inclui a configuração normal (com as regras do XP) e sobrepõe-lhe estas
+    write(FC_CONF, '<?xml version="1.0"?>\n<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">\n'
+          '<fontconfig>\n  <include ignore_missing="yes">/etc/fonts/fonts.conf</include>\n'
+          + fc_rules() + '</fontconfig>\n')
+    log_add(f'created\t{FC_CONF}')
+
+
+def engine_kind(path):
+    """'dir' se o executável está na pasta de um motor de browser, 'script'
+    se é um lançador em script que o arranca, None caso contrário."""
+    real = os.path.realpath(path)
+    if not os.path.isfile(real):
+        return None
+    d = os.path.dirname(real)
+    if any(os.path.exists(os.path.join(d, f)) for f in ENGINE_FILES):
+        return 'dir'
+    try:
+        with open(real, 'rb') as f:
+            head = f.read(4096)
+    except OSError:
+        return None
+    if head.startswith(b'#!'):
+        text = head.decode('utf-8', 'replace').lower()
+        if any(h in text for h in SCRIPT_HINTS):
+            return 'script'
+    return None
+
+
+def exec_program(exec_line):
+    try:
+        args = shlex.split(exec_line)
+    except ValueError:
+        return None
+    while args and (args[0] == 'env' or '=' in args[0] and not args[0].startswith('/')):
+        args.pop(0)
+    if not args:
+        return None
+    prog = args[0]
+    if not prog.startswith('/'):
+        prog = shutil.which(prog)
+    return prog
+
+
+def patch_exec(text):
+    out = []
+    for line in text.splitlines(keepends=True):
+        if line.split('=', 1)[0].strip() == 'Exec' and ENV not in line:
+            cmd = line.split('=', 1)[1].lstrip()
+            old = 'env ' + FT_ENV + ' '
+            if cmd.startswith(old):  # versão anterior deste script
+                cmd = cmd[len(old):]
+            line = 'Exec=env ' + ENV + ' ' + cmd
+        out.append(line)
+    return ''.join(out)
+
+
+def desktop_dirs():
+    dirs = os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share').split(':')
+    dirs += ['/var/lib/snapd/desktop']
+    return [os.path.join(d, 'applications') for d in dirs if d]
+
+
+def fix_desktop_files():
+    engines = set()  # pastas de motores e lançadores em script (caminhos reais)
+    seen = set()
+    # os da home têm prioridade (são os que o menu usa)
+    for d in [USER_APPS] + desktop_dirs():
+        if not os.path.isdir(d):
+            continue
+        for name in sorted(os.listdir(d)):
+            if not name.endswith('.desktop') or name in seen:
+                continue
+            seen.add(name)
+            path = os.path.join(d, name)
+            cp = configparser.ConfigParser(interpolation=None, strict=False)
+            try:
+                cp.read(path, encoding='utf-8')
+                exec_line = cp.get('Desktop Entry', 'Exec', fallback='')
+            except (configparser.Error, UnicodeDecodeError):
+                continue
+            if 'flatpak run' in exec_line or not exec_line:
+                continue
+            prog = exec_program(exec_line)
+            kind = engine_kind(prog) if prog else None
+            if not kind:
+                continue
+            real = os.path.realpath(prog)
+            engines.add(os.path.dirname(real) if kind == 'dir' else real)
+            with open(path, encoding='utf-8') as f:
+                text = f.read()
+            new = patch_exec(text)
+            if new == text:
+                continue
+            if d == USER_APPS:
+                # ficheiro do utilizador: guardar o original antes de mexer
+                os.makedirs(BACKUP, exist_ok=True)
+                bak = os.path.join(BACKUP, name)
+                if not os.path.exists(bak):
+                    shutil.copy2(path, bak)
+                log_add(f'modified\t{path}\t{bak}')
+            else:
+                path = os.path.join(USER_APPS, name)
+                log_add(f'created\t{path}')
+            os.makedirs(USER_APPS, exist_ok=True)
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(new)
+            print(f'  lançador: {name}')
+    return engines
+
+
+def fix_commands(engines):
+    """Comandos no PATH que levam ao motor (ex.: /usr/bin/code ->
+    /usr/share/code/bin/code)."""
+    for bindir in ('/usr/bin', '/usr/local/bin'):
+        if not os.path.isdir(bindir):
+            continue
+        for name in sorted(os.listdir(bindir)):
+            path = os.path.join(bindir, name)
+            real = os.path.realpath(path)
+            d = os.path.dirname(real)
+            if not (real in engines or d in engines or
+                    (os.path.basename(d) == 'bin' and os.path.dirname(d) in engines)):
+                continue
+            wrapper = os.path.join(USER_BIN, name)
+            if os.path.exists(wrapper):
+                with open(wrapper, errors='replace') as f:
+                    if MARK not in f.read():
+                        continue  # não é nosso: não tocar
+            os.makedirs(USER_BIN, exist_ok=True)
+            with open(wrapper, 'w') as f:
+                f.write(f'#!/bin/sh\n{MARK}\nexec env {ENV} {shlex.quote(path)} "$@"\n')
+            os.chmod(wrapper, 0o755)
+            log_add(f'created\t{wrapper}')
+            print(f'  comando: {name}')
+
+
+def fix_flatpaks():
+    if not shutil.which('flatpak'):
+        return
+    apps = subprocess.run(['flatpak', 'list', '--app', '--columns=application'],
+                          capture_output=True, text=True).stdout.split()
+    for app in apps:
+        meta = subprocess.run(['flatpak', 'info', '--show-metadata', app],
+                              capture_output=True, text=True).stdout
+        base = next((l.split('=', 1)[1] for l in meta.splitlines() if l.startswith('base=')), '')
+        if app not in FLATPAK_APPS and not any(b in base for b in FLATPAK_BASES):
+            continue
+        subprocess.run(['flatpak', 'override', '--user', '--env=' + FT_ENV, app], check=False)
+        log_add(f'flatpak\t{app}')
+        # (dentro do Flatpak a configuração do utilizador é a da pasta da app)
+        conf = os.path.join(HOME, '.var/app', app, FLATPAK_CONF)
+        write(conf, '<?xml version="1.0"?>\n<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">\n'
+              '<fontconfig>' + fc_rules() + '</fontconfig>\n')
+        log_add(f'created\t{conf}')
+        print(f'  flatpak: {app}')
+
+
+def undo():
+    for line in reversed(log_lines()):
+        kind, *rest = line.split('\t')
+        if kind == 'created' and os.path.exists(rest[0]):
+            os.remove(rest[0])
+        elif kind == 'modified' and os.path.exists(rest[1]):
+            shutil.copy2(rest[1], rest[0])
+        elif kind == 'flatpak' and shutil.which('flatpak'):
+            subprocess.run(['flatpak', 'override', '--user',
+                            '--unset-env=FREETYPE_PROPERTIES', rest[0]], check=False)
+        print(f'  desfeito: {rest[0]}')
+    if os.path.exists(LOG):
+        os.rename(LOG, LOG + '.undone')
+
+
+def main():
+    if '--undo' in sys.argv:
+        undo()
+        return
+    print('Aplicações com motor de browser (renderização de texto normal):')
+    write_fc_conf()
+    engines = fix_desktop_files()
+    fix_commands(engines)
+    fix_flatpaks()
+    subprocess.run(['update-desktop-database', USER_APPS], check=False,
+                   stderr=subprocess.DEVNULL)
+
+
+if __name__ == '__main__':
+    main()

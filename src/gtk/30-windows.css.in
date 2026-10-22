@@ -1,0 +1,250 @@
+/* =====================================================================
+ * Barras de título (Window.Caption) — medidas confirmadas ao píxel contra
+ * capturas do XP:
+ *   altura 30 px (SM_CYCAPTION 26 + moldura 4), botões 21×21 em y = 6,
+ *   minimizar/maximizar/fechar em W-73 / W-50 / W-27 (2 px entre eles,
+ *   6 px até à direita), ícone 16×16 em (6, 8), texto a partir de x = 26.
+ *   Texto: Trebuchet MS Bold 10 pt (13 px), branco com sombra 1,1 #0A1883;
+ *   inativo #D8E4F8 sem sombra.
+ * =================================================================== */
+headerbar, .titlebar:not(headerbar) {
+  min-height: 21px;
+  margin: 0;
+  padding: 6px 6px 3px 6px;
+  {{part:caption:focused}}
+  color: @xp_caption_text;
+  box-shadow: none;
+  text-shadow: none;
+}
+headerbar:backdrop, .titlebar:not(headerbar):backdrop {
+  {{state:caption:unfocused}}
+  color: @xp_caption_inactive_text;
+}
+.maximized headerbar, .maximized .titlebar:not(headerbar),
+.tiled headerbar, .tiled-left headerbar, .tiled-right headerbar {
+  {{part:caption-max:focused}}
+  /* como no XP: legenda de 26 px a começar 1 px acima do ecrã (vêem-se 25, a
+   * partir da linha de brilho); as colunas da moldura ficam de fora */
+  margin: -1px -4px 0 -4px;
+  padding: 2px 3px 3px 1px;   /* botões a 3 px da direita e 1 px do topo (medido) */
+}
+.maximized headerbar:backdrop, .tiled headerbar:backdrop,
+.tiled-left headerbar:backdrop, .tiled-right headerbar:backdrop { {{state:caption-max:unfocused}} }
+.fullscreen headerbar { margin: 0; }
+
+headerbar .title, .titlebar .title, headerbar windowtitle .title, windowtitle > .title {
+  padding: 0 4px;
+  font-family: "Trebuchet MS";
+  font-weight: bold;
+  font-size: 9.75pt;
+  color: @xp_caption_text;
+  text-shadow: 1px 1px @xp_caption_shadow;
+}
+headerbar:backdrop .title, .titlebar:backdrop .title {
+  color: @xp_caption_inactive_text;
+  text-shadow: none;
+}
+headerbar .subtitle, windowtitle > .subtitle {
+  font-size: 7.5pt;
+  color: @xp_caption_inactive_text;
+  text-shadow: none;
+}
+headerbar separator { background: none; min-width: 6px; }
+
+/* ---------------------------------------------------------------------
+ * Botões normais dentro de barras de título (apps com headerbar própria):
+ * botões azuis brilhantes como os de janela (CaptionButton), texto branco
+ * ------------------------------------------------------------------- */
+headerbar > button:not(.titlebutton), headerbar box > button, headerbar box > menubutton > button,
+headerbar .linked > button, headerbar > menubutton > button {
+  min-height: 15px;
+  min-width: 15px;
+  margin: 0 1px;
+  padding: 3px 5px;
+  border-style: solid;
+  border-width: 0;
+  border-image: url("assets/caption-button-focused-normal.png") 5 5 5 5 stretch;
+  border-image-width: 5px;
+  background-color: transparent;
+  background-image: url("assets/caption-button-focused-normal-fill.png");
+  background-size: 100% 100%;
+  color: @xp_caption_text;
+  -gtk-icon-shadow: none;
+  text-shadow: none;
+  box-shadow: none;
+}
+headerbar > button:not(.titlebutton):hover, headerbar box > button:hover, headerbar box > menubutton > button:hover,
+headerbar .linked > button:hover {
+  border-image-source: url("assets/caption-button-focused-hover.png");
+  background-image: url("assets/caption-button-focused-hover-fill.png");
+}
+headerbar > button:not(.titlebutton):active, headerbar > button:not(.titlebutton):checked,
+headerbar box > button:active, headerbar box > button:checked, headerbar box > menubutton > button:checked,
+headerbar .linked > button:active, headerbar .linked > button:checked {
+  border-image-source: url("assets/caption-button-focused-active.png");
+  background-image: url("assets/caption-button-focused-active-fill.png");
+}
+headerbar > button:not(.titlebutton):disabled, headerbar:backdrop > button:not(.titlebutton),
+headerbar box > button:disabled, headerbar:backdrop box > button {
+  border-image-source: url("assets/caption-button-unfocused-normal.png");
+  background-image: url("assets/caption-button-unfocused-normal-fill.png");
+  color: @xp_caption_inactive_text;
+}
+headerbar > button.flat:not(.titlebutton):not(:hover):not(:active):not(:checked),
+headerbar box > button.flat:not(:hover):not(:active):not(:checked) {
+  border-image: none;
+  background-image: none;
+}
+headerbar entry, headerbar spinbutton { margin: 0 1px; }
+headerbar label { color: inherit; }
+headerbar image { color: inherit; }
+
+/* Botões de janela: imagens pré-desenhadas pelo uxtheme (21×21, glifo incluído) */
+headerbar button.titlebutton, .titlebar button.titlebutton, windowcontrols > button {
+  min-width: 21px;
+  min-height: 21px;
+  margin: 0 0 0 2px;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: transparent;
+  -gtk-icon-source: none;
+  -gtk-icon-shadow: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: auto;
+  outline: none;
+}
+windowcontrols { margin: 0; /*@gtk4*/border-spacing: 0;/*@end*/ }
+windowcontrols > button > image, headerbar button.titlebutton > image {
+  -gtk-icon-source: none;
+  color: transparent;
+  opacity: 0;
+}
+windowcontrols > button:first-child, headerbar button.titlebutton:first-child { margin-left: 0; }
+windowcontrols.start { margin-right: 6px; }
+
+/*@gtk3*/
+headerbar button.titlebutton.minimize { background-image: url("assets/caption-min-focused-normal.png"); }
+headerbar button.titlebutton.minimize:hover { background-image: url("assets/caption-min-focused-hover.png"); }
+headerbar button.titlebutton.minimize:active { background-image: url("assets/caption-min-focused-active.png"); }
+headerbar button.titlebutton.minimize:backdrop { background-image: url("assets/caption-min-unfocused-normal.png"); }
+headerbar button.titlebutton.minimize:backdrop:hover { background-image: url("assets/caption-min-unfocused-hover.png"); }
+headerbar button.titlebutton.maximize { background-image: url("assets/caption-max-focused-normal.png"); }
+headerbar button.titlebutton.maximize:hover { background-image: url("assets/caption-max-focused-hover.png"); }
+headerbar button.titlebutton.maximize:active { background-image: url("assets/caption-max-focused-active.png"); }
+headerbar button.titlebutton.maximize:backdrop { background-image: url("assets/caption-max-unfocused-normal.png"); }
+headerbar button.titlebutton.maximize:backdrop:hover { background-image: url("assets/caption-max-unfocused-hover.png"); }
+.maximized headerbar button.titlebutton.maximize { background-image: url("assets/caption-restore-focused-normal.png"); }
+.maximized headerbar button.titlebutton.maximize:hover { background-image: url("assets/caption-restore-focused-hover.png"); }
+.maximized headerbar button.titlebutton.maximize:active { background-image: url("assets/caption-restore-focused-active.png"); }
+.maximized headerbar button.titlebutton.maximize:backdrop { background-image: url("assets/caption-restore-unfocused-normal.png"); }
+headerbar button.titlebutton.close { background-image: url("assets/caption-close-focused-normal.png"); }
+headerbar button.titlebutton.close:hover { background-image: url("assets/caption-close-focused-hover.png"); }
+headerbar button.titlebutton.close:active { background-image: url("assets/caption-close-focused-active.png"); }
+headerbar button.titlebutton.close:backdrop { background-image: url("assets/caption-close-unfocused-normal.png"); }
+headerbar button.titlebutton.close:backdrop:hover { background-image: url("assets/caption-close-unfocused-hover.png"); }
+/*@end*/
+/*@gtk4*/
+windowcontrols > button.minimize { background-image: url("assets/caption-min-focused-normal.png"); }
+windowcontrols > button.minimize:hover { background-image: url("assets/caption-min-focused-hover.png"); }
+windowcontrols > button.minimize:active { background-image: url("assets/caption-min-focused-active.png"); }
+windowcontrols > button.minimize:backdrop { background-image: url("assets/caption-min-unfocused-normal.png"); }
+windowcontrols > button.minimize:backdrop:hover { background-image: url("assets/caption-min-unfocused-hover.png"); }
+windowcontrols > button.maximize { background-image: url("assets/caption-max-focused-normal.png"); }
+windowcontrols > button.maximize:hover { background-image: url("assets/caption-max-focused-hover.png"); }
+windowcontrols > button.maximize:active { background-image: url("assets/caption-max-focused-active.png"); }
+windowcontrols > button.maximize:backdrop { background-image: url("assets/caption-max-unfocused-normal.png"); }
+windowcontrols > button.maximize:backdrop:hover { background-image: url("assets/caption-max-unfocused-hover.png"); }
+.maximized windowcontrols > button.maximize { background-image: url("assets/caption-restore-focused-normal.png"); }
+.maximized windowcontrols > button.maximize:hover { background-image: url("assets/caption-restore-focused-hover.png"); }
+.maximized windowcontrols > button.maximize:active { background-image: url("assets/caption-restore-focused-active.png"); }
+.maximized windowcontrols > button.maximize:backdrop { background-image: url("assets/caption-restore-unfocused-normal.png"); }
+windowcontrols > button.close { background-image: url("assets/caption-close-focused-normal.png"); }
+windowcontrols > button.close:hover { background-image: url("assets/caption-close-focused-hover.png"); }
+windowcontrols > button.close:active { background-image: url("assets/caption-close-focused-active.png"); }
+windowcontrols > button.close:backdrop { background-image: url("assets/caption-close-unfocused-normal.png"); }
+windowcontrols > button.close:backdrop:hover { background-image: url("assets/caption-close-unfocused-hover.png"); }
+/* ícone da janela no layout "icon:" (GTK4) */
+windowcontrols > image.icon { min-width: 16px; min-height: 16px; margin: 2px 4px 3px 0; -gtk-icon-size: 16px; }
+
+/* ---------------------------------------------------------------------
+ * Molduras de janelas normais (mutter-x11-frames): o mutter só aceita
+ * moldura em cima, por isso o GTK desenha a legenda sem as 4 colunas de
+ * moldura de cada lado (caption-inner) e a extensão Zorin XP acrescenta as
+ * bordas, o ícone e o título alinhado à esquerda por fora/por cima.
+ * ------------------------------------------------------------------- */
+/* O mutter põe a legenda (headerbar.default-decoration) dentro de um widget
+ * que também leva a classe .titlebar: esse invólucro fica sem fundo nem
+ * margens, senão a regra geral das legendas aplicava-se duas vezes e a
+ * legenda ficava com 39 px em vez de 30 (e a extensão não a reconhecia) */
+window > widget.titlebar, window > widget.titlebar:backdrop,
+window.csd > widget.titlebar, window.csd > widget.titlebar:backdrop,
+window.maximized > widget.titlebar {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: none;
+}
+widget.titlebar > headerbar.default-decoration, widget.default-decoration > headerbar.titlebar {
+  margin: 0;
+  padding: 6px 2px 3px 0;
+  {{part:caption-inner:focused}}
+}
+widget.titlebar > headerbar.default-decoration:backdrop,
+widget.default-decoration > headerbar.titlebar:backdrop { {{state:caption-inner:unfocused}} }
+widget.titlebar > headerbar.default-decoration .title,
+widget.default-decoration > headerbar.titlebar .title { color: transparent; text-shadow: none; }
+.maximized widget.titlebar > headerbar.default-decoration,
+.maximized widget.default-decoration > headerbar.titlebar {
+  margin: -4px -4px 0 -4px;
+  padding: 6px 6px 3px 6px;
+  {{part:caption-max:focused}}
+}
+.maximized widget.titlebar > headerbar.default-decoration:backdrop,
+.maximized widget.default-decoration > headerbar.titlebar:backdrop { {{state:caption-max:unfocused}} }
+/*@end*/
+
+/* ---------------------------------------------------------------------
+ * Decorações do lado do cliente (CSD): sem sombra (o XP não tinha),
+ * cantos superiores arredondados como a legenda
+ * ------------------------------------------------------------------- */
+decoration {
+  border-radius: 8px 8px 0 0;
+  box-shadow: none;
+  margin: 0;
+}
+window.csd decoration, window.csd > decoration {
+  box-shadow: 0 0 0 1px transparent;
+  /* moldura de 4 px (FrameLeft/Right/Bottom) — o GTK recua o conteúdo */
+  border-style: solid;
+  border-width: 0 4px 4px 4px;
+  border-image: url("assets/frame-csd-focused.png") 0 4 4 4 stretch;
+  border-image-width: 0 4px 4px 4px;
+}
+window.csd decoration:backdrop { border-image-source: url("assets/frame-csd-unfocused.png"); }
+/* a legenda cobre as colunas da moldura, como no XP */
+window.csd > headerbar.titlebar, window.csd > .titlebar { margin-left: -4px; margin-right: -4px; }
+window.csd.maximized decoration, window.csd.fullscreen decoration, window.csd.tiled decoration,
+window.csd.tiled-left decoration, window.csd.tiled-right decoration {
+  border-width: 0;
+  border-image: none;
+}
+window.csd.maximized decoration, window.csd.fullscreen decoration, window.csd.tiled decoration { border-radius: 0; }
+/*@gtk3*/
+/* as janelas dos menus também são window.csd: sem a moldura azul das janelas
+ * (só o contorno e a sombra do próprio menu) */
+window.csd.popup decoration, window.csd.popup decoration:backdrop {
+  border-width: 0;
+  border-image: none;
+  border-radius: 0;
+}
+tooltip.csd decoration { box-shadow: none; }
+messagedialog.csd decoration { border-radius: 8px 8px 0 0; }
+/*@end*/
+window.solid-csd { padding: 0; }

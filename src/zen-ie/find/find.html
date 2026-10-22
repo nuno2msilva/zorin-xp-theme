@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<title>Localizar</title>
+<style>
+/* o diálogo Localizar do IE6 (medido na captura): área de 362 x 111 */
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #ece9d8;
+    color: #000;
+    font: 11px "ZXP Tahoma", sans-serif;
+    user-select: none;
+    cursor: default;
+}
+.abs { position: absolute; }
+label u, button u, span u { text-decoration: underline; }
+#lbl { left: 10px; top: 16px; }
+#q {
+    left: 66px; top: 12px; width: 184px; height: 21px;
+    box-sizing: border-box;
+    padding: 2px 3px;
+    border: 1px solid #7f9db9;
+    background: #fff;
+    font: inherit;
+    color: #000;
+    outline: none;
+    user-select: text;
+}
+button {
+    left: 257px; width: 94px; height: 23px;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: #000;
+    border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch;
+}
+button:hover { border-image-source: url("img/button-hover.png"); }
+button:hover:active { border-image-source: url("img/button-active.png"); }
+button.default { border-image-source: url("img/button-default.png"); }
+button:disabled { border-image-source: url("img/button-disabled.png"); color: #aca899; }
+#next { top: 12px; }
+#cancel { top: 39px; }
+.check { left: 12px; display: flex; align-items: center; gap: 5px; }
+.check input, .radio input { display: none; }
+.check i, .radio i { width: 13px; height: 13px; flex: none; background: var(--off) no-repeat; }
+.check i { --off: url("img/check-unchecked-normal.png"); --on: url("img/check-checked-normal.png"); }
+.check:hover i { --off: url("img/check-unchecked-hover.png"); --on: url("img/check-checked-hover.png"); }
+.radio i { --off: url("img/radio-unchecked-normal.png"); --on: url("img/radio-checked-normal.png"); }
+.radio:hover i { --off: url("img/radio-unchecked-hover.png"); --on: url("img/radio-checked-hover.png"); }
+input:checked + i { background-image: var(--on); }
+#whole { top: 46px; }
+#case { top: 66px; }
+/* grupo "Direcção" (caixa de grupo do XP: rebordo arredondado, título azul) */
+#dir {
+    left: 146px; top: 48px; width: 102px; height: 39px;
+    box-sizing: border-box;
+    border: 1px solid #d0d0bf;
+    border-radius: 3px;
+}
+#dirtitle { left: 160px; top: 41px; padding: 0 2px; background: #ece9d8; color: #0046d5; }
+.radio { top: 59px; display: flex; align-items: flex-start; gap: 3px; line-height: 13px; }
+#up { left: 155px; }
+#down { left: 196px; }
+</style>
+</head>
+<body>
+<label class="abs" id="lbl" for="q">Locali<u>z</u>ar:</label>
+<input class="abs" id="q" type="text" accesskey="z" autocomplete="off">
+<button class="abs default" id="next" disabled accesskey="l"><u>L</u>ocalizar seguinte</button>
+<button class="abs" id="cancel">Cancelar</button>
+<label class="abs check" id="whole"><input type="checkbox" id="wholeword" accesskey="i"><i></i><span>Apenas palavras <u>i</u>nteiras</span></label>
+<label class="abs check" id="case"><input type="checkbox" id="matchcase" accesskey="m"><i></i><span><u>M</u>aiúsculas/minúsculas</span></label>
+<div class="abs" id="dir"></div>
+<span class="abs" id="dirtitle">Direcção</span>
+<label class="abs radio" id="up"><input type="radio" name="dir" value="up" accesskey="c"><i></i><span>Para<br><u>c</u>ima</span></label>
+<label class="abs radio" id="down"><input type="radio" name="dir" value="down" checked accesskey="b"><i></i><span>Para<br><u>b</u>aixo</span></label>
+<script src="find.js"></script>
+</body>
+</html>
