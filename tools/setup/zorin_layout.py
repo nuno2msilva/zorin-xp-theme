@@ -16,6 +16,10 @@ approved for XP:
   - a single workspace, as XP (no multiple desktops).
 The installer's backup (/org/gnome/shell/, /org/gnome/mutter/ and
 /org/gnome/desktop/wm/preferences/) allows restoring everything.
+
+Also a module: the XP Zorin Appearance (src/zorin-appearance-xp) applies
+scheme_settings() and monitors() when its "Windows" (list) scheme is picked,
+instead of Zorin's values (installed as ~/.local/share/zorin-xp/zorin_layout.py).
 """
 import json
 
@@ -76,6 +80,8 @@ XP = [
     (TB, 'trans-use-border', GLib.Variant('b', False)),
     (TB, 'trans-use-custom-opacity', GLib.Variant('b', False)),
     (TB, 'trans-use-dynamic-opacity', GLib.Variant('b', False)),
+    # XP's caption buttons (the GTK theme's; Zorin's scheme adds the app menu)
+    ('org.gnome.desktop.wm.preferences', 'button-layout', GLib.Variant('s', ':minimize,maximize,close')),
     # one workspace, as XP (2026-10-23, user's wish)
     ('org.gnome.mutter', 'dynamic-workspaces', GLib.Variant('b', False)),
     ('org.gnome.desktop.wm.preferences', 'num-workspaces', GLib.Variant('i', 1)),
@@ -116,6 +122,20 @@ def per_monitor(settings, key, value):
     settings.set_string(key, json.dumps({k: value for k in sorted(keys)}, separators=(',', ':')))
 
 
+def scheme_settings():
+    """Every (schema, key, value) of the XP layout but the per-monitor ones."""
+    return ZORIN_WINDOWS_LAYOUT + XP
+
+
+def monitors():
+    """The per-monitor ones (JSON keyed by monitor), on every monitor key."""
+    tb = Gio.Settings.new(TB)
+    per_monitor(tb, 'panel-sizes', PANEL_SIZE)
+    per_monitor(tb, 'panel-element-positions',
+                [{'element': e, 'visible': v, 'position': p} for e, v, p in ELEMENTS])
+    Gio.Settings.sync()
+
+
 def main():
     shell = Gio.Settings.new('org.gnome.shell')
     enabled = shell.get_strv('enabled-extensions')
@@ -131,13 +151,8 @@ def main():
     shell.set_strv('enabled-extensions', enabled)
     shell.set_strv('disabled-extensions', disabled)
 
-    set_all(ZORIN_WINDOWS_LAYOUT)
-    set_all(XP)
-    tb = Gio.Settings.new(TB)
-    per_monitor(tb, 'panel-sizes', PANEL_SIZE)
-    per_monitor(tb, 'panel-element-positions',
-                [{'element': e, 'visible': v, 'position': p} for e, v, p in ELEMENTS])
-    Gio.Settings.sync()
+    set_all(scheme_settings())
+    monitors()
 
 
 if __name__ == '__main__':

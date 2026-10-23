@@ -249,6 +249,8 @@ XPROFILE
         mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications"
         install -m 755 "$HERE/src/zorin-appearance-xp/zorin-appearance" "$HOME/.local/bin/zorin-appearance"
         record "$HOME/.local/bin/zorin-appearance"
+        # (its "Windows" scheme applies the XP layout: the shell component's module)
+        install_file "$HERE/tools/setup/zorin_layout.py" "$HOME/.local/share/zorin-xp/zorin_layout.py"
         if [ -f /usr/share/applications/zorin-appearance.desktop ]; then
             sed "s|^Exec=.*|Exec=$HOME/.local/bin/zorin-appearance|" \
                 /usr/share/applications/zorin-appearance.desktop \

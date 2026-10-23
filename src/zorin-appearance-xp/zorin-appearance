@@ -11,7 +11,11 @@ XP's Display Properties:
     theme draws with the title embedded in the outline);
   - Close button at the bottom right (changes apply at once, as in the
     original application, so there is no OK/Cancel).
+Its "Windows" scheme (the window list one, Windows 7 style) applies the XP
+layout instead of Zorin's values (_xp_scheme).
 """
+import importlib.util
+import os
 import sys
 
 import gi
@@ -20,6 +24,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import GLib, GObject, Gtk  # noqa: E402
 
 from zorin_appearance import __main__ as za  # noqa: E402
+from zorin_appearance.Layouts import layout as za_layout  # noqa: E402
 
 # margins measured on an XP property sheet (the same as the taskbar
 # settings): tab at 7/5/6 px, buttons 9 px from it, 6 px from each other and
@@ -39,6 +44,47 @@ GEAR = 'emblem-system-symbolic'
 ROW_MARGIN = {'top': 3, 'bottom': 3, 'start': 6, 'end': 6}
 LANG = next((l[:2] for l in GLib.get_language_names() if l[:2] in TEXTS), 'en')
 T = TEXTS[LANG]
+
+
+# the XP layout (tools/setup/zorin_layout.py), installed with the theme
+XP_LAYOUT = os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'zorin_layout.py')
+
+
+def _xp_scheme():
+    """Zorin's "Windows" scheme (the window list one) is the XP layout's base,
+    but its own values (40 px bar, 160 px buttons, Activities, no Show
+    Desktop, the app menu on the captions) undid the XP ones: picking it now
+    applies the XP layout, and it shows as the current scheme while the XP
+    layout is applied (the scheme compares its settings with the system's)."""
+    try:
+        spec = importlib.util.spec_from_file_location('zxp_layout', XP_LAYOUT)
+        xp = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(xp)
+        ours = xp.scheme_settings()
+    except (OSError, ImportError, AttributeError) as e:
+        print(f'Zorin XP: {XP_LAYOUT}: {e}', file=sys.stderr)
+        return
+    cls = next((c for c in za_layout.Layout.__subclasses__() if c.__name__ == 'WindowsListShell'), None)
+    if cls is None:
+        return
+    keys = {(schema, key) for schema, key, _value in ours}
+    init = cls.__init__
+
+    def __init__(self, *args, **kwargs):
+        init(self, *args, **kwargs)
+        # (the per-monitor ones, JSON keyed by monitor, are written by monitors()
+        # for every monitor, and not compared)
+        self.settings = [s for s in self.settings if (s[0], s[1]) not in keys
+                         and s[1] not in ('panel-sizes', 'panel-element-positions')] + ours
+
+    def on_clicked(self):
+        za_layout.Layout.on_clicked(self)
+        xp.monitors()
+    cls.__init__ = __init__
+    cls.on_clicked = on_clicked
+
+
+_xp_scheme()
 
 
 class _StackProxy:
