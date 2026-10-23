@@ -16,6 +16,32 @@ version is planned.
 
 ---
 
+## Screenshots
+
+![The desktop: "O meu computador", "Reciclagem" and "Os meus documentos" icons, two Explorer windows and the XP taskbar](docs/screenshots/desktop.png)
+
+**Taskbar** — the Start button, window buttons and the notification area:
+
+![Taskbar](docs/screenshots/taskbar.png)
+
+**Title bar** — XP caption, buttons and menu bar:
+
+![Title bar](docs/screenshots/titlebar.png)
+
+**Files as the XP Explorer** — task pane, toolbar, address bar and XP icons:
+
+![Explorer](docs/screenshots/explorer.png)
+
+**Zen Browser as Internet Explorer 6** — with the Favorites bar:
+
+![Internet Explorer 6](docs/screenshots/browser.png)
+
+| Welcome screen | Boot screen |
+|---|---|
+| ![Welcome screen](docs/screenshots/logon.png) | ![Boot screen](docs/screenshots/boot.png) |
+
+---
+
 ## Requirements
 
 - **Zorin OS 18.1** (GNOME 46) in an **X11 session** (the window frames rely
@@ -224,6 +250,7 @@ tools/
   lib/ builders/ setup/ test/
 system/      what runs with sudo (welcome screen, boot screen)
 rescue/      backup and restore
+docs/        the README screenshots (tools/test/shelltest/session.sh makes them)
 ```
 
 The build only reads `assets/`. To extract the resources again (for example

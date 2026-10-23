@@ -119,6 +119,26 @@ def patch_selection(path):
     return True
 
 
+TRASH_ANCHOR = "    _getVisibleName() {\n"
+TRASH_NAME = ("        // Zorin XP: the trash is named by our translation (\"Reciclagem\",\n"
+              "        // tools/setup/molocale.py), not by gvfs (\"Lixo\")\n"
+              "        if (this._fileExtra == Enums.FileType.USER_DIRECTORY_TRASH)\n"
+              "            return _('Trash');\n")
+
+
+def patch_trash_name(path):
+    """The desktop trash icon gets its label from gvfs's display name of
+    trash:///, which our translations do not reach: use the program's own
+    _('Trash') instead, like the screen-reader name next to it."""
+    text = open(path, encoding="utf-8").read()
+    if text.count(TRASH_ANCHOR) != 1:
+        print("  fileItem.js of zorin-desktop-icons changed: XP trash name not applied", file=sys.stderr)
+        return False
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text.replace(TRASH_ANCHOR, TRASH_ANCHOR + TRASH_NAME))
+    return True
+
+
 def patch_desktop(app):
     """O módulo do XP e os ganchos no desktopManager.js (tudo ou nada)."""
     path = os.path.join(app, "desktopManager.js")
@@ -176,6 +196,7 @@ def build(out, src=SRC):
     with open(enums, "w", encoding="utf-8") as f:
         f.write(new)
     patch_selection(os.path.join(app, "desktopIconItem.js"))
+    patch_trash_name(os.path.join(app, "fileItem.js"))
     patch_desktop(app)
     with open(os.path.join(out, "stamp.json"), "w") as f:
         json.dump({"src": src, "files": stamp(src)}, f, indent=1)
