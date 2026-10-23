@@ -533,12 +533,22 @@ class XpExplorer:
             if scroller:
                 scroller.connect('notify::width', lambda *_: self._tile_columns(grid))
                 self._tile_width_cb(scroller, grid)
+                wheel = Gtk.EventControllerScroll(flags=Gtk.EventControllerScrollFlags.BOTH_AXES)
+                wheel.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+                wheel.connect('scroll', lambda c, dx, dy: self._list_wheel(c, grid, dx, dy))
+                scroller.add_controller(wheel)
             # new cells appear while scrolling (sideways in List) and when the
             # folder finishes loading
+            # (and the vertical scrollbar comes and goes with the content's height:
+            # the columns are counted again beside it)
+            def resized():
+                if getattr(self, '_mode', None) != 'list':
+                    self._tile_columns(grid)
+                return self._tile_cells(grid)
             for adj in (grid.get_vadjustment(), grid.get_hadjustment()):
                 if adj:
                     adj.connect('value-changed', lambda *_: self._tile_cells(grid))
-                    adj.connect('changed', lambda *_: GLib.idle_add(lambda: self._tile_cells(grid)))
+                    adj.connect('changed', lambda *_: GLib.idle_add(resized))
             # (List: the rows per column follow the view's height — on its side,
             # the grid's vertical page is that height)
             vadj = grid.get_vadjustment()
@@ -894,10 +904,13 @@ class XpExplorer:
         orient = Gtk.Orientation.HORIZONTAL if listing else Gtk.Orientation.VERTICAL
         if grid.get_orientation() != orient:
             grid.set_orientation(orient)
-        # (only List scrolls sideways — and Details, Nautilus's list view)
+        # (only List scrolls sideways — and Details, Nautilus's list view. The
+        # other axis is EXTERNAL, not NEVER: with NEVER the view asks for the
+        # grid's minimum size, which the columns fixed here make; the view grew
+        # past the window and the next count, from that width, kept it there)
         if isinstance(scroller, Gtk.ScrolledWindow):
-            policy = (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER) if listing else \
-                (Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+            policy = (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.EXTERNAL) if listing else \
+                (Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.AUTOMATIC)
             if scroller.get_policy() != policy:
                 scroller.set_policy(*policy)
         if listing and scroller:
@@ -911,6 +924,10 @@ class XpExplorer:
             grid.set_margin_end(0)
             return False
         width = scroller.get_width() - 8   # grid padding (CSS)
+        # (less the vertical scrollbar when it shows: the columns go beside it)
+        bar = scroller.get_vscrollbar() if isinstance(scroller, Gtk.ScrolledWindow) else None
+        if bar is not None and bar.get_child_visible():
+            width -= bar.get_width() or bar.measure(Gtk.Orientation.HORIZONTAL, -1)[1]
         if width <= 0:
             return False
         n = max(1, width // pitch)
@@ -940,6 +957,21 @@ class XpExplorer:
         # stretch the rows to fill the height)
         grid.set_margin_bottom(max(0, avail - rows * LIST_ROW))
         return False
+
+    def _list_wheel(self, ctrl, grid, dx, dy):
+        """List: the mouse wheel scrolls sideways, one column per notch, as in
+        XP (GTK 4 only scrolls the axis the wheel turns, and List has no
+        vertical one). Sideways scrolling (touchpad, tilt wheel) is GTK's."""
+        if getattr(self, '_mode', None) != 'list' or not dy or dx:
+            return False
+        adj = grid.get_hadjustment()
+        if adj is None:
+            return False
+        # (a touchpad gives pixels; a wheel gives notches)
+        step = 1 if ctrl.get_unit() == Gdk.ScrollUnit.SURFACE else self._list_width(grid)
+        top = max(adj.get_lower(), adj.get_upper() - adj.get_page_size())
+        adj.set_value(min(top, max(adj.get_lower(), adj.get_value() + dy * step)))
+        return True
 
     def _list_width(self, grid):
         """List: every column as wide as the folder's longest name (as in XP).
