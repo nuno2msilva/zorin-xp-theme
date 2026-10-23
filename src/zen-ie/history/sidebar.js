@@ -1,11 +1,11 @@
 /*
- * Barra Histórico do IE6. Vistas do botão "Ver":
- *   Por data      — "Há 3 semanas", "Há 2 semanas", "Há 1 semana", os dias desta
- *                   semana pelo nome e "Hoje" (no fim, como no IE), cada um com
- *                   uma pasta por site e as páginas lá dentro
- *   Por site      — uma pasta por site
- *   Por mais visitado / Por ordem de visita hoje — lista simples
- * "Procurar" mostra só as páginas que contêm o texto.
+ * IE6's History bar. Views of the "View" button:
+ *   By date       — "Há 3 semanas", "Há 2 semanas", "Há 1 semana", this
+ *                   week's days by name and "Hoje" (at the end, as in IE),
+ *                   each with a folder per site and the pages inside
+ *   By site       — a folder per site
+ *   By most visited / By order visited today — a plain list
+ * "Search" shows only the pages that contain the text.
  */
 const DAY = 86400000;
 const ICON_DAY = "img/history-day.png", ICON_FOLDER = "img/folder.png",
@@ -31,7 +31,7 @@ function dayGroup(t) {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     if (t >= today)
         return {key: "0", name: "Hoje"};
-    // dias desta semana (desde segunda-feira) pelo nome
+    // this week's days (since Monday) by name
     const dow = (now.getDay() + 6) % 7;            // 0 = segunda
     const monday = today - dow * DAY;
     if (t >= monday) {
@@ -94,7 +94,7 @@ function render() {
                 groups.set(g.key, {name: g.name, pages: []});
             groups.get(g.key).pages.push(it);
         }
-        // do mais antigo para o mais recente: "Hoje" no fim, como no IE6
+        // from oldest to newest: "Hoje" at the end, as in IE6
         const keys = [...groups.keys()].sort((a, b) => Number(b) - Number(a));
         for (const k of keys) {
             const id = `d|${k}`;
@@ -145,7 +145,7 @@ list.addEventListener("keydown", async e => {
     }
 });
 
-// --- Ver ----------------------------------------------------------------------
+// --- View ---------------------------------------------------------------------
 const viewmenu = document.getElementById("viewmenu");
 const viewbtn = document.getElementById("view");
 viewbtn.addEventListener("click", e => {

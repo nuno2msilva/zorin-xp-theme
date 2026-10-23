@@ -1,11 +1,11 @@
 /* =====================================================================
- * Barras de título (Window.Caption) — medidas confirmadas ao píxel contra
- * capturas do XP:
- *   altura 30 px (SM_CYCAPTION 26 + moldura 4), botões 21×21 em y = 6,
- *   minimizar/maximizar/fechar em W-73 / W-50 / W-27 (2 px entre eles,
- *   6 px até à direita), ícone 16×16 em (6, 8), texto a partir de x = 26.
- *   Texto: Trebuchet MS Bold 10 pt (13 px), branco com sombra 1,1 #0A1883;
- *   inativo #D8E4F8 sem sombra.
+ * Title bars (Window.Caption) — measurements checked to the pixel against
+ * XP captures:
+ *   30 px high (SM_CYCAPTION 26 + frame 4), 21×21 buttons at y = 6,
+ *   minimize/maximize/close at W-73 / W-50 / W-27 (2 px between them,
+ *   6 px to the right edge), 16×16 icon at (6, 8), text from x = 26.
+ *   Text: Trebuchet MS Bold 10 pt (13 px), white with a 1,1 #0A1883 shadow;
+ *   inactive #D8E4F8 without shadow.
  * =================================================================== */
 headerbar, .titlebar:not(headerbar) {
   min-height: 21px;
@@ -23,10 +23,10 @@ headerbar:backdrop, .titlebar:not(headerbar):backdrop {
 .maximized headerbar, .maximized .titlebar:not(headerbar),
 .tiled headerbar, .tiled-left headerbar, .tiled-right headerbar {
   {{part:caption-max:focused}}
-  /* como no XP: legenda de 26 px a começar 1 px acima do ecrã (vêem-se 25, a
-   * partir da linha de brilho); as colunas da moldura ficam de fora */
+  /* as in XP: 26 px caption starting 1 px above the screen (25 show, from
+   * the glow line on); the frame columns stay out */
   margin: -1px -4px 0 -4px;
-  padding: 2px 3px 3px 1px;   /* botões a 3 px da direita e 1 px do topo (medido) */
+  padding: 2px 3px 3px 1px;   /* buttons 3 px from the right and 1 px from the top (measured) */
 }
 .maximized headerbar:backdrop, .tiled headerbar:backdrop,
 .tiled-left headerbar:backdrop, .tiled-right headerbar:backdrop { {{state:caption-max:unfocused}} }
@@ -52,8 +52,8 @@ headerbar .subtitle, windowtitle > .subtitle {
 headerbar separator { background: none; min-width: 6px; }
 
 /* ---------------------------------------------------------------------
- * Botões normais dentro de barras de título (apps com headerbar própria):
- * botões azuis brilhantes como os de janela (CaptionButton), texto branco
+ * Normal buttons inside title bars (apps with their own headerbar):
+ * shiny blue buttons like the window ones (CaptionButton), white text
  * ------------------------------------------------------------------- */
 headerbar > button:not(.titlebutton), headerbar box > button, headerbar box > menubutton > button,
 headerbar .linked > button, headerbar > menubutton > button {
@@ -99,7 +99,7 @@ headerbar entry, headerbar spinbutton { margin: 0 1px; }
 headerbar label { color: inherit; }
 headerbar image { color: inherit; }
 
-/* Botões de janela: imagens pré-desenhadas pelo uxtheme (21×21, glifo incluído) */
+/* Window buttons: images pre-drawn by uxtheme (21×21, glyph included) */
 headerbar button.titlebutton, .titlebar button.titlebutton, windowcontrols > button {
   min-width: 21px;
   min-height: 21px;
@@ -168,19 +168,19 @@ windowcontrols > button.close:hover { background-image: url("assets/caption-clos
 windowcontrols > button.close:active { background-image: url("assets/caption-close-focused-active.png"); }
 windowcontrols > button.close:backdrop { background-image: url("assets/caption-close-unfocused-normal.png"); }
 windowcontrols > button.close:backdrop:hover { background-image: url("assets/caption-close-unfocused-hover.png"); }
-/* ícone da janela no layout "icon:" (GTK4) */
+/* window icon in the "icon:" layout (GTK4) */
 windowcontrols > image.icon { min-width: 16px; min-height: 16px; margin: 2px 4px 3px 0; -gtk-icon-size: 16px; }
 
 /* ---------------------------------------------------------------------
- * Molduras de janelas normais (mutter-x11-frames): o mutter só aceita
- * moldura em cima, por isso o GTK desenha a legenda sem as 4 colunas de
- * moldura de cada lado (caption-inner) e a extensão Zorin XP acrescenta as
- * bordas, o ícone e o título alinhado à esquerda por fora/por cima.
+ * Frames of normal windows (mutter-x11-frames): mutter only accepts a frame
+ * at the top, so GTK draws the caption without the 4 frame columns on each
+ * side (caption-inner) and the Zorin XP extension adds the borders, the icon
+ * and the left-aligned title outside/on top.
  * ------------------------------------------------------------------- */
-/* O mutter põe a legenda (headerbar.default-decoration) dentro de um widget
- * que também leva a classe .titlebar: esse invólucro fica sem fundo nem
- * margens, senão a regra geral das legendas aplicava-se duas vezes e a
- * legenda ficava com 39 px em vez de 30 (e a extensão não a reconhecia) */
+/* mutter puts the caption (headerbar.default-decoration) inside a widget
+ * that also has the .titlebar class: that wrapper gets no background nor
+ * margins, otherwise the general caption rule applied twice and the caption
+ * ended up 39 px instead of 30 (and the extension did not recognise it) */
 window > widget.titlebar, window > widget.titlebar:backdrop,
 window.csd > widget.titlebar, window.csd > widget.titlebar:backdrop,
 window.maximized > widget.titlebar {
@@ -211,8 +211,8 @@ widget.default-decoration > headerbar.titlebar .title { color: transparent; text
 /*@end*/
 
 /* ---------------------------------------------------------------------
- * Decorações do lado do cliente (CSD): sem sombra (o XP não tinha),
- * cantos superiores arredondados como a legenda
+ * Client-side decorations (CSD): no shadow (XP had none), top corners
+ * rounded like the caption
  * ------------------------------------------------------------------- */
 decoration {
   border-radius: 8px 8px 0 0;
@@ -221,14 +221,14 @@ decoration {
 }
 window.csd decoration, window.csd > decoration {
   box-shadow: 0 0 0 1px transparent;
-  /* moldura de 4 px (FrameLeft/Right/Bottom) — o GTK recua o conteúdo */
+  /* 4 px frame (FrameLeft/Right/Bottom) — GTK pulls the content in */
   border-style: solid;
   border-width: 0 4px 4px 4px;
   border-image: url("assets/frame-csd-focused.png") 0 4 4 4 stretch;
   border-image-width: 0 4px 4px 4px;
 }
 window.csd decoration:backdrop { border-image-source: url("assets/frame-csd-unfocused.png"); }
-/* a legenda cobre as colunas da moldura, como no XP */
+/* the caption covers the frame columns, as in XP */
 window.csd > headerbar.titlebar, window.csd > .titlebar { margin-left: -4px; margin-right: -4px; }
 window.csd.maximized decoration, window.csd.fullscreen decoration, window.csd.tiled decoration,
 window.csd.tiled-left decoration, window.csd.tiled-right decoration {
@@ -237,8 +237,9 @@ window.csd.tiled-left decoration, window.csd.tiled-right decoration {
 }
 window.csd.maximized decoration, window.csd.fullscreen decoration, window.csd.tiled decoration { border-radius: 0; }
 /*@gtk3*/
-/* as janelas dos menus também são window.csd: sem a moldura azul das janelas
- * (só o contorno e a sombra do próprio menu) */
+/* menu windows are window.csd too: without the windows' blue frame (only
+ * the menu's own outline and shadow) */
+
 window.csd.popup decoration, window.csd.popup decoration:backdrop {
   border-width: 0;
   border-image: none;

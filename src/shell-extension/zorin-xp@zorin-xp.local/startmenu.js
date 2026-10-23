@@ -1,17 +1,17 @@
 /*
- * Menu Iniciar do Zorin com o aspeto do menu Iniciar do Windows XP.
+ * Zorin's Start menu with the look of the Windows XP Start menu.
  *
- * Mantém o conteúdo e o comportamento do zorin-menu (disposição "ALL":
- * categorias + pesquisa à esquerda, locais e atalhos à direita) e
- * reorganiza-o como o XP (medidas de capturas reais, menu de 380 px):
- *   ┌ faixa StartUserPanel (64 px): fotografia 48 px em (9,9) com a moldura
- *   │ UserTileBackground em (1,1), nome em Franklin Gothic Medium 14 pt em x 67
- *   ├ coluna esquerda 190 px (ProgList) │ coluna direita 190 px (PlacesList)
- *   └ faixa StartPanelLogoff (41 px): pesquisa oculta (escrever para pesquisar); "Terminar sessão" e
- *     "Encerrar" à mesma distância da direita que no XP (x 185 e 302 em 380)
- * O utilizador da coluna direita passa para a faixa de cima; os botões de
- * sessão do Zorin dão lugar aos do XP; a pesquisa vai para a faixa de baixo.
- * Ícones, categorias e "Todos os Programas" ficam como no Zorin.
+ * Keeps the content and behaviour of zorin-menu (the "ALL" layout:
+ * categories + search on the left, places and shortcuts on the right) and
+ * rearranges it like XP (measurements from real captures, 380 px menu):
+ *   ┌ StartUserPanel band (64 px): 48 px picture at (9,9) with the
+ *   │ UserTileBackground frame at (1,1), name in Franklin Gothic Medium 14 pt at x 67
+ *   ├ left column 190 px (ProgList) │ right column 190 px (PlacesList)
+ *   └ StartPanelLogoff band (41 px): hidden search (type to search); "Terminar sessão" and
+ *     "Encerrar" at the same distance from the right as in XP (x 185 and 302 of 380)
+ * The user from the right column moves to the top band; Zorin's session
+ * buttons give way to XP's; the search goes to the bottom band.
+ * Icons, categories and "Todos os programas" stay as in Zorin.
  */
 import AccountsService from 'gi://AccountsService';
 import Clutter from 'gi://Clutter';
@@ -30,7 +30,7 @@ import {showEndSession, LOGOUT, SHUTDOWN} from './endSession.js';
 
 const MENU_UUID = 'zorin-menu@zorinos.com';
 
-// fecha o menu Iniciar (todos os monitores) de imediato, sem animação
+// closes the Start menu (every monitor) at once, without animation
 export function closeStartMenus() {
     const buttons = Main.extensionManager.lookup(MENU_UUID)?.stateObj?.menuButtons ?? [];
     for (const b of buttons) {
@@ -40,21 +40,21 @@ export function closeStartMenus() {
 }
 const HEADER_H = 64;
 const FOOTER_H = 41;
-// Larguras iguais às de tools/builders/shelltheme.py (o XP tinha 380 = 190 + 190)
+// Widths equal to tools/builders/shelltheme.py's (XP had 380 = 190 + 190)
 const START_W = 380, LEFT_W = 190, RIGHT_W = START_W - LEFT_W;
-// Botões da faixa de baixo como no XP: ícones em x=184 e 301 (em 380)
+// Bottom band buttons as in XP: icons at x=184 and 301 (of 380)
 const LOGOFF_X = START_W - 196, SHUTDOWN_X = START_W - 79;
 const SEARCH_X = 8, SEARCH_W = 150, SEARCH_H = 20;
-const SEP_H = 9;  // separadores do XP: 9 px com a linha de 2 px
-// Coluna esquerda (medidas de capturas do XP, a contar do topo da faixa de
-// baixo F): linha do separador em F-36, "Todos os programas" (seta 16×24 e
-// destaque) de F-29 a F-6, 5 px de margem por baixo (ProgList ContentMargins)
+const SEP_H = 9;  // XP separators: 9 px with the 2 px line
+// Left column (measurements from XP captures, counting from the top of the
+// bottom band F): separator line at F-36, "Todos os programas" (16×24 arrow
+// and highlight) from F-29 to F-6, 5 px of margin below (ProgList ContentMargins)
 const LEFT_PAD_T = 6, LEFT_PAD_B = 5;
-const LEFT_SEP_H = 10;  // separador por cima de "Todos os programas": 3 + linha 2 + 5
-const SHADOW_W = 5;     // sombra do XP: 5 px à direita e em baixo
-const ARROW_H = 17;     // setas da barra de deslocamento do XP (17×17)
+const LEFT_SEP_H = 10;  // separator above "Todos os programas": 3 + line 2 + 5
+const SHADOW_W = 5;     // XP shadow: 5 px to the right and below
+const ARROW_H = 17;     // XP scrollbar arrows (17×17)
 
-// Diagnóstico: existe ~/.cache/zorin-xp-debug -> registo no diário (journalctl)
+// Diagnostics: ~/.cache/zorin-xp-debug exists -> log in the journal (journalctl)
 const debug = msg => {
     if (GLib.file_test(`${GLib.get_user_cache_dir()}/zorin-xp-debug`, GLib.FileTest.EXISTS))
         console.log(`ZXP ${msg}`);
@@ -87,16 +87,18 @@ export class StartMenuTweaks {
                 console.error(`Zorin XP: menu Iniciar: ${e}\n${e.stack}`);
             }
         });
-        // Nada pré-selecionado: o Zorin dá o foco do teclado ao primeiro item
-        // ao abrir o menu (e ao primeiro programa ao abrir uma categoria), o
-        // que o realça e faz a lista saltar para ele. Como no XP, o foco fica
-        // no próprio menu até se usar o teclado: a primeira seta seleciona o
-        // primeiro item (BaseLayout._onKeyPress) e escrever inicia a pesquisa.
-        // Ao abrir uma categoria com o teclado mantém-se o comportamento do Zorin.
-        // O realce segue o rato: ao sair de um item, o foco do teclado que o
-        // Zorin lhe deu ao passar o rato volta para o menu. Senão o item fica
-        // "alvo": quando um grab termina (p. ex. o das setas da barra) o
-        // GNOME devolve-lhe o foco e o Zorin realça-o e desloca a lista até ele
+        // Nothing preselected: Zorin gives the keyboard focus to the first item
+        // when the menu opens (and to the first program when a category
+        // opens), which highlights it and makes the list jump to it. As in XP,
+        // the focus stays on the menu itself until the keyboard is used: the
+        // first arrow selects the first item (BaseLayout._onKeyPress) and
+        // typing starts the search. Opening a category with the keyboard
+        // keeps Zorin's behaviour.
+        // The highlight follows the mouse: when leaving an item, the keyboard
+        // focus Zorin gave it on hover goes back to the menu. Otherwise the
+        // item stays "targeted": when a grab ends (e.g. the scrollbar
+        // arrows') GNOME gives it the focus back and Zorin highlights it and
+        // scrolls the list to it
         this._patch(base.BaseMenuItem.prototype, '_onHover', function (orig, ...args) {
             orig.call(this, ...args);
             if (this.hover || !this.has_key_focus())
@@ -113,9 +115,9 @@ export class StartMenuTweaks {
             if (this._zxp)
                 global.stage.set_key_focus(this);
         });
-        // Com o rato, a lista também não recebe o foco: o Zorin focaria o
-        // primeiro programa e a lista deslizaria até ao topo (ao reabrir a
-        // mesma categoria, que mantém a posição em que ficou)
+        // With the mouse, the list does not get the focus either: Zorin would focus
+        // the first program and the list would slide to the top (when reopening
+        // the same category, which keeps the position where it was)
         this._patch(proto, '_onSelectCategory', function (orig, ...args) {
             const type = Clutter.get_current_event()?.type();
             const keyboard = type === Clutter.EventType.KEY_PRESS || type === Clutter.EventType.KEY_RELEASE;
@@ -141,28 +143,28 @@ export class StartMenuTweaks {
                 orig.call(this);
                 return;
             }
-            // altura calculada de raiz (this.height devolveria a altura da
-            // abertura anterior e o menu cresceria a cada abertura)
+            // height calculated from scratch (this.height would return the height of
+            // the previous opening and the menu would grow on every opening)
             const available = this._availableHeight();
             const bodyH = this._sidebar.updateHeight(available);
-            // tudo com altura fixa: o corpo não pode encolher/esticar com o
-            // conteúdo (senão a faixa de baixo sobe e desce)
+            // everything with a fixed height: the body cannot shrink/stretch with the
+            // content (otherwise the bottom band moves up and down)
             this._zxpBody?.set_height(bodyH);
             this.set_height(bodyH + HEADER_H + FOOTER_H + SHADOW_W);
-            // sombra: imagem do tamanho exato do menu + 5 px (ver _xpify)
+            // shadow: image of the menu's exact size + 5 px (see _xpify)
             const shadow = slicedImage('start-shadow', START_W + SHADOW_W,
                 bodyH + HEADER_H + FOOTER_H + SHADOW_W, [15, SHADOW_W, SHADOW_W, 10]);
             this.set_style(`padding: 0 ${SHADOW_W}px ${SHADOW_W}px 0; ` +
                 `background-image: url("file://${shadow}"); background-position: 0 0; ` +
                 'background-repeat: no-repeat;');
             debug(`updateHeight: disponível=${available} altura=${this.height}`);
-            // o conteúdo do popup tem padding do tema Zorin: anulá-lo (inline)
+            // the popup content has the Zorin theme's padding: cancel it (inline)
             for (let a = this.get_parent(); a; a = a.get_parent()) {
                 if (a.has_style_class_name?.('popup-menu-content') ||
                     a.has_style_class_name?.('popup-menu-section'))
                     a.set_style('padding: 0; margin: 0; spacing: 0; border-width: 0;');
                 if (a.has_style_class_name?.('popup-menu-boxpointer')) {
-                    // sem seta nem margens (o tema Zorin dá rise 4 px e margin-bottom 1.75em)
+                    // no arrow nor margins (the Zorin theme gives 4 px rise and margin-bottom 1.75em)
                     a.set_style('margin: 0; -arrow-rise: 0; -arrow-base: 0; ' +
                         '-arrow-border-width: 0; -arrow-border-radius: 0; -boxpointer-gap: 0;');
                     self._pinBoxPointer(a, this);
@@ -173,20 +175,20 @@ export class StartMenuTweaks {
         this._reloadMenus();
     }
 
-    // Como no XP: o menu abre encostado à esquerda do ecrã, com a base no topo
-    // da barra de tarefas. O cálculo do BoxPointer centra-o no botão e o tema
-    // Zorin acrescenta margens; aqui a posição é calculada diretamente, com os
-    // desvios internos (faixa de topo à esquerda, faixa de baixo em baixo)
-    // medidos depois de cada disposição. Sem translações: a animação de
-    // abertura repõe-nas a 0 e o menu saltaria.
+    // As in XP: the menu opens against the left of the screen, with its bottom
+    // at the top of the taskbar. BoxPointer's calculation centres it on the
+    // button and the Zorin theme adds margins; here the position is computed
+    // directly, with the inner offsets (top band on the left, bottom band at
+    // the bottom) measured after each layout. No translations: the opening
+    // animation resets them to 0 and the menu would jump.
     _pinBoxPointer(bp, layout) {
         if (bp._zxpPinned)
             return;
         bp._zxpPinned = true;
-        // desvios internos já medidos com o tema Zorin (evitam que a primeira
-        // abertura apareça desalinhada por um instante); confirmados a seguir
-        bp._zxpOx = 0;   // da esquerda do BoxPointer à esquerda da faixa de topo
-        bp._zxpOb = 5;   // da base da faixa de baixo à base do BoxPointer (a sombra)
+        // inner offsets already measured with the Zorin theme (they keep the first
+        // opening from showing misaligned for an instant); confirmed afterwards
+        bp._zxpOx = 0;   // from the BoxPointer's left to the top band's left
+        bp._zxpOb = 5;   // from the bottom band's bottom to the BoxPointer's bottom (the shadow)
         bp.translation_x = 0;
         bp.translation_y = 0;
         bp._reposition = function (box) {
@@ -207,7 +209,7 @@ export class StartMenuTweaks {
             debug(`posição: ${Math.floor(x)},${Math.floor(y)} altura=${box.get_height()} barra=${srcY} ` +
                 `ox=${this._zxpOx} ob=${this._zxpOb} trans=${this.translation_x},${this.translation_y}`);
         };
-        // medir os desvios internos e repor a posição se mudarem
+        // measure the inner offsets and restore the position if they change
         const measure = () => {
             bp._zxpIdle = 0;
             if (!bp.visible || !layout._zxpHeader?.get_stage() || !layout._zxpFooter)
@@ -250,7 +252,7 @@ export class StartMenuTweaks {
         this._patches.push([proto, name, orig]);
     }
 
-    // Reconstrói os menus já criados com a disposição atual (patch ativo ou não)
+    // Rebuilds the menus already created with the current layout (patch on or not)
     _reloadMenus() {
         const panels = global.zorinTaskbar?.panels?.map(p => p?.panel) ?? [Main.panel];
         for (const panel of panels) {
@@ -284,10 +286,10 @@ export class StartMenuTweaks {
         sep?.destroy();
         left.add_style_class_name('zxp-start-left');
         sidebar.add_style_class_name('zxp-start-right');
-        // medidas inline: a folha do zorin-menu é carregada depois do tema e ganha-lhe
+        // inline measurements: zorin-menu's sheet is loaded after the theme and wins over it
         left.set_style(`padding: ${LEFT_PAD_T}px 4px ${LEFT_PAD_B}px 6px;`);
         sidebar.set_style('padding: 9px 8px 5px 6px;');
-        left.set_width(LEFT_W);      // largura fixa (o CSS só dá a preferida)
+        left.set_width(LEFT_W);      // fixed width (CSS only gives the preferred one)
         const catBox = layout._categoriesSection?._categoriesBox;
         if (catBox) {
             for (const c of catBox.get_children())
@@ -296,7 +298,7 @@ export class StartMenuTweaks {
         }
         const catScroll = layout._categoriesSection?._scrollBox;
         if (catScroll) {
-            // sem scroll: a lista de categorias mede e mostra o conteúdo todo
+            // no scroll: the category list measures and shows all its content
             catScroll.vscrollbar_policy = St.PolicyType.NEVER;
             catScroll.remove_style_class_name('vfade');
         }
@@ -305,17 +307,18 @@ export class StartMenuTweaks {
         layout.vertical = true;
         layout.add_style_class_name('zxp-start');
         layout.add_child(layout._zxpHeader = this._header(sidebar));
-        // Sombra do XP (desenhada pelo win32k, não vem no tema; medida numa
-        // captura real): 5 px de padding à direita e em baixo, com a imagem de
-        // fundo gerada em updateHeight. Fica dentro da caixa do menu: o
-        // BoxPointer é pintado num buffer próprio e o que sai da caixa perde-se
+        // XP's shadow (drawn by win32k, it does not come in the theme; measured in
+        // a real capture): 5 px of padding on the right and at the bottom, with
+        // the background image generated in updateHeight. It stays inside the
+        // menu's box: the BoxPointer is painted in its own buffer and whatever
+        // leaves the box is lost
         layout.set_style(`padding: 0 ${SHADOW_W}px ${SHADOW_W}px 0;`);
         layout.add_child(body);
         layout.add_child(layout._zxpFooter = this._footerBox = this._footer(layout));
 
-        // O utilizador e os botões de sessão passam para as faixas. O
-        // updateHeight do Zorin volta a mostrar o utilizador para medir a
-        // altura: esconde-se de novo depois de cada chamada.
+        // The user and the session buttons move to the bands. Zorin's
+        // updateHeight shows the user again to measure the height: hide it
+        // again after each call.
         const kids = sidebar.get_children();
         const sessionSep = kids[kids.indexOf(sidebar._sessionButtonsSection) - 1];
         const hideMoved = () => {
@@ -329,9 +332,10 @@ export class StartMenuTweaks {
         sidebar.updateHeight = available => {
             origUpdate(available);
             hideMoved();
-            // Altura fixa, como no XP: a da vista de categorias (todas, sem
-            // scroll), seja qual for a vista atual — ao abrir uma categoria ou
-            // pesquisar, as listas maiores rolam dentro da coluna e o menu não salta
+            // Fixed height, as in XP: the categories view's (all of them, no scroll),
+            // whatever the current view — when a category opens or a search
+            // runs, the longer lists scroll inside the column and the menu
+            // does not jump
             const cats = layout._categoriesSection?._categoriesBox;
             const all = layout._allAppsButton;
             let natLeft = LEFT_PAD_T + LEFT_PAD_B;
@@ -345,12 +349,13 @@ export class StartMenuTweaks {
 
         this._xpPlaces(sidebar);
         this._xpShortcuts(sidebar);
-        // Coluna direita com as medidas do XP (Screenshot_20261011171012):
-        // itens de 26 px (ícone a 1 px do topo e a 2 px da esquerda, texto 4 px
-        // depois do ícone) com 4 px entre eles; separadores de 12 px com a linha
-        // (StartPanel.PlacesListSeparator, 134×2, tamanho real) 7 px abaixo do
-        // item anterior e em x=28. O espaço que sobra fica em baixo, como no XP.
-        // Tudo inline: a folha do zorin-menu ganha ao tema nestes seletores
+        // Right column with XP's measurements (Screenshot_20261011171012):
+        // 26 px items (icon 1 px from the top and 2 px from the left, text 4 px
+        // after the icon) with 4 px between them; 12 px separators with the
+        // line (StartPanel.PlacesListSeparator, 134×2, real size) 7 px below
+        // the previous item and at x=28. The leftover space stays at the
+        // bottom, as in XP. All inline: zorin-menu's sheet wins over the theme
+        // on these selectors
         const xpRight = a => {
             if (a.has_style_class_name?.('popup-separator-menu-item')) {
                 a.set_style('padding: 3px 0 3px 0; margin: 0; min-height: 0; spacing: 0;');
@@ -381,7 +386,7 @@ export class StartMenuTweaks {
         this._xpMorePrograms(layout, left);
         this._xpScrollBars(layout);
 
-        // Pesquisa do Zorin na faixa de baixo, à esquerda (como na montagem)
+        // Zorin's search in the bottom band, on the left (as in the mock-up)
         const search = layout._searchEntry;
         if (search) {
             search.get_parent()?.remove_child(search);
@@ -390,21 +395,21 @@ export class StartMenuTweaks {
             search.set_position(SEARCH_X, Math.floor((FOOTER_H - SEARCH_H) / 2));
             search.set_size(SEARCH_W, SEARCH_H);
             this._footerBox.add_child(search);
-            // Sempre oculta (a faixa de baixo do XP só tem Terminar sessão e
-            // Encerrar), mas operacional: com o menu aberto, qualquer tecla
-            // começa a pesquisa no Zorin e os resultados aparecem à esquerda
+            // Always hidden (XP's bottom band only has Log Off and Turn Off), but
+            // working: with the menu open, any key starts the search in Zorin
+            // and the results appear on the left
             search.opacity = 0;
             search.reactive = false;
         }
     }
 
-    // "Todos os programas" como no XP: separador por cima, texto a negrito
-    // (#373738) alinhado à direita e a seta verde (StartPanel.MoreProgramsArrow
-    // / hot) a 8 px da borda; o destaque ocupa 175×24, de x=7 até à seta.
-    // "Voltar" é o espelho: mesma altura, letra e destaque, seta para a esquerda
+    // "Todos os programas" as in XP: separator above, bold text (#373738)
+    // right-aligned and the green arrow (StartPanel.MoreProgramsArrow / hot)
+    // 8 px from the edge; the highlight takes 175×24, from x=7 to the arrow.
+    // "Voltar" is the mirror: same height, font and highlight, arrow to the left
     _xpMorePrograms(layout, left) {
-        // separador do XP por cima de "Todos os programas" e de "Voltar"
-        // (cada um só visível quando o respetivo botão está visível)
+        // XP separator above "Todos os programas" and "Voltar"
+        // (each one only visible when its button is visible)
         for (const btn of [layout._allAppsButton, layout._backButton]) {
             if (!btn)
                 continue;
@@ -412,7 +417,7 @@ export class StartMenuTweaks {
             left.insert_child_below(sep, btn);
             btn.bind_property('visible', sep, 'visible', GObject.BindingFlags.SYNC_CREATE);
         }
-        // "Todos os programas" com p minúsculo, como no XP (o Zorin escreve "Programas")
+        // "Todos os programas" with a lowercase p, as in XP (Zorin writes "Programas")
         this._xpGreenButton(layout._allAppsButton, 'Todos os programas', 'start-more-arrow', false);
         this._xpGreenButton(layout._backButton, 'Voltar', 'start-back-arrow', true);
     }
@@ -421,7 +426,7 @@ export class StartMenuTweaks {
         if (!btn)
             return;
         btn.add_style_class_name('zxp-more-programs');
-        // inline: a folha do zorin-menu ganha ao tema no padding dos itens
+        // inline: zorin-menu's sheet wins over the theme in the items' padding
         btn.set_style('padding: 0; margin: 0 4px 0 1px; spacing: 12px; min-height: 24px; border-radius: 0;');
         btn._icon?.hide();
         const label = btn.get_children().find(c => c instanceof St.Label);
@@ -444,7 +449,7 @@ export class StartMenuTweaks {
             btn.insert_child_at_index(arrow, 0);
         else
             btn.add_child(arrow);
-        // seta "hot" com o realce: rato por cima ou item escolhido pelo teclado
+        // "hot" arrow with the highlight: mouse over or item chosen with the keyboard
         const hot = () => {
             const style = arrowStyle(btn.hover || btn.has_style_class_name('selected'));
             if (arrow.style !== style)
@@ -453,10 +458,10 @@ export class StartMenuTweaks {
         btn.connectObject('notify::hover', hot, 'style-changed', hot, arrow);
     }
 
-    // Barras de deslocamento do XP nas listas da coluna esquerda: ocupam 17 px
-    // (não ficam por cima da lista, sem esbatimento) e as setas, que o tema
-    // desenha na border-image, funcionam como no Windows: um clique avança uma
-    // linha e, mantendo premido, repete
+    // XP scrollbars in the left column lists: they take 17 px (they do not
+    // sit on top of the list, no fading) and the arrows, which the theme draws
+    // in the border-image, work as in Windows: one click moves one line and,
+    // holding it pressed, repeats
     _xpScrollBars(layout) {
         const walk = a => {
             if (a instanceof St.ScrollView)
@@ -479,8 +484,8 @@ export class StartMenuTweaks {
         const handle = bar.get_children().find(c => c.name === 'vhandle');
         let zone = null, pressed = null, timer = 0, grab = null;
 
-        // Barra (setas + calha) e cursor (com a pega centrada, se couber)
-        // como imagens do tamanho exato, trocadas conforme o estado
+        // Bar (arrows + trough) and thumb (with the grip centred, if it fits)
+        // as images of the exact size, swapped according to the state
         const paint = () => {
             const h = Math.round(bar.height);
             if (h >= 2 * ARROW_H) {
@@ -498,7 +503,7 @@ export class StartMenuTweaks {
             if (handle && th >= 10) {
                 const state = handle.has_style_pseudo_class('active') ? 'active'
                     : handle.hover ? 'hover' : 'normal';
-                // a pega só aparece se couber nas margens do cursor (4 + 8 + 4)
+                // the grip only shows if it fits within the thumb's margins (4 + 8 + 4)
                 const img = slicedImage(`scroll-thumb-${state}`, 17, th, [5, 5, 5, 5],
                     th >= 16 ? `scroll-grip-${state}` : null);
                 const style = `background-image: url("file://${img}"); background-position: 0 0;`;
@@ -517,7 +522,7 @@ export class StartMenuTweaks {
                 return 'down';
             return null;
         };
-        // uma linha = a altura de um item da lista
+        // one line = the height of a list item
         const line = () => {
             const find = a => {
                 if (a.visible && a.has_style_class_name?.('popup-menu-item') && a.height > 0)
@@ -531,7 +536,7 @@ export class StartMenuTweaks {
             };
             return find(view) || bar.adjustment.step_increment;
         };
-        // só avança com o botão premido em cima da seta onde se carregou
+        // only moves with the button pressed over the arrow where it was pressed
         const step = () => {
             if (!pressed || zone !== pressed)
                 return;
@@ -570,9 +575,9 @@ export class StartMenuTweaks {
                 if (!zone)
                     return Clutter.EVENT_PROPAGATE;
                 pressed = zone;
-                // captura o rato até largar o botão (mesmo fora da barra),
-                // como o St faz ao arrastar o cursor; o gesto de arrastar a
-                // lista (PanAction do Zorin) fica desligado entretanto
+                // grabs the mouse until the button is released (even outside the bar),
+                // as St does when dragging the thumb; the gesture of dragging the
+                // list (Zorin's PanAction) is off in the meantime
                 const focus = global.stage.key_focus;
                 if (focus && focus !== layout && layout.contains(focus))
                     global.stage.set_key_focus(layout);
@@ -581,7 +586,7 @@ export class StartMenuTweaks {
                     a.enabled = false;
                 paint();
                 step();
-                // repetição: a primeira ao fim de ~1/3 s, depois a cada 50 ms
+                // repetition: the first after ~1/3 s, then every 50 ms
                 timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 330, () => {
                     timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
                         step();
@@ -610,8 +615,8 @@ export class StartMenuTweaks {
         paint();
     }
 
-    // Separador do XP (StartPanel.ProgListSeparator, 172×2) com a imagem em x=12
-    // (a parte visível vai de 18 a 177, como na captura), 10 px no total
+    // XP separator (StartPanel.ProgListSeparator, 172×2) with the image at x=12
+    // (the visible part goes from 18 to 177, as in the capture), 10 px in total
     _xpLeftSeparator(xp) {
         const line = new St.Widget({
             width: 172,
@@ -633,9 +638,9 @@ export class StartMenuTweaks {
         return Gio.FileIcon.new(Gio.File.new_for_path(path));
     }
 
-    // Locais como no XP, pela ordem escolhida pelo utilizador e com os ícones
-    // de 24 px do XP; os restantes (Transferências, etc.) ficam escondidos.
-    // "O meu computador" abre a pasta pessoal.
+    // Places as in XP, in the order chosen by the user and with XP's 24 px
+    // icons; the others (Transferências, etc.) are hidden.
+    // "O meu computador" opens the home folder.
     _xpPlaces(sidebar) {
         const places = sidebar._placesSection;
         const items = places?._items;
@@ -666,7 +671,7 @@ export class StartMenuTweaks {
                 it._icon.gicon = this._icon(key);
                 it._icon.icon_size = 24;
             };
-            // o Zorin atualiza nome/ícone de forma assíncrona: reaplicar depois
+            // Zorin updates the name/icon asynchronously: apply again afterwards
             it._info.connectObject('changed', apply, it);
             apply();
         }
@@ -678,9 +683,9 @@ export class StartMenuTweaks {
         }
     }
 
-    // Atalhos com ícones do XP (escolhidos pelo utilizador) e, depois de um
-    // segundo separador, Ajuda e suporte, Internet (globo do XP, navegador
-    // predefinido) e o Terminal com o ícone da Linha de comandos (cmd.exe)
+    // Shortcuts with XP icons (chosen by the user) and, after a second
+    // separator, Internet (XP globe, default browser), Downloads and the
+    // Terminal with the Command Prompt icon (cmd.exe)
     _xpShortcuts(sidebar) {
         const shortcuts = sidebar._shortcutsSection;
         if (shortcuts && this._misc?.ShortcutMenuItem) {
@@ -706,8 +711,8 @@ export class StartMenuTweaks {
                 app?.launch([], global.create_app_launch_context(event?.get_time?.() ?? 0, -1));
                 net.emit('activated');
             };
-            // Downloads: a pasta das transferências (lida no momento do clique:
-            // pode ter mudado de sítio depois de o menu ser feito)
+            // Downloads: the downloads folder (read at click time: it may have moved
+            // after the menu was built)
             const downloads = add('Downloads', ['true'], 'downloads');
             downloads.activate = event => {
                 GLib.reload_user_special_dirs_cache();
@@ -774,8 +779,8 @@ export class StartMenuTweaks {
         const footer = new St.Widget({style_class: 'zxp-start-footer', x_expand: true, height: FOOTER_H,
             layout_manager: new Clutter.FixedLayout()});
         const actions = SystemActions.getDefault();
-        // como no XP: o Iniciar fecha primeiro (de imediato, sem animação) e só
-        // depois aparece o diálogo de desligar/terminar sessão
+        // as in XP: Start closes first (at once, without animation) and only then
+        // does the turn off/log off dialog appear
         const close = () => closeStartMenus();
         const mk = (x, icon, text, fn) => {
             const b = new St.Button({style_class: 'zxp-start-session', x, y: 8, can_focus: true,
@@ -791,8 +796,9 @@ export class StartMenuTweaks {
             });
             return b;
         };
-        // o diálogo do XP abre logo a seguir ao Iniciar fechar (sem passar pelo
-        // gnome-session); sem a extensão de fim de sessão, os do GNOME
+        // XP's dialog opens right after Start closes (without going through
+        // gnome-session); without the end-session extension, GNOME's ones
+
         footer.add_child(mk(LOGOFF_X, 'logoff', 'Terminar sessão',
             () => showEndSession(LOGOUT) || actions.activateLogout()));
         footer.add_child(mk(SHUTDOWN_X, 'shutdown', 'Encerrar',

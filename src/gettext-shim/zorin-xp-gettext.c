@@ -1,12 +1,12 @@
 /*
- * Zorin XP — os nomes do XP ("O meu computador", "Reciclagem") no Ficheiros e
- * no ambiente de trabalho, sem mexer nos catálogos de tradução do sistema.
+ * Zorin XP — XP's names ("O meu computador", "Reciclagem") in Files and on
+ * the desktop, without touching the system's translation catalogues.
  *
- * Carregada com LD_PRELOAD só nesses programas. Para os domínios de tradução
- * em ZXP_GETTEXT_DOMAINS (separados por ":") liga o catálogo à pasta
- * ZXP_LOCALEDIR (cópias geradas por tools/setup/molocale.py), mesmo que o programa
- * peça outra pasta. Depois tira estas variáveis do ambiente, para os
- * programas que estes abrirem não a herdarem.
+ * Loaded with LD_PRELOAD only in those programs. For the translation domains
+ * in ZXP_GETTEXT_DOMAINS (separated by ":") it binds the catalogue to the
+ * ZXP_LOCALEDIR folder (copies made by tools/setup/molocale.py), even if the
+ * program asks for another folder. Then it removes these variables from the
+ * environment, so the programs these ones open do not inherit it.
  */
 #define _GNU_SOURCE
 #include <dlfcn.h>
@@ -56,7 +56,7 @@ __attribute__((constructor)) static void zxp_init(void)
     if (dir && list && strlen(dir) < sizeof(localedir) && strlen(list) < sizeof(domains)) {
         strcpy(localedir, dir);
         strcpy(domains, list);
-        /* (domínios que o programa nunca liga: já ficam ligados aqui) */
+        /* (domains the program never binds: they get bound here already) */
         strcpy(copy, list);
         for (tok = strtok_r(copy, ":", &save); tok; tok = strtok_r(NULL, ":", &save))
             real_bindtextdomain(tok, localedir);

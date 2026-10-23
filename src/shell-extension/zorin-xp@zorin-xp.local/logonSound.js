@@ -1,11 +1,12 @@
 /*
- * Som de início de sessão do XP, quando o ambiente de trabalho aparece:
- *   - primeiro início de sessão depois de ligar o computador: "Iniciar o
- *     Windows" (Windows XP Startup.wav, evento desktop-login do tema);
- *   - inícios de sessão seguintes: "Início de sessão do Windows" (Windows XP
- *     Logon Sound.wav, evento service-login).
- * Só no arranque do Shell: desbloquear o ecrã volta a ativar as extensões e
- * não deve tocar; reiniciar o Shell (Alt+F2 r) na mesma sessão também não.
+ * XP's logon sound, when the desktop appears:
+ *   - first logon after turning the computer on: "Iniciar o Windows"
+ *     (Windows XP Startup.wav, the theme's desktop-login event);
+ *   - later logons: "Início de sessão do Windows" (Windows XP Logon
+ *     Sound.wav, the service-login event).
+ * Only when the Shell starts: unlocking the screen enables the extensions
+ * again and must not play; restarting the Shell (Alt+F2 r) in the same
+ * session must not either.
  */
 import GLib from 'gi://GLib';
 
@@ -34,8 +35,8 @@ function writeText(path, text) {
 const MARKER = GLib.build_filenamev([GLib.get_user_runtime_dir(), 'zorin-xp-logon-sound']);
 const SESSION = GLib.getenv('XDG_SESSION_ID') || 'sessão';
 
-// o Shell está a arrancar pela primeira vez nesta sessão? (não ao reiniciar
-// o Shell com Alt+F2 r, nem ao desbloquear o ecrã)
+// is the Shell starting for the first time in this session? (not when
+// restarting the Shell with Alt+F2 r, nor when unlocking the screen)
 export function isSessionStart() {
     return Main.layoutManager._startingUp && readText(MARKER) !== SESSION;
 }
@@ -45,7 +46,7 @@ export function playLogonSound() {
         return;
     writeText(MARKER, SESSION);
 
-    // primeiro início de sessão desde que o computador arrancou?
+    // first logon since the computer started?
     const lastBoot = GLib.build_filenamev([GLib.get_user_data_dir(), 'zorin-xp', 'last-boot']);
     const boot = readText(BOOT_ID);
     const firstSinceBoot = readText(lastBoot) !== boot;

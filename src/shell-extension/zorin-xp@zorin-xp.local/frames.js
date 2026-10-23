@@ -1,16 +1,16 @@
 /*
- * Zorin XP — Molduras
+ * Zorin XP — Frames
  *
- * Nas janelas X11 com moldura do servidor (mutter-x11-frames), o mutter 46
- * só aceita moldura em cima (as extensões direita/inferior estão fixas a 0),
- * e o GTK4 não deixa alinhar o título à esquerda. O tema GTK desenha a
- * legenda sem as 4 colunas de moldura de cada lado; esta extensão
- * acrescenta, como filho do ator da janela (acompanha movimento, animações
- * e miniaturas da vista geral, sem intercetar o rato):
- *   - as 4 colunas de cada lado da legenda (cantos arredondados),
- *   - as bordas esquerda, direita e inferior de 4 px,
- *   - o ícone 16×16 em (6, 8) e o título a partir de x = 26.
- * Medidas confirmadas ao píxel contra capturas reais do Windows XP.
+ * On X11 windows with a server-side frame (mutter-x11-frames), mutter 46 only
+ * accepts a frame at the top (the right/bottom extents are fixed at 0), and
+ * GTK4 does not allow left-aligning the title. The GTK theme draws the
+ * caption without the 4 frame columns on each side; this extension adds, as
+ * a child of the window actor (it follows moves, animations and overview
+ * thumbnails, without catching the mouse):
+ *   - the 4 columns on each side of the caption (rounded corners),
+ *   - the 4 px left, right and bottom borders,
+ *   - the 16×16 icon at (6, 8) and the title from x = 26.
+ * Measurements checked to the pixel against real Windows XP captures.
  */
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
@@ -24,9 +24,9 @@ const BORDER = 4;          // SM_CXSIZEFRAME
 const CAPTION = 30;        // SM_CYCAPTION (26) + moldura (4)
 const ICON_X = 6, ICON_Y = 8, ICON_SIZE = 16;
 const TEXT_X = 26;
-const BUTTONS_WIDTH = 73;  // do botão minimizar até à direita
-// peças dos lados da legenda: 4 colunas de moldura + 8 do canto arredondado
-// (que o GTK corta na janela das molduras do mutter; só as 6 linhas de cima)
+const BUTTONS_WIDTH = 73;  // from the minimize button to the right edge
+// pieces of the caption sides: 4 frame columns + 8 of the rounded corner
+// (which GTK cuts in mutter's frame window; only the top 6 rows)
 const CAPTION_SIDE = 12;
 
 export class XpFrame {
@@ -79,8 +79,8 @@ export class XpFrame {
     }
 
     _updateIcon() {
-        // (um ícone escolhido para a janela — o favicon da página no IE, ver
-        // zenIcons.js — ou o da aplicação)
+        // (an icon chosen for the window — the page's favicon in IE, see
+        // zenIcons.js — or the application's)
         const gicon = this._ext.iconFor(this._win);
         if (gicon) {
             this._icon.set_child(new St.Icon({gicon, icon_size: ICON_SIZE}));
@@ -106,7 +106,7 @@ export class XpFrame {
         const max = w.get_maximized() === Meta.MaximizeFlags.BOTH;
         const tiled = w.get_maximized() !== 0 && !max;
 
-        // Só quando a legenda tem a altura do tema XP (outro tema GTK -> nada)
+        // Only when the caption has the XP theme's height (another GTK theme -> nothing)
         const expectedTop = max ? CAPTION - BORDER : CAPTION;
         const visible = !w.is_fullscreen() && top === expectedTop;
         this._box.visible = visible;
@@ -114,7 +114,7 @@ export class XpFrame {
             return;
 
         const state = w.appears_focused ? 'focused' : 'unfocused';
-        // origem da "janela XP" completa (com as bordas) relativa ao ator
+        // origin of the whole "XP window" (with the borders) relative to the actor
         const ox = frame.x - buffer.x - (max ? BORDER : BORDER);
         const oy = frame.y - buffer.y - (max ? BORDER : 0);
         const fullW = frame.width + 2 * BORDER;
@@ -176,7 +176,7 @@ export class Frames {
         this.path = ext.path;
         this.titleY = 9;
         this._frames = new Map();
-        this._icons = new Map();     // janela -> ícone escolhido (setIcon)
+        this._icons = new Map();     // window -> chosen icon (setIcon)
         this._created = global.display.connect('window-created', (_d, w) => this._track(w));
         for (const actor of global.get_window_actors())
             this._track(actor.meta_window);
@@ -205,7 +205,7 @@ export class Frames {
             return true;
         };
         if (!attach()) {
-            // o ator ainda não existe logo após window-created
+            // the actor does not exist yet right after window-created
             GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 attach();
                 return GLib.SOURCE_REMOVE;
@@ -217,7 +217,7 @@ export class Frames {
         return this._icons.get(w) ?? null;
     }
 
-    // ícone próprio de uma janela na legenda (null: volta ao da aplicação)
+    // a window's own icon in the caption (null: back to the application's)
     setIcon(w, gicon) {
         const old = this._icons.get(w) ?? null;
         if (old === gicon || (old && gicon && old.equal(gicon)))

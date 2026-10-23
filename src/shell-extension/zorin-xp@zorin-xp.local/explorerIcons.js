@@ -1,14 +1,15 @@
 /*
- * Na barra de tarefas, cada janela do Explorador (o Ficheiros) com o ícone da
- * pasta que tem aberta, como no XP — a zorin-taskbar põe em todas o ícone da
- * aplicação (o de "O meu computador").
+ * On the taskbar, each Explorer (Files) window with the icon of the folder it
+ * has open, as in XP — zorin-taskbar gives them all the application's icon
+ * (the "O meu computador" one).
  *
- * A pasta de cada janela vem do próprio Nautilus (org.freedesktop.FileManager1,
- * propriedade OpenWindowsWithLocations: caminho D-Bus da janela -> locais) e o
- * caminho D-Bus de cada janela vem do mutter. O ícone é o da pasta (o mesmo do
- * título e da barra de endereço do Explorador): o escolhido para o local
- * (shortcut-icons.json, o dos Atalhos) ou, na raiz de um disco montado, o do
- * disco do XP — como placeIcon do Explorador (src/nautilus-xp: _place_icon).
+ * Each window's folder comes from Nautilus itself
+ * (org.freedesktop.FileManager1, OpenWindowsWithLocations property: the
+ * window's D-Bus path -> locations) and each window's D-Bus path comes from
+ * mutter. The icon is the folder's (the same as the Explorer's title and
+ * address bar): the one chosen for the place (shortcut-icons.json, the
+ * Shortcuts' one) or, at the root of a mounted disk, XP's disk icon — like
+ * the Explorer's placeIcon (src/nautilus-xp: _place_icon).
  */
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -17,14 +18,14 @@ import St from 'gi://St';
 const FILES = ['org.gnome.Nautilus', 'Org.gnome.Nautilus', 'nautilus'];
 const PLACE_ICONS = GLib.build_filenamev([GLib.get_user_data_dir(), 'zorin-xp', 'shortcut-icons.json']);
 const NETWORK_FS = ['cifs', 'smb3', 'smbfs', 'nfs', 'nfs4', 'fuse.sshfs', 'sshfs', '9p', 'vboxsf', 'davfs'];
-// Recentes e Favoritos: os ícones a cores do XP, como na barra lateral do Explorador
+// Recent and Favorites: XP's colour icons, as in the Explorer's sidebar
 const SCHEME_ICONS = {recent: 'folder-recent', starred: 'user-bookmarks'};
 const BUS_NAME = 'org.freedesktop.FileManager1';
 const BUS_PATH = '/org/freedesktop/FileManager1';
 
-// ícone próprio num botão da barra de tarefas (a zorin-taskbar põe em todos o
-// da aplicação): troca o createIcon do ícone do botão. Usado também pelo
-// zenIcons.js. Devolve true se mudou.
+// a button's own icon on the taskbar (zorin-taskbar gives them all the
+// application's): swaps the createIcon of the button's icon. Also used by
+// zenIcons.js. Returns true if it changed.
 export function setButtonIcon(button, gicon) {
     const base = button.icon;
     if (!base || (button._zxpGicon && button._zxpGicon.equal(gicon)))
@@ -53,7 +54,7 @@ function refreshIcon(base) {
         base._createIconTexture?.(base.iconSize);
 }
 
-// os botões da zorin-taskbar (um por janela)
+// the zorin-taskbar buttons (one per window)
 export function taskbarButtons() {
     const out = [];
     for (const panel of global.zorinTaskbar?.panels ?? []) {
@@ -68,11 +69,11 @@ export function taskbarButtons() {
 
 export class ExplorerIcons {
     constructor() {
-        this._locations = {};          // caminho D-Bus da janela -> uri
+        this._locations = {};          // window D-Bus path -> uri
         this._icons = new Map();       // uri -> GIcon
-        this._buttons = new Set();     // botões com o ícone mudado
+        this._buttons = new Set();     // buttons with a changed icon
         this._timer = 0;
-        // (sem arrancar o Nautilus só por isto)
+        // (without starting Nautilus just for this)
         Gio.DBusProxy.new_for_bus(Gio.BusType.SESSION, Gio.DBusProxyFlags.DO_NOT_AUTO_START, null,
             BUS_NAME, BUS_PATH, BUS_NAME, null, (_o, res) => {
                 try {
@@ -88,7 +89,7 @@ export class ExplorerIcons {
                     'notify::g-name-owner', () => this._load(), this);
                 this._load();
             });
-        // (o botão de uma janela nova aparece pouco depois da janela)
+        // (a new window's button appears shortly after the window)
         global.display.connectObject('window-created', () => this._soon(), this);
     }
 
@@ -159,7 +160,7 @@ export class ExplorerIcons {
                     keep(info.get_icon());
                     return;
                 }
-                // a raiz de um disco montado: noutro dispositivo que a pasta de cima
+                // the root of a mounted disk: on a different device than the folder above
                 parent.query_info_async('unix::device', Gio.FileQueryInfoFlags.NONE,
                     GLib.PRIORITY_DEFAULT, null, (_p, res2) => {
                         let up;
@@ -186,7 +187,7 @@ export class ExplorerIcons {
     }
 
     _chosenIcon(uri) {
-        // (o ficheiro dos Atalhos: endereço -> ícone; pequeno, lido de cada vez)
+        // (the Shortcuts file: address -> icon; small, read every time)
         try {
             const [, data] = GLib.file_get_contents(PLACE_ICONS);
             const map = JSON.parse(new TextDecoder().decode(data));

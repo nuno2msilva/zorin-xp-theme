@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
-"""Zorin XP — a janela "Abrir" / "Guardar como" do Windows XP.
+"""Zorin XP — Windows XP's "Open" / "Save As" dialog.
 
-Serviço de portal (org.freedesktop.impl.portal.FileChooser) que o
-xdg-desktop-portal usa em vez da janela do GNOME: serve as aplicações
-flatpak, os browsers e, com GTK_USE_PORTAL=1 / GDK_DEBUG=portals, todas as
-aplicações GTK. A janela segue o modelo 1552 do comdlg32.dll (posições,
-textos), com a barra de locais, a barra de ferramentas e as cinco vistas do
-XP (Miniaturas, Mosaicos, Ícones, Lista, Detalhes), o menu do botão direito,
-os nomes editados no sítio, as caixas de mensagem do XP e a pega de
-redimensionar no canto. O tamanho e a vista ficam guardados de uma vez para
-a outra (~/.local/share/zorin-xp/filechooser.json).
+A portal service (org.freedesktop.impl.portal.FileChooser) that
+xdg-desktop-portal uses instead of GNOME's dialog: it serves flatpak
+applications, browsers and, with GTK_USE_PORTAL=1 / GDK_DEBUG=portals, every
+GTK application. The window follows comdlg32.dll's template 1552 (positions,
+texts), with the places bar, the toolbar and XP's five views (Thumbnails,
+Tiles, Icons, List, Details), the right-click menu, names edited in place,
+XP's message boxes and the resize grip in the corner. The size and the view
+are remembered from one time to the next (~/.local/share/zorin-xp/filechooser.json).
 
-Se algo correr mal ao abrir a janela, o pedido passa para a janela do GNOME
-(org.freedesktop.impl.portal.desktop.gnome): nenhuma aplicação fica sem
-conseguir abrir ou guardar.
+If something goes wrong when opening the window, the request goes to
+GNOME's dialog (org.freedesktop.impl.portal.desktop.gnome): no application
+is left unable to open or save.
 
-Teste sem o portal:  zorin-xp-filechooser --test open|save|folder|multi [pasta [nome]]
-(ZXP_FC_SCRIPT=<ficheiro.py> corre um guião de teste com a janela em `dlg`)
+Test without the portal:  zorin-xp-filechooser --test open|save|folder|multi [folder [name]]
+(ZXP_FC_SCRIPT=<file.py> runs a test script with the window in `dlg`)
 """
 import fnmatch
 import json
@@ -61,7 +60,7 @@ def load(name, default):
 
 S = load("strings.json", {})
 TEST_REPLY = False
-TEST = False           # (modo de teste: a janela conta como ativa)
+TEST = False           # (test mode: the window counts as active)
 LAYOUT = load("layout.json", {"size": [578, 387], "controls": {}})
 
 
@@ -70,7 +69,7 @@ def t(key, default=""):
 
 
 def fmt(text, *args):
-    """Os %1, %2!ls! das cadeias do Windows."""
+    """The %1, %2!ls! of Windows strings."""
     return re.sub(r"%(\d)(?:![^!]*!)?", lambda m: str(args[int(m.group(1)) - 1])
                   if int(m.group(1)) <= len(args) else "", text)
 
@@ -95,8 +94,8 @@ DOCUMENTS = special(GLib.UserDirectory.DIRECTORY_DOCUMENTS) or HOME
 DOWNLOADS = special(GLib.UserDirectory.DIRECTORY_DOWNLOAD) or os.path.join(HOME, "Downloads")
 PICTURES = special(GLib.UserDirectory.DIRECTORY_PICTURES) or os.path.join(HOME, "Imagens")
 NETWORK = os.path.join(GLib.get_user_runtime_dir(), "gvfs")
-# a barra de locais: sem "Recentes" (não se guarda lá) nem "Os meus locais na
-# rede"; com "As minhas imagens" e as Transferências
+# the places bar: without "Recentes" (nothing is saved there) nor "Os meus
+# locais na rede"; with "As minhas imagens" and Downloads
 PLACES = (DESKTOP, DOCUMENTS, HOME, PICTURES, DOWNLOADS)
 
 
@@ -116,9 +115,9 @@ def place_icon(path):
 
 
 def host_path(path):
-    """Os caminhos do portal de documentos (/run/user/N/doc/<id>/...), que é o
-    que as aplicações flatpak (o Zen) conhecem, -> o caminho verdadeiro. A
-    pasta <id> contém só o ficheiro exportado: corresponde à pasta dele."""
+    """The document portal's paths (/run/user/N/doc/<id>/...), which is what
+    flatpak applications (Zen) know, -> the real path. The <id> folder only
+    contains the exported file: it matches that file's folder."""
     root = os.path.join(GLib.get_user_runtime_dir(), "doc") + os.sep
     if not path or not path.startswith(root):
         return path
@@ -171,14 +170,14 @@ def file_icon(path, is_dir, ctype, size):
     return icon_pixbuf(names + ["unknown"], size)
 
 
-# seleção como no XP (ImageList ILD_BLEND50, medida numa captura do XP): os
-# píxeis com alfa >= 128 ficam a meio caminho da cor de realce, no alfa
-# pré-multiplicado e arredondado para cima (pode passar do alfa: ao desenhar
-# satura, como no XP); os outros (sombras) ficam iguais
+# selection as in XP (ImageList ILD_BLEND50, measured in an XP capture):
+# pixels with alpha >= 128 go halfway to the highlight colour, in
+# premultiplied alpha and rounded up (it may exceed the alpha: drawing
+# saturates, as in XP); the others (shadows) stay the same
 HIGHLIGHT = (0x31, 0x6A, 0xC5)
 FACE = (0xEC, 0xE9, 0xD8)
 GREY = (0x80, 0x80, 0x80)
-SORTED_BG = (0xF7, 0xF7, 0xF7)        # a coluna pela qual se ordena (Detalhes)
+SORTED_BG = (0xF7, 0xF7, 0xF7)        # the column the list is sorted by (Details)
 
 
 def rgb(c):
@@ -186,7 +185,7 @@ def rgb(c):
 
 
 def blended(pb):
-    """A imagem do ícone selecionado (cairo, pré-multiplicada)."""
+    """The image of the selected icon (cairo, premultiplied)."""
     if pb is None:
         return None
     hit = _blend_cache.get(pb)
@@ -209,7 +208,7 @@ def blended(pb):
             o = y * stride + x * 4
             out[o], out[o + 1], out[o + 2], out[o + 3] = b, g, r, a
     s = cairo.ImageSurface.create_for_data(out, cairo.FORMAT_ARGB32, w, h, stride)
-    _blend_cache[pb] = (s, out)         # (os dados têm de viver com a imagem)
+    _blend_cache[pb] = (s, out)         # (the data must live with the image)
     return s
 
 
@@ -256,8 +255,8 @@ def list_dir(path, show_hidden=False):
         names = os.listdir(path)
     except OSError:
         return []
-    # ~/.hidden: os nomes que o Ficheiros também esconde (ex.: os atalhos com
-    # os nomes antigos das pastas pessoais)
+    # ~/.hidden: the names Files also hides (e.g. the shortcuts with the home
+    # folders' old names)
     try:
         with open(os.path.join(path, ".hidden"), encoding="utf-8") as f:
             hidden = set(f.read().splitlines())
@@ -273,8 +272,8 @@ def list_dir(path, show_hidden=False):
     return out
 
 
-# "Dispor ícones por": pastas sempre primeiro, como no XP; a data com as mais
-# recentes primeiro
+# "Dispor ícones por" (Arrange Icons By): folders always first, as in XP;
+# the date with the newest first
 SORT_KEYS = ("name", "size", "type", "mtime")
 SORT_DESC = {"name": False, "size": False, "type": False, "mtime": True}
 
@@ -295,7 +294,7 @@ def sort_entries(entries, key, desc):
 
 
 def matches(entry, flt):
-    """flt: (nome, [(0, glob) | (1, mime)]) — as pastas aparecem sempre."""
+    """flt: (name, [(0, glob) | (1, mime)]) — folders always show."""
     if entry.is_dir or not flt:
         return True
     for kind, pat in flt[1]:
@@ -307,15 +306,15 @@ def matches(entry, flt):
 
 
 def xp_wrap(text, width, measure, lines=2):
-    """text em até `lines` linhas de `width` px, como o DrawText do XP com
-    DT_WORDBREAK | DT_END_ELLIPSIS: parte nos espaços; uma palavra mais larga
-    que a linha é cortada com "..." e acaba ali; a última linha leva o resto
-    do texto, cortado no fim. lines=None: o texto inteiro (o nome do item com
-    foco no XP), com as palavras compridas partidas onde a linha acaba."""
+    """text in up to `lines` lines of `width` px, like XP's DrawText with
+    DT_WORDBREAK | DT_END_ELLIPSIS: breaks at spaces; a word wider than the
+    line is cut with "..." and ends there; the last line takes the rest of
+    the text, cut at the end. lines=None: the whole text (the focused item's
+    name in XP), with long words broken where the line ends."""
     if measure(text) <= width:
         return text
 
-    def fits(s):                        # o maior começo de s que cabe (>= 1)
+    def fits(s):                        # the longest start of s that fits (>= 1)
         lo, hi = 1, len(s)
         while lo < hi:
             mid = (lo + hi + 1) // 2
@@ -329,7 +328,7 @@ def xp_wrap(text, width, measure, lines=2):
         if measure(s) <= width:
             return s
         lo, hi = 0, len(s)
-        while lo < hi:                  # o maior começo que cabe com "..."
+        while lo < hi:                  # the longest start that fits with "..."
             mid = (lo + hi + 1) // 2
             if measure(s[:mid].rstrip() + "...") <= width:
                 lo = mid
@@ -362,7 +361,7 @@ def xp_wrap(text, width, measure, lines=2):
 
 
 def play_sound(file=None, event=None):
-    """Um som do esquema do XP, se os sons de eventos estiverem ligados."""
+    """A sound from XP's scheme, if event sounds are on."""
     try:
         if not Gio.Settings.new("org.gnome.desktop.sound").get_boolean("event-sounds"):
             return
@@ -379,8 +378,8 @@ def play_sound(file=None, event=None):
 
 
 # ---------------------------------------------------------------- texto do XP
-LINE = 13          # Tahoma 8 no XP: linhas de 13 px...
-ASCENT = 11        # ... com a linha de base a 11 px do topo
+LINE = 13          # Tahoma 8 in XP: 13 px lines...
+ASCENT = 11        # ... with the baseline 11 px from the top
 
 
 def draw_text(cr, widget, text, x, top, color):
@@ -399,12 +398,12 @@ def line_attrs():
 # ---------------------------------------------------------------- vistas
 VIEWS = ("thumbnails", "tiles", "icons", "list", "details")
 DEFAULT_VIEW = "list"
-# as grelhas do Explorador do XP (a mesma vista da janela de ficheiros),
-# medidas em capturas: os itens a partir de (2, 2); Miniaturas 125 x 139 com
-# a moldura de 96 em (14, 6) e o nome 99 px abaixo dela; Mosaicos 218 x 56,
-# o ícone de 48 em (1, 4), o texto a 53 px, 2 px acima do meio; Ícones
-# 75 x 75, o ícone de 32 em (21, 4), o nome a 40 px (7 px abaixo do ícone até
-# ao topo das letras)
+# XP Explorer's grids (the same view as the file dialog), measured in
+# captures: items from (2, 2); Thumbnails 125 x 139 with the 96 px frame at
+# (14, 6) and the name 99 px below it; Tiles 218 x 56, the 48 px icon at
+# (1, 4), the text at 53 px, 2 px above the middle; Icons 75 x 75, the 32 px
+# icon at (21, 4), the name at 40 px (7 px below the icon to the top of the
+# letters)
 GRID = {"thumbnails": (125, 139), "tiles": (218, 56), "icons": (75, 75)}
 GRID_MARGIN = 2
 NAME_W = {"thumbnails": 121, "icons": 71}
@@ -412,13 +411,13 @@ NAME_TOP = {"thumbnails": 105, "icons": 40}
 THUMB_FRAME = (14, 6)
 ICON_AT = {"icons": (21, 4), "tiles": (1, 4)}
 TILE_TEXT_X, TILE_TEXT_W = 53, 159
-DETAIL_TEXT_X = 24                    # o nome nos Detalhes (ícone de 16 a 4 px)
+DETAIL_TEXT_X = 24                    # the name in Details (16 px icon at 4 px)
 COLUMN_WIDTHS = {"name": 179, "size": 97, "type": 119, "mtime": 121}
-PLACE_H, PLACE_TEXT_W = 71, 83          # botões da barra de locais
+PLACE_H, PLACE_TEXT_W = 71, 83          # places bar buttons
 
 
 class ItemCell(Gtk.CellRenderer):
-    """Um item das Miniaturas, Mosaicos ou Ícones, desenhado como no XP."""
+    """An item in Thumbnails, Tiles or Icons, drawn as in XP."""
     entry = GObject.Property(type=object)
 
     def __init__(self, dlg):
@@ -448,7 +447,7 @@ class ItemCell(Gtk.CellRenderer):
 
 
 class NameCell(Gtk.CellRenderer):
-    """O nome nos Detalhes: ícone e nome, com o realce só no nome (XP)."""
+    """The name in Details: icon and name, with the highlight only on the name (XP)."""
     entry = GObject.Property(type=object)
 
     def __init__(self, dlg):
@@ -470,8 +469,9 @@ class NameCell(Gtk.CellRenderer):
 
 
 class TreeNameCell(Gtk.CellRendererText):
-    """O nome na árvore da "Procurar pasta": o realce só no texto (o GTK não
-    pinta o fundo das células selecionadas), azul com o foco, bege sem."""
+    """The name in the "Browse for Folder" tree: the highlight only on the
+    text (GTK does not paint the background of selected cells), blue with
+    the focus, beige without."""
 
     def __init__(self, dlg):
         super().__init__(xpad=2, ypad=1)
@@ -493,10 +493,10 @@ class TreeNameCell(Gtk.CellRendererText):
 
 
 class AnchorFixed(Gtk.Fixed):
-    """Posições do modelo de diálogo, com a ancoragem do XP ao redimensionar:
-    a lista estica, a linha de baixo acompanha o fundo, os botões a direita.
-    O tamanho é o do modelo mais o que a pega do canto acrescentou (grow);
-    a caixa do nome a editar fica por cima de tudo (editor)."""
+    """Positions from the dialog template, with XP's anchoring on resize: the
+    list stretches, the bottom row follows the bottom, the buttons the right
+    edge. The size is the template's plus what the corner grip added (grow);
+    the box of the name being edited goes on top of everything (editor)."""
 
     def __init__(self, base_w, base_h):
         super().__init__()
@@ -509,7 +509,7 @@ class AnchorFixed(Gtk.Fixed):
         self.put(widget, rect[0], rect[1])
         self.items.append((widget, rect, anchor, stretch))
 
-    # (no XP o tamanho do modelo é também o mínimo)
+    # (in XP the template's size is also the minimum)
     def do_get_preferred_width(self):
         w = self.base[0] + self.grow[0]
         return w, w
@@ -535,7 +535,7 @@ class AnchorFixed(Gtk.Fixed):
             w.size_allocate(r)
         if self.editor:
             w, (x, y, cw, ch) = self.editor
-            w.get_preferred_width()     # (o GTK quer o pedido antes da alocação)
+            w.get_preferred_width()     # (GTK wants the request before the allocation)
             r = Gdk.Rectangle()
             r.x, r.y, r.width, r.height = alloc.x + x, alloc.y + y, max(1, cw), max(1, ch)
             w.size_allocate(r)
@@ -593,7 +593,7 @@ frame.zxp-rename, textview.zxp-rename, textview.zxp-rename text { background-col
 class XpFileDialog(Gtk.Window):
     def __init__(self, kind, title, options, on_done, parent_window=""):
         save = kind in ("save", "savefiles")
-        # o título do XP, nunca o da aplicação ("Guardar imagem do Zen...")
+        # XP's title, never the application's ("Save image from Zen...")
         super().__init__(title=t("saveTitle", "Guardar como") if save else t("openTitle", "Abrir"))
         self.kind = kind                      # open | save | savefiles
         self.options = options
@@ -617,7 +617,7 @@ class XpFileDialog(Gtk.Window):
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_skip_taskbar_hint(False)
-        # (só pela pega do canto inferior direito, como no XP)
+        # (only through the bottom right corner grip, as in XP)
         self.set_resizable(False)
         self.connect("delete-event", lambda *_: self.finish(1) or True)
         self.connect("key-press-event", self._on_key)
@@ -635,9 +635,9 @@ class XpFileDialog(Gtk.Window):
         self.box = AnchorFixed(bw, bh)
         self.add(self.box)
 
-        # "Guardar em:" / "Procurar em:" e a lista de locais
+        # "Guardar em:" / "Procurar em:" (Save in / Look in) and the places list
         look_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("saveIn") if save else t("lookIn", "Procurar &em:")))
-        look_lbl.set_xalign(1)          # (no XP encosta à caixa)
+        look_lbl.set_xalign(1)          # (in XP it sits against the box)
         self.look = Gtk.ComboBox()
         self.look_store = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str, int)
         self.look.set_model(self.look_store)
@@ -658,7 +658,7 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1137, [99, 7, 261, 22])
         self.box.place(self.look, [r[0], r[1] - 1, r[2], 22])
 
-        # barra de ferramentas
+        # toolbar
         tb = Gtk.Box(spacing=0)
         self.btn_back = self._tool("back", t("back"), self.go_back)
         self.btn_up = self._tool("up", t("upOneLevel"), self.go_up)
@@ -669,12 +669,12 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1088, [372, 7, 120, 23])
         self.box.place(tb, [r[0], r[1], r[2], 22])
 
-        # barra de locais
+        # places bar
         places = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.place_buttons = {}
         for path in PLACES:
             places.pack_start(self._place_button(path), False, False, 0)
-        # (cortada pela moldura, como no XP, quando não cabe)
+        # (clipped by the frame, as in XP, when it does not fit)
         clip = Gtk.ScrolledWindow()
         clip.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.EXTERNAL)
         clip.add(places)
@@ -682,8 +682,8 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1184, [6, 36, 87, 338])
         self.box.place(clip, r, "lt", "h")
 
-        # lista de ficheiros: Lista (FlowBox), Detalhes (TreeView) e as três
-        # grelhas (IconView com os itens desenhados à XP)
+        # file list: List (FlowBox), Details (TreeView) and the three grids
+        # (IconView with the items drawn XP style)
         self.store = Gtk.ListStore(object)
         self.stack = Gtk.Stack()
         sel_mode = Gtk.SelectionMode.MULTIPLE if self.multiple else Gtk.SelectionMode.SINGLE
@@ -762,7 +762,7 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1120, [99, 36, 465, 254])
         self.box.place(frame, r, "lt", "wh")
 
-        # nome do ficheiro / tipo / botões
+        # file name / type / buttons
         name_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("fileName", "&Nome do ficheiro:")))
         name_lbl.set_xalign(0)
         self.name = Gtk.ComboBoxText.new_with_entry()
@@ -806,7 +806,7 @@ class XpFileDialog(Gtk.Window):
         self.box.place(self.btn_cancel, r, "rb")
         self.set_default(self.btn_ok)
 
-        # opções extra da aplicação ("choices"), por baixo, como os modelos do XP
+        # the application's extra options ("choices"), below, like XP's templates
         self.choices = {}
         extra = 0
         for ch_id, label, opts, default in options.get("choices") or []:
@@ -831,8 +831,8 @@ class XpFileDialog(Gtk.Window):
         if extra:
             self.box.base = (bw, bh + extra)
 
-        # a pega de redimensionar (SBS_SIZEGRIP: 17 x 17 no canto, a imagem
-        # do tema em baixo à esquerda dela)
+        # the resize grip (SBS_SIZEGRIP: 17 x 17 in the corner, the theme's image
+        # at its bottom left)
         self.grip = Gtk.EventBox()
         self.grip.add(Gtk.Image.new_from_file(os.path.join(DATA, "sizegrip.png")))
         self.grip.get_child().set_halign(Gtk.Align.START)
@@ -846,18 +846,18 @@ class XpFileDialog(Gtk.Window):
         self._grip = None
         self.box.place(self.grip, [bw - 17, bh + extra - 17, 17, 17], "rb")
 
-        # o tamanho da última vez
+        # the size from last time
         size = self.state.get("size") or []
         if len(size) == 2:
             self.box.grow = [max(0, int(size[0]) - bw), max(0, int(size[1]) - (bh + extra))]
             self._clamp_grow()
 
-        # a vista da última vez
+        # the view from last time
         self.set_view(self.view_mode, remember=False)
 
-        # pasta inicial e nome: a que a aplicação pede (o Zen lembra-se da
-        # pasta de cada sítio), senão as Transferências (Guardar) ou Os meus
-        # documentos (Abrir)
+        # initial folder and name: the one the application asks for (Zen remembers
+        # each site's folder), otherwise Downloads (Save) or Os meus documentos
+        # (Open)
         start = None
         cf = options.get("current_file")
         if cf:
@@ -901,7 +901,7 @@ class XpFileDialog(Gtk.Window):
         except OSError:
             pass
 
-    # ------------------------------------------------------------ peças
+    # ------------------------------------------------------------ pieces
     def _set_transient(self, *_):
         pw = self._parent_window or ""
         if pw.startswith("x11:"):
@@ -924,7 +924,7 @@ class XpFileDialog(Gtk.Window):
         img = Gtk.Image.new_from_file(os.path.join(DATA, f"tb-{name}-normal.png"))
         box.pack_start(img, False, False, 0)
         if arrow:
-            # a seta do botão (BTNS_WHOLEDROPDOWN): triângulo preto de 5 x 3
+            # the button's arrow (BTNS_WHOLEDROPDOWN): black 5 x 3 triangle
             surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, 5, 3)
             cr = cairo.Context(surf)
             cr.set_source_rgb(0, 0, 0)
@@ -952,7 +952,7 @@ class XpFileDialog(Gtk.Window):
         btn.set_focus_on_click(False)
         v = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         img = Gtk.Image.new_from_pixbuf(icon_pixbuf(place_icon(path), 32))
-        # (até 2 linhas de 83 px, partidas como o DrawText do XP)
+        # (up to 2 lines of 83 px, broken like XP's DrawText)
         lab = Gtk.Label(label=xp_wrap(place_name(path), PLACE_TEXT_W, lambda s: self._measure(self, s), 2))
         lab.set_justify(Gtk.Justification.CENTER)
         lab.set_attributes(line_attrs())
@@ -1027,8 +1027,8 @@ class XpFileDialog(Gtk.Window):
         return {"list": self.flow, "details": self.tree}.get(self.view_mode, self.icons)
 
     def focus_view(self):
-        """O foco na lista (na Lista, no item selecionado: a FlowBox não o
-        guarda ela própria)."""
+        """The focus on the list (in List, on the selected item: the FlowBox does
+        not keep it itself)."""
         if self.view_mode == "list":
             sel = self.flow.get_selected_children()
             ch = sel[0] if sel else self.flow.get_child_at_index(0)
@@ -1045,8 +1045,8 @@ class XpFileDialog(Gtk.Window):
             self.icons.set_item_width(GRID[mode][0])
             self.icons.queue_resize()
             self.icons.queue_draw()
-        # (o GtkStack ignora páginas ainda escondidas: antes do show_all da
-        # janela ficava a primeira, a das grelhas, vazia na Lista/Detalhes)
+        # (GtkStack ignores pages that are still hidden: before the window's
+        # show_all the first one stayed, the grids', empty in List/Details)
         page = self.stack.get_child_by_name("items" if mode in GRID else mode)
         page.show_all()
         self.stack.set_visible_child(page)
@@ -1094,8 +1094,8 @@ class XpFileDialog(Gtk.Window):
         cr.paint()
 
     def _tile_lines(self, e):
-        """Mosaicos: imagens com as dimensões e o tipo, os outros ficheiros
-        com o tipo e o tamanho, as pastas só com o nome (como no XP)."""
+        """Tiles: images with their dimensions and type, other files with the
+        type and size, folders with the name only (as in XP)."""
         if e.is_dir:
             return []
         kind = e.type_name()
@@ -1124,8 +1124,8 @@ class XpFileDialog(Gtk.Window):
         x, y = area.x, area.y
         cr.save()
         if mode == "thumbnails":
-            # a moldura de 96 x 96 (1 px #ECE9D8 por cima da orla); selecionada,
-            # 3 px azuis por fora (bege sem o foco)
+            # the 96 x 96 frame (1 px #ECE9D8 over the edge); when selected, 3 px of
+            # blue outside (beige without the focus)
             fx, fy = x + THUMB_FRAME[0], y + THUMB_FRAME[1]
             cr.set_source_rgb(1, 1, 1)
             cr.rectangle(fx, fy, 96, 96)
@@ -1167,15 +1167,15 @@ class XpFileDialog(Gtk.Window):
         cr.restore()
 
     def _draw_name(self, cr, widget, e, x, top, width, selected, focus, thumbs=False):
-        """O nome debaixo do ícone: até 2 linhas, ao centro; o do item com o
-        foco inteiro, por cima do que estiver por baixo (como no XP)."""
+        """The name under the icon: up to 2 lines, centred; the focused item's in
+        full, on top of whatever is below it (as in XP)."""
         full = focus and self._is_cursor(e)
         lines = self._wrap(widget, e.name, width, None if full else 2).split("\n")
         ws = [self._measure(widget, ln) for ln in lines]
         tw = max(ws)
         if selected:
             cr.set_source_rgb(*rgb(HIGHLIGHT if focus else FACE))
-            # (nas Miniaturas o realce começa rente ao texto e acaba 2 px abaixo)
+            # (in Thumbnails the highlight starts tight against the text and ends 2 px below)
             cr.rectangle(x + (width - tw) // 2 - 2, top if thumbs else top - 1, tw + 4, LINE * len(lines) + 2)
             cr.fill()
         color = (255, 255, 255) if selected and focus else (0, 0, 0)
@@ -1217,7 +1217,7 @@ class XpFileDialog(Gtk.Window):
             cell.set_property("cell-background-set", False)
 
     def _tree_band(self, tree, cr):
-        """A coluna ordenada a cinzento até ao fundo da lista, como no XP."""
+        """The sorted column in grey down to the bottom of the list, as in XP."""
         col = self.columns.get(self.sort[0])
         if col is None:
             return False
@@ -1256,7 +1256,7 @@ class XpFileDialog(Gtk.Window):
         self._thumb_idle = 0
         return False
 
-    # ------------------------------------------------------------ navegação
+    # ------------------------------------------------------------ navigation
     def current_filter(self):
         i = self.types.get_active()
         return self.filters[i] if self.filters and i >= 0 else None
@@ -1290,7 +1290,7 @@ class XpFileDialog(Gtk.Window):
 
     def _fill_look(self):
         """Ambiente de trabalho > Os meus documentos / O meu computador > ... /
-        Os meus locais na rede, com o caminho atual no sítio certo."""
+        Os meus locais na rede, with the current path in the right place."""
         rows = [(DESKTOP, 0), (DOCUMENTS, 1), (HOME, 1)]
         mounts = []
         for m in Gio.VolumeMonitor.get().get_mounts():
@@ -1300,7 +1300,7 @@ class XpFileDialog(Gtk.Window):
         rows.append(("/", 2))
         rows += [(r, 2) for r, _n, _i in mounts]
         rows.append((NETWORK, 1))
-        # o caminho atual: a partir do local mais próximo que o contenha
+        # the current path: from the closest place that contains it
         cur = self.cwd
         if cur not in [r for r, _ in rows]:
             anchors = [(r, lvl) for r, lvl in rows if r != NETWORK and
@@ -1381,7 +1381,7 @@ class XpFileDialog(Gtk.Window):
         self.refresh()
         self._save_state()
 
-    # ------------------------------------------------------------ seleção
+    # ------------------------------------------------------------ selection
     def selected(self):
         if self.view_mode == "list":
             return [ch.entry for ch in self.flow.get_selected_children()]
@@ -1446,7 +1446,7 @@ class XpFileDialog(Gtk.Window):
             self.entry.set_text(e.name)
             self.accept()
 
-    # ------------------------------------------------------------ botão direito
+    # ------------------------------------------------------------ right click
     def _on_view_button(self, view, ev):
         if ev.type != Gdk.EventType.BUTTON_PRESS or ev.button != 3:
             return False
@@ -1483,8 +1483,8 @@ class XpFileDialog(Gtk.Window):
         return item
 
     def _background_menu(self):
-        """O menu do fundo da lista, como no XP: Ver, Dispor ícones por,
-        Actualizar, Novo > Pasta (sem Colar/Colar atalho, desativados)."""
+        """The list background's menu, as in XP: View, Arrange Icons By, Refresh,
+        New > Folder (without Paste/Paste Shortcut, disabled)."""
         menu = Gtk.Menu()
         view = self._menu_item("view", "&Ver", None)
         view.set_submenu(self._view_submenu())
@@ -1492,7 +1492,7 @@ class XpFileDialog(Gtk.Window):
         menu.append(Gtk.SeparatorMenuItem())
         arrange = self._menu_item("arrange", "&Dispor ícones por", None)
         sub = Gtk.Menu()
-        # (no XP sem ponto e sem as opções desativadas de agrupar/dispor)
+        # (in XP no dot and without the disabled grouping/arranging options)
         for key, label in (("name", t("colName", "Nome")), ("size", t("colSize", "Tamanho")),
                            ("type", t("colType", "Tipo")), ("mtime", "Modificado")):
             item = Gtk.MenuItem.new_with_mnemonic(mnemonic(label))
@@ -1510,8 +1510,8 @@ class XpFileDialog(Gtk.Window):
         return menu
 
     def _item_menu(self, sel):
-        """O menu dos itens: "Abrir" (pastas) ou "Seleccionar" (ficheiros) a
-        negrito, Eliminar, Mudar o nome, Propriedades."""
+        """The items' menu: "Abrir" (folders) or "Seleccionar" (files) in bold,
+        Delete, Rename, Properties."""
         menu = Gtk.Menu()
         files = [e for e in sel if not e.is_dir]
         writable = os.access(self.cwd, os.W_OK)
@@ -1537,7 +1537,7 @@ class XpFileDialog(Gtk.Window):
             self.accept()
 
     def show_properties(self, paths):
-        """As Propriedades do Ficheiros (org.freedesktop.FileManager1)."""
+        """Files' Properties (org.freedesktop.FileManager1)."""
         uris = [Gio.File.new_for_path(p).get_uri() for p in paths]
         try:
             bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
@@ -1547,7 +1547,7 @@ class XpFileDialog(Gtk.Window):
         except GLib.Error:
             pass
 
-    # ------------------------------------------------------------ nova pasta / eliminar
+    # ------------------------------------------------------------ new folder / delete
     def new_folder(self):
         if not self.cwd or not os.access(self.cwd, os.W_OK):
             return
@@ -1564,10 +1564,10 @@ class XpFileDialog(Gtk.Window):
         e = make_entry(path)
         if e is None:
             return
-        # (como no XP: no fim da lista até se actualizar, já a mudar o nome)
+        # (as in XP: at the end of the list until refreshed, already being renamed)
         self.entries.append(e)
         self._add_row(e)
-        # (depois de a vista arrumar o item novo)
+        # (after the view has placed the new item)
         GLib.timeout_add(30, lambda: self.start_edit(e) and False)
 
     def _remove_entry(self, e):
@@ -1601,7 +1601,7 @@ class XpFileDialog(Gtk.Window):
             return False
 
     def delete_selected(self, permanent=False):
-        """Eliminar com a pergunta do XP (Reciclagem; Shift+Delete: de vez)."""
+        """Delete with XP's question (Recycle Bin; Shift+Delete: permanently)."""
         sel = self.selected()
         if not sel or not os.access(self.cwd, os.W_OK):
             return
@@ -1640,11 +1640,11 @@ class XpFileDialog(Gtk.Window):
         if done and not permanent:
             play_sound(os.path.join(SOUNDS, "Windows XP Recycle.wav"))
 
-    # ------------------------------------------------------------ mudar o nome no sítio
+    # ------------------------------------------------------------ rename in place
     def start_edit(self, e, text=None):
-        """A caixa do nome por cima do item, como no XP (F2, Mudar o nome,
-        Nova pasta): só uma linha nos Mosaicos, Lista e Detalhes; nos Ícones e
-        Miniaturas várias, ao centro, se o nome não couber."""
+        """The name box over the item, as in XP (F2, Rename, New folder): a single
+        line in Tiles, List and Details; several in Icons and Thumbnails,
+        centred, if the name does not fit."""
         if e not in self.entries:
             return
         self.finish_edit(True)
@@ -1683,7 +1683,7 @@ class XpFileDialog(Gtk.Window):
             editor.connect("activate", lambda *_: self.finish_edit(True))
         editor.connect("key-press-event", self._editor_key)
         editor.connect("focus-out-event", self._editor_focus_out)
-        # (numa janela própria: as vistas têm as suas, que ficariam por cima)
+        # (in a window of its own: the views have theirs, which would end up on top)
         holder = Gtk.EventBox()
         holder.set_visible_window(True)
         holder.add(widget)
@@ -1697,7 +1697,7 @@ class XpFileDialog(Gtk.Window):
         self._place_editor()
         widget.show_all()
         editor.grab_focus()
-        # o nome sem a extensão fica selecionado, como no XP
+        # the name without the extension is selected, as in XP
         stem = len(text) if e.is_dir else len(os.path.splitext(text)[0] or text)
         if multi:
             buf = editor.get_buffer()
@@ -1714,7 +1714,7 @@ class XpFileDialog(Gtk.Window):
         return ed["editor"].get_text()
 
     def _label_geom(self, e):
-        """Onde está o nome do item (coordenadas da janela)."""
+        """Where the item's name is (window coordinates)."""
         if e not in self.entries:
             return None
         i = self.entries.index(e)
@@ -1775,7 +1775,7 @@ class XpFileDialog(Gtk.Window):
             y = g["row"] + (g["height"] - 17) // 2
         else:
             y = g["top"] - 2 + (1 if mode == "thumbnails" else 0)
-        # (sem sair da lista pelos lados)
+        # (without leaving the list through the sides)
         frame = self.stack.get_allocation()
         x = max(frame.x, min(x, frame.x + frame.width - w))
         rect = [round(x), round(y), int(w), int(h)]
@@ -1802,7 +1802,7 @@ class XpFileDialog(Gtk.Window):
         ed = self._edit
         if not ed:
             return False
-        # (logo a seguir a abrir, a vista ainda pode ficar com o foco)
+        # (right after opening, the view may still keep the focus)
         if time.monotonic() - ed["since"] < 0.4:
             GLib.idle_add(lambda: self._edit is ed and ed["editor"].grab_focus() and False)
             return False
@@ -1861,7 +1861,7 @@ class XpFileDialog(Gtk.Window):
 
     # ------------------------------------------------------------ caixas do XP
     def _modal(self, title, fixed, buttons, default, escape=None):
-        """Mostra uma caixa e espera pela resposta (o índice do botão)."""
+        """Shows a box and waits for the answer (the button's index)."""
         win = Gtk.Window(title=title, transient_for=self, modal=True, resizable=False)
         win.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         win.set_skip_taskbar_hint(True)
@@ -1885,7 +1885,7 @@ class XpFileDialog(Gtk.Window):
         win.set_default(buttons[default])
         win.show_all()
         buttons[default].grab_focus()
-        if TEST_REPLY:      # (só no modo de teste: responde sozinho)
+        if TEST_REPLY:      # (test mode only: it answers by itself)
             GLib.timeout_add(1500, lambda: answer(default) or False)
         loop.run()
         return result[0]
@@ -1897,12 +1897,12 @@ class XpFileDialog(Gtk.Window):
         return lab
 
     def xp_msgbox(self, title, text, icon="warning", buttons=("ok",), default=0):
-        """Uma MessageBox do user32 (MB_ICONEXCLAMATION | MB_YESNO, ...): margem
-        de 11 px, o ícone e o texto ao meio um do outro, o texto a 62 px, os
-        botões de 75 x 23 (6 px entre eles) ao centro, 17 px abaixo."""
+        """A user32 MessageBox (MB_ICONEXCLAMATION | MB_YESNO, ...): 11 px margin,
+        the icon and the text centred on each other, the text at 62 px, the
+        75 x 23 buttons (6 px apart) centred, 17 px below."""
         play_sound(event={"warning": "dialog-warning", "error": "dialog-error",
                           "info": "dialog-information"}.get(icon, "dialog-warning"))
-        # (o texto partido nas palavras a 5/8 da largura do ecrã, como no user32)
+        # (the text broken at words at 5/8 of the screen width, as in user32)
         limit = 640
         try:
             limit = Gdk.Display.get_default().get_primary_monitor().get_workarea().width * 5 // 8
@@ -1935,9 +1935,9 @@ class XpFileDialog(Gtk.Window):
         return self._modal(title, fixed, btns, default, escape)
 
     def xp_confirm(self, title, text, icon, many=False):
-        """A confirmação de eliminar do shell32 (diálogos 1011-1013, Tahoma 8 =
-        1,5 px por unidade): 412 x 127 (vários: 412 x 97), o ícone em (15, 15),
-        o texto ao lado, Sim / Não em baixo à direita. 0 = Sim."""
+        """shell32's delete confirmation (dialogs 1011-1013, Tahoma 8 = 1.5 px per
+        unit): 412 x 127 (several: 412 x 97), the icon at (15, 15), the text
+        beside it, Sim / Não at the bottom right. 0 = Yes."""
         fixed = Gtk.Fixed()
         fixed.set_size_request(412, 97 if many else 127)
         fixed.put(Gtk.Image.new_from_file(os.path.join(DATA, f"msg-{icon}.png")), 15, 15)
@@ -2066,13 +2066,13 @@ class XpFileDialog(Gtk.Window):
 
 
 class XpBrowseFolder(Gtk.Window):
-    """A "Procurar pasta" do XP (SHBrowseForFolder com BIF_NEWDIALOGSTYLE e
-    BIF_EDITBOX; shell32, diálogo 1087), para escolher pastas ("Abrir pasta"
-    dos editores e IDEs, SaveFiles): o texto da aplicação em cima, a árvore a
-    partir do Ambiente de trabalho (linhas pontilhadas, +/-), "Pasta:",
-    "Criar nova pasta" (com o nome editado na árvore), OK / Cancelar e a pega
-    no canto."""
-    # (o que é igual na janela de ficheiros)
+    """XP's "Browse for Folder" (SHBrowseForFolder with BIF_NEWDIALOGSTYLE and
+    BIF_EDITBOX; shell32, dialog 1087), for choosing folders (the "Open
+    Folder" of editors and IDEs, SaveFiles): the application's text at the
+    top, the tree from the Desktop (dotted lines, +/-), "Pasta:", "Criar nova
+    pasta" (with the name edited in the tree), OK / Cancel and the grip in
+    the corner."""
+    # (what is the same as in the file dialog)
     _measure = XpFileDialog._measure
     _modal = XpFileDialog._modal
     _msg_label = XpFileDialog._msg_label
@@ -2083,7 +2083,7 @@ class XpBrowseFolder(Gtk.Window):
     _grip_motion = XpFileDialog._grip_motion
     _load_state = staticmethod(XpFileDialog._load_state)
 
-    COLS = (GdkPixbuf.Pixbuf, str, str, bool)      # ícone, nome, caminho, já lido
+    COLS = (GdkPixbuf.Pixbuf, str, str, bool)      # icon, name, path, already read
 
     def __init__(self, kind, title, options, on_done, parent_window=""):
         super().__init__(title=t("browseTitle", "Procurar pasta"))
@@ -2111,7 +2111,7 @@ class XpBrowseFolder(Gtk.Window):
         self.box = AnchorFixed(bw, bh)
         self.add(self.box)
 
-        # o texto que a aplicação pôs (lpszTitle), até 3 linhas
+        # the text the application set (lpszTitle), up to 3 lines
         r = c.get(14146, [15, 11, 288, 39])
         desc = self._msg_label(xp_wrap(title or "", r[2], lambda s: self._measure(self, s), 3))
         self.box.place(desc, r, "lt", "w")
@@ -2124,7 +2124,7 @@ class XpBrowseFolder(Gtk.Window):
         cp = Gtk.CellRendererPixbuf(xpad=0, ypad=0)
         col.pack_start(cp, False)
         col.add_attribute(cp, "pixbuf", 0)
-        # (sem esticar: o realce fica só no nome, como no XP)
+        # (without stretching: the highlight stays on the name only, as in XP)
         self.name_cell = TreeNameCell(self)
         col.pack_start(self.name_cell, False)
         col.add_attribute(self.name_cell, "text", 1)
@@ -2175,9 +2175,9 @@ class XpBrowseFolder(Gtk.Window):
             self.box.grow = [max(0, int(size[0]) - bw), max(0, int(size[1]) - bh)]
             self._clamp_grow()
 
-        # Ambiente de trabalho > Os meus documentos, O meu computador (as
-        # pastas pessoais, o disco e as unidades ligadas), Os meus locais na
-        # rede e as pastas do ambiente de trabalho
+        # Ambiente de trabalho > Os meus documentos, O meu computador (the home
+        # folders, the disk and the connected drives), Os meus locais na rede
+        # and the desktop's folders
         self.root = self._add(None, DESKTOP, place_name(DESKTOP), lazy=False)
         self.docs = self._add(self.root, DOCUMENTS, place_name(DOCUMENTS))
         self.computer = self._add(self.root, HOME, place_name(HOME))
@@ -2196,7 +2196,7 @@ class XpBrowseFolder(Gtk.Window):
         self.select_folder(start if start and os.path.isdir(start) else DOCUMENTS)
         self.tree.grab_focus()
 
-    # ------------------------------------------------------------ árvore
+    # ------------------------------------------------------------ tree
     def _subfolders(self, path):
         try:
             names = os.listdir(path)
@@ -2218,7 +2218,7 @@ class XpBrowseFolder(Gtk.Window):
             with os.scandir(path) as it:
                 for i, d in enumerate(it):
                     if i > 400:
-                        return True         # (pastas enormes: o + fica, como no XP)
+                        return True         # (huge folders: the + stays, as in XP)
                     if not d.name.startswith(".") and d.is_dir():
                         return True
         except OSError:
@@ -2263,7 +2263,7 @@ class XpBrowseFolder(Gtk.Window):
             child = self.store.iter_next(child)
 
     def select_folder(self, path):
-        """Abre a árvore até à pasta (a partir do local mais próximo)."""
+        """Opens the tree down to the folder (from the closest place)."""
         path = os.path.abspath(path)
         self._load(self.computer)
         anchors = [(DESKTOP, self.root), (DOCUMENTS, self.docs), (HOME, self.computer)]
@@ -2307,7 +2307,7 @@ class XpBrowseFolder(Gtk.Window):
             self.btn_new.set_sensitive(bool(path) and os.access(path, os.W_OK))
         self.tree.queue_draw()
 
-    # ------------------------------------------------------------ nova pasta
+    # ------------------------------------------------------------ new folder
     def new_folder(self):
         path, it = self.selected_path()
         if not path or not os.access(path, os.W_OK):
@@ -2317,7 +2317,7 @@ class XpBrowseFolder(Gtk.Window):
         while os.path.lexists(os.path.join(path, name)):
             name, n = f"{base} ({n})", n + 1
         new = os.path.join(path, name)
-        self._load(it)                  # (antes de a criar: senão aparecia duas vezes)
+        self._load(it)                  # (before creating it: otherwise it appeared twice)
         try:
             os.mkdir(new)
         except OSError as err:
@@ -2332,12 +2332,12 @@ class XpBrowseFolder(Gtk.Window):
         GLib.timeout_add(50, lambda: self._start_edit(tp))
 
     def editing_text_hidden(self, text):
-        """(o nome do item a editar não se desenha: fica a caixa por cima)"""
+        """(the name of the item being edited is not drawn: the box sits on top)"""
         return self._editing is not None and self._editing.get("text") == text
 
     def _start_edit(self, tp, text=None):
-        """O nome editado no sítio, na árvore (como no XP): uma caixa de uma
-        linha, rente ao nome, que cresce ao escrever."""
+        """The name edited in place, in the tree (as in XP): a one-line box, tight
+        against the name, which grows while typing."""
         self._end_edit(False)
         it = self.store.get_iter(tp)
         name = self.store[it][1]
@@ -2373,7 +2373,7 @@ class XpBrowseFolder(Gtk.Window):
         cell = self.tree.get_cell_area(tp, self.name_col)
         bg = self.tree.get_background_area(tp, self.name_col)
         off = self.name_col.cell_get_position(self.name_cell)
-        x0 = cell.x + (off[0] if off else 0) + 2          # (o texto, depois do xpad)
+        x0 = cell.x + (off[0] if off else 0) + 2          # (the text, after the xpad)
         wx, wy = self.tree.convert_bin_window_to_widget_coords(x0, bg.y)
         co = self.tree.translate_coordinates(self.box, wx, wy)
         if co is None:
@@ -2498,8 +2498,8 @@ class XpBrowseFolder(Gtk.Window):
 
 
 def load_thumb(e):
-    """A miniatura do XP: a imagem reduzida para caber em 96 x 96 (as
-    pequenas não crescem); de outros tipos, a miniatura que o GNOME já fez."""
+    """XP's thumbnail: the image scaled down to fit 96 x 96 (small ones do not
+    grow); for other types, the thumbnail GNOME already made."""
     path = None
     try:
         info = Gio.File.new_for_path(e.path).query_info("thumbnail::path", Gio.FileQueryInfoFlags.NONE, None)
@@ -2563,7 +2563,7 @@ class Portal:
         kind = {"OpenFile": "open", "SaveFile": "save", "SaveFiles": "savefiles"}[method]
         try:
             self._show(kind, handle, parent, title, options, inv)
-        except Exception as e:      # janela do GNOME em vez desta
+        except Exception as e:      # GNOME's dialog instead of this one
             print(f"zorin-xp-filechooser: {e}; a usar a do GNOME", file=sys.stderr)
             self._fallback(method, params, inv)
 
@@ -2611,7 +2611,7 @@ class Portal:
 
 
 def shot(widget, path):
-    """(teste) Desenha o conteúdo de uma janela num PNG, sem o ecrã."""
+    """(test) Draws a window's content into a PNG, without the screen."""
     child = widget.get_child() if isinstance(widget, Gtk.Window) else widget
     a = child.get_allocation()
     surf = cairo.ImageSurface(cairo.FORMAT_ARGB32, a.width, a.height)
@@ -2640,7 +2640,7 @@ def main():
             Gtk.main_quit()
         global TEST
         TEST = True
-        # (fora da sessão não há as definições do GNOME: as do tema XP)
+        # (outside the session there are no GNOME settings: the XP theme's)
         st = Gtk.Settings.get_default()
         st.set_property("gtk-icon-theme-name", "WindowsXP")
         st.set_property("gtk-font-name", "Tahoma 8.25")
@@ -2652,7 +2652,8 @@ def main():
         else:
             dlg = XpFileDialog(kind, "", opts, done)
         if len(sys.argv) > 4:
-            # (teste: escreve o nome e carrega no botão)
+            # (test: types the name and presses the button)
+
             global TEST_REPLY
             TEST_REPLY = True
 

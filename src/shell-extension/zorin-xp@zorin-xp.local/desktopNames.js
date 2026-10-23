@@ -1,15 +1,16 @@
 /*
- * Ícones do ambiente de trabalho como no XP:
- *  - "O meu computador" e "Reciclagem" em vez de "Pasta pessoal" e "Lixo";
- *  - a grelha do XP (células mais pequenas).
+ * Desktop icons as in XP:
+ *  - "O meu computador" and "Reciclagem" instead of "Pasta pessoal" and "Lixo";
+ *  - XP's grid (smaller cells).
  *
- * Os ícones são desenhados por um processo gjs à parte, que a extensão
- * zorin-desktop-icons lança com um Gio.SubprocessLauncher. Junta-se a esse
- * lançador a biblioteca zorin-xp-gettext.so (LD_PRELOAD), que faz o processo
- * usar as traduções de ~/.local/share/zorin-xp/locale (tools/setup/molocale.py), e
- * troca-se o programa pela cópia com a grelha do XP (tools/setup/dingcopy.py), se
- * ainda corresponder aos ficheiros do Zorin. Depois relança-se o processo (a
- * extensão do Zorin volta a lançá-lo sozinha). Nada do sistema se mexe.
+ * The icons are drawn by a separate gjs process, which the
+ * zorin-desktop-icons extension launches with a Gio.SubprocessLauncher. That
+ * launcher gets the zorin-xp-gettext.so library (LD_PRELOAD), which makes the
+ * process use the translations in ~/.local/share/zorin-xp/locale
+ * (tools/setup/molocale.py), and the program is swapped for the copy with
+ * XP's grid (tools/setup/dingcopy.py), if it still matches Zorin's files.
+ * Then the process is relaunched (the Zorin extension launches it again by
+ * itself). Nothing on the system is touched.
  */
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -29,7 +30,7 @@ function namesReady() {
     return GLib.file_test(SHIM, GLib.FileTest.EXISTS) && GLib.file_test(LOCALE, GLib.FileTest.IS_DIR);
 }
 
-// A cópia só vale se os ficheiros do Zorin forem os mesmos de quando foi feita
+// The copy only counts if Zorin's files are the same as when it was made
 function copyMatches(src) {
     try {
         const [, bytes] = GLib.file_get_contents(GLib.build_filenamev([DING, 'stamp.json']));
@@ -71,9 +72,9 @@ function prepare(launch, argv) {
     const src = GLib.path_get_dirname(argv[0]);
     if (copyMatches(src))
         argv = argv.map(a => a === src || a.startsWith(`${src}/`) ? DING_APP + a.slice(src.length) : a);
-    // O ding.js começa por "#!/usr/bin/env gjs": a biblioteca carregava-se no
-    // env e tirava-se do ambiente antes do gjs. Lança-se o gjs diretamente
-    // (a linha de comando fica a mesma: "gjs .../ding.js ...").
+    // ding.js starts with "#!/usr/bin/env gjs": the library would load into
+    // env and be removed from the environment before gjs. gjs is launched
+    // directly (the command line stays the same: "gjs .../ding.js ...").
     if (argv[0].endsWith('.js'))
         argv = ['gjs', ...argv];
     console.log(`Zorin XP: ícones do ambiente de trabalho: ${argv.join(' ')}${namesReady() ? ' (nomes do XP)' : ''}`);
@@ -83,7 +84,7 @@ function prepare(launch, argv) {
 export class DesktopNames {
     constructor() {
         this._timer = 0;
-        // até a extensão do Zorin ter lançado o processo
+        // until the Zorin extension has launched the process
         if (!this._apply()) {
             this._timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, RETRY_MS, () => {
                 if (!this._apply())
@@ -110,14 +111,14 @@ export class DesktopNames {
                 return proto._zxpSpawnv.call(this, prepare(this, argv));
             };
         }
-        // o que está a correr foi lançado antes disto: relança-se
+        // what is running was launched before this: relaunch it
         if (!proc._zxpPrepared)
             this._relaunch(proc);
         return true;
     }
 
-    // A extensão do Zorin, ao arrancar, mata pelo caminho do programa os
-    // processos que ficaram de antes (ex. Alt+F2 r): os da cópia matam-se aqui
+    // The Zorin extension, when it starts, kills by program path the processes
+    // left from before (e.g. Alt+F2 r): the copy's ones are killed here
     _killStrays(proc) {
         const mine = proc.subprocess.get_identifier();
         const prog = GLib.build_filenamev([DING_APP, 'ding.js']);
@@ -142,8 +143,8 @@ export class DesktopNames {
         }
     }
 
-    // locked: o ecrã foi bloqueado (as extensões desligam-se); fica tudo como
-    // está, para o ambiente de trabalho não piscar a cada bloqueio
+    // locked: the screen was locked (the extensions get disabled); everything
+    // stays as it is, so the desktop does not flicker on every lock
     destroy(locked) {
         if (this._timer)
             GLib.source_remove(this._timer);

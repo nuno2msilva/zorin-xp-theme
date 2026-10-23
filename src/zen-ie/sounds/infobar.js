@@ -1,9 +1,9 @@
-// Os sons da barra de informações do IE6 SP2, a partir da página (só ouve: a
-// página faz o mesmo de sempre). Não há eventos para as extensões saberem
-// quando o browser bloqueia uma janela ou pede uma permissão, por isso:
-//   - pop-up bloqueado: o window.open da página devolveu null;
-//   - pedido de permissão: a página pediu a localização, as notificações, a
-//     câmara ou o microfone e a resposta ainda é "perguntar".
+// The sounds of IE6 SP2's information bar, from the page (it only listens:
+// the page does what it always does). There are no events for extensions to
+// know when the browser blocks a window or asks for a permission, so:
+//   - pop-up blocked: the page's window.open returned null;
+//   - permission request: the page asked for the location, notifications,
+//     camera or microphone and the answer is still "ask".
 const page = window.wrappedJSObject;
 const tell = op => browser.runtime.sendMessage({op}).catch(() => {});
 
@@ -13,7 +13,7 @@ function wrap(target, name, before, after) {
         return;
     exportFunction(function (...args) {
         before?.call(this);
-        // (um a um: a função da página não pode ler um array deste lado)
+        // (one by one: the page's function cannot read an array from this side)
         const result = original.call(this, ...args);
         after?.(result);
         return result;

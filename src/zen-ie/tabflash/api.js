@@ -1,13 +1,12 @@
-/* Zorin XP — aviso de novo separador no modo compacto.
+/* Zorin XP — new tab notice in compact mode.
  *
- * Quando se abre um separador em segundo plano (ex.: clique do meio numa
- * ligação), a janela fica com o atributo zxp-tab-flash e o separador com
- * zxp-flash durante a animação; o userChrome (src/zen-ie/ie.css) desenha a
- * faixa laranja a piscar na beira esquerda (modo compacto: a barra dos
- * separadores está escondida) e o separador a piscar como um botão da barra
- * de tarefas do XP (barra lateral à vista). Feito aqui, e
- * não só em CSS, porque o CSS voltava a piscar ao arrancar (separadores
- * restaurados) e ao mudar de espaço (separadores que voltam a ser mostrados). */
+ * When a tab opens in the background (e.g. a middle click on a link), the
+ * window gets the zxp-tab-flash attribute and the tab zxp-flash during the
+ * animation; userChrome (src/zen-ie/ie.css) draws the flashing orange strip
+ * on the left edge (compact mode: the tab bar is hidden) and the tab
+ * flashing like an XP taskbar button (sidebar visible). Done here, and not
+ * only in CSS, because the CSS flashed again on startup (restored tabs) and
+ * when switching spaces (tabs shown again). */
 "use strict";
 
 /* global ExtensionAPI, ChromeUtils, Services */
@@ -20,8 +19,8 @@ this.zxpTabFlash = class extends ExtensionAPI {
   onStartup() {
     this.windows = new Set();
     this.ready = false;
-    // (os separadores repostos ao arrancar não contam)
-    // (o módulo mudou de sítio no Firefox 158: o novo primeiro, o antigo depois)
+    // (the tabs restored on startup do not count)
+    // (the module moved in Firefox 158: the new one first, the old one after)
     let SessionStore = null;
     for (const url of ["moz-src:///browser/components/sessionstore/SessionStore.sys.mjs",
                        "resource:///modules/sessionstore/SessionStore.sys.mjs"]) {
@@ -38,14 +37,14 @@ this.zxpTabFlash = class extends ExtensionAPI {
       this.ready = true;
     }
 
-    // (os elementos chegam aqui embrulhados: as propriedades JS do separador
-    // — selected, pinned, ownerGlobal — não se veem; usam-se os atributos)
+    // (the elements arrive here wrapped: the tab's JS properties — selected,
+    // pinned, ownerGlobal — are not visible; the attributes are used)
     this.onTabOpen = (event, win) => {
       const tab = event.target;
       if (!this.ready || tab.hasAttribute("pinned") || tab.hasAttribute("pending")) {
         return;
       }
-      // (um separador novo à frente já se vê: só os de segundo plano)
+      // (a new tab in front is already visible: only the background ones)
       win.setTimeout(() => {
         if (tab.isConnected && !tab.hasAttribute("selected") && !tab.hasAttribute("pending")) {
           this.flash(win, tab);
@@ -66,16 +65,16 @@ this.zxpTabFlash = class extends ExtensionAPI {
     }
     this.observer = subject => this.track(subject);
     Services.obs.addObserver(this.observer, "browser-delayed-startup-finished");
-    // (se a reposição da sessão nunca avisar, ao fim de 10 s já conta)
+    // (if the session restore never notifies, after 10 s it counts anyway)
     this.readyTimer = setTimeout(() => { this.ready = true; }, 10000);
   }
 
-  // a janela (faixa na beira, modo compacto) e o próprio separador (barra
-  // lateral à vista) piscam juntos
+  // the window (strip on the edge, compact mode) and the tab itself (sidebar
+  // visible) flash together
   flash(win, tab) {
     const root = win.document.documentElement;
     root.removeAttribute(ATTR);
-    root.getBoundingClientRect();         // (recomeça a animação)
+    root.getBoundingClientRect();         // (restarts the animation)
     root.setAttribute(ATTR, "true");
     win.clearTimeout(win._zxpTabFlashTimer);
     win._zxpTabFlashTimer = win.setTimeout(() => root.removeAttribute(ATTR), FLASH_MS);

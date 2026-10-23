@@ -1,15 +1,15 @@
 /*
- * "Procurar" e Ctrl+F: a janela Localizar (uma janela à parte, que se pode
- * mover, como no IE). Procura no separador ativo da janela de onde foi
- * chamada, com a procura do próprio browser (sem mexer na página).
+ * "Procurar" (Search) and Ctrl+F: the Find window (a separate window, which
+ * can be moved, as in IE). It searches the active tab of the window it was
+ * called from, with the browser's own find (without touching the page).
  *
- * Abrir uma janela do browser leva o seu tempo, por isso a janela fica
- * pronta: depois da primeira vez, fechá-la (Cancelar, Esc, Procurar) só a
- * minimiza, e voltar a chamá-la é só restaurá-la. Fica numa janela privada,
- * que não conta para a sessão do Zen (que só se grava ao fechar a última
- * janela "regular"), e fecha-se quando já não há janelas normais. A extensão
- * do GNOME tira-a da barra de tarefas e do Alt+Tab. Sem a permissão das
- * janelas privadas, a janela fecha-se de verdade, como antes.
+ * Opening a browser window takes its time, so the window is kept ready:
+ * after the first time, closing it (Cancel, Esc, Search) only minimizes it,
+ * and calling it again just restores it. It lives in a private window, which
+ * does not count for Zen's session (which is only saved when the last
+ * "regular" window closes), and it closes when there are no normal windows
+ * left. The GNOME extension takes it off the taskbar and Alt+Tab. Without the
+ * private windows permission, the window really closes, as before.
  */
 const WIDTH = 384, HEIGHT = 152;
 let find = null;          // {id, parent, keep}
@@ -22,7 +22,7 @@ function placement(parent) {
     };
 }
 
-// (no Zen o clique pode chegar sem o separador: a última janela focada)
+// (in Zen the click may arrive without the tab: the last focused window)
 async function parentOf(tab) {
     if (tab && (!find || tab.windowId !== find.id))
         return browser.windows.get(tab.windowId);
@@ -71,7 +71,7 @@ async function hide() {
     }
 }
 
-// um pedido de cada vez (dois cliques seguidos não abrem duas janelas)
+// one request at a time (two clicks in a row do not open two windows)
 function serial(fn) {
     return (...args) => {
         opening = (opening || Promise.resolve()).then(() => fn(...args)).catch(e => console.error("Localizar:", e));
@@ -79,7 +79,7 @@ function serial(fn) {
     };
 }
 
-// o botão Procurar abre e fecha
+// the Search button opens and closes
 browser.browserAction.onClicked.addListener(serial(async tab => {
     if (await visible())
         await hide();
@@ -87,7 +87,7 @@ browser.browserAction.onClicked.addListener(serial(async tab => {
         await show(await parentOf(tab));
 }));
 
-// Ctrl+F abre, ou traz para a frente a que já está aberta
+// Ctrl+F opens, or brings to the front the one already open
 browser.commands.onCommand.addListener(serial(async (command, tab) => {
     if (command !== "localizar")
         return;
@@ -98,7 +98,7 @@ browser.commands.onCommand.addListener(serial(async (command, tab) => {
     await show(await parentOf(tab));
 }));
 
-// a página Localizar pergunta onde procurar, e pede para se esconder
+// the Find page asks where to search, and asks to hide itself
 browser.runtime.onMessage.addListener(msg => {
     if (msg.op === "parent")
         return Promise.resolve(find ? find.parent : null);
@@ -113,14 +113,14 @@ browser.windows.onRemoved.addListener(async id => {
         find = null;
         return;
     }
-    // (sem janelas normais, a janela pronta não pode prender o browser aberto)
+    // (without normal windows, the ready window must not keep the browser open)
     const normal = await browser.windows.getAll({windowTypes: ["normal"]});
     if (!normal.length) {
         const fid = find.id;
         find = null;
         browser.windows.remove(fid).catch(() => {});
     } else if (id === find.parent) {
-        // (como no IE: a janela Localizar vai-se com a sua janela)
+        // (as in IE: the Find window goes with its window)
         find.parent = null;
         serial(hide)();
     }

@@ -1,16 +1,16 @@
 /*
- * Desligar o computador / Terminar sessão como no XP.
+ * Turn Off Computer / Log Off as in XP.
  *
- * O gnome-session pede ao Shell o diálogo de fim de sessão por D-Bus
- * (EndSessionDialog.Open); em vez do diálogo do GNOME (com contagem de 60 s)
- * abre-se o do XP — msgina.dll diálogo 20100 e shell32.dll diálogo 1089,
- * com as imagens e textos desses binários — e a resposta (ConfirmedShutdown,
- * ConfirmedReboot, ConfirmedLogout ou Canceled) é dada logo ao clicar.
+ * gnome-session asks the Shell for the end-session dialog over D-Bus
+ * (EndSessionDialog.Open); instead of GNOME's dialog (with a 60 s countdown)
+ * XP's opens — msgina.dll dialog 20100 and shell32.dll dialog 1089, with the
+ * images and texts from those binaries — and the answer (ConfirmedShutdown,
+ * ConfirmedReboot, ConfirmedLogout or Canceled) is given right on the click.
  *
- * Enquanto o diálogo está aberto, o ambiente de trabalho perde a cor aos
- * poucos (como no XP: começa ~2 s depois e demora ~3 s, medido). Ao
- * confirmar aparece o ecrã de estado do XP com o som respetivo, e só depois
- * do som acabar é que a sessão termina.
+ * While the dialog is open, the desktop slowly loses its colour (as in XP:
+ * it starts ~2 s later and takes ~3 s, measured). On confirming, XP's status
+ * screen appears with its sound, and only after the sound ends does the
+ * session end.
  */
 import Clutter from 'gi://Clutter';
 import Gdm from 'gi://Gdm';
@@ -30,7 +30,7 @@ export {LOGOUT, SHUTDOWN, RESTART, XpDialog};
 
 let _instance = null;
 
-// o Iniciar abre o diálogo diretamente (sem ir e voltar pelo gnome-session)
+// Start opens the dialog directly (without a round trip through gnome-session)
 export function showEndSession(type) {
     if (!_instance)
         return false;
@@ -51,9 +51,9 @@ function sessionManagerCall(method, params = null, onError = null) {
         });
 }
 
-// último recurso: o logind desliga/reinicia sem passar pelo gnome-session
+// last resort: logind turns off/restarts without going through gnome-session
 function login1Call(method) {
-    // (o ambiente de testes fala com o logind verdadeiro: nunca desligar a máquina)
+    // (the test environment talks to the real logind: never turn the machine off)
     if (GLib.getenv('ZXP_LOGON_TEST')) {
         log(`Zorin XP: [teste] login1.${method}`);
         return;
@@ -79,7 +79,7 @@ function sleep(ms) {
     }));
 }
 
-// toca um som do tema e espera que acabe (no XP a sessão só termina depois)
+// plays a theme sound and waits for it to end (in XP the session only ends after)
 export function playAndWait(id, maxMs) {
     return new Promise(resolve => {
         let done = false;
@@ -114,15 +114,15 @@ export class EndSession {
         if (!dlg)
             return;
         this._dlg = dlg;
-        // os métodos D-Bus são procurados no objeto a cada chamada
+        // D-Bus methods are looked up on the object on every call
         dlg.OpenAsync = (params, invocation) => this._open(params, invocation);
         dlg.Close = () => this._close();
     }
 
     _open(params, invocation) {
         const [type] = params;
-        // o próprio Shell já confirmou (Shutdown()/Reboot() pedidos pelo Iniciar):
-        // o gnome-session pede o diálogo por formalidade — responde-se logo
+        // the Shell itself already confirmed (Shutdown()/Reboot() asked by Start):
+        // gnome-session asks for the dialog as a formality — answer at once
         if (this._confirming && this._confirming.type === type) {
             invocation.return_value(null);
             const signal = this._confirming.signal;
@@ -146,7 +146,7 @@ export class EndSession {
         return undefined;
     }
 
-    // pedido do próprio Shell (menu Iniciar): sem diálogo do gnome-session à espera
+    // request from the Shell itself (Start menu): no gnome-session dialog waiting
     showLocal(type) {
         if (this._busy)
             return;
@@ -171,7 +171,7 @@ export class EndSession {
         this._startGray();
     }
 
-    // ------------------------------------------- fundo a perder a cor
+    // ------------------------------------------- background losing its colour
     _startGray() {
         this._stopGray();
         const ui = Main.layoutManager.uiGroup;
@@ -185,7 +185,7 @@ export class EndSession {
             if (t < 0)
                 return GLib.SOURCE_CONTINUE;
             const k = Math.min(1, t);
-            const eased = 1 - Math.pow(1 - k, 2);  // mais rápido no início, como no XP
+            const eased = 1 - Math.pow(1 - k, 2);  // faster at the start, as in XP
             this._desat.factor = eased;
             this._dim.set_brightness(-0.04 * eased);
             if (k >= 1) {
@@ -214,9 +214,9 @@ export class EndSession {
         this._dialog = null;
     }
 
-    // ------------------------------------------------------------ ações
-    // resposta ao gnome-session: ao diálogo que ele pediu, ou, se o diálogo foi
-    // aberto pelo Shell, pedido direto sem confirmação
+    // ------------------------------------------------------------ actions
+    // answer to gnome-session: to the dialog it asked for, or, if the dialog
+    // was opened by the Shell, a direct request without confirmation
     _emit(signal) {
         if (!this._local) {
             this._dlg?._dbusImpl.emit_signal(signal, null);
@@ -226,13 +226,13 @@ export class EndSession {
             sessionManagerCall('Logout', new GLib.Variant('(u)', [1]));
             return;
         }
-        // (o gnome-session 46 já não implementa RequestShutdown/RequestReboot:
-        // Shutdown()/Reboot() pedem-nos o diálogo, que _open confirma logo)
+        // (gnome-session 46 no longer implements RequestShutdown/RequestReboot:
+        // Shutdown()/Reboot() ask us for the dialog, which _open confirms at once)
         const reboot = signal === 'ConfirmedReboot';
         this._confirming = {type: reboot ? RESTART : SHUTDOWN, signal};
         const fallback = () => login1Call(reboot ? 'Reboot' : 'PowerOff');
         sessionManagerCall(reboot ? 'Reboot' : 'Shutdown', null, fallback);
-        // se o gnome-session não avançar (aplicação presa), o sistema faz-o
+        // if gnome-session does not go ahead (stuck application), the system does it
         this._fallbackId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 20, () => {
             this._fallbackId = 0;
             fallback();
@@ -240,15 +240,15 @@ export class EndSession {
         });
     }
 
-    // o ecrã bloqueado (extensão do ecrã de boas-vindas) já perguntou e já
-    // mostra o estado do XP: só falta pedir ao gnome-session
+    // the lock screen (welcome screen extension) already asked and already
+    // shows XP's status: only asking gnome-session is left
     requestPower(action) {
         this._local = true;
         this._emit(action === 'restart' ? 'ConfirmedReboot' : 'ConfirmedShutdown');
     }
 
-    // XP: "Mudar de utilizador" bloqueia a sessão e mostra o ecrã de boas-vindas,
-    // mesmo com uma só conta (o GNOME só o permite com várias)
+    // XP: "Mudar de utilizador" (Switch User) locks the session and shows the
+    // welcome screen, even with a single account (GNOME only allows it with several)
     _switchUser() {
         Main.screenShield?.lock(false);
         Clutter.threads_add_repaint_func_full(Clutter.RepaintFlags.POST_PAINT, () => {
@@ -284,8 +284,8 @@ export class EndSession {
             }
             return;
         }
-        // terminar sessão / desligar / reiniciar: ecrã de estado do XP, som,
-        // e só então a confirmação (o gnome-session termina tudo a seguir)
+        // log off / turn off / restart: XP's status screen, sound, and only then
+        // the confirmation (gnome-session ends everything after that)
         this._busy = true;
         const s = xpStrings(this._ext.path);
         const screen = new XpScreen(this._ext.path);

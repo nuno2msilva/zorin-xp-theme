@@ -1,12 +1,12 @@
 /*
- * Comum às barras Favoritos e Histórico: linhas da lista (ícone + texto,
- * recuo por nível), seleção, pastas que abrem com um clique (como no IE) e
- * abrir endereços (clique: no separador atual; botão do meio ou Ctrl: novo).
+ * Shared by the Favorites and History bars: list rows (icon + text, indent
+ * per level), selection, folders that open with one click (as in IE) and
+ * opening addresses (click: in the current tab; middle button or Ctrl: new).
  */
 const list = document.getElementById("list");
 let selected = null;           // id do item seleccionado
 
-// pastas abertas (guardadas entre aberturas da barra)
+// open folders (kept between openings of the bar)
 const openFolders = new Set(JSON.parse(localStorage.getItem("open") || "[]"));
 function saveOpen() {
     localStorage.setItem("open", JSON.stringify([...openFolders]));
@@ -54,7 +54,7 @@ function toggleFolder(id) {
     saveOpen();
 }
 
-// botão do meio: abrir num separador novo
+// middle button: open in a new tab
 list.addEventListener("auxclick", e => {
     if (e.button !== 1)
         return;
@@ -64,5 +64,5 @@ list.addEventListener("auxclick", e => {
 });
 list.addEventListener("mousedown", e => {
     if (e.button === 1)
-        e.preventDefault();       // (sem rolagem automática)
+        e.preventDefault();       // (no automatic scrolling)
 });

@@ -1,6 +1,6 @@
 /*
- * "Adicionar aos Favoritos" (aberto pelo Adicionar... da barra Favoritos):
- * nome da página, e "Criar em >>" mostra as pastas (com "Nova pasta...").
+ * "Adicionar aos Favoritos" (opened by the Favorites bar's Add...): the
+ * page's name, and "Criar em >>" shows the folders (with "Nova pasta...").
  */
 const params = new URLSearchParams(location.search);
 const url = params.get("url");
@@ -35,7 +35,7 @@ async function renderTree() {
             for (const c of (node.children || []).filter(n => n.type === "folder"))
                 add(c, c.title, depth + 1);
     };
-    // a raiz é "Favoritos" (o menu de marcadores), com "Hiperligações" (a barra)
+    // the root is "Favoritos" (the bookmarks menu), with "Hiperligações" (the toolbar)
     const rootNode = {...menu, children: [{...bar, title: "Hiperligações"},
         ...(other && other.children && other.children.length ? [{...other, title: "Outros favoritos"}] : []),
         ...(menu.children || [])]};

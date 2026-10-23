@@ -1,8 +1,8 @@
 /*
- * Barra Favoritos do IE6: os marcadores do Zen como favoritos. A pasta
- * "Hiperligações" é a barra de marcadores (como no IE: a barra Hiperligações);
- * o resto do menu de marcadores aparece na raiz; "Outros favoritos" se houver.
- * Pastas primeiro, depois os endereços (pela ordem guardada).
+ * IE6's Favorites bar: Zen's bookmarks as favorites. The "Hiperligações"
+ * (Links) folder is the bookmarks toolbar (as in IE: the Links bar); the
+ * rest of the bookmarks menu appears at the root; "Outros favoritos" if
+ * there are any. Folders first, then the addresses (in the stored order).
  */
 const ROOT_MENU = "menu________", ROOT_BAR = "toolbar_____", ROOT_OTHER = "unfiled_____";
 const ICON_FOLDER = "img/folder.png", ICON_FOLDER_OPEN = "img/folder-open.png", ICON_PAGE = "img/page.png";
@@ -71,7 +71,7 @@ list.addEventListener("click", e => {
     }
 });
 
-// botão direito: o menu de marcadores do próprio Zen (abrir, editar, eliminar...)
+// right click: Zen's own bookmarks menu (open, edit, delete...)
 list.addEventListener("contextmenu", e => {
     const r = e.target.closest(".row");
     if (!r)
@@ -87,8 +87,8 @@ list.addEventListener("keydown", e => {
         renameSelected();
 });
 
-// --- Adicionar... ----------------------------------------------------------
-// abre a janela "Adicionar aos Favoritos" (como o IE), para a página atual
+// --- Add... ----------------------------------------------------------------
+// opens the "Adicionar aos Favoritos" (Add Favorite) window (like IE), for the current page
 document.getElementById("add").addEventListener("click", async () => {
     const [tab] = await browser.tabs.query({active: true, currentWindow: true});
     if (!tab || !/^(https?|ftp|file):/.test(tab.url))

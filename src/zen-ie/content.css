@@ -1,16 +1,16 @@
 /*
- * Dentro das páginas (userContent.css do perfil): o que o IE6 mudava lá.
- *   - barras de deslocamento com as cores do Luna (a forma do XP — setas em
- *     cima e em baixo, 17 px — vem das preferências, tools/setup/zenprefs.py)
- *   - a página de erro "Não é possível apresentar a página" do IE
- *     (tools/builders/ieerror.py: os ZXP-ERROR-* são postos pelo tools/builders/zenie.py)
+ * Inside pages (the profile's userContent.css): what IE6 changed there.
+ *   - scrollbars with Luna's colours (XP's shape — arrows at the top and
+ *     bottom, 17 px — comes from the preferences, tools/setup/zenprefs.py)
+ *   - IE's "A página não pode ser apresentada" error page
+ *     (tools/builders/ieerror.py: the ZXP-ERROR-* are put in by tools/builders/zenie.py)
  */
 :root { scrollbar-color: #c4d4f7 #f6f5f0; }
 
-/* erros de rede (o IE mostrava esta página para todos: servidor não
-   encontrado, ligação recusada, tempo esgotado, sem rede...); os de
-   certificados ficam como estão. A página de erro só aceita recursos chrome:
-   — o texto e as imagens são desenhados só com CSS (tools/builders/ieerror.py) */
+/* network errors (IE showed this page for all of them: server not found,
+   connection refused, timeout, no network...); certificate errors stay as
+   they are. The error page only accepts chrome: resources — the text and
+   the images are drawn with CSS only (tools/builders/ieerror.py) */
 @-moz-document regexp("about:neterror\\?e=(dnsNotFound|connectionFailure|netTimeout|netReset|netInterrupt|proxyConnectFailure|proxyResolveFailure|netOffline|unknownSocketType|redirectLoop)&.*") {
     :root {
         color-scheme: light !important;
@@ -26,7 +26,7 @@
         padding: 0 !important;
         background: ZXP-ERROR-BG, #fff !important;
     }
-    /* a página do Zen sai toda, menos o caminho até ao "Tentar novamente" */
+    /* Zen's page goes away entirely, except the path to "Tentar novamente" */
     body > :not(.container),
     body > .container > :not(#netErrorButtonContainer),
     #netErrorButtonContainer > :not(#neterrorTryAgainButton) { display: none !important; }
@@ -37,7 +37,7 @@
         padding: 0 !important;
         border: none !important;
     }
-    /* o texto (preto, com negritos e o título) e as ligações (vermelho) */
+    /* the text (black, with the bold parts and the title) and the links (red) */
     body::before, body::after {
         visibility: visible !important;
         position: absolute;
@@ -49,7 +49,7 @@
     }
     body::before { content: ZXP-ERROR-TEXT; color: #000; }
     body::after { content: ZXP-ERROR-LINKS; color: #f00; }
-    /* os ícones (pagerror, refresh, search, back) e as marcas da lista */
+    /* the icons (pagerror, refresh, search, back) and the list bullets */
     :root::after {
         content: "";
         position: absolute;
@@ -60,8 +60,8 @@
         box-shadow: ZXP-ERROR-ICONS;
         pointer-events: none;
     }
-    /* "Detectar definições de rede" (no IE: detetar e voltar a carregar): o
-       "Tentar novamente" do Zen, invisível, por cima da ligação */
+    /* "Detectar definições de rede" (in IE: detect and reload): Zen's
+       "Try Again", invisible, on top of the link */
     #neterrorTryAgainButton {
         visibility: visible !important;
         position: absolute !important;

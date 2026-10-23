@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
-"""Zorin XP — ecrã de carregamento do XP desde o primeiro instante da sessão.
+"""Zorin XP — XP's loading screen from the very first moment of the session.
 
-Entre o fim do ecrã de início de sessão e o GNOME Shell desenhar o seu
-primeiro ecrã, uma sessão X11 nova fica preta alguns segundos. O XP mostrava
-o ecrã de boas-vindas ("bem-vindo", a conta e "A carregar as suas definições
-pessoais...") até ao ambiente de trabalho aparecer. Este programa arranca a
-partir do ~/.xprofile (lido pelo arranque X11 do GDM) e desenha esse ecrã —
-o mesmo da extensão zorin-xp (xpScreen.js), com as mesmas imagens e textos.
+Between the end of the login screen and GNOME Shell drawing its first frame,
+a new X11 session stays black for a few seconds. XP showed the welcome
+screen ("bem-vindo", the account and "A carregar as suas definições
+pessoais...") until the desktop appeared. This program starts from
+~/.xprofile (read by GDM's X11 startup) and draws that screen — the same as
+the zorin-xp extension's (xpScreen.js), with the same images and texts.
 
-Fecha-se quando a extensão já mostra o ecrã dela (ficheiro
-$XDG_RUNTIME_DIR/zorin-xp-splash.done); se a extensão não o fizer, 6 s
-depois de o GNOME Shell arrancar, e nunca dura mais de 30 s.
+It closes when the extension already shows its own screen (the
+$XDG_RUNTIME_DIR/zorin-xp-splash.done file); if the extension does not, 6 s
+after GNOME Shell starts, and it never lasts more than 30 s.
 
-Teste sem janela: zorin-xp-splash --png saida.png [LxA]
+Test without a window: zorin-xp-splash --png out.png [WxH]
 """
 import os
 import pwd
 import sys
 
-# (o texto do XP: interpretador v35, como o GNOME Shell da sessão e do greeter)
+# (XP's text: the v35 interpreter, like the session's and the greeter's GNOME Shell)
 os.environ["FREETYPE_PROPERTIES"] = "truetype:interpreter-version=35"
 
 import cairo  # noqa: E402
@@ -38,7 +38,7 @@ DONE = os.path.join(RUNTIME, "zorin-xp-splash.done")
 MAX_SECONDS = 30
 AFTER_SHELL_SECONDS = 6
 
-# medidas do UIFILE 1000 do logonui.exe (as da extensão)
+# measurements from logonui.exe's UIFILE 1000 (the extension's)
 TOP_H, BOTTOM_H, LINE_H, PANEL_W = 80, 96, 2, 384
 LIST_X, ITEM_H, FRAME, PICTURE = 27, 80, 58, 48
 TEXT_X = 7 + FRAME + 7
@@ -83,8 +83,8 @@ def text_layout(cr, text, family, px, bold=False, italic=False):
     return lay
 
 
-# texto como o GDI do XP (como gdiText.js na extensão): cada letra avança a
-# largura inteira da tabela gdi-metrics.json; linha = subida + descida Windows
+# text like XP's GDI (like gdiText.js in the extension): each glyph advances
+# the whole width from the gdi-metrics.json table; line = Windows ascent + descent
 _METRICS = None
 
 
@@ -151,7 +151,7 @@ def rgb(cr, r, g, b):
 
 
 def background(cr, W, H):
-    """O fundo do ecrã de boas-vindas (welcome.js): faixas, linhas e o brilho."""
+    """The welcome screen's background (welcome.js): bands, lines and the glow."""
     rgb(cr, 90, 126, 220)
     cr.rectangle(0, 0, W, H)
     cr.fill()
@@ -171,7 +171,7 @@ def background(cr, W, H):
 
 
 def draw(cr, X, Y, W, H, s, real, icon):
-    """O ecrã de boas-vindas do XP com "bem-vindo" na área (X, Y, W, H)."""
+    """XP's welcome screen with "bem-vindo" in the area (X, Y, W, H)."""
     cr.save()
     cr.translate(X, Y)
     background(cr, W, H)
@@ -180,13 +180,13 @@ def draw(cr, X, Y, W, H, s, real, icon):
     div = W // 2 - 2
     paint_pixbuf(cr, image("divider-v"), div, top, 1, content_h)
 
-    # "bem-vindo" à direita do painel esquerdo, com a sombra 2 px ao lado e 3 abaixo
+    # "bem-vindo" on the right of the left panel, with the shadow 2 px to the side and 3 below
     for dx, dy, col in ((2, 3, (49, 81, 181)), (0, 0, (239, 247, 255))):
         t = GdiText(cr, s.get("welcome", "bem-vindo"), "Arial", 48, bold=True, italic=True)
         rgb(cr, *col)
         t.draw(div - 22 - t.width + dx, top + (content_h - t.height) // 2 + dy)
 
-    # a conta: moldura, imagem, nome e "A carregar as suas definições pessoais..."
+    # the account: frame, picture, name and "A carregar as suas definições pessoais..."
     tx, ty = div + LIST_X, top + (content_h - ITEM_H) // 2
     paint_pixbuf(cr, image("frame-hot"), tx + 7, ty + 7)
     try:
@@ -272,5 +272,6 @@ if __name__ == "__main__":
     else:
         try:
             run()
-        except Exception as e:  # nunca atrapalhar o arranque da sessão
+        except Exception as e:  # never get in the way of the session starting
+
             print(f"zorin-xp-splash: {e}", file=sys.stderr)

@@ -1,13 +1,13 @@
-// "Iniciar navegação" do XP (Windows XP Start.wav): um clique quando o
-// separador à vista começa a abrir uma página — seguir uma ligação, escrever
-// um endereço, Retroceder/Avançar, Página inicial, Atualizar. Os de fundo, os
-// quadros (anúncios) e as páginas internas (about:) não clicam.
-// (o webNavigation não dispara no Zen: usa-se o estado "a carregar" do
-// separador, que chega várias vezes por navegação — redirecionamentos — e
-// por isso só conta o primeiro em cada 1,5 s; o Zen não toca WAV: vai em OGG)
+// XP's "Iniciar navegação" (Start Navigation, Windows XP Start.wav): a click
+// when the visible tab starts opening a page — following a link, typing an
+// address, Back/Forward, Home, Refresh. Background tabs, frames (ads) and
+// internal pages (about:) do not click.
+// (webNavigation does not fire in Zen: the tab's "loading" state is used,
+// which arrives several times per navigation — redirects — so only the
+// first one every 1.5 s counts; Zen does not play WAV: it goes as OGG)
 const click = new Audio(browser.runtime.getURL("start.ogg"));
 const QUIET_MS = 1500;
-const lastClick = new Map();        // separador -> hora do último clique
+const lastClick = new Map();        // tab -> time of the last click
 
 function play() {
     click.currentTime = 0;
@@ -26,8 +26,8 @@ browser.tabs.onUpdated.addListener((tabId, info, tab) => {
 
 browser.tabs.onRemoved.addListener(tabId => lastClick.delete(tabId));
 
-// a barra de informações (infobar.js): "Pop-up bloqueado" e "Barra de
-// informações" do XP SP2, no máximo um a cada 1,5 s
+// the information bar (infobar.js): XP SP2's "Pop-up bloqueado" and
+// "Barra de informações", at most one every 1.5 s
 const infobar = {
     "popup-blocked": new Audio(browser.runtime.getURL("popup-blocked.ogg")),
     "infobar": new Audio(browser.runtime.getURL("infobar.ogg")),

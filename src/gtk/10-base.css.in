@@ -1,13 +1,13 @@
 /*
- * Zorin XP — Luna (Azul)
- * Gerado a partir do luna.msstyles do Windows XP por tools/build.py.
- * Tokens: {{slice:NOME}} = margens de corte (topo dir base esq) do INI,
- *         {{bw:NOME}}    = as mesmas margens em px.
- * Blocos marcados com @gtk3 / @gtk4 … @end são condicionais (ver tools/builders/gtktheme.py).
+ * Zorin XP — Luna (Blue)
+ * Generated from Windows XP's luna.msstyles by tools/build.py.
+ * Tokens: {{slice:NAME}} = slice margins (top right bottom left) from the INI,
+ *         {{bw:NAME}}    = the same margins in px.
+ * Blocks marked with @gtk3 / @gtk4 … @end are conditional (see tools/builders/gtktheme.py).
  */
 
 /* ---------------------------------------------------------------------
- * Cores do sistema ([SysMetrics] do NORMALBLUE_INI)
+ * System colours (NORMALBLUE_INI's [SysMetrics])
  * ------------------------------------------------------------------- */
 @define-color xp_btnface #ECE9D8;        /* Btnface / MenuBar */
 @define-color xp_window #FFFFFF;         /* Window / Menu */
@@ -29,7 +29,7 @@
 @define-color xp_caption_shadow #0A1883;  /* Window TextShadowColor */
 @define-color xp_hotlight #FFC83C;       /* Tab AccentColorHint (laranja) */
 
-/* Nomes usados por aplicações e pelo libadwaita */
+/* Names used by applications and by libadwaita */
 @define-color theme_bg_color @xp_btnface;
 @define-color theme_fg_color @xp_text;
 @define-color theme_base_color @xp_window;
@@ -114,7 +114,7 @@
   transition: none;
 }
 /*@gtk4*/
-/* GTK4 desenha o outline sempre; no XP o retângulo de foco só aparece com o teclado */
+/* GTK4 always draws the outline; in XP the focus rectangle only appears with the keyboard */
 *:focus-visible {
   outline-color: @xp_text;
   outline-style: dotted;
@@ -177,12 +177,12 @@ separator {
 }
 
 /* ---------------------------------------------------------------------
- * Botões (button.pushbutton)
- *   SizingMargins 8,8,9,9 · ContentMargins 3 · 5 estados
+ * Buttons (button.pushbutton)
+ *   SizingMargins 8,8,9,9 · ContentMargins 3 · 5 states
  * ------------------------------------------------------------------- */
 button {
-  min-height: 17px;  /* 17 + 2×3 = 23 px, a altura padrão dos botões do XP */
-  min-width: 61px;   /* 75 px de largura mínima, como os botões das caixas de diálogo */
+  min-height: 17px;  /* 17 + 2×3 = 23 px, XP's standard button height */
+  min-width: 61px;   /* 75 px minimum width, like the dialog box buttons */
   padding: 3px 6px;
   margin: 1px;
   {{part:button:normal}}
@@ -208,7 +208,7 @@ button.image-button { min-width: 15px; padding: 3px 4px; }
 button.text-button.image-button label { padding: 0 2px; }
 button.circular { border-radius: 0; }
 
-/* Botões "planos" = botões de barra de ferramentas (Toolbar.Button) */
+/* "Flat" buttons = toolbar buttons (Toolbar.Button) */
 button.flat, toolbar button, .inline-toolbar button, actionbar button.flat,
 filechooser button.flat, .path-bar button, popover.background modelbutton.flat {
   min-width: 0;
@@ -233,12 +233,12 @@ button.flat:checked:hover, toolbar button:checked:hover, .path-bar button:checke
 }
 button.flat:disabled, toolbar button:disabled { border-image: none; }
 
-/* Botões ligados (.linked) mantêm o aspeto individual do XP */
+/* Linked buttons (.linked) keep XP's individual look */
 .linked > button, .linked > entry { margin: 1px 0; }
 .linked > button + button { margin-left: 1px; }
 
 /* ---------------------------------------------------------------------
- * Caixas de verificação e botões de opção (TrueSize 13×13)
+ * Check boxes and option buttons (TrueSize 13×13)
  * ------------------------------------------------------------------- */
 check, radio {
   min-width: 13px;
@@ -279,7 +279,7 @@ radio:checked:hover { -gtk-icon-source: url("assets/radio-checked-hover.png"); }
 radio:checked:active { -gtk-icon-source: url("assets/radio-checked-active.png"); }
 radio:checked:disabled { -gtk-icon-source: url("assets/radio-checked-disabled.png"); }
 
-/* Nos menus, o XP desenha só o visto/ponto (sem caixa) */
+/* In menus, XP draws only the check/dot (no box) */
 menu menuitem check, menu menuitem radio, .menu menuitem check, .menu menuitem radio,
 popover modelbutton check, popover modelbutton radio {
   -gtk-icon-source: none;
@@ -294,8 +294,8 @@ menu menuitem radio:checked, .menu menuitem radio:checked, popover modelbutton r
   -gtk-icon-source: -gtk-icontheme("media-record-symbolic");
   -gtk-icon-transform: scale(0.5);
 }
-/* GTK4: ponto e visto do XP (Marlett), pretos e brancos sobre o realce; as
- * regras gerais dos botões de opção (radio:hover…) não entram nos menus */
+/* GTK4: XP's dot and check (Marlett), black and white on the highlight; the
+ * general option button rules (radio:hover…) do not reach the menus */
 popover modelbutton radio, popover modelbutton radio:hover, popover modelbutton radio:active,
 popover modelbutton check, popover modelbutton check:hover, popover modelbutton check:active {
   -gtk-icon-source: none;
@@ -316,10 +316,10 @@ popover modelbutton:hover check:checked, popover modelbutton:hover check:checked
 popover modelbutton:selected check:checked { -gtk-icon-source: url("assets/menu-check13-selected.png"); }
 
 /* ---------------------------------------------------------------------
- * Campos de texto (edit: BorderFill 1 px #7F9DB9)
+ * Text fields (edit: BorderFill 1 px #7F9DB9)
  * ------------------------------------------------------------------- */
 entry, spinbutton:not(.vertical), spinbutton.vertical > entry {
-  min-height: 13px;  /* 13 + 2 + 3 + 2×1 = 20 px, como os campos do XP */
+  min-height: 13px;  /* 13 + 2 + 3 + 2×1 = 20 px, like XP's fields */
   padding: 2px 3px 3px;
   border: 1px solid @xp_field_border;
   border-radius: 0;
@@ -339,8 +339,8 @@ entry.error { color: #C00000; }
 entry.flat { border-color: transparent; background-color: transparent; }
 
 /* ---------------------------------------------------------------------
- * Listas pendentes (Combobox): 22 px = borda 1 + 1 branco + botão 15×18
- * (botão + glifo pré-desenhados por tools/builders/gtkassets.py, combo-arrow-*)
+ * Drop-down lists (Combobox): 22 px = border 1 + 1 white + 15×18 button
+ * (button + glyph pre-drawn by tools/builders/gtkassets.py, combo-arrow-*)
  * ------------------------------------------------------------------- */
 combobox button.combo, dropdown > button, button.dropdown {
   min-width: 0;
@@ -360,7 +360,7 @@ combobox button.combo:disabled, dropdown > button:disabled {
   background-color: @xp_field_disabled;
 }
 combobox button.combo cellview, combobox button.combo > box > label, dropdown > button label { margin: 0 0 0 2px; }
-/* com foco, o XP realça o texto selecionado (Highlight) */
+/* with focus, XP highlights the selected text (Highlight) */
 combobox button.combo:focus cellview, dropdown > button:focus label {
   background-color: @xp_highlight;
   color: @xp_highlight_text;
@@ -380,7 +380,7 @@ combobox button.combo:hover arrow, dropdown > button:hover arrow { background-im
 combobox button.combo:checked arrow, combobox button.combo:active arrow,
 dropdown > button:checked arrow { background-image: url("assets/combo-arrow-active.png"); }
 combobox button.combo:disabled arrow, dropdown > button:disabled arrow { background-image: url("assets/combo-arrow-disabled.png"); }
-/* lista pendente editável: entrada + botão num só contorno */
+/* editable drop-down list: entry + button in a single outline */
 combobox .linked > entry {
   min-height: 14px;
   margin: 1px 0;
@@ -392,7 +392,7 @@ combobox .linked > entry + button.combo {
   border-left-width: 0;
 }
 combobox .linked > entry + button.combo arrow { margin: 0; }
-/* lista desdobrada: caixa de lista com contorno preto */
+/* the dropped-down list: list box with a black outline */
 combobox window.popup menu, combobox menu, .combo-popup {
   padding: 0;
   border: 1px solid #000000;
@@ -400,7 +400,7 @@ combobox window.popup menu, combobox menu, .combo-popup {
 combobox menu menuitem { padding: 1px 3px; min-height: 13px; }
 
 /* ---------------------------------------------------------------------
- * Botões giratórios (Spin)
+ * Spin buttons (Spin)
  * ------------------------------------------------------------------- */
 spinbutton:not(.vertical) { padding: 0; }
 spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > text {
@@ -436,7 +436,7 @@ spinbutton:not(.vertical) { padding: 1px 0; }
 spinbutton:not(.vertical) > entry, spinbutton:not(.vertical) > text { padding: 1px 3px 2px; }
 
 /* ---------------------------------------------------------------------
- * Barras de deslocamento (ScrollBar: 17 px, setas, eixo, polegar)
+ * Scrollbars (ScrollBar: 17 px, arrows, trough, thumb)
  * ------------------------------------------------------------------- */
 scrollbar {
   padding: 0;
@@ -514,10 +514,10 @@ scrollbar.horizontal button.down:hover { background-image: url("assets/scroll-ar
 scrollbar.horizontal button.down:active { background-image: url("assets/scroll-arrow-right-active.png"); }
 scrollbar.horizontal button.down:disabled { background-image: url("assets/scroll-arrow-right-disabled.png"); }
 
-/* Canto entre duas barras (ScrollBar.SizeBox = cor do botão) */
+/* Corner between two bars (ScrollBar.SizeBox = button colour) */
 scrolledwindow junction { background-color: @xp_btnface; border: 0; }
 
 /*@gtk3*/
-/* Barras sempre visíveis, como no XP */
+/* Scrollbars always visible, as in XP */
 scrollbar.overlay-indicator:not(.dragging):not(.hovering) { opacity: 1; }
 /*@end*/

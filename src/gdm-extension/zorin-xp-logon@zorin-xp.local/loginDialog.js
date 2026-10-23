@@ -1,9 +1,9 @@
-// Zorin XP — o ecrã de início de sessão (GDM) é o ecrã de boas-vindas do XP.
+// Zorin XP — the login screen (GDM) is XP's welcome screen.
 //
-// O GNOME Shell no modo gdm cria o diálogo indicado em
-// Main.sessionMode.unlockDialog; a extensão põe lá esta classe, por isso o
-// diálogo do GNOME nunca chega a existir. A autenticação usa o verificador do
-// GNOME (auth.js) e o arranque da sessão o greeter do GDM, como o original.
+// GNOME Shell in gdm mode creates the dialog given in
+// Main.sessionMode.unlockDialog; the extension puts this class there, so
+// GNOME's dialog never exists. Authentication uses GNOME's verifier
+// (auth.js) and the session start GDM's greeter, like the original.
 
 import AccountsService from 'gi://AccountsService';
 import Clutter from 'gi://Clutter';
@@ -21,7 +21,7 @@ import {XpAuth} from './auth.js';
 import {TurnOff, login1Power} from './turnOff.js';
 import {XpWelcome} from './welcome.js';
 
-const BOOT_STATUS_MS = 1500;   // "O Windows está a iniciar..." logo a seguir ao arranque
+const BOOT_STATUS_MS = 1500;   // "O Windows está a iniciar..." right after boot
 
 export function listUsers(userManager) {
     return userManager.list_users()
@@ -81,7 +81,7 @@ export const XpLoginDialog = GObject.registerClass({
         this._resetGreeterProxy();
         this._watchGreeterSession().catch(logError);
 
-        // logo a seguir ao arranque: "O Windows está a iniciar..." até as contas carregarem
+        // right after boot: "O Windows está a iniciar..." until the accounts load
         this._booting = uptime() < 180;
         if (this._booting) {
             this._ui.showStatus(this._ui.strings.starting);
@@ -99,7 +99,7 @@ export const XpLoginDialog = GObject.registerClass({
         this._syncUsers();
     }
 
-    // um erro em qualquer reação devolve o ecrã ao GNOME (nunca ficar sem entrar)
+    // an error in any reaction hands the screen back to GNOME (never be left unable to log in)
     _guard(fn) {
         try {
             return fn();
@@ -130,7 +130,7 @@ export const XpLoginDialog = GObject.registerClass({
         if (!this._userManager.is_loaded || this._booting)
             return;
         const users = listUsers(this._userManager);
-        // sem contas para mostrar (ou lista desligada): fica o ecrã do GNOME
+        // no accounts to show (or the list is disabled): GNOME's screen stays
         if (users.length === 0)
             throw new Error('sem contas para o ecrã de boas-vindas');
         this._ui.showStatus(null);
@@ -153,31 +153,31 @@ export const XpLoginDialog = GObject.registerClass({
     }
 
     _cancelUser() {
-        // XP: Esc ou um clique no fundo voltam à lista, sem conta selecionada
+        // XP: Esc or a click on the background go back to the list, with no account selected
         if (this._auth.complete || !this._ui.selected)
             return;
         this._auth.cancel();
         this._ui.select(null);
-        // (as setas voltam a andar pela lista)
+        // (the arrows move through the list again)
         super.grab_key_focus();
     }
 
     _onAuthReset() {
         if (this._auth.complete)
             return;
-        // se o GDM não responder e isto entrar em ciclo, fica o ecrã do GNOME
+        // if GDM does not answer and this loops, GNOME's screen stays
         const now = GLib.get_monotonic_time();
         this._resets = (this._resets ?? []).filter(t => now - t < 5e6);
         this._resets.push(now);
         if (this._resets.length > 3)
             throw new Error('o verificador do GDM não responde');
-        // o verificador desistiu (tentativas a mais) ou foi cancelado: volta-se à lista
+        // the verifier gave up (too many attempts) or was cancelled: back to the list
         this._ui.select(null);
     }
 
     _turnOff() {
         this._turnOffFlow ??= new TurnOff(this, this._ui, this._ext.path, {
-            // XP: avisa se alguém tem sessão iniciada
+            // XP: warns if anyone has a session open
             loggedIn: () => this._userManager.list_users().some(u =>
                 u.is_loaded && !u.is_system_account() && u.is_logged_in()),
             power: action => login1Power(action),
@@ -196,7 +196,7 @@ export const XpLoginDialog = GObject.registerClass({
             (_g, serviceName) => this._guard(() => this._onSessionOpened(serviceName)), this);
     }
 
-    // corre fn depois de o próximo ecrã estar mesmo desenhado (ou ao fim de 1 s)
+    // runs fn after the next frame has really been drawn (or after 1 s)
     _afterPaint(fn, extraMs = 100) {
         let done = false;
         const run = () => {
@@ -220,8 +220,8 @@ export const XpLoginDialog = GObject.registerClass({
     }
 
     _onSessionOpened(serviceName) {
-        // XP: "bem-vindo" no ecrã antes de passar para a sessão (é a imagem que
-        // fica à vista enquanto o servidor de ecrã da sessão arranca)
+        // XP: "bem-vindo" on the screen before moving to the session (it is the
+        // image that stays visible while the session's display server starts)
         this._ui.showWelcome(this._ui.strings.loggingOn);
         this._auth.finish(() => this._afterPaint(() => {
             log('Zorin XP: [sessão] a iniciar a sessão');
@@ -229,7 +229,7 @@ export const XpLoginDialog = GObject.registerClass({
         }, 300));
     }
 
-    // o ecrã de boas-vindas volta a ficar ativo (mudar de utilizador, sair)
+    // the welcome screen becomes active again (switch user, log off)
     async _watchGreeterSession() {
         const proxy = await LoginManager.getLoginManager().getCurrentSessionProxy();
         this._greeterSession = proxy;
@@ -247,8 +247,8 @@ export const XpLoginDialog = GObject.registerClass({
         this._syncUsers();
     }
 
-    // -------------------------------------------- o que o ScreenShield usa
-    // (o ScreenShield dá o foco ao diálogo: vai para a caixa da palavra-passe)
+    // -------------------------------------------- what ScreenShield uses
+    // (ScreenShield gives the focus to the dialog: it goes to the password box)
     grab_key_focus() {
         if (this._ui.entry.mapped && this._ui.entry.reactive)
             this._ui.entry.grab_key_focus();
@@ -264,7 +264,7 @@ export const XpLoginDialog = GObject.registerClass({
         else
             super.grab_key_focus();     // (as setas escolhem a conta)
         log('Zorin XP: [arranque] ecrã de boas-vindas aberto');
-        // já desenhado por baixo: a capa do arranque (igual a este) pode sair
+        // already drawn underneath: the boot cover (identical to this one) can leave
         this._afterPaint(() => this._ext.coverDone());
         return true;
     }
@@ -288,7 +288,7 @@ export const XpLoginDialog = GObject.registerClass({
     }
 
     addCharacter(_unichar) {
-        // como o GNOME: não se escreve antes de escolher a conta
+        // like GNOME: nothing is typed before choosing the account
     }
 
     finish(onComplete) {

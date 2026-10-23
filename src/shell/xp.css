@@ -1,14 +1,14 @@
 /*
- * Zorin XP — camada Windows XP Luna sobre o tema Shell do Zorin.
- * Medidas confirmadas ao píxel contra capturas reais do XP:
- *   barra 30 px · botão Iniciar 111×30 ("Iniciar"; a largura vem do texto) · 7 px até ao 1.º botão
- *   botões de janela 160×30, ícone 16 em (11, 8), texto em x = 31 (Tahoma 8, branco)
- *   área de notificação: TaskbarTray, relógio Tahoma 8 branco
+ * Zorin XP — Windows XP Luna layer on top of the Zorin Shell theme.
+ * Measurements checked to the pixel against real XP captures:
+ *   30 px bar · Start button 111×30 ("Iniciar"; the width comes from the text) · 7 px to the first button
+ *   160×30 window buttons, 16 px icon at (11, 8), text at x = 31 (Tahoma 8, white)
+ *   notification area: TaskbarTray, white Tahoma 8 clock
  */
 
-/* ---------------------------------------------------------------- barra */
+/* ---------------------------------------------------------------- bar */
 #panel {
-  background-color: #245ddb;   /* a zorin-taskbar lê esta cor para o fundo */
+  background-color: #245ddb;   /* zorin-taskbar reads this colour for the background */
   font-family: Tahoma, sans-serif;
   font-size: 11px;
   font-weight: normal;
@@ -41,7 +41,7 @@
   color: #ffffff;
 }
 
-/* --------------------------------------------------------- botão Iniciar */
+/* --------------------------------------------------------- Start button */
 #panelLeft .panel-button {
   width: {{START_BUTTON_W}}px;
   min-width: {{START_BUTTON_W}}px;
@@ -63,7 +63,7 @@
 #panelLeft .panel-button:focus { background-image: url("xp/start-hover.png"); background-color: transparent; }
 #panelLeft .panel-button:active,
 #panelLeft .panel-button:checked { background-image: url("xp/start-active.png"); background-color: transparent; }
-/* o PanelMenu.Button mede-se pelo filho: a largura vai para a caixa interior */
+/* PanelMenu.Button is measured by its child: the width goes to the inner box */
 #panelLeft .panel-button .panel-status-menu-box {
   width: {{START_BUTTON_W}}px;
   min-width: {{START_BUTTON_W}}px;
@@ -78,7 +78,7 @@
   width: 0;
 }
 
-/* ---------------------------------------------------- botões de janela */
+/* ---------------------------------------------------- window buttons */
 #zorintaskbarScrollview .overview-tile,
 #zorintaskbarScrollview .overview-tile .dtp-container,
 #zorintaskbarScrollview .overview-tile .overview-icon {
@@ -125,13 +125,14 @@
 }
 #zorintaskbarTaskbar .dash-item-container > StWidget { margin: 0; padding: 0; }
 
-/* ------------------------------------------------ área de notificação */
-/* Medidas do XP (TrayNotifyHoriz, capturas reais): ícones de 16 px com passo
- * de 18 (2 px depois de cada um), o primeiro a 19 px do início da área; o
- * relógio (Tahoma 8 branco) a 9 px do último ícone e com o texto a 15 px da
- * borda do ecrã. A extensão (taskbar.js) desenha o fundo (TaskbarTray), põe a
- * seta "mostrar ícones ocultos" no início de #panelRight e esconde os ícones
- * das aplicações; os do sistema ficam sempre à vista. */
+/* ------------------------------------------------ notification area */
+/* XP measurements (TrayNotifyHoriz, real captures): 16 px icons with an
+ * 18 px step (2 px after each one), the first 19 px from the start of the
+ * area; the clock (white Tahoma 8) 9 px from the last icon and with the text
+ * 15 px from the screen edge. The extension (taskbar.js) draws the
+ * background (TaskbarTray), puts the "show hidden icons" arrow at the start
+ * of #panelRight and hides the application icons; the system ones are
+ * always visible. */
 #panel .panel-button .system-status-icon,
 #panel .panel-button .panel-status-indicators-box > .system-status-icon {
   icon-size: 16px;
@@ -140,13 +141,13 @@
   color: #ffffff;
   -st-icon-style: symbolic;
 }
-#panel .panel-button .panel-status-indicators-box { spacing: 4px; }   /* passo de 20, como os ícones das aplicações */
-/* ícones das aplicações a cores, como no XP (a extensão troca os
- * monocromáticos pelo ícone da aplicação) */
+#panel .panel-button .panel-status-indicators-box { spacing: 4px; }   /* 20 px step, like the application icons */
+/* application icons in colour, as in XP (the extension swaps the
+ * monochrome ones for the application's icon) */
 #panel #panelRight .panel-button .appindicator-icon { -st-icon-style: regular; }
 #panelRight { spacing: 0; padding-left: 0; }
 #panelRight > StBin { margin-right: 2px; }
-#panelRight > .zxp-chevron { margin: 0 3px 0 0; }   /* (StButton também é um StBin); folga até aos ícones */
+#panelRight > .zxp-chevron { margin: 0 3px 0 0; }   /* (StButton is also an StBin); gap to the icons */
 #panelRight .panel-button {
   -natural-hpadding: 0;
   -minimum-hpadding: 0;
@@ -169,7 +170,7 @@
   font-size: 11px;
   font-weight: normal;
   color: #ffffff;
-  padding: 0;   /* centrado: texto nas linhas 11–18 da barra, como no XP */
+  padding: 0;   /* centred: text on rows 11–18 of the bar, as in XP */
   border: 0;
   background: none;
   box-shadow: none;
@@ -212,13 +213,13 @@
   -y-offset: 4px;
 }
 
-/* --------------------------------------------- menu Iniciar (zorin-menu)
- * Estrutura da extensão Zorin XP (startmenu.js), segundo a montagem do
- * utilizador: faixa de topo do XP com fotografia e nome; coluna esquerda branca
- * com as categorias do Zorin; coluna direita #D3E5FA com locais e atalhos
- * (ícones do Zorin); faixa de baixo do XP com a pesquisa à esquerda e
- * "Terminar sessão" / "Encerrar". Largura {{START_W}} px (o XP tinha 380; as categorias
- * do Zorin precisam de mais): peças do luna.msstyles desenhadas a essa largura.
+/* --------------------------------------------- Start menu (zorin-menu)
+ * Structure of the Zorin XP extension (startmenu.js), following the user's
+ * mock-up: XP's top band with the picture and name; white left column with
+ * Zorin's categories; #D3E5FA right column with places and shortcuts
+ * (Zorin's icons); XP's bottom band with the search on the left and
+ * "Terminar sessão" / "Encerrar". Width {{START_W}} px, as in XP: pieces of
+ * luna.msstyles drawn at that width.
  */
 .popup-menu-boxpointer.zorin-menu, .zorin-menu.popup-menu-boxpointer {
   -arrow-rise: 0;
@@ -236,7 +237,7 @@
   border-radius: 0;
   border-image: none;
   background-color: transparent;
-  box-shadow: none;  /* a sombra do XP é a imagem start-shadow.png (startmenu.js) */
+  box-shadow: none;  /* XP's shadow is the start-shadow.png image (startmenu.js) */
   font-family: Tahoma, sans-serif;
   font-size: 11px;
   font-weight: normal;
@@ -245,7 +246,7 @@
 .zorin-menu .popup-menu-section { padding: 0; margin: 0; spacing: 0; }
 .zorin-menu .zxp-start { width: {{START_W}}px; spacing: 0; padding: 0; }
 
-/* faixa de topo: fotografia e nome */
+/* top band: picture and name */
 .zxp-start-header {
   background-image: url("xp/start-header.png");
   background-position: 0 0;
@@ -253,7 +254,7 @@
   background-repeat: no-repeat;
 }
 .zxp-start-usertile {
-  /* 48 + padding 8/6 = 62 (no St o width aplica-se ao conteúdo) */
+  /* 48 + padding 8/6 = 62 (in St the width applies to the content) */
   padding: 8px 6px 6px 8px;
   background-image: url("xp/start-usertile.png");
   background-size: 62px 62px;
@@ -268,7 +269,7 @@
   text-shadow: 2px 2px 2px #09428b;
 }
 
-/* colunas: imagens do XP (bordas laterais, divisória #95BDEE, linha laranja) */
+/* columns: XP images (side borders, #95BDEE divider, orange line) */
 .zxp-start-body { spacing: 0; padding: 0; }
 .zorin-menu .zxp-start-left, .zorin-menu .apps-box.zxp-start-left {
   width: {{LEFT_W}}px;
@@ -276,7 +277,7 @@
   background-color: #ffffff;
   background-image: url("xp/start-left.png");
   background-repeat: no-repeat;
-  background-position: 0 0;  /* sem isto o St centra a imagem e esconde a linha laranja */
+  background-position: 0 0;  /* without this St centres the image and hides the orange line */
   background-size: {{LEFT_W}}px 1200px;
 }
 .zorin-menu .zxp-start-right, .zorin-menu .shortcuts-box.zxp-start-right {
@@ -289,8 +290,8 @@
   background-size: {{RIGHT_W}}px 1200px;
 }
 
-/* itens: destaque #316AC5 do XP, cantos retos; linhas de 40 px à esquerda
- * (ícones de 32) e de 30 px à direita (ícones de 24, a 8 px da divisória) */
+/* items: XP's #316AC5 highlight, square corners; 40 px rows on the left
+ * (32 px icons) and 30 px on the right (24 px icons, 8 px from the divider) */
 .zorin-menu .popup-menu-item {
   color: #000000;
   border-radius: 0;
@@ -299,11 +300,12 @@
 .zorin-menu .zxp-start-left .popup-menu-item { padding: 2px 4px 2px 2px; spacing: 6px; }
 .zorin-menu .zxp-start-right .popup-menu-item { color: #0a246a; padding: 1px 4px 1px 2px; spacing: 4px; margin: 0 0 4px 0; }
 .zorin-menu .zxp-places .popup-menu-item StLabel { font-weight: bold; }
-/* O realce segue o rato (:hover) e a navegação por teclado (.selected, que o
- * Zorin põe no item com foco). Sem :focus: o Zorin dá o foco ao item por onde o
- * rato passa e ele ficaria realçado depois de o rato sair. Sem :active: é a
- * marca que o Zorin deixa na última categoria aberta (premir um item já o
- * realça por estar debaixo do rato) */
+/* The highlight follows the mouse (:hover) and keyboard navigation
+ * (.selected, which Zorin sets on the focused item). No :focus: Zorin gives
+ * the focus to the item the mouse goes over and it would stay highlighted
+ * after the mouse leaves. No :active: it is the mark Zorin leaves on the
+ * last category opened (pressing an item already highlights it because it is
+ * under the mouse) */
 .zorin-menu .popup-menu-item:active, .zorin-menu .popup-menu-item:focus { background-color: transparent; }
 .zorin-menu .popup-menu-item:hover, .zorin-menu .popup-menu-item.selected {
   background-color: #316ac5;
@@ -313,8 +315,8 @@
 .zorin-menu .popup-menu-item:hover StLabel, .zorin-menu .popup-menu-item.selected StLabel,
 .zorin-menu .popup-menu-item:hover StIcon, .zorin-menu .popup-menu-item.selected StIcon { color: #ffffff; }
 
-/* "Todos os programas": negrito, alinhado à direita com a seta verde */
-/* StartPanel.MorePrograms: Tahoma 8 Bold, TextColor 55 55 56; destaque de 175×24 colado à seta */
+/* "Todos os programas": bold, right-aligned with the green arrow */
+/* StartPanel.MorePrograms: Tahoma 8 Bold, TextColor 55 55 56; 175×24 highlight against the arrow */
 .zorin-menu .zxp-more-programs { padding: 0; margin: 0 4px 0 1px; spacing: 12px; min-height: 24px; border-radius: 0; }
 .zorin-menu .zxp-more-programs StLabel { font-weight: bold; color: #373738; }
 .zorin-menu .zxp-more-programs:hover StLabel,
@@ -332,7 +334,7 @@
   background-image: url("xp/start-sep-right.png");
 }
 
-/* faixa de baixo: pesquisa + Terminar sessão / Encerrar */
+/* bottom band: search + Log Off / Turn Off */
 .zxp-start-footer {
   background-image: url("xp/start-footer.png");
   background-position: 0 0;
@@ -362,7 +364,7 @@
 .zorin-menu .zxp-start-search StLabel.hint-text { color: #808080; }
 .zorin-menu .zxp-start-search .search-entry-icon { color: #000000; icon-size: 12px; padding: 0 2px 0 0; }
 .zxp-start-session { padding: 0; border: 0; background: none; border-radius: 0; }
-.zxp-start-session-box { spacing: 4px; }  /* ícone em x=184/301, texto em 212/320 (medido no XP) */
+.zxp-start-session-box { spacing: 4px; }  /* icon at x=184/301, text at 212/320 (measured in XP) */
 .zxp-start-session StLabel {
   font-family: Tahoma, sans-serif;
   font-size: 11px;
@@ -374,11 +376,12 @@
 .zxp-shutdown { background-image: url("xp/start-shutdown.png"); }
 .zxp-start-session:hover .zxp-shutdown { background-image: url("xp/start-shutdown-hot.png"); }
 
-/* Barra de deslocamento vertical do XP nas listas do menu Iniciar (17 px).
- * O St não tem botões de seta: a barra leva padding de 17 px em cima e em
- * baixo (onde o cursor não entra) e startmenu.js põe-lhe como fundo a imagem
- * das setas + calha, e ao cursor a do cursor + pega, já no tamanho exato (o
- * border-image do St deforma as fatias), conforme o estado de cada parte */
+/* XP vertical scrollbar in the Start menu lists (17 px).
+ * St has no arrow buttons: the bar gets 17 px of padding at the top and
+ * bottom (where the thumb does not go) and startmenu.js gives it the image
+ * of the arrows + trough as its background, and the thumb the image of the
+ * thumb + grip, already at the exact size (St's border-image distorts the
+ * slices), according to each part's state */
 .zorin-menu StScrollView StScrollBar {
   width: 17px;
   min-width: 17px;
@@ -399,12 +402,12 @@
   transition-duration: 0ms;
 }
 
-/* ------------------------------------------------- menus de contexto
- * Menus do XP (medidos na captura do menu do ambiente de trabalho): caixa
- * branca quadrada, contorno 1 px #ACA899, 2 px de margem interior, itens de
- * 17 px com o texto a 17 px do realce (coluna das marcas), realce #316AC5 com
- * texto branco, separador de 7 px (linha #ACA899 a 1 px dos lados), sombra
- * de 4 px à direita e em baixo. Só nos menus marcados por menus.js. */
+/* ------------------------------------------------- context menus
+ * XP menus (measured in the capture of the desktop menu): square white box,
+ * 1 px #ACA899 outline, 2 px of inner margin, 17 px items with the text
+ * 17 px from the highlight (the marks column), #316AC5 highlight with white
+ * text, 7 px separator (#ACA899 line 1 px from the sides), 4 px shadow to the
+ * right and below. Only on the menus marked by menus.js. */
 .popup-menu-boxpointer.zxp-menu {
   -arrow-rise: 0;
   -arrow-base: 0;
@@ -420,7 +423,7 @@
   font-weight: normal;
 }
 .popup-menu.panel-menu.zxp-menu { margin-bottom: 0; }
-/* (a sombra fica dentro da margem: o BoxPointer corta o que sai dele) */
+/* (the shadow stays inside the margin: BoxPointer cuts whatever leaves it) */
 .zxp-menu .popup-menu-content {
   padding: 2px;
   margin: 0 4px 4px 0;
@@ -465,7 +468,7 @@
   height: 1px;
   background-color: #aca899;
 }
-/* (o título "Janelas abertas" do menu das aplicações: sem altura, ver menus.js) */
+/* (the "Janelas abertas" title of the application menu: no height, see menus.js) */
 .zxp-menu .popup-separator-menu-item.zxp-gone { height: 0; padding: 0; margin: 0; }
 .zxp-menu .popup-sub-menu {
   border: 0;

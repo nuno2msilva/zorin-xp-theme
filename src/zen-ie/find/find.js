@@ -1,9 +1,10 @@
 /*
- * Janela Localizar: procura no separador ativo da janela de onde foi chamada
- * (o background diz qual: a janela fica pronta de uma vez para a outra), com
- * browser.find (a procura do browser: realça e mostra o resultado, sem mexer
- * na página). "Localizar seguinte" anda pelos resultados na direcção
- * escolhida; a procura recomeça quando o texto ou as opções mudam.
+ * Find window: searches the active tab of the window it was called from (the
+ * background says which: the window stays ready from one use to the next),
+ * with browser.find (the browser's find: highlights and shows the result,
+ * without touching the page). "Localizar seguinte" (Find Next) moves
+ * through the results in the chosen direction; the search starts over when
+ * the text or the options change.
  */
 const q = document.getElementById("q");
 const next = document.getElementById("next");
@@ -44,7 +45,7 @@ async function findNext() {
     }
     state.index += down() ? 1 : -1;
     if (state.index >= state.count || state.index < 0) {
-        // (como o IE: avisa e recomeça do outro lado)
+        // (like IE: warns and starts over from the other end)
         alert("Terminou a pesquisa do documento.");
         state.index = down() ? 0 : state.count - 1;
     }
@@ -55,7 +56,7 @@ async function cancel() {
     if (state)
         await browser.find.removeHighlighting(state.tabId).catch(() => {});
     state = null;
-    // (fica pronta para a próxima vez: o background esconde-a, ou fecha-a)
+    // (it stays ready for next time: the background hides it, or closes it)
     browser.runtime.sendMessage({op: "hide"});
 }
 

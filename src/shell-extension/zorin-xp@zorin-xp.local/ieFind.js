@@ -1,12 +1,12 @@
 /*
- * A janela Localizar do "Internet Explorer" (o Zen, src/zen-ie/find): fica
- * pronta, minimizada, de uma vez para a outra. Como um diálogo do IE, não tem
- * botão na barra de tarefas nem aparece no Alt+Tab ou na vista geral, e abre
- * e fecha sem animação.
+ * The "Internet Explorer" Find window (Zen, src/zen-ie/find): it stays
+ * ready, minimized, from one use to the next. Like an IE dialog, it has no
+ * taskbar button, does not show in Alt+Tab or the overview, and opens and
+ * closes without animation.
  *
- * O título é o que a distingue ("Extension: (Localizar) - Localizar — ...").
- * O Shell não tem maneira de pôr skip_taskbar pelo JS: no X11 pede-se como as
- * aplicações pedem (skiptaskbar.py).
+ * Its title is what tells it apart ("Extension: (Localizar) - Localizar — ...").
+ * The Shell has no way to set skip_taskbar from JS: on X11 it is requested
+ * the way applications request it (skiptaskbar.py).
  */
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -24,8 +24,8 @@ function isZen(w) {
 export class IeFind {
     constructor(path) {
         this._helper = GLib.build_filenamev([path, 'skiptaskbar.py']);
-        this._windows = new Map();     // janela -> [ligações]
-        this._find = new WeakSet();    // as janelas Localizar
+        this._windows = new Map();     // window -> [connections]
+        this._find = new WeakSet();    // the Find windows
         const wm = Main.wm;
         this._shouldAnimate = wm._shouldAnimateActor;
         const self = this;
@@ -55,13 +55,13 @@ export class IeFind {
         this._find.add(w);
         if (Meta.is_wayland_compositor() || w.get_client_type() !== Meta.WindowClientType.X11)
             return;
-        const xid = w.get_description();      // ("0x...": a janela X11)
+        const xid = w.get_description();      // ("0x...": the X11 window)
         if (!/^0x[0-9a-f]+$/i.test(xid))
             return;
         try {
             const proc = Gio.Subprocess.new(['python3', this._helper, xid], Gio.SubprocessFlags.NONE);
             proc.wait_async(null, () => {
-                // (a zorin-taskbar só volta a filtrar quando a aplicação muda de janelas)
+                // (zorin-taskbar only filters again when the application changes windows)
                 const app = Shell.WindowTracker.get_default().get_window_app(w);
                 app?.emit('windows-changed');
             });

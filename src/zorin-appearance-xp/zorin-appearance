@@ -1,16 +1,16 @@
 #!/usr/bin/python3
-"""Zorin XP — a Aparência do Zorin como folha de propriedades do Windows XP.
+"""Zorin XP — Zorin Appearance as a Windows XP property sheet.
 
-Substitui o comando `zorin-appearance` (instalado em ~/.local/bin, que vem
-antes de /usr/bin no PATH) e corre a aplicação da Zorin sem a alterar; só
-reorganiza a janela depois de ela a construir, como as Propriedades de
-visualização do XP:
-  - separadores (Gtk.Notebook) em vez da barra lateral (GtkStackSidebar);
-  - título à esquerda na barra azul;
-  - secções (título a negrito + conteúdo) em caixas de grupo (Gtk.Frame, que
-    o tema desenha com o título embutido no contorno);
-  - botão Fechar em baixo à direita (as alterações aplicam-se logo, como na
-    aplicação original, por isso não há OK/Cancelar).
+Replaces the `zorin-appearance` command (installed in ~/.local/bin, which
+comes before /usr/bin in PATH) and runs Zorin's application without changing
+it; it only rearranges the window after the application builds it, like
+XP's Display Properties:
+  - tabs (Gtk.Notebook) instead of the sidebar (GtkStackSidebar);
+  - title on the left on the blue bar;
+  - sections (bold title + content) in group boxes (Gtk.Frame, which the
+    theme draws with the title embedded in the outline);
+  - Close button at the bottom right (changes apply at once, as in the
+    original application, so there is no OK/Cancel).
 """
 import sys
 
@@ -21,9 +21,9 @@ from gi.repository import GLib, GObject, Gtk  # noqa: E402
 
 from zorin_appearance import __main__ as za  # noqa: E402
 
-# margens medidas numa folha de propriedades do XP (as mesmas das definições
-# da barra de tarefas): separador a 7/5/6 px, botões a 9 px dele, a 6 px uns
-# dos outros e da direita, a 8 px do fundo
+# margins measured on an XP property sheet (the same as the taskbar
+# settings): tab at 7/5/6 px, buttons 9 px from it, 6 px from each other and
+# from the right, 8 px from the bottom
 MARGIN = {'top': 7, 'start': 5, 'end': 6, 'bottom': 9}
 BUTTONS = {'end': 6, 'bottom': 8, 'spacing': 6}
 
@@ -35,14 +35,14 @@ TEXTS = {
     'en': {'close': 'Close', 'title': 'Appearance Properties', 'settings': 'Settings'},
 }
 GEAR = 'emblem-system-symbolic'
-# linhas das listas: margens interiores 12 px na aplicação, compactas no XP
+# list rows: 12 px inner margins in the application, compact in XP
 ROW_MARGIN = {'top': 3, 'bottom': 3, 'start': 6, 'end': 6}
 LANG = next((l[:2] for l in GLib.get_language_names() if l[:2] in TEXTS), 'en')
 T = TEXTS[LANG]
 
 
 class _StackProxy:
-    """O que a aplicação ainda pede ao Gtk.Stack (ir para uma página)."""
+    """What the application still asks of the Gtk.Stack (go to a page)."""
 
     def __init__(self, notebook, names):
         self._notebook = notebook
@@ -54,7 +54,7 @@ class _StackProxy:
 
 
 def _group_boxes(root):
-    """Secções "<b>Título</b>" + conteúdo -> caixa de grupo do XP."""
+    """Sections "<b>Title</b>" + content -> XP group box."""
     def walk(widget):
         if isinstance(widget, Gtk.Container):
             for child in widget.get_children():
@@ -85,7 +85,7 @@ def _walk(widget):
 
 
 def _gear_buttons(root):
-    """Botões só com a engrenagem -> botão "Definições", como no XP."""
+    """Gear-only buttons -> a "Definições" (Settings) button, as in XP."""
     for w in list(_walk(root)):
         if not isinstance(w, Gtk.Button):
             continue
@@ -97,9 +97,9 @@ def _gear_buttons(root):
 
 
 def _xp_lists(root):
-    """Listas da aplicação (cartões brancos com linhas) -> controlos soltos
-    numa caixa de grupo: sem moldura nem separadores, linhas compactas. As
-    que não estão numa secção com título ficam numa caixa sem título."""
+    """The application's lists (white cards with rows) -> loose controls in a
+    group box: no frame nor separators, compact rows. Those that are not in a
+    section with a title go in a box without a title."""
     for lst in [w for w in _walk(root) if isinstance(w, Gtk.ListBox)]:
         if isinstance(lst.get_parent(), Gtk.FlowBox):
             continue
@@ -113,8 +113,8 @@ def _xp_lists(root):
                 box.set_margin_start(ROW_MARGIN['start'])
                 box.set_margin_end(ROW_MARGIN['end'])
         lst.get_style_context().add_class('zxp-plain-list')
-        # a aplicação põe cada lista numa moldura (o "cartão"): dentro de uma
-        # caixa de grupo nossa some; sozinha passa a caixa de grupo sem título
+        # the application puts each list in a frame (the "card"): inside one of our
+        # group boxes it disappears; on its own it becomes a group box without a title
         frames = []
         a = lst.get_parent()
         while a and not isinstance(a, Gtk.Notebook):
@@ -162,7 +162,7 @@ class XpAppearance(za.ZorinAppearance):
             title = stack.child_get_property(child, 'title')
             names.append(stack.child_get_property(child, 'name'))
             stack.remove(child)
-            # (o contorno é o do próprio separador)
+            # (the outline is the tab's own)
             if isinstance(child, Gtk.ScrolledWindow):
                 child.set_shadow_type(Gtk.ShadowType.NONE)
             notebook.append_page(child, Gtk.Label(label=title))
@@ -184,7 +184,7 @@ class XpAppearance(za.ZorinAppearance):
         self.add(content)
         self.stack = _StackProxy(notebook, names)
 
-        # título à esquerda, como nos diálogos do XP (o GtkHeaderBar centra-o)
+        # title on the left, as in XP's dialogs (GtkHeaderBar centres it)
         hb = self.get_titlebar()
         title = Gtk.Label(xalign=0)
         title.get_style_context().add_class('title')
@@ -195,7 +195,7 @@ class XpAppearance(za.ZorinAppearance):
         self.connect('notify::title', self._xp_title)
 
     def _xp_title(self, *_args):
-        # a aplicação põe "Aparência do Zorin" depois de criar a janela
+        # the application sets "Aparência do Zorin" after creating the window
         if self.get_title() != T['title']:
             self.set_title(T['title'])
 

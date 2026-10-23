@@ -1,2 +1,2 @@
-// O botão "Favoritos" da barra abre e fecha a barra Favoritos (como no IE)
+// The toolbar's "Favoritos" button opens and closes the Favorites bar (as in IE)
 browser.browserAction.onClicked.addListener(() => browser.sidebarAction.toggle());

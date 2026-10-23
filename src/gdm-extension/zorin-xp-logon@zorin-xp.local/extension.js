@@ -1,11 +1,11 @@
-// Zorin XP — o ecrã de boas-vindas do Windows XP substitui os ecrãs do GNOME:
-//   - no GDM (modo gdm): o ecrã de início de sessão (loginDialog.js);
-//   - na sessão (modos user/unlock-dialog): o ecrã bloqueado (unlockDialog.js).
+// Zorin XP — the Windows XP welcome screen replaces GNOME's screens:
+//   - in GDM (gdm mode): the login screen (loginDialog.js);
+//   - in the session (user/unlock-dialog modes): the lock screen (unlockDialog.js).
 //
-// O GNOME Shell cria estes ecrãs com a classe que está em
-// Main.sessionMode.unlockDialog; a extensão põe lá as do XP, e os diálogos do
-// GNOME nunca chegam a ser criados. Se um diálogo do XP falhar (ao criar-se ou
-// mais tarde), é trocado pelo do GNOME na hora: nunca se fica sem conseguir entrar.
+// GNOME Shell creates these screens with the class in
+// Main.sessionMode.unlockDialog; the extension puts XP's there, and GNOME's
+// dialogs are never created. If an XP dialog fails (when created or later),
+// it is swapped for GNOME's on the spot: you are never left unable to log in.
 
 import GLib from 'gi://GLib';
 
@@ -40,14 +40,14 @@ export default class ZorinXpWelcomeExtension extends Extension {
         if (Main.sessionMode.isGreeter && Main.layoutManager._startingUp)
             this._showCover();
 
-        // XP: Win+L mostra logo o ecrã de boas-vindas (sem o deslizar do GNOME)
+        // XP: Win+L shows the welcome screen at once (without GNOME's slide)
         const ss = Main.screenShield;
         if (ss && !Main.sessionMode.isGreeter) {
             const lock = ss.lock;
             ss.lock = function (_animate) {
                 return lock.call(this, false);
             };
-            // ...nem o escurecer logo a seguir a bloquear (o de inatividade fica)
+            // ...nor the dimming right after locking (the idle one stays)
             const fade = ss._activateFade;
             ss._activateFade = function (lightbox, time) {
                 if (lightbox === this._shortLightbox)
@@ -57,8 +57,8 @@ export default class ZorinXpWelcomeExtension extends Extension {
         }
     }
 
-    // põe a classe do XP em vez da do GNOME (a cada mudança de modo, porque o
-    // GNOME volta a copiar os valores do modo para Main.sessionMode)
+    // puts XP's class instead of GNOME's (on every mode change, because GNOME
+    // copies the mode's values to Main.sessionMode again)
     _apply() {
         const key = Main.sessionMode.isGreeter ? 'gdm' : 'unlock';
         const current = Main.sessionMode.unlockDialog;
@@ -69,8 +69,8 @@ export default class ZorinXpWelcomeExtension extends Extension {
         this._syncPanel();
     }
 
-    // a extensão arrancou depois de o GNOME já ter criado o diálogo dele
-    // (normalmente não acontece: as extensões arrancam antes): trocar já
+    // the extension started after GNOME had already created its dialog
+    // (normally it does not happen: extensions start before): swap it now
     _replaceExisting() {
         const ss = Main.screenShield;
         const d = ss?._dialog;
@@ -89,7 +89,7 @@ export default class ZorinXpWelcomeExtension extends Extension {
         }
     }
 
-    // o painel de cima do GNOME (relógio, menus) não existe no ecrã de boas-vindas do XP
+    // GNOME's top panel (clock, menus) does not exist on XP's welcome screen
     _syncPanel() {
         const box = Main.layoutManager.panelBox;
         const xp = !this._gnome && (Main.sessionMode.isGreeter || Main.sessionMode.isLocked);
@@ -113,11 +113,11 @@ export default class ZorinXpWelcomeExtension extends Extension {
         Main.layoutManager.panelBox.show();
     }
 
-    // O GNOME Shell só começa a mostrar o ecrã depois de carregar o fundo do
-    // sistema e de ficar desocupado (layout.js, _loadBackground): até lá a
-    // placa mostra preto quando o Plymouth sai. O ecrã do XP fica já desenhado
-    // por cima de tudo e o ecrã é mostrado logo; sai quando o diálogo
-    // verdadeiro (igual) já está desenhado por baixo.
+    // GNOME Shell only starts showing the screen after loading the system
+    // background and becoming idle (layout.js, _loadBackground): until then the
+    // card shows black when Plymouth leaves. The XP screen is drawn right away
+    // on top of everything and the screen is shown at once; it leaves when the
+    // real dialog (identical) has been drawn underneath.
     _showCover() {
         try {
             const cover = new XpWelcome(this.path);
@@ -172,7 +172,8 @@ export default class ZorinXpWelcomeExtension extends Extension {
         this._showPanel();
     }
 
-    // um diálogo do XP deu erro: trocar já pelo do GNOME
+    // an XP dialog failed: swap it for GNOME's now
+
     fallback(dialog, error) {
         logError(error, 'Zorin XP: ecrã de boas-vindas — a voltar ao do GNOME');
         if (this._gnome)

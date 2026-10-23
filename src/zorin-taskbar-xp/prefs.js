@@ -1,14 +1,13 @@
 /*
- * Zorin XP — definições da zorin-taskbar como uma folha de propriedades do
- * Windows XP: título e botão de fechar na barra azul, separadores no corpo da
- * janela, alinhados à esquerda (Gtk.Notebook, que o tema desenha como os
- * separadores do XP), e não na barra de título como o AdwPreferencesWindow
- * os põe.
+ * Zorin XP — zorin-taskbar settings as a Windows XP property sheet: title
+ * and close button on the blue bar, tabs in the window's body, aligned to
+ * the left (Gtk.Notebook, which the theme draws as XP's tabs), and not on
+ * the title bar where AdwPreferencesWindow puts them.
  *
- * O instalador copia a zorin-taskbar do sistema para a pasta pessoal (tem
- * prioridade sobre a do sistema), muda o nome do prefs.js original para
- * prefs-zorin.js — sem o alterar — e acrescenta este ficheiro, que só
- * reorganiza a janela depois de o código da Zorin a preencher.
+ * The installer copies the system's zorin-taskbar to the home folder (it
+ * takes priority over the system one), renames the original prefs.js to
+ * prefs-zorin.js — without changing it — and adds this file, which only
+ * rearranges the window after Zorin's code has filled it.
  */
 import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
@@ -18,25 +17,25 @@ import Gtk from 'gi://Gtk';
 
 import ZorinTaskbarPreferences from './prefs-zorin.js';
 
-// margens do separador no corpo da janela, medidas numa folha de propriedades
-// do XP: 7 px em cima (até ao selecionado), 5 à esquerda, 6 à direita (depois
-// da sombra da moldura); 9 px até aos botões OK/Cancelar/Aplicar, que ficam
-// a 6 px uns dos outros e da direita e a 8 px do fundo
+// margins of the tab in the window's body, measured on an XP property
+// sheet: 7 px at the top (to the selected one), 5 on the left, 6 on the
+// right (after the frame's shadow); 9 px to the OK/Cancel/Apply buttons,
+// which sit 6 px from each other and from the right and 8 px from the bottom
 const MARGIN = {top: 7, start: 5, end: 6, bottom: 9};
 const BUTTONS_MARGIN = {end: 6, bottom: 8, spacing: 6};
-// folha de propriedades mais alta do que larga, como as do XP
+// property sheet taller than wide, like XP's
 const SIZE = [495, 600];
 
-// passo das setas da barra de deslocamento e repetição ao mantê-las premidas
-// (os mesmos tempos do menu Iniciar)
+// scrollbar arrow step and repetition while holding them pressed
+// (the same timings as the Start menu)
 const SCROLL_STEP = 24;
 const REPEAT_DELAY = 330, REPEAT_INTERVAL = 50;
 
 const GEAR = 'emblem-system-symbolic';
-// a Zorin escreve o valor dos deslizadores 500 ms depois de mexidos
+// Zorin writes the sliders' value 500 ms after they move
 const SCALE_SETTLE_MS = 600;
 
-// textos dos diálogos do XP (a extensão da Zorin não os tem)
+// texts of XP's dialogs (Zorin's extension does not have them)
 const TEXTS = {
     pt: {settings: 'Definições', ok: 'OK', cancel: 'Cancelar', apply: 'Aplicar', title: 'Propriedades da barra de tarefas'},
     es: {settings: 'Configuración', ok: 'Aceptar', cancel: 'Cancelar', apply: 'Aplicar', title: 'Propiedades de la barra de tareas'},
@@ -44,7 +43,7 @@ const TEXTS = {
     de: {settings: 'Einstellungen', ok: 'OK', cancel: 'Abbrechen', apply: 'Übernehmen', title: 'Eigenschaften von Taskleiste'},
     en: {settings: 'Settings', ok: 'OK', cancel: 'Cancel', apply: 'Apply', title: 'Taskbar Properties'},
 };
-// nomes mais curtos na lista de elementos do painel (separador Posição)
+// shorter names in the panel elements list (Position tab)
 const SHORT_NAMES = {
     pt: {'Menu do sistema': 'Sistema', 'Menu de data': 'Data', 'Botão do ambiente de trabalho': 'Ver ADT'},
 };
@@ -58,21 +57,21 @@ function* descendants(widget) {
     }
 }
 
-// botões com a engrenagem → botão "Definições", o mais comum no XP
+// buttons with the gear → a "Definições" (Settings) button, the most common in XP
 function xpGearButton(button) {
     const child = button.get_child();
     if (button.get_icon_name() !== GEAR && !(child instanceof Gtk.Image && child.get_icon_name() === GEAR)) {
-        // botões só com ícone (setas da lista de elementos): sem a largura
-        // mínima de 75 px dos botões de texto
+        // icon-only buttons (arrows of the elements list): without the 75 px
+        // minimum width of text buttons
         if (child instanceof Gtk.Image) {
             button.add_css_class('image-button');
-            // ↑ ↓: só a seta azul do XP, sem botão por baixo
+            // ↑ ↓: only XP's blue arrow, without a button underneath
             const dir = {'go-up-symbolic': 'up', 'go-down-symbolic': 'down'}[child.get_icon_name()];
             if (dir) {
                 button.add_css_class('zxp-arrow');
                 button.add_css_class(dir);
-                // (a grelha das duas setas não reparte a altura da linha:
-                // centra-se ela própria)
+                // (the grid of the two arrows does not share the row's height:
+                // it centres itself)
                 button.get_parent().valign = Gtk.Align.CENTER;
                 child.visible = false;
             }
@@ -90,8 +89,7 @@ function xpGearButtons(root) {
     for (const w of descendants(root)) {
         if (w instanceof Gtk.Button)
             xpGearButton(w);
-        // nomes dos elementos do painel: mais curtos e em várias linhas se
-        // for preciso
+        // names of the panel elements: shorter and on several lines if needed
         if (w instanceof Gtk.Label && w.get_parent() instanceof Gtk.Grid) {
             w.wrap = true;
             const short = SHORT_NAMES[LANG]?.[w.label];
@@ -105,9 +103,10 @@ function xpGearButtons(root) {
     }
 }
 
-// o botão "Visível" de cada elemento → caixa de verificação, que ocupa menos.
-// O botão sai da grelha mas continua vivo e ligado à caixa: é dele que a
-// Zorin lê o estado (row.visibleToggleBtn) e recebe o sinal toggled.
+// each element's "Visível" button → a check box, which takes less space.
+// The button leaves the grid but stays alive and connected to the box: it is
+// from it that Zorin reads the state (row.visibleToggleBtn) and gets the
+// toggled signal.
 function xpVisibleCheck(toggle) {
     const grid = toggle.get_parent();
     const [col, row] = grid.query_child(toggle);
@@ -118,9 +117,9 @@ function xpVisibleCheck(toggle) {
     grid.attach(check, col, row, 1, 1);
 }
 
-// linhas com deslizador (ou com uma fila de botões): os controlos passam para
-// uma linha própria, por baixo do título, a toda a largura, como as barras de
-// controlo dos diálogos do XP — e a janela pode ser estreita como as do XP
+// rows with a slider (or with a row of buttons): the controls move to a row
+// of their own, below the title, full width, like the control bars of XP's
+// dialogs — and the window can be narrow like XP's
 function xpSliderRow(row) {
     const header = row.get_first_child();
     const suffixes = [...descendants(header)].find(w => w.has_css_class('suffixes'));
@@ -138,8 +137,7 @@ function xpSliderRow(row) {
     header.add_css_class('zxp-slider-row');
     suffixes.halign = Gtk.Align.FILL;
     suffixes.hexpand = true;
-    // caixas de verificação que acompanham o deslizador ("Dinâmico") ficam
-    // por baixo dele
+    // check boxes that go with the slider ("Dinâmico") sit below it
     const checks = controls.filter(w => w instanceof Gtk.CheckButton && w.get_parent() === suffixes);
     if (scales.length && checks.length) {
         suffixes.orientation = Gtk.Orientation.VERTICAL;
@@ -151,24 +149,24 @@ function xpSliderRow(row) {
     }
 }
 
-// grupo de botões de opção (rádio) para escolhas que a Zorin mostra como
-// botões de alternar ou lista pendente
+// group of option (radio) buttons for choices Zorin shows as toggle
+// buttons or a drop-down list
 function radioBox(row, orientation = Gtk.Orientation.HORIZONTAL) {
     const box = new Gtk.Box({orientation, spacing: 14, css_classes: ['zxp-radios'], valign: Gtk.Align.CENTER});
     row.add_suffix(box);
     return box;
 }
 
-// "Posição do painel": Abaixo/Acima/Esquerda/Direita em botões de opção. Os
-// botões de alternar da Zorin saem da linha mas continuam a ser eles a mudar
-// a definição (o sinal clicked) e a refletir o estado (set_active).
+// "Posição do painel": Abaixo/Acima/Esquerda/Direita as option buttons.
+// Zorin's toggle buttons leave the row but they are still what changes the
+// setting (the clicked signal) and reflects the state (set_active).
 function xpPositionRadios(builder) {
     const ids = ['bottom', 'top', 'left', 'right'].map(p => `position_${p}_button`);
     const toggles = ids.map(id => builder.get_object(id));
     if (toggles.some(t => !t))
         return;
     const row = toggles[0].get_ancestor(Adw.ActionRow);
-    // as quatro opções numa linha própria, por baixo do título
+    // the four options in a row of their own, below the title
     const header = row.get_first_child();
     header.orientation = Gtk.Orientation.VERTICAL;
     header.add_css_class('zxp-slider-row');
@@ -190,9 +188,10 @@ function xpPositionRadios(builder) {
     }
 }
 
-// "Âncora": Início/Centro/Fim em botões de opção em vez da lista pendente. A
-// Zorin muda os textos conforme o painel é horizontal ou vertical
-// (remove_all/append), por isso os botões seguem o modelo da lista.
+// "Âncora": Início/Centro/Fim as option buttons instead of the drop-down
+// list. Zorin changes the texts depending on whether the panel is
+// horizontal or vertical (remove_all/append), so the buttons follow the
+// list's model.
 function xpAnchorRadios(builder) {
     const combo = builder.get_object('panel_anchor_combo');
     if (!combo)
@@ -210,8 +209,8 @@ function xpAnchorRadios(builder) {
             const label = model.get_value(iter, 0), id = model.get_value(iter, 1);
             let radio = radios.get(id);
             if (!radio) {
-                // (o grupo só se define uma vez: voltar a pô-lo no mesmo
-                // grupo deixa o GTK em ciclo infinito)
+                // (the group is only set once: putting it in the same group again sends
+                // GTK into an infinite loop)
                 radio = new Gtk.CheckButton({group: radios.values().next().value ?? null});
                 radio.connect('toggled', () => {
                     if (!syncing && radio.active && combo.get_active_id() !== id)
@@ -241,10 +240,10 @@ function xpAnchorRadios(builder) {
     row.remove(combo);
 }
 
-// barra de deslocamento vertical do XP, com setas: o GTK4 já não tem setas
-// nas barras, por isso a da página é escondida (EXTERNAL) e montada aqui —
-// seta, barra, seta — sobre o mesmo ajuste. Como no menu Iniciar, só desloca
-// ao clicar: um passo ao premir, e repete após 330 ms enquanto premida.
+// XP vertical scrollbar, with arrows: GTK4 no longer has arrows on its
+// scrollbars, so the page's one is hidden (EXTERNAL) and built here — arrow,
+// bar, arrow — on the same adjustment. As in the Start menu, it only
+// scrolls on click: one step on press, repeating after 330 ms while pressed.
 function xpScrolledPage(page) {
     const sw = page.get_first_child();
     if (!(sw instanceof Gtk.ScrolledWindow))
@@ -308,11 +307,11 @@ function xpScrolledPage(page) {
     return box;
 }
 
-// AdwPreferencesGroup → caixa de grupo do XP, com o título embutido no
-// contorno e o traço interrompido atrás dele. O Gtk.Frame do GTK4 já não abre
-// esse intervalo, por isso a caixa é montada em peças que o tema desenha:
-//   ╭─ Título ─────────╮   .zxp-gb-tl  label.zxp-gb-title  .zxp-gb-tr
-//   │ lista …          │   .zxp-gb-body (lados e fundo)
+// AdwPreferencesGroup → XP group box, with the title embedded in the
+// outline and the line interrupted behind it. GTK4's Gtk.Frame no longer
+// opens that gap, so the box is built from pieces the theme draws:
+//   ╭─ Title ──────────╮   .zxp-gb-tl  label.zxp-gb-title  .zxp-gb-tr
+//   │ list …           │   .zxp-gb-body (sides and bottom)
 //   ╰──────────────────╯
 function xpGroupBox(group) {
     const inner = group.get_first_child();
@@ -342,14 +341,14 @@ function xpGroupBox(group) {
 
 export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
     fillPreferencesWindow(window) {
-        // as páginas que o código da Zorin acrescenta (Estilo, Posição, …)
+        // the pages Zorin's code adds (Style, Position, …)
         const pages = [];
         const add = window.add;
         window.add = function (page) {
             pages.push(page);
             return add.call(this, page);
         };
-        // e o Gtk.Builder onde a Zorin carrega os .ui (páginas e janelas de opções)
+        // and the Gtk.Builder where Zorin loads the .ui files (pages and option windows)
         const builders = [];
         const setScope = Gtk.Builder.prototype.set_scope;
         Gtk.Builder.prototype.set_scope = function (...args) {
@@ -365,10 +364,10 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
         if (!pages.length)
             return;
 
-        // todos os grupos, também os das janelas de opções (vêm do mesmo Gtk.Builder)
+        // every group, also the option windows' ones (they come from the same Gtk.Builder)
         const objects = builders.flatMap(b => b.get_objects());
         objects.filter(o => o instanceof Adw.PreferencesGroup).forEach(xpGroupBox);
-        // (as linhas sem id não vêm em get_objects: percorre-se a árvore)
+        // (rows without an id do not come in get_objects: walk the tree)
         if (builders[0]) {
             xpPositionRadios(builders[0]);
             xpAnchorRadios(builders[0]);
@@ -377,7 +376,7 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
             .flatMap(o => [o, ...descendants(o)]));
         [...widgets].filter(w => w instanceof Adw.ActionRow).forEach(xpSliderRow);
         objects.filter(o => o instanceof Gtk.Button).forEach(xpGearButton);
-        // a lista dos elementos do painel (Posição) é refeita pela Zorin
+        // the panel elements list (Position) is rebuilt by Zorin
         for (const list of objects.filter(o => o instanceof Gtk.ListBox)) {
             xpGearButtons(list);
             list.observe_children().connect('items-changed', () => xpGearButtons(list));
@@ -391,7 +390,7 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
             scrollable: false,
         });
         for (const page of pages) {
-            // a página ocupa a largura do separador (o AdwClamp limita-a a 600 px)
+            // the page takes the tab's width (AdwClamp limits it to 600 px)
             for (let c = page.get_first_child(); c; c = c.get_first_child()) {
                 if (c instanceof Adw.Clamp) {
                     c.maximum_size = c.tightening_threshold = 10000;
@@ -401,11 +400,11 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
             window.remove(page);
             notebook.append_page(xpScrolledPage(page), new Gtk.Label({label: page.get_title()}));
         }
-        // o diálogo das extensões exige uma página na estrutura original (que
-        // deixa de se ver): uma vazia evita o erro "did not provide any UI"
+        // the extensions dialog requires a page in the original structure (which
+        // is no longer visible): an empty one avoids the "did not provide any UI" error
         window.add(new Adw.PreferencesPage());
 
-        // título à esquerda, como nos diálogos do XP (o AdwHeaderBar centra-o)
+        // title on the left, as in XP's dialogs (AdwHeaderBar centres it)
         const title = new Gtk.Label({label: window.get_title() ?? '', css_classes: ['title'], xalign: 0});
         window.bind_property('title', title, 'label', GObject.BindingFlags.SYNC_CREATE);
         const header = new Adw.HeaderBar({title_widget: new Adw.Bin()});
@@ -418,11 +417,11 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
         view.add_top_bar(header);
         window.set_content(view);
         window.add_css_class('zxp-property-sheet');
-        // título à maneira do XP ("Propriedades da barra de tarefas")
+        // XP-style title ("Propriedades da barra de tarefas")
         window.set_title(T.title);
         window.set_default_size(...SIZE);
 
-        // "ir para a página X" (target-prefs-page) passa a escolher o separador
+        // "go to page X" (target-prefs-page) now picks the tab
         window.set_visible_page_name = name => {
             const i = pages.findIndex(p => p.get_name() === name);
             if (i >= 0)
@@ -430,15 +429,15 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
         };
     }
 
-    // OK / Cancelar / Aplicar, como nas folhas de propriedades do XP. As
-    // definições passam a modo diferido (Gio.Settings.delay): os controlos
-    // continuam ligados a elas, mas nada chega ao painel até Aplicar ou OK;
-    // Cancelar e o botão de fechar descartam o que não foi aplicado.
+    // OK / Cancel / Apply, as on XP's property sheets. The settings go into
+    // delayed mode (Gio.Settings.delay): the controls stay bound to them, but
+    // nothing reaches the panel until Apply or OK; Cancel and the close
+    // button discard what was not applied.
     _xpButtons(window) {
         const settings = [window._settings, window._gnomeInterfaceSettings].filter(s => s);
         settings.forEach(s => s.delay());
-        // a Zorin volta a escrever valores iguais ao preencher a janela, por
-        // isso has-unapplied não chega: compara-se com o que está gravado
+        // Zorin writes the same values again when filling the window, so
+        // has-unapplied is not enough: compare with what is stored
         const saved = settings.map(s => new Gio.Settings({settings_schema: s.settings_schema, path: s.path}));
         const pending = () => settings.some((s, i) => s.settings_schema.list_keys()
             .some(k => !s.get_value(k).equal(saved[i].get_value(k))));
@@ -457,8 +456,9 @@ export default class ZorinTaskbarXpPreferences extends ZorinTaskbarPreferences {
         const applyBtn = new Gtk.Button({label: T.apply, sensitive: false});
         [ok, cancel, applyBtn].forEach(b => box.append(b));
 
-        // os deslizadores da Zorin só escrevem 500 ms depois de largados: OK
-        // esconde logo a janela e aplica/fecha depois disso; Aplicar repete
+        // Zorin's sliders only write 500 ms after being released: OK hides the
+        // window at once and applies/closes after that; Apply repeats
+
         const afterScales = fn => GLib.timeout_add(GLib.PRIORITY_DEFAULT, SCALE_SETTLE_MS, () => {
             fn();
             return GLib.SOURCE_REMOVE;

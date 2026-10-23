@@ -1,19 +1,19 @@
 /*
- * Barras de deslocamento das páginas como as do XP (as do Explorador e do
- * IE6: ScrollBar do luna.msstyles, as mesmas imagens do tema GTK). Folha de
- * nível "agent", registada pela extensão src/zen-ie/scrollbars: só a esse
- * nível se chega às peças da barra (scrollbar, scrollbarbutton, slider,
- * thumb) — o userContent.css só muda as cores. As imagens vão embutidas
- * ({{img:...}}, tools/builders/zenie.py) para as páginas não terem de as ler do disco.
- * (A barra vertical tem o atributo vertical; a horizontal não tem nenhum.)
- * 17 px; setas com rato por cima / premidas / desativadas; polegar com as
- * riscas no meio (normal, rato por cima, a arrastar); calha.
+ * Page scrollbars like XP's (the Explorer's and IE6's: luna.msstyles'
+ * ScrollBar, the same images as the GTK theme). An "agent" level sheet,
+ * registered by the src/zen-ie/scrollbars extension: only at that level can
+ * the bar's parts be reached (scrollbar, scrollbarbutton, slider, thumb) —
+ * userContent.css only changes the colours. The images are embedded
+ * ({{img:...}}, tools/builders/zenie.py) so pages do not have to read them from disk.
+ * (The vertical bar has the vertical attribute; the horizontal one has none.)
+ * 17 px; arrows with hover / pressed / disabled; thumb with the grip lines in
+ * the middle (normal, hover, dragging); trough.
  */
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
-/* (a barra em si fica com o desenho do Firefox: com "appearance: none"
-   deixava de ocupar espaço; a calha pinta-se no slider, que a cobre entre as
-   setas) */
+/* (the bar itself keeps Firefox's drawing: with "appearance: none" it
+   stopped taking space; the trough is painted on the slider, which covers it
+   between the arrows) */
 scrollbar {
   background-color: transparent !important;
   border: 0 !important;
@@ -28,7 +28,7 @@ slider {
   margin: 0 !important;
   padding: 0 !important;
 }
-/* (o XP estica as imagens repetindo colunas, sem suavizar) */
+/* (XP stretches images by repeating columns, without smoothing) */
 slider, thumb, scrollbarbutton { image-rendering: pixelated !important; }
 scrollbar[vertical] slider {
   background: {{img:scroll-shaft-vert-normal-fill}} 0 0 / 100% 100% no-repeat !important;
@@ -47,7 +47,7 @@ scrollbar:not([vertical]):disabled slider {
   border-image-source: {{img:scroll-shaft-horz-disabled}} !important;
 }
 
-/* o polegar: imagem de 9 partes (margens de 5 px), o meio e as riscas */
+/* the thumb: 9-part image (5 px margins), the middle and the grip lines */
 thumb {
   appearance: none !important;
   border: 0 !important;
@@ -90,10 +90,10 @@ scrollbar:not([vertical]) thumb:is(:active, [active="true"]) {
 }
 scrollbar:disabled thumb { visibility: hidden !important; }
 
-/* as setas (17x17, já com o desenho) */
-/* (as barras finas que alguns sítios pedem, scrollbar-width: thin, ficam
-   normais: layout.css.scrollbar-width-thin.disabled, em tools/setup/zenprefs.py —
-   o XP só tinha a de 17 px) */
+/* the arrows (17x17, already drawn) */
+/* (the thin bars some sites ask for, scrollbar-width: thin, stay normal:
+   layout.css.scrollbar-width-thin.disabled, in tools/setup/zenprefs.py —
+   XP only had the 17 px one) */
 scrollbarbutton {
   appearance: none !important;
   min-width: 17px !important;
@@ -123,7 +123,7 @@ scrollbar:not([vertical]) scrollbarbutton[type="increment"]:hover { background-i
 scrollbar:not([vertical]) scrollbarbutton[type="increment"]:hover:active { background-image: {{img:scroll-arrow-right-active}} !important; }
 scrollbar:not([vertical]):disabled scrollbarbutton[type="increment"] { background-image: {{img:scroll-arrow-right-disabled}} !important; }
 
-/* o canto entre as duas barras: cor de botão do XP */
+/* the corner between the two bars: XP's button colour */
 scrollcorner {
   appearance: none !important;
   background: #ece9d8 !important;

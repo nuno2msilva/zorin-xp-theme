@@ -1,17 +1,17 @@
-/* Zorin XP — título e ícone do Internet Explorer.
+/* Zorin XP — Internet Explorer title and icon.
  *
- * O Zen escreve o título da janela como "página — Zen Browser"; aqui o
- * gBrowser de cada janela passa a dar o título do IE6 do XP ("Google -
- * Microsoft Internet Explorer", como na captura; sem página, só "Microsoft
- * Internet Explorer"). É esse título que aparece na barra de título e no
- * botão da barra de tarefas.
+ * Zen writes the window title as "page — Zen Browser"; here each window's
+ * gBrowser gives XP's IE6 title instead ("Google - Microsoft Internet
+ * Explorer", as in the capture; without a page, just "Microsoft Internet
+ * Explorer"). That title is what shows in the title bar and on the taskbar
+ * button.
  *
- * O ícone dessas duas é desenhado pelo GNOME Shell (extensão zorin-xp,
- * zenIcons.js), que não sabe que página está aberta: para cada janela, o
- * favicon da página escolhida vai, em PNG de 16 px, para uma pasta da cache
- * (no Flatpak, ~/.var/app/app.zen_browser.zen/cache/zorin-xp-favicons), com um
- * index.json "título da janela -> ficheiro". Sem favicon (ou separador
- * vazio), a página do IE (img/page.png do tema). */
+ * The icon of both is drawn by GNOME Shell (zorin-xp extension,
+ * zenIcons.js), which does not know which page is open: for each window, the
+ * selected page's favicon goes, as a 16 px PNG, to a cache folder (in the
+ * Flatpak, ~/.var/app/app.zen_browser.zen/cache/zorin-xp-favicons), with an
+ * index.json "window title -> file". Without a favicon (or an empty tab),
+ * IE's page (the theme's img/page.png). */
 "use strict";
 
 /* global ExtensionAPI, Services, ChromeUtils, IOUtils, PathUtils, Ci */
@@ -21,7 +21,7 @@ const SIZE = 16;
 const DEFAULT = "page.png";
 
 function cacheDir() {
-  // (o Zen de teste, tools/test/zentest, usa outra pasta: é o mesmo Flatpak)
+  // (the test Zen, tools/test/zentest, uses another folder: it is the same Flatpak)
   const test = Services.env.get("ZXP_FAVICON_DIR");
   if (test) {
     return test;
@@ -31,7 +31,7 @@ function cacheDir() {
   return PathUtils.join(base, "zorin-xp-favicons");
 }
 
-// (nome curto e estável para cada endereço de ícone: FNV-1a de 32 bits)
+// (short, stable name for each icon address: 32-bit FNV-1a)
 function hash(text) {
   let h = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) {
@@ -45,9 +45,9 @@ this.zxpTitle = class extends ExtensionAPI {
   onStartup() {
     this.dir = cacheDir();
     this.index = PathUtils.join(this.dir, "index.json");
-    this.files = new Set();         // ícones já escritos (nesta sessão)
-    this.windows = new Map();       // janela -> {restore, icon, timer}
-    // (a pasta começa vazia em cada arranque: só ficam os ícones em uso)
+    this.files = new Set();         // icons already written (in this session)
+    this.windows = new Map();       // window -> {restore, icon, timer}
+    // (the folder starts empty on every start: only the icons in use stay)
     this.ready = (async () => {
       await IOUtils.remove(this.dir, { recursive: true, ignoreAbsent: true });
       await IOUtils.makeDirectory(this.dir, { createAncestors: true });
@@ -62,15 +62,15 @@ this.zxpTitle = class extends ExtensionAPI {
       if (this.windows.has(win) || !win.gBrowser) {
         return;
       }
-      // (sem o embrulho: o método original usa campos privados do gBrowser,
-      // que só funcionam no objeto verdadeiro)
+      // (without the wrapper: the original method uses gBrowser's private
+      // fields, which only work on the real object)
       const gb = win.wrappedJSObject.gBrowser;
       const own = Object.hasOwn(gb, "getWindowTitleForBrowser");
       const orig = gb.getWindowTitleForBrowser;
       const state = { icon: DEFAULT, timer: 0 };
       gb.getWindowTitleForBrowser = (browser) => {
         const title = orig.call(gb, browser);
-        // (o Zen junta "página — marca": fica só a página)
+        // (Zen joins "page — brand": only the page stays)
         const i = title.lastIndexOf(" — ");
         const page = i >= 0 ? title.slice(0, i) : "";
         this.schedule(win);
@@ -105,8 +105,8 @@ this.zxpTitle = class extends ExtensionAPI {
     Services.obs.addObserver(this.observer, "browser-delayed-startup-finished");
   }
 
-  // (vários avisos seguidos ao mudar de separador ou carregar uma página:
-  // uma só atualização)
+  // (several notices in a row when switching tabs or loading a page:
+  // a single update)
   schedule(win) {
     const state = this.windows.get(win);
     if (!state || state.timer) {
@@ -130,8 +130,8 @@ this.zxpTitle = class extends ExtensionAPI {
     await this.writeIndex();
   }
 
-  // o favicon em PNG de 16 px (desenhado num canvas da própria janela, que
-  // sabe abrir os endereços de ícones do Firefox: page-icon:, data:...)
+  // the favicon as a 16 px PNG (drawn on a canvas of the window itself, which
+  // knows how to open Firefox's icon addresses: page-icon:, data:...)
   async iconFile(win, url) {
     const name = `${hash(url)}.png`;
     if (this.files.has(name)) {
@@ -178,7 +178,7 @@ this.zxpTitle = class extends ExtensionAPI {
       state.restore();
     }
     this.windows.clear();
-    // (sem extensão, as janelas voltam ao ícone da aplicação)
+    // (without the extension, the windows go back to the application's icon)
     IOUtils.remove(this.index, { ignoreAbsent: true }).catch(() => {});
   }
 

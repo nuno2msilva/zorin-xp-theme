@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Tira uma janela X11 da barra de tarefas e do Alt+Tab: skiptaskbar.py <xid>
+"""Takes an X11 window off the taskbar and Alt+Tab: skiptaskbar.py <xid>
 
-Pede-o ao mutter como as aplicações pedem (a mensagem _NET_WM_STATE com
-_NET_WM_STATE_SKIP_TASKBAR e _NET_WM_STATE_SKIP_PAGER), porque o Shell não
-tem maneira de o mudar pelo JS. Usado por ieFind.js.
+Asks mutter the way applications ask (the _NET_WM_STATE message with
+_NET_WM_STATE_SKIP_TASKBAR and _NET_WM_STATE_SKIP_PAGER), because the Shell
+has no way to change it from JS. Used by ieFind.js.
 """
+
 import ctypes
 import ctypes.util
 import sys

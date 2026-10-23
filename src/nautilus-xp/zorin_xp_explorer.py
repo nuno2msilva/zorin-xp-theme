@@ -1,18 +1,18 @@
-"""Zorin XP — o Nautilus com o aspeto do Explorador do Windows XP.
+"""Zorin XP — Nautilus with the look of the Windows XP Explorer.
 
-Extensão do nautilus-python (instalada em ~/.local/share/nautilus-python/
-extensions): corre dentro do Nautilus e, quando ele abre uma janela,
-reorganiza-a como o Explorador do XP, sem mudar o que o Nautilus faz:
+A nautilus-python extension (installed in ~/.local/share/nautilus-python/
+extensions): it runs inside Nautilus and, when Nautilus opens a window,
+rearranges it like XP's Explorer, without changing what Nautilus does:
 
-  legenda    ícone + nome da pasta à esquerda, botões da janela
+  caption    folder icon + name on the left, window buttons
   menus      Ficheiro  Editar  Ver  Favoritos  Ferramentas  Ajuda
-  ferramentas Retroceder  Avançar  Acima | Procurar  Pastas | Vistas
-  endereço   Endereço [ícone  caminho]  [→ Ir para]
-  à esquerda o painel de tarefas azul, com os locais numa secção
+  toolbar    Retroceder  Avançar  Acima | Procurar  Pastas | Vistas
+  address    Endereço [icon  path]  [→ Ir para]
+  left       the blue task pane, with the places in a section
 
-As barras próprias do Nautilus ficam escondidas (continuam lá: a pesquisa
-volta a mostrá-las); os menus e botões chamam as ações que o Nautilus já tem.
-As imagens vêm do tema GTK (gerado a partir do shell32.dll/shellstyle.dll).
+Nautilus's own bars stay hidden (they are still there: search shows them
+again); the menus and buttons call the actions Nautilus already has. The
+images come from the GTK theme (generated from shell32.dll/shellstyle.dll).
 """
 import collections
 import json
@@ -74,7 +74,7 @@ TEXTS = {
         'weekdays': ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira',
                      'sábado', 'domingo'],
         'long-date': '{wd}, {d} de {m} de {y}, {t}',
-        # (shell32.dll: diálogos 1011-1013, cadeias 16722, 16723, 4112)
+        # (shell32.dll: dialogs 1011-1013, strings 16722, 16723, 4112)
         'delete': 'Eliminar', 'yes': '_Sim', 'no': '_Não',
         'confirm-file': 'Confirmar eliminação de ficheiro(s)',
         'confirm-folder': 'Confirmar eliminação de pasta(s)',
@@ -83,7 +83,7 @@ TEXTS = {
         'ask-folder': "Tem a certeza de que pretende remover a pasta '{}' e mover todo o conteúdo "
                       "para a 'Reciclagem'?",
         'ask-many': "Tem a certeza de que pretende mandar estes {} itens para a 'Reciclagem'?",
-        # (eliminar de vez: Shift+Delete, na Reciclagem — shell32 12295, 66)
+        # (delete permanently: Shift+Delete, in the Recycle Bin — shell32 12295, 66)
         'kill-file': "Tem a certeza de que pretende eliminar '{}'?",
         'kill-folder': "Tem a certeza de que pretende remover a pasta '{}' e todo o seu conteúdo?",
         'kill-many': 'Tem a certeza de que pretende eliminar estes {} itens?',
@@ -153,9 +153,9 @@ TEXTS = {
         'open-window': 'Open in New Window',
     },
 }
-# Vistas do XP sobre as duas vistas do Nautilus (grelha = 2, lista = 1 na
-# ação slot.files-view-mode) e os tamanhos de ícone que ele tem: a grelha
-# começa nos 48 px (o XP usa 32 em Ícones), as miniaturas do XP têm 96
+# XP's views on top of Nautilus's two views (grid = 2, list = 1 in the
+# slot.files-view-mode action) and the icon sizes it has: the grid starts at
+# 48 px (XP uses 32 in Icons), XP's thumbnails are 96
 VIEW_MODES = {
     'thumbnails': {'view': 2, 'zoom': 'medium', 'captions': ['none', 'none', 'none']},
     'tiles': {'view': 2, 'zoom': 'small', 'captions': ['zxp_tile', 'none', 'none']},
@@ -164,65 +164,65 @@ VIEW_MODES = {
     'details': {'view': 1, 'zoom': 'small', 'columns': ['name', 'zxp_size', 'zxp_type', 'zxp_date']},
 }
 DEFAULT_VIEW = 'icons'
-# passos das grelhas do Explorador (medidos em capturas do XP): Mosaicos
-# 218 x 56, Miniaturas 125 x 139 (moldura de 96), Ícones 75 (ícones de 32)
+# steps of the Explorer's grids (measured in XP captures): Tiles 218 x 56,
+# Thumbnails 125 x 139 (96 px frame), Icons 75 (32 px icons)
 TILE_WIDTH = 218
 THUMB_PITCH = 125
 ICON_PITCH = 75
 ICON_SIZE = 32
-# Miniaturas: os ícones do XP só vão até 48 px — como no XP, não são esticados
-# (ficam com 48 ao centro da moldura); só as imagens têm miniatura. Nos
-# Ícones e nos Mosaicos as imagens têm o ícone do tipo, como no XP
+# Thumbnails: XP's icons only go up to 48 px — as in XP, they are not
+# stretched (they stay at 48 in the centre of the frame); only images get a
+# thumbnail. In Icons and Tiles images get the type icon, as in XP
 THUMB_ICON = 48
 PITCHES = {'tiles': TILE_WIDTH, 'thumbnails': THUMB_PITCH, 'icons': ICON_PITCH}
-# largura do nome debaixo do ícone (a coluna menos 2 px de cada lado)
+# width of the name below the icon (the column minus 2 px on each side)
 NAME_WIDTHS = {'thumbnails': THUMB_PITCH - 4, 'icons': ICON_PITCH - 4}
 TYPE_ICON_SIZES = {'thumbnails': THUMB_ICON, 'tiles': THUMB_ICON, 'icons': ICON_SIZE}
-# seleção como no XP (ImageList ILD_BLEND50, medida numa captura do XP): os
-# píxeis com alfa >= 128 ficam a meio caminho da cor de realce (com o alfa
-# pré-multiplicado, arredondado para cima); os outros (sombras) ficam iguais
+# selection as in XP (ImageList ILD_BLEND50, measured in an XP capture):
+# pixels with alpha >= 128 go halfway to the highlight colour (with
+# premultiplied alpha, rounded up); the others (shadows) stay the same
 HIGHLIGHT = (0x31, 0x6A, 0xC5)
-# Detalhes: a coluna pela qual se ordena com fundo cinzento claro de cima a
-# baixo, como no XP (medido); a faixa do cabeçalho é a mesma do tema
+# Details: the column the list is sorted by with a light grey background from
+# top to bottom, as in XP (measured); the header strip is the theme's
 # (src/gtk/40-libadwaita.css.in, ".nautilus-list-view columnview")
 SORTED_COLUMN_BG = '#F7F7F7'
 HEADER_BAND = ('linear-gradient(to bottom, #EEEAD8 0, #EEEAD8 17px, #E2DECD 17px, #E2DECD 18px, '
                '#D6D2C2 18px, #D6D2C2 19px, #CBC7B8 19px, #CBC7B8 20px, transparent 20px)')
-# "Outros locais", por esta ordem (os outros locais do Nautilus saem; os
-# marcadores vão para a secção "Atalhos", que só aparece se houver algum)
+# "Outros locais" (Other Places), in this order (Nautilus's other places go;
+# the bookmarks go to the "Atalhos" section, which only shows if there are any)
 OTHER_PLACES = ('home', 'documents', 'recent', 'starred', 'downloads')
 SECTION_MOUNTS = 2                 # NautilusGtkPlacesSectionType (unidades ligadas)
 BOOKMARKS = os.path.join(GLib.get_user_config_dir(), 'gtk-3.0', 'bookmarks')
-# ícones escolhidos para os Atalhos (endereço -> nome do ícone), só ali: as
-# pastas reais ficam como estão; os discos montados têm o do disco sozinhos
+# icons chosen for the Shortcuts (address -> icon name), only there: the
+# real folders stay as they are; mounted disks get the disk icon by themselves
 SHORTCUT_ICONS = os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'shortcut-icons.json')
 NETWORK_FS = ('cifs', 'smb3', 'smbfs', 'nfs', 'nfs4', 'fuse.sshfs', 'sshfs', '9p', 'vboxsf', 'davfs')
 OPEN_NORMAL = 1                    # NautilusOpenFlags
-# larguras das colunas dos Detalhes no Explorador (medidas)
+# widths of the Details columns in the Explorer (measured)
 COLUMN_WIDTHS = {'name': 179, 'size': 97, 'type': 119, 'date_modified': 121,
                  'zxp_size': 97, 'zxp_type': 119, 'zxp_date': 121}
 RIGHT_ALIGNED = ('size', 'zxp_size')
 STATE_FILE = os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'explorer.ini')
-# "Dispor ícones por" (menu do fundo): a ordenação do próprio Nautilus (ação
-# view.sort, alvo (atributo, invertido)), com a bolinha da escolhida
+# "Dispor ícones por" (background menu): Nautilus's own sorting (the
+# view.sort action, target (attribute, reversed)), with the dot on the chosen one
 ARRANGE = (('name', ('name', False)), ('size', ('size', False)), ('type', ('type', False)),
            ('modified', ('date_modified', True)))
 SIDEBAR_ICONS = {'document-open-recent': 'folder-recent', 'starred': 'user-bookmarks'}
-# os mesmos para o título, o endereço e a barra de tarefas (explorerIcons.js)
+# the same for the title, the address and the taskbar (explorerIcons.js)
 SCHEME_ICONS = {'recent': 'folder-recent', 'starred': 'user-bookmarks'}
-# o clique do Explorador ao abrir uma pasta ("Iniciar navegação" do XP)
+# the Explorer's click when opening a folder (XP's "Iniciar navegação")
 NAV_SOUND = os.path.join(GLib.get_user_data_dir(), 'sounds', 'WindowsXP', 'xp', 'Windows XP Start.wav')
 NAV_QUIET_MS = 300
-# o som de mandar para a Reciclagem ("Esvaziar a Reciclagem" no XP)
+# the sound of sending to the Recycle Bin ("Esvaziar a Reciclagem" in XP)
 TRASH_SOUND = os.path.join(GLib.get_user_data_dir(), 'sounds', 'WindowsXP', 'xp', 'Windows XP Recycle.wav')
-# os itens dos menus do Nautilus que abrem as janelas dele: os do XP
+# the Nautilus menu items that open its own windows: XP's instead
 SWAPPED_ACTIONS = {'view.new-folder': 'xp.new-folder', 'view.rename': 'xp.rename',
                    'view.move-to-trash': 'xp.delete',
                    'view.delete-permanently-menu-item': 'xp.delete-permanently',
                    'view.delete-from-trash': 'xp.delete-permanently'}
-# a coluna do Nautilus -> a nossa, com os formatos do XP (Recentes, pesquisas)
+# Nautilus's column -> ours, with XP's formats (Recent, searches)
 COLUMN_TWINS = {'size': 'zxp_size', 'type': 'zxp_type', 'date_modified': 'zxp_date'}
-# pré-visualização nos Detalhes: à largura do painel (o painel não cresce)
+# preview in Details: at the pane's width (the pane does not grow)
 PREVIEW_MAX = (200, 200)
 PREVIEW_CACHE = os.path.join(GLib.get_user_cache_dir(), 'zorin-xp', 'details-preview')
 
@@ -239,8 +239,8 @@ def walk(widget):
 
 
 def find(widget, type_name):
-    """Primeiro descendente com este tipo GObject (o nome do tipo em Python
-    muda conforme os módulos importados; o do GType não)."""
+    """First descendant with this GObject type (the type's name in Python
+    changes with the imported modules; the GType's does not)."""
     return next((w for w in walk(widget) if w.__gtype__.name == type_name), None)
 
 
@@ -257,7 +257,7 @@ def image(name, fallback_icon, size=24):
 
 
 class XpExplorer:
-    """Reorganiza uma janela do Nautilus."""
+    """Rearranges a Nautilus window."""
 
     def __init__(self, win):
         self.win = win
@@ -269,10 +269,10 @@ class XpExplorer:
         self.tabs = find(self.content_tv, 'AdwTabView')
         win.add_css_class('zxp-explorer')
         self._mode = load_view_mode()
-        # (para as regras de estilo só desta janela: _sort_band)
+        # (for style rules for this window only: _sort_band)
         self._css_id = f'zxp-win-{id(self)}'
         win.add_css_class(self._css_id)
-        # a janela "Nova Pasta" do Nautilus (pede o nome antes): a do XP
+        # Nautilus's "New Folder" window (it asks for the name first): XP's instead
         self._toplevels = Gtk.Window.get_toplevels()
         self._toplevels.connect('items-changed', self._new_toplevels)
         self._tiles = self._mode == 'tiles'
@@ -281,8 +281,8 @@ class XpExplorer:
         keys = Gtk.EventControllerKey(propagation_phase=Gtk.PropagationPhase.CAPTURE)
         keys.connect('key-pressed', self._keys)
         win.add_controller(keys)
-        # sem zoom em nenhuma vista, como no Explorador do XP: sem os atalhos
-        # (Ctrl++, Ctrl+-, Ctrl+0) e sem Ctrl+roda (o tamanho vem da vista escolhida)
+        # no zoom in any view, as in XP's Explorer: without the shortcuts
+        # (Ctrl++, Ctrl+-, Ctrl+0) and without Ctrl+wheel (the size comes from the chosen view)
         app = win.get_application()
         if app is not None:
             for action in ('view.zoom-in', 'view.zoom-out', 'view.zoom-standard'):
@@ -294,7 +294,7 @@ class XpExplorer:
         win.add_controller(scroll)
 
         self._actions()
-        # as barras do Nautilus ficam escondidas (a pesquisa volta a mostrá-las)
+        # Nautilus's bars stay hidden (search shows them again)
         self.content_tv.set_reveal_top_bars(False)
         self.content_tv.set_reveal_bottom_bars(False)
         if isinstance(self.sidebar_tv, Adw.ToolbarView):
@@ -317,7 +317,7 @@ class XpExplorer:
             self.tabs.connect('notify::selected-page', lambda *_: self._follow_slot())
         self._follow_slot()
 
-    # ------------------------------------------------------------- ações
+    # ------------------------------------------------------------- actions
     def _slot(self):
         page = self.tabs.get_selected_page() if self.tabs else None
         child = page.get_child() if page else None
@@ -361,7 +361,7 @@ class XpExplorer:
                                              GLib.Variant('s', load_view_mode()))
         mode.connect('activate', lambda a, v: self._set_view_mode(a, v.get_string()))
         group.add_action(mode)
-        # (win.toggle-sidebar só funciona com a janela estreita)
+        # (win.toggle-sidebar only works with a narrow window)
         add('toggle-folders', lambda: self.split.set_show_sidebar(not self.split.get_show_sidebar()))
         add('go', self._go)
 
@@ -376,7 +376,7 @@ class XpExplorer:
             [Gio.File.new_for_uri(uri)], ''))
         self.win.insert_action_group('xp', group)
 
-    # ------------------------------------------------------------ barras
+    # ------------------------------------------------------------ bars
     def _caption(self):
         self.title_icon = Gtk.Image(pixel_size=16)
         title = Gtk.Label(xalign=0, css_classes=['title'], ellipsize=3)
@@ -441,7 +441,7 @@ class XpExplorer:
             return
         action.set_state(GLib.Variant('s', key))
         save_view_mode(key)
-        # (já, antes de o Nautilus trocar as imagens das células: _thumb_picture)
+        # (now, before Nautilus swaps the cells' images: _thumb_picture)
         self._mode = key
         self._tiles = key == 'tiles'
         self._thumbs = key == 'thumbnails'
@@ -455,12 +455,12 @@ class XpExplorer:
             lst = Gio.Settings.new('org.gnome.nautilus.list-view')
             lst.set_string('default-zoom-level', conf['zoom'])
             lst.set_strv('default-visible-columns', conf['columns'])
-            # as colunas do XP logo a seguir ao nome, pela ordem do Explorador
+            # XP's columns right after the name, in the Explorer's order
             order = [c for c in lst.get_strv('default-column-order') if c not in conf['columns']]
             lst.set_strv('default-column-order', conf['columns'] + order)
             prefs.set_string('default-folder-viewer', 'list-view')
         if conf['view'] == 1:
-            # as colunas por omissão só valem para uma vista nova
+            # the default columns only apply to a new view
             slot.activate_action('slot.files-view-mode', GLib.Variant('u', 2))
         slot.activate_action('slot.files-view-mode', GLib.Variant('u', conf['view']))
 
@@ -470,21 +470,21 @@ class XpExplorer:
         GLib.idle_add(settle)
 
     def _sync_tiles(self, key=None):
-        """Mosaicos: as células da grelha deitadas — ícone à esquerda, nome,
-        tipo e tamanho ao lado, alinhados à esquerda (a grelha do Nautilus
-        só as tem em pé). As células são recicladas e criadas ao deslocar,
-        por isso a grelha é seguida e cada célula nova é acertada."""
+        """Tiles: the grid's cells lying down — icon on the left, name, type and
+        size beside it, left-aligned (Nautilus's grid only has them standing).
+        Cells are recycled and created while scrolling, so the grid is
+        followed and every new cell is fixed."""
         if key is not None:
             self._mode = key
             self._tiles = key == 'tiles'
             self._thumbs = key == 'thumbnails'
         view = self._files_view()
-        # o XP não tem a barra flutuante do Nautilus ("… selecionado (303,5 kB)")
+        # XP does not have Nautilus's floating bar ("… selected (303.5 kB)")
         bar = find(view, 'NautilusFloatingBar') if view else None
         if bar is not None and bar.get_child_visible():
             bar.set_child_visible(False)
-        # nem o aviso "A pasta está vazia": no XP uma pasta vazia fica em
-        # branco (escondido de vez, para os cliques chegarem à vista por baixo)
+        # nor the "Folder is empty" notice: in XP an empty folder stays blank
+        # (hidden for good, so clicks reach the view underneath)
         for page in (w for w in walk(view) if w.__gtype__.name == 'AdwStatusPage') if view else ():
             if page.get_child_visible():
                 page.set_child_visible(False)
@@ -494,7 +494,7 @@ class XpExplorer:
             for k in ('music', 'pictures', 'videos'):
                 (view.add_css_class if k == kind else view.remove_css_class)(f'zxp-wm-{k}')
         if view:
-            # (a Lista não tem a faixa do cabeçalho dos Detalhes: CSS)
+            # (List does not have the Details header strip: CSS)
             (view.add_css_class if self._mode == 'list' else view.remove_css_class)('zxp-list')
         columns = find(view, 'GtkColumnView') if view else None
         if columns:
@@ -512,7 +512,7 @@ class XpExplorer:
             if scroller:
                 scroller.connect('notify::width', lambda *_: self._tile_columns(grid))
                 self._tile_width_cb(scroller, grid)
-            # células novas aparecem ao deslocar e quando a pasta acaba de carregar
+            # new cells appear while scrolling and when the folder finishes loading
             adj = grid.get_vadjustment()
             if adj:
                 adj.connect('value-changed', lambda *_: self._tile_cells(grid))
@@ -528,8 +528,8 @@ class XpExplorer:
         GLib.timeout_add(150, again)
 
     def _on_bind(self, factory, view, update):
-        """update(view) depois de a lista pôr ficheiros nas células (células
-        novas ao recarregar a pasta, ou recicladas), uma vez por ciclo."""
+        """update(view) after the list puts files into the cells (new cells when
+        the folder reloads, or recycled ones), once per cycle."""
         if factory is None or getattr(factory, '_zxp_bind', False):
             return
         factory._zxp_bind = True
@@ -544,14 +544,14 @@ class XpExplorer:
         factory.connect_after('bind', bound)
 
     def _sync_columns(self, cv):
-        """Detalhes: títulos e larguras das colunas como no Explorador. A
-        Lista do XP não tem cabeçalho."""
+        """Details: column titles and widths as in the Explorer. XP's List has no
+        header."""
         header = next((w for w in walk(cv) if w.get_css_name() == 'header'), None)
         if header is not None:
             header.set_visible(getattr(self, '_mode', None) != 'list')
         cols = cv.get_columns()
-        # nos Recentes (e nas pesquisas) o Nautilus usa as colunas dele: as
-        # nossas no mesmo sítio, com os formatos do XP ("31 KB", "Imagem PNG")
+        # in Recent (and searches) Nautilus uses its own columns: ours in the same
+        # place, with XP's formats ("31 KB", "Imagem PNG")
         by_id = {cols.get_item(i).get_id(): cols.get_item(i) for i in range(cols.get_n_items())}
         for cid, tid in COLUMN_TWINS.items():
             col, twin = by_id.get(cid), by_id.get(tid)
@@ -561,8 +561,8 @@ class XpExplorer:
                 col.set_visible(False)
                 cv.insert_column(pos, twin)
         recent = self._location_scheme() == 'recent'
-        # títulos cortados com "..." quando não cabem com a seta (como no XP),
-        # refeitos ao mudar a largura de uma coluna ou a ordenação
+        # titles cut with "..." when they do not fit with the arrow (as in XP),
+        # redone when a column's width or the sorting changes
         if not getattr(cv, '_zxp_titles', False):
             cv._zxp_titles = True
             sorter = cv.get_sorter()
@@ -582,8 +582,8 @@ class XpExplorer:
             self._on_bind(col.get_factory(), cv, self._align_cells)
             cid = col.get_id() or ''
             if cid == 'starred':
-                # (o XP não tem estrelas; a coluna esticava as linhas e o
-                # Nautilus volta a mostrá-la ao carregar cada pasta)
+                # (XP has no stars; the column stretched the rows and Nautilus shows it
+                # again when it loads each folder)
                 col.set_visible(False)
                 if not getattr(col, '_zxp_hide', False):
                     col._zxp_hide = True
@@ -595,8 +595,8 @@ class XpExplorer:
                 col.set_title(title)
             width = COLUMN_WIDTHS.get(cid)
             if cid == 'name' and (getattr(self, '_mode', None) == 'list' or recent):
-                # Lista: o nome inteiro, como no XP (a coluna ocupa a largura);
-                # nos Recentes os nomes são compridos: também
+                # List: the whole name, as in XP (the column takes the width); in
+                # Recent the names are long: too
                 col.set_fixed_width(-1)
                 col.set_expand(True)
             elif width:
@@ -621,17 +621,17 @@ class XpExplorer:
             GLib.timeout_add(150, again)
 
     def _header_titles(self, cv):
-        """Os títulos do cabeçalho dos Detalhes como no XP: o que não cabe
-        (com a seta de ordenação) é cortado com "..." em vez de empurrar a
-        seta para fora. Primeiro o título inteiro, para o GTK dizer se cabe;
-        depois de desenhado, o corte à medida do espaço que ficou."""
+        """The Details header titles as in XP: what does not fit (with the sort
+        arrow) is cut with "..." instead of pushing the arrow out. First the
+        whole title, so GTK says whether it fits; once drawn, the cut to the
+        space that is left."""
         header = next((w for w in walk(cv) if w.get_css_name() == 'header'), None)
         if header is None:
             return
         labels = [w for w in walk(header) if isinstance(w, Gtk.Label)]
         for lbl in labels:
             if lbl.get_label() != getattr(lbl, '_zxp_text', None):
-                lbl._zxp_name = lbl.get_label()     # (posto pelo GTK: o título)
+                lbl._zxp_name = lbl.get_label()     # (set by GTK: the title)
             if lbl.get_label() != lbl._zxp_name:
                 lbl.set_label(lbl._zxp_name)
             lbl._zxp_text = lbl._zxp_name
@@ -648,8 +648,8 @@ class XpExplorer:
         self._next_frames(cv, cut)
 
     def _next_frames(self, widget, fn, frames=12):
-        """fn() nas próximas frames (~0,2 s): as posições só ficam certas
-        depois de o GTK refazer a disposição, que pode levar mais que uma."""
+        """fn() on the next frames (~0.2 s): the positions are only right after
+        GTK redoes the layout, which may take more than one."""
         widget._zxp_frames = frames
         widget._zxp_frame_fn = fn
         if getattr(widget, '_zxp_tick', 0):
@@ -665,11 +665,11 @@ class XpExplorer:
         widget._zxp_tick = widget.add_tick_callback(tick)
 
     def _sort_band(self, cv):
-        """Detalhes: a coluna pela qual se ordena com o fundo cinzento claro
-        do XP, da largura do seu título e de cima a baixo (também onde já não
-        há ficheiros). É o fundo da própria lista, por baixo das linhas, com a
-        faixa do cabeçalho por cima; posto numa folha de estilo só desta
-        janela, com a posição da coluna."""
+        """Details: the column the list is sorted by with XP's light grey
+        background, as wide as its title and from top to bottom (also where
+        there are no more files). It is the list's own background, below the
+        rows, with the header strip on top; set in a stylesheet for this
+        window only, with the column's position."""
         css = ''
         header = next((w for w in walk(cv) if w.get_css_name() == 'header'), None)
         if getattr(self, '_mode', None) == 'details' and header is not None:
@@ -693,7 +693,7 @@ class XpExplorer:
         if getattr(self, '_band_provider', None) is None:
             self._band_provider = Gtk.CssProvider()
             display = self.win.get_display()
-            # (acima do tema, que entra como folha do utilizador)
+            # (above the theme, which comes in as a user stylesheet)
             Gtk.StyleContext.add_provider_for_display(
                 display, self._band_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 200)
             self.win.connect('destroy', lambda *_: Gtk.StyleContext.remove_provider_for_display(
@@ -701,30 +701,30 @@ class XpExplorer:
         self._band_provider.load_from_string(css)
 
     def _no_path(self, cv):
-        """Nos Recentes (e nas pesquisas) o Nautilus mostra por baixo do nome
-        a pasta onde o ficheiro está: no Explorador só o nome."""
+        """In Recent (and searches) Nautilus shows the folder the file is in below
+        the name: in the Explorer only the name."""
         for box in walk(cv):
             if not box.has_css_class('column-name-labels-box'):
                 continue
             name = box.get_first_child()
             lbl = name.get_first_child() if isinstance(name, Gtk.Box) else None
             if isinstance(lbl, Gtk.Label) and lbl.get_ellipsize() != Pango.EllipsizeMode.END:
-                # (cortado no fim, como no XP; o Nautilus corta ao meio)
+                # (cut at the end, as in XP; Nautilus cuts in the middle)
                 lbl.set_ellipsize(Pango.EllipsizeMode.END)
             c = box.get_first_child()
             while c is not None:
                 if isinstance(c, Gtk.Label) and c.has_css_class('caption'):
                     if not getattr(c, '_zxp_hidden', False):
                         c._zxp_hidden = True
-                        # (o Nautilus volta a mostrá-la ao reciclar a célula)
+                        # (Nautilus shows it again when recycling the cell)
                         c.connect('notify::visible', lambda l, _p: l.get_visible() and l.set_visible(False))
                     if c.get_visible():
                         c.set_visible(False)
                 c = c.get_next_sibling()
 
     def _align_cells(self, cv):
-        """Tamanho alinhado à direita, como no XP (as células são criadas e
-        recicladas pela lista; a ordem das células segue a das colunas)."""
+        """Size right-aligned, as in XP (the cells are created and recycled by the
+        list; the cells' order follows the columns')."""
         self._link_emblems(cv)
         self._no_path(cv)
         self._sel_cells(cv)
@@ -768,11 +768,11 @@ class XpExplorer:
             row = row.get_next_sibling()
         return False
 
-    # ----------------------------- atalhos das pastas especiais, sem a seta
-    # "As minhas imagens", "A minha música"... dentro de "Os meus documentos"
-    # são atalhos (ligações simbólicas): no XP eram as próprias pastas, com o
-    # seu ícone (metadados, tools/setup/xpfolders.py) e sem a seta de atalho, que o
-    # Nautilus põe em todas as ligações — aqui escondida só nessas.
+    # ----------------------------- shortcuts of the special folders, without the arrow
+    # "As minhas imagens", "A minha música"... inside "Os meus documentos" are
+    # shortcuts (symbolic links): in XP they were the folders themselves, with
+    # their icon (metadata, tools/setup/xpfolders.py) and without the shortcut
+    # arrow, which Nautilus puts on every link — hidden here only on those.
     def _special_targets(self):
         if getattr(self, '_specials', None) is None:
             U = GLib.UserDirectory
@@ -805,7 +805,7 @@ class XpExplorer:
                 continue
             if not getattr(cell, '_zxp_links', False):
                 cell._zxp_links = True
-                # (célula reciclada para outro ficheiro: os emblemas mudam depois)
+                # (cell recycled for another file: the emblems change afterwards)
                 cell.connect('notify::item', lambda c, _p: GLib.timeout_add(
                     150, lambda: self._link_emblem(c)))
             self._link_emblem(cell)
@@ -819,11 +819,11 @@ class XpExplorer:
                 special = self._is_special_link(Nautilus.FileInfo.get_uri(f))
             except Exception:
                 pass
-        # esconde-se a caixa dos emblemas (o Nautilus refaz as imagens dentro
-        # dela quando o ficheiro muda, mas a caixa fica)
+        # the emblems box is hidden (Nautilus rebuilds the images inside it when
+        # the file changes, but the box stays)
         box = getattr(cell, '_zxp_emblems', None)
         if box is None and cell.__gtype__.name == 'NautilusGridCell':
-            # (na grelha: a coluna ao lado do ícone)
+            # (in the grid: the column beside the icon)
             clamp = cell.get_first_child()
             vbox = clamp.get_first_child() if clamp else None
             icon_box = vbox.get_first_child() if vbox else None
@@ -838,8 +838,8 @@ class XpExplorer:
                                                              for n in g.get_names()):
                         box = cell._zxp_emblems = img.get_parent()
                         break
-        # (nos Mosaicos, Miniaturas e Ícones a coluna dos emblemas sai sempre:
-        # nos Mosaicos afastava o nome, nos outros tirava o ícone do centro)
+        # (in Tiles, Thumbnails and Icons the emblems column always goes: in Tiles
+        # it pushed the name away, in the others it took the icon off centre)
         grid_mode = getattr(self, '_mode', None) in PITCHES
         hide = special or (grid_mode and cell.__gtype__.name == 'NautilusGridCell')
         if box is not None and box.get_visible() == hide:
@@ -847,16 +847,16 @@ class XpExplorer:
         return False
 
     def _tile_width_cb(self, scroller, grid):
-        # (Gtk.Widget não avisa mudanças de largura: segue-se a janela)
+        # (Gtk.Widget does not notify width changes: follow the window)
         self.win.connect('notify::default-width', lambda *_: GLib.idle_add(
             lambda: self._tile_columns(grid) and False))
         self.win.connect('notify::maximized', lambda *_: GLib.timeout_add(
             200, lambda: self._tile_columns(grid) and False))
 
     def _tile_columns(self, grid):
-        """Colunas com a largura do XP (PITCHES): o GtkGridView reparte a
-        sobra pelas colunas; aqui fixa-se o número de colunas e a sobra fica
-        à direita."""
+        """Columns with XP's width (PITCHES): GtkGridView spreads the leftover
+        among the columns; here the number of columns is fixed and the
+        leftover stays on the right."""
         scroller = grid.get_parent()
         pitch = PITCHES.get(getattr(self, '_mode', None))
         if pitch is None or not scroller:
@@ -864,7 +864,7 @@ class XpExplorer:
             grid.set_max_columns(100)
             grid.set_margin_end(0)
             return False
-        width = scroller.get_width() - 8   # padding da grelha (CSS)
+        width = scroller.get_width() - 8   # grid padding (CSS)
         if width <= 0:
             return False
         n = max(1, width // pitch)
@@ -899,8 +899,8 @@ class XpExplorer:
             labels.set_valign(Gtk.Align.CENTER if on else Gtk.Align.FILL)
             labels.set_hexpand(on)
             clamp.set_maximum_size(TILE_WIDTH if on else cell._zxp_clamp)
-            # Ícones e Miniaturas: o nome em até 2 linhas, partido nos espaços
-            # e cortado com "…" no fim (como no XP)
+            # Icons and Thumbnails: the name in up to 2 lines, broken at spaces
+            # and cut with "…" at the end (as in XP)
             two = self._mode in ('icons', 'thumbnails')
             for lbl in walk(labels):
                 if isinstance(lbl, Gtk.Label):
@@ -912,12 +912,12 @@ class XpExplorer:
                         wrap, chars, ell, lines = False, -1, Pango.EllipsizeMode.NONE, -1
                     lbl.set_wrap_mode(wrap_mode)
                     lbl.set_xalign(0 if on else 0.5)
-                    # o realce da seleção só por trás do texto, como no XP
+                    # the selection highlight only behind the text, as in XP
                     if not hasattr(lbl, '_zxp_halign'):
                         lbl._zxp_halign = lbl.get_halign()
                     lbl.set_halign(Gtk.Align.START if on else Gtk.Align.CENTER)
                     lbl.set_justify(Gtk.Justification.LEFT if on else Gtk.Justification.CENTER)
-                    # uma linha por texto, cortada com "…" (como os mosaicos do XP)
+                    # one line per text, cut with "…" (like XP's tiles)
                     lbl.set_wrap(False if on else wrap)
                     lbl.set_lines(1 if on else lines)
                     lbl.set_max_width_chars(-1 if on else chars)
@@ -939,18 +939,18 @@ class XpExplorer:
         return False
 
     def _xp_name(self, lbl):
-        """O nome como o XP o mostra nos Ícones e Miniaturas (DrawText com
-        quebra nas palavras e "..." no fim): até 2 linhas partidas nos espaços;
-        uma palavra que não caiba na 1.ª linha é cortada lá, sozinha; a 2.ª
-        linha leva o resto, cortado no fim. O Nautilus põe o nome inteiro; o
-        texto cortado fica por cima (o nome verdadeiro em _zxp_name)."""
+        """The name as XP shows it in Icons and Thumbnails (DrawText with word
+        breaking and "..." at the end): up to 2 lines broken at spaces; a word
+        that does not fit on the first line is cut there, on its own; the
+        second line takes the rest, cut at the end. Nautilus sets the whole
+        name; the cut text goes on top (the real name in _zxp_name)."""
         text = lbl.get_label()
         if text != getattr(lbl, '_zxp_text', None):
-            lbl._zxp_name = text        # (um nome posto pelo Nautilus)
+            lbl._zxp_name = text        # (a name set by Nautilus)
         name = lbl._zxp_name
         width = NAME_WIDTHS.get(getattr(self, '_mode', None))
-        # o item com o foco (o último clicado, mesmo já sem seleção) mostra o
-        # nome inteiro, enquanto a vista tiver o foco — como no XP
+        # the focused item (the last one clicked, even without selection) shows the
+        # whole name while the view has the focus — as in XP
         row = getattr(lbl, '_zxp_row', None)
         focused = row is not None and bool(row.get_state_flags() & Gtk.StateFlags.FOCUSED) and \
             self.win.is_active()
@@ -965,14 +965,14 @@ class XpExplorer:
         if out != text:
             lbl.set_label(out)
 
-    # ------------------------------------------------------------ miniaturas
-    # Miniaturas: a moldura de 96x96 do XP (1 px #ECE9D8, fundo branco), as
-    # imagens reduzidas para caber lá dentro (94x94), os outros com o ícone de
-    # 48 px ao centro (o Nautilus esticava-os para 96 e desfocavam). Ícones:
-    # 32 px (o Nautilus não tem menos de 48 na grelha). Ícones e Mosaicos: as
-    # imagens com o ícone do tipo, como no XP. Nos três, o ícone ao centro da
-    # coluna, sem os 18 px que o Nautilus deixa à esquerda para equilibrar a
-    # coluna dos emblemas.
+    # ------------------------------------------------------------ thumbnails
+    # Thumbnails: XP's 96x96 frame (1 px #ECE9D8, white background), images
+    # scaled down to fit inside (94x94), the others with the 48 px icon in
+    # the centre (Nautilus stretched them to 96 and they got blurry). Icons:
+    # 32 px (Nautilus has nothing below 48 in the grid). Icons and Tiles:
+    # images with the type icon, as in XP. In all three, the icon in the
+    # centre of the column, without the 18 px Nautilus leaves on the left to
+    # balance the emblems column.
     def _thumb_cells(self, grid):
         mode = getattr(self, '_mode', None)
         on = mode == 'thumbnails'
@@ -994,8 +994,8 @@ class XpExplorer:
                     icon_box._zxp_margin = icon_box.get_margin_start()
                 centred = mode in ('thumbnails', 'icons')
                 icon_box.set_margin_start(0 if centred else icon_box._zxp_margin)
-                # Ícones: 32x32 em vez dos 48x48 que o Nautilus pede (o dele
-                # volta ao sair, a não ser que entretanto tenha pedido outro)
+                # Icons: 32x32 instead of the 48x48 Nautilus asks for (its own comes back
+                # when leaving, unless it asked for another one in the meantime)
                 req = icon_box.get_size_request()
                 if mode == 'icons':
                     if (req.width, req.height) != (ICON_SIZE, ICON_SIZE):
@@ -1008,9 +1008,9 @@ class XpExplorer:
             self._thumb_picture(pic)
 
     def _thumb_picture(self, pic):
-        """A imagem da célula para a vista atual, sempre a partir da que o
-        Nautilus pôs (_zxp_src): as nossas (_zxp_mine) e a da seleção
-        (_zxp_tex) não contam como dele."""
+        """The cell's image for the current view, always from the one Nautilus
+        set (_zxp_src): ours (_zxp_mine) and the selection one (_zxp_tex) do
+        not count as its own."""
         mode = getattr(self, '_mode', None)
         on = mode == 'thumbnails'
         fit, valign = pic._zxp_fit
@@ -1049,7 +1049,7 @@ class XpExplorer:
         if mode == 'thumbnails':
             # a miniatura do Nautilus (cantos redondos, contorno): a do XP
             return self._xp_thumbnail(f) or src
-        # uma miniatura nos Ícones ou Mosaicos: o ícone do tipo de ficheiro
+        # a thumbnail in Icons or Tiles: the file type's icon
         mime = Nautilus.FileInfo.get_mime_type(f)
         if not mime:
             return src
@@ -1057,11 +1057,11 @@ class XpExplorer:
                                      Gtk.TextDirection.NONE, 0)
 
     def _xp_thumbnail(self, f):
-        """A miniatura como o XP a desenha nas Miniaturas: a imagem reduzida
-        para caber em 96x96 (as pequenas não crescem), ao centro; a moldura
-        cinzenta de 1 px é desenhada por cima da orla (CSS outline) e, com o
-        item selecionado, dá lugar a uma azul de 3 px por fora. Vem do
-        ficheiro da miniatura que o Nautilus já fez."""
+        """The thumbnail as XP draws it in Thumbnails: the image scaled down to fit
+        96x96 (small ones do not grow), centred; the 1 px grey frame is drawn
+        over the edge (CSS outline) and, with the item selected, gives way to
+        a 3 px blue one outside. It comes from the thumbnail file Nautilus
+        already made."""
         try:
             info = Gio.File.new_for_uri(Nautilus.FileInfo.get_uri(f)).query_info(
                 'thumbnail::path', Gio.FileQueryInfoFlags.NONE, None)
@@ -1093,11 +1093,11 @@ class XpExplorer:
             cache.popitem(last=False)
         return tex
 
-    # ------------------------------------------------- seleção como no XP
-    # O ícone dos itens selecionados fica misturado com a cor de realce
-    # (HIGHLIGHT), píxel a píxel: o Nautilus continua a mostrar o seu ícone,
-    # aqui só se troca a imagem da Gtk.Picture enquanto o item está
-    # selecionado e a janela ativa (inativa: o ícone normal, como no XP).
+    # ------------------------------------------------- selection as in XP
+    # The icon of selected items is blended with the highlight colour
+    # (HIGHLIGHT), pixel by pixel: Nautilus keeps showing its icon, here only
+    # the Gtk.Picture's image is swapped while the item is selected and the
+    # window active (inactive: the normal icon, as in XP).
     def _sel_cells(self, root):
         for cell in walk(root):
             if cell.__gtype__.name not in ('NautilusGridCell', 'NautilusNameCell'):
@@ -1120,7 +1120,7 @@ class XpExplorer:
         if not getattr(self, '_sel_watch', False):
             self._sel_watch = True
             self.win.connect('notify::is-active', lambda *_: self._sel_all())
-        # (o foco a entrar e a sair da vista muda a seleção, como no XP)
+        # (the focus entering and leaving the view changes the selection, as in XP)
         view = root if isinstance(root, Gtk.GridView) else next(
             (w for w in walk(root) if w.get_css_name() == 'listview'), None)
         if view is not None and not getattr(view, '_zxp_focus', False):
@@ -1140,7 +1140,7 @@ class XpExplorer:
             if getattr(w, '_zxp_sel', False):
                 self._sel_picture(w)
             elif getattr(w, '_zxp_row', None) is not None and isinstance(w, Gtk.Label):
-                self._xp_name(w)        # (o nome inteiro só com a janela ativa)
+                self._xp_name(w)        # (the whole name only with the window active)
 
     def _sel_picture(self, pic):
         if pic._zxp_busy:
@@ -1148,10 +1148,10 @@ class XpExplorer:
         cur = pic.get_paintable()
         if cur is None:
             return
-        if pic._zxp_tex is None or cur != pic._zxp_tex:      # (um ícone novo do Nautilus)
+        if pic._zxp_tex is None or cur != pic._zxp_tex:      # (a new icon from Nautilus)
             pic._zxp_orig, pic._zxp_tex = cur, None
-        # (nas Miniaturas o XP não tinge a imagem: a moldura fica azul, CSS;
-        # sem o foco na vista — a escrever um nome, no endereço — também não)
+        # (in Thumbnails XP does not tint the image: the frame turns blue, CSS;
+        # without the focus on the view — typing a name, in the address — not either)
         view = pic._zxp_row.get_parent()
         focused = view is not None and bool(view.get_state_flags() & Gtk.StateFlags.FOCUS_WITHIN)
         want = bool(pic._zxp_row.get_state_flags() & Gtk.StateFlags.SELECTED) and focused and \
@@ -1167,14 +1167,14 @@ class XpExplorer:
             pic._zxp_busy = False
 
     def _blend(self, paintable, pic):
-        """A imagem selecionada do XP: os píxeis com alfa >= 128 a meio
-        caminho da cor de realce, no alfa pré-multiplicado (o resultado pode
-        passar do alfa, como no XP: a mistura ao desenhar satura)."""
+        """XP's selected image: pixels with alpha >= 128 halfway to the highlight
+        colour, in premultiplied alpha (the result may exceed the alpha, as in
+        XP: blending when drawing saturates)."""
         w, h = paintable.get_intrinsic_width(), paintable.get_intrinsic_height()
         if w <= 0 or h <= 0:
             return None
-        # (no tamanho da própria imagem — não no da célula, que pode ainda ser
-        # o da vista anterior —, até 128 px: as grandes seriam lentas)
+        # (at the image's own size — not the cell's, which may still be the
+        # previous view's —, up to 128 px: big ones would be slow)
         f = min(1.0, 128 / w, 128 / h)
         w, h = max(1, round(w * f)), max(1, round(h * f))
         cache = self.__dict__.setdefault('_blend_cache', collections.OrderedDict())
@@ -1210,7 +1210,7 @@ class XpExplorer:
         return out
 
     def _brand(self):
-        """Bandeira do Windows no canto da barra de menus; anima a carregar."""
+        """Windows flag in the corner of the menu bar; animates while loading."""
         self.brand = Gtk.Image(pixel_size=BRAND_SIZE, css_classes=['zxp-explorer-brand-flag'])
         self.brand_frames = []
         path = asset('explorer-brand')
@@ -1258,7 +1258,7 @@ class XpExplorer:
         if action:
             btn.set_action_name(action)
 
-        # imagem "quente" ao passar o rato e cinzenta quando inativo
+        # "hot" image on hover and grey when disabled
         def sync(*_):
             state = 'disabled' if not btn.get_sensitive() else (
                 'hot' if btn.get_state_flags() & Gtk.StateFlags.PRELIGHT else 'normal')
@@ -1303,7 +1303,7 @@ class XpExplorer:
         bar.append(Gtk.Label(label=T['address'], css_classes=['dim-label']))
         self.entry = Gtk.Entry(hexpand=True)
         self.entry.connect('activate', lambda *_: self._go())
-        # botão de lista pendente dentro da caixa, como na barra de endereço do XP
+        # drop-down button inside the box, as in XP's address bar
         arrow = asset('combo-arrow-normal')
         if arrow:
             self.entry.set_icon_from_paintable(Gtk.EntryIconPosition.SECONDARY,
@@ -1320,10 +1320,10 @@ class XpExplorer:
         return bar
 
     def _section(self, title, body, special=None):
-        """Secção do painel de tarefas do XP: cabeçalho (bitmap 112 do
-        shellstyle.dll, título azul a negrito, seta de recolher 21×23) e corpo.
-        As especiais (Música, Imagens, Vídeos) têm o cabeçalho azul (110), o
-        ícone de 32 px a sair por cima e uma marca de água no corpo."""
+        """An XP task pane section: header (shellstyle.dll bitmap 112, bold blue
+        title, 21×23 collapse arrow) and body. The special ones (Music,
+        Pictures, Videos) have the blue header (110), the 32 px icon sticking
+        out on top and a watermark in the body."""
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, css_classes=['zxp-taskpane-section'])
         header = Gtk.Button(css_classes=['zxp-taskpane-header'], focusable=False)
         prefix = 'explorer-section'
@@ -1389,10 +1389,10 @@ class XpExplorer:
         if view:
             view.activate_action(f'view.{action}', None)
 
-    # ------------------------------------------ nova pasta e mudar o nome
-    # Como no XP: a pasta é criada logo ("Nova pasta", "Nova pasta (2)"…) e o
-    # nome fica numa caixa de edição por cima do item, em vez das janelas do
-    # Nautilus; Enter ou clicar fora confirma, Esc cancela.
+    # ------------------------------------------ new folder and rename
+    # As in XP: the folder is created at once ("Nova pasta", "Nova pasta
+    # (2)"…) and the name goes into an edit box over the item, instead of
+    # Nautilus's windows; Enter or clicking outside confirms, Esc cancels.
     def _keys(self, _ctrl, keyval, _code, state):
         mods = state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK |
                         Gdk.ModifierType.ALT_MASK)
@@ -1401,12 +1401,12 @@ class XpExplorer:
         if mods == Gdk.ModifierType.CONTROL_MASK and keyval in (
                 Gdk.KEY_plus, Gdk.KEY_equal, Gdk.KEY_minus, Gdk.KEY_0, Gdk.KEY_KP_Add,
                 Gdk.KEY_KP_Subtract, Gdk.KEY_KP_0):
-            return True                     # (sem zoom)
+            return True                     # (no zoom)
         if keyval == Gdk.KEY_F2 and not mods:
             return self._rename_selected()
         if keyval in (Gdk.KEY_Delete, Gdk.KEY_KP_Delete) and mods in (0, Gdk.ModifierType.SHIFT_MASK):
-            # (só com o foco nos ficheiros: no endereço o Delete apaga letras;
-            # Shift+Delete elimina de vez, como no XP)
+            # (only with the focus on the files: in the address Delete deletes
+            # letters; Shift+Delete deletes permanently, as in XP)
             focus, view = self.win.get_focus(), self._files_view()
             if focus is not None and view is not None and focus.is_ancestor(view) and self._selection():
                 self._confirm_delete(permanent=bool(mods))
@@ -1439,7 +1439,7 @@ class XpExplorer:
             dlg = model.get_item(i)
             if dlg.__gtype__.name == 'GtkMessageDialog' and \
                     GLib.get_monotonic_time() < getattr(self, '_auto_delete_until', 0):
-                # a pergunta do Nautilus depois da nossa (_delete_now): "Eliminar"
+                # Nautilus's question after ours (_delete_now): "Delete"
                 self._auto_delete_until = 0
                 dlg.set_opacity(0)
 
@@ -1461,9 +1461,9 @@ class XpExplorer:
 
     # ------------------------------------------------- eliminar, como no XP
     def _confirm_delete(self, permanent=False):
-        """A pergunta do XP antes de eliminar (textos e disposição dos
-        diálogos 1011-1013 do shell32): para a Reciclagem, com o som depois;
-        de vez (Shift+Delete, ou já dentro da Reciclagem), sem som."""
+        """XP's question before deleting (texts and layout of shell32 dialogs
+        1011-1013): to the Recycle Bin, with the sound afterwards; permanently
+        (Shift+Delete, or already inside the Recycle Bin), without sound."""
         files = self._selection()
         if not files:
             return False
@@ -1480,7 +1480,7 @@ class XpExplorer:
         else:
             title, text, icon = T['confirm-many'], T[f'{kind}-many'].format(len(files)), 'confirm-many'
         if not permanent:
-            # o ícone da Reciclagem como ela está (vazia ou cheia), como no XP
+            # the Recycle Bin's icon as it is (empty or full), as in XP
             try:
                 count = Gio.File.new_for_uri('trash:///').query_info(
                     'trash::item-count', Gio.FileQueryInfoFlags.NONE, None).get_attribute_uint32(
@@ -1502,9 +1502,9 @@ class XpExplorer:
         return True
 
     def _delete_now(self, uris):
-        """Eliminar de vez pelas operações do próprio Nautilus (progresso,
-        erros); a pergunta dele, que vem a seguir, já foi feita à maneira do
-        XP: é respondida aqui sem chegar a aparecer (_new_toplevels)."""
+        """Delete permanently through Nautilus's own operations (progress,
+        errors); its question, which comes next, has already been asked the XP
+        way: it is answered here without ever showing (_new_toplevels)."""
         self._auto_delete_until = GLib.get_monotonic_time() + 5 * 1000000
 
         def got(_o, res):
@@ -1513,7 +1513,7 @@ class XpExplorer:
             except GLib.Error as e:
                 print(f'Zorin XP: eliminar: {e}')
                 return
-            # (assíncrono: a chamada é ao próprio processo)
+            # (asynchronous: the call is to the process itself)
             proxy.call('DeleteURIs', GLib.Variant('(asa{sv})', (uris, {})), Gio.DBusCallFlags.NONE,
                        -1, None, lambda p, r: p.call_finish(r))
         Gio.DBusProxy.new_for_bus(Gio.BusType.SESSION, Gio.DBusProxyFlags.NONE, None, 'org.gnome.Nautilus',
@@ -1521,10 +1521,10 @@ class XpExplorer:
                                   None, got)
 
     def _xp_message(self, title, text, icon, on_yes, many=False):
-        """Uma caixa de mensagem do XP (Sim / Não), à medida do diálogo de
-        confirmação do shell32 (unidades de diálogo da Tahoma 8 = 1,5 px):
-        412 x 127 px (vários itens: 412 x 97), o ícone de 32 px em (15, 15),
-        o texto ao lado, os botões em baixo à direita."""
+        """An XP message box (Yes / No), sized like shell32's confirmation dialog
+        (Tahoma 8 dialog units = 1.5 px): 412 x 127 px (several items:
+        412 x 97), the 32 px icon at (15, 15), the text beside it, the buttons
+        at the bottom right."""
         dlg = Gtk.Window(title=title, transient_for=self.win, modal=True, resizable=False,
                          css_classes=['zxp-message'])
         fixed = Gtk.Fixed()
@@ -1534,8 +1534,8 @@ class XpExplorer:
         if path:
             img.set_from_file(path)
         fixed.put(img, 15, 15)
-        # (o texto partido aqui, à largura do diálogo: uma etiqueta com quebra
-        # automática pede ao Gtk.Fixed a altura de uma coluna de 1 letra)
+        # (the text broken here, at the dialog's width: a wrapping label asks the
+        # Gtk.Fixed for the height of a 1-letter-wide column)
         label = Gtk.Label(xalign=0, yalign=0)
         width = 336 if many else 330
 
@@ -1588,7 +1588,7 @@ class XpExplorer:
         return self._start_edit(target)
 
     def _edit_when_shown(self, target, tries=30):
-        """Espera que o item novo apareça na vista, seleciona-o e edita-o."""
+        """Waits for the new item to appear in the view, selects it and edits it."""
         def attempt():
             nonlocal tries
             tries -= 1
@@ -1619,7 +1619,7 @@ class XpExplorer:
         return False
 
     def _start_edit(self, target):
-        # (uma edição de cada vez: a que estiver aberta é confirmada)
+        # (one edit at a time: the open one is confirmed)
         if getattr(self, '_editor', None) is not None and getattr(self, '_editor_finish', None):
             self._editor_finish(True)
         view = self._files_view()
@@ -1646,23 +1646,23 @@ class XpExplorer:
         ok, rect = label.compute_bounds(overlay)
         if not ok:
             return False
-        # a caixa como no XP (medida): o texto fica onde estava o nome; com o
-        # nome centrado (Ícones, Miniaturas) a caixa é o texto + 5 px de cada
-        # lado; à esquerda (Mosaicos) 4 px antes e 15 depois; na Lista e nos
-        # Detalhes 2 px antes (para não tocar no ícone) e 15 depois. 17 px de
-        # altura: o texto (13) + 1 px + o contorno, em cima e em baixo.
+        # the box as in XP (measured): the text stays where the name was; with the
+        # name centred (Icons, Thumbnails) the box is the text + 5 px on each
+        # side; on the left (Tiles) 4 px before and 15 after; in List and
+        # Details 2 px before (so it does not touch the icon) and 15 after.
+        # 17 px high: the text (13) + 1 px + the outline, above and below.
         mode = getattr(self, '_mode', None)
         grid = label.get_ancestor(Gtk.GridView) is not None
         centred = grid and mode in ('icons', 'thumbnails')
         kind = 'zxp-rename-left' if grid and not centred else ('zxp-rename-list' if not grid else '')
         before, after = (5, 5) if centred else ((4, 15) if grid else (2, 15))
-        # um nome mais largo que o dos Ícones/Miniaturas: caixa de várias
-        # linhas com essa largura, o texto centrado e partido (como no XP)
+        # a name wider than the Icons/Thumbnails one: a multi-line box of that
+        # width, the text centred and broken (as in XP)
         probe = label.create_pango_layout(display).get_pixel_size()[0]
         multi = centred and probe > NAME_WIDTHS.get(mode, probe)
         if multi:
-            # (dentro de uma moldura com a altura calculada aqui: um texto
-            # com quebra pede a altura de uma coluna de 1 letra)
+            # (inside a frame with the height calculated here: a wrapping text asks
+            # for the height of a 1-letter-wide column)
             editor = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR, justification=Gtk.Justification.CENTER,
                                   accepts_tab=False)
             entry = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER,
@@ -1683,26 +1683,25 @@ class XpExplorer:
         width = text_w + before + after + 2
 
         def place():
-            # (a célula de um item novo ainda muda de sítio durante uns
-            # instantes, e a vista pode deslocar-se: a caixa segue o nome
-            # enquanto se escreve)
+            # (a new item's cell still moves for a few moments, and the view may
+            # scroll: the box follows the name while typing)
             ok, rect = label.compute_bounds(overlay)
             if not ok:
                 return
             pad = label.get_style_context().get_padding()
             shown_w = label.get_layout().get_pixel_size()[0]
             if centred:
-                # (o centro do nome que estava à vista)
+                # (the centre of the name that was visible)
                 centre = rect.get_x() + pad.left + (rect.get_width() - pad.left - pad.right) / 2
                 x = int(round(centre - text_w / 2)) - before - 1
             else:
                 x = int(round(rect.get_x() + pad.left + label.get_xalign() *
                               (rect.get_width() - pad.left - pad.right - shown_w))) - before - 1
             if grid:
-                # (nas Miniaturas logo abaixo da moldura de 3 px da seleção)
+                # (in Thumbnails right below the selection's 3 px frame)
                 y = int(rect.get_y()) + pad.top - 2 + (1 if mode == 'thumbnails' else 0)
             else:
-                # (na Lista e nos Detalhes a caixa ocupa a linha: 17 px)
+                # (in List and Details the box takes the row: 17 px)
                 row = label.get_parent()
                 while row is not None and row.get_css_name() != 'row':
                     row = row.get_parent()
@@ -1712,7 +1711,7 @@ class XpExplorer:
             entry.set_margin_top(max(0, y))
 
         def grow(*_):
-            # cresce com o texto escrito (a de várias linhas cresce para baixo)
+            # grows with the typed text (the multi-line one grows downwards)
             if multi:
                 layout = editor.create_pango_layout(get_text())
                 layout.set_width(text_w * Pango.SCALE)
@@ -1753,7 +1752,7 @@ class XpExplorer:
                     target.set_display_name(new, None)
                 except GLib.Error as e:
                     print(f'Zorin XP: mudar o nome: {e}')
-            # extensão mudada: a pergunta do XP (shell32, cadeia 4112)
+            # extension changed: XP's question (shell32, string 4112)
             if not is_dir and os.path.splitext(display)[1].lower() != os.path.splitext(new)[1].lower():
                 self._xp_message(T['rename'], T['ask-extension'], 'warning', rename)
             else:
@@ -1769,7 +1768,7 @@ class XpExplorer:
                 finish(False)
                 return True
             if multi and kv in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
-                finish(True)            # (Enter confirma, não muda de linha)
+                finish(True)            # (Enter confirms, it does not add a line)
                 return True
             return False
         keys.connect('key-pressed', key)
@@ -1778,8 +1777,8 @@ class XpExplorer:
         started = GLib.get_monotonic_time()
 
         def left(*_):
-            # (logo ao abrir, o foco pode ser devolvido a outro sítio — ao
-            # fechar o popover do Nautilus, por exemplo: a caixa retoma-o)
+            # (right when it opens, the focus may be given back elsewhere — when
+            # Nautilus's popover closes, for example: the box takes it back)
             if GLib.get_monotonic_time() - started < 400000:
                 GLib.idle_add(lambda: editor.grab_focus() and False)
                 return
@@ -1787,7 +1786,7 @@ class XpExplorer:
         focus.connect('leave', left)
         editor.add_controller(focus)
         editor.grab_focus()
-        # nome sem a extensão selecionado (como no XP); pastas: tudo
+        # name without the extension selected (as in XP); folders: everything
         dot = display.rfind('.')
         end = dot if (not is_dir and dot > 0) else len(display)
         if multi:
@@ -1801,12 +1800,12 @@ class XpExplorer:
         if not places or not isinstance(self.sidebar_tv, Adw.ToolbarView):
             return
         self.sidebar_tv.add_css_class('zxp-taskpane')
-        # painel de tarefas do XP: 250 px
+        # XP's task pane: 250 px
         self.split.set_min_sidebar_width(250)
         self.split.set_max_sidebar_width(250)
 
-        # os locais do Nautilus ficam numa secção ("Outros locais"), só com a
-        # altura dos itens; o painel inteiro desloca-se, como no XP
+        # Nautilus's places go into a section ("Outros locais"), only as tall as
+        # the items; the whole pane scrolls, as in XP
         self.sidebar_tv.set_content(None)
         inner = find(places, 'GtkScrolledWindow')
         if inner:
@@ -1818,13 +1817,13 @@ class XpExplorer:
         self.details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.tasks_section = self._section(T['file-tasks'], self.tasks_box)
         sections = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, css_classes=['zxp-taskpane-sections'])
-        # secção especial da pasta (Música, Imagens, Vídeos), por cima
+        # the folder's special section (Music, Pictures, Videos), on top
         self.special_slot = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.special_kind = None
         sections.append(self.special_slot)
         sections.append(self.tasks_section)
         sections.append(self._section(T['other-places'], places))
-        # os atalhos (marcadores) à parte, só quando há algum
+        # the shortcuts (bookmarks) separately, only when there are any
         self.shortcuts_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.shortcuts_section = self._section(T['shortcuts'], self.shortcuts_box)
         sections.append(self.shortcuts_section)
@@ -1834,7 +1833,7 @@ class XpExplorer:
         scroller.set_child(sections)
         self.sidebar_tv.set_content(scroller)
 
-        # ícones a cores (o Nautilus usa os simbólicos, monocromáticos)
+        # colour icons (Nautilus uses the monochrome symbolic ones)
         listbox = find(places, 'GtkListBox')
         self._places = places
         self._places_list(listbox)
@@ -1843,7 +1842,7 @@ class XpExplorer:
         pending = [0]
 
         def soon(*_):
-            # (uma passagem por ciclo, por muitos avisos que cheguem)
+            # (one pass per cycle, however many notices arrive)
             if not pending[0]:
                 pending[0] = GLib.idle_add(color_icons)
 
@@ -1855,12 +1854,12 @@ class XpExplorer:
                 g = img.get_gicon()
                 if isinstance(g, Gio.ThemedIcon):
                     names = [n[:-len('-symbolic')] for n in g.get_names() if n.endswith('-symbolic')]
-                    # Recentes e Favoritos com os ícones do XP ("Documentos
-                    # recentes" e "Favoritos" do menu Iniciar)
+                    # Recent and Favorites with XP's icons (the Start menu's "Documentos
+                    # recentes" and "Favoritos")
                     names = [SIDEBAR_ICONS.get(n, n) for n in names]
                     icon = Gio.ThemedIcon.new_from_names(names) if names else None
-                    # só se mudar: trocar o ícone avisa notify::gicon, que
-                    # voltaria aqui sem fim (o Nautilus encravava)
+                    # only if it changes: swapping the icon emits notify::gicon, which would
+                    # come back here endlessly (Nautilus got stuck)
                     if icon is not None and not g.equal(icon):
                         img.set_from_gicon(icon)
                 if img.get_pixel_size() != 16:
@@ -1870,7 +1869,7 @@ class XpExplorer:
                     img.connect('notify::gicon', soon)
             return False
         if listbox:
-            # (o modelo tem de ficar guardado, senão deixa de avisar)
+            # (the model must stay stored, otherwise it stops notifying)
             listbox._zxp_children = listbox.observe_children()
             listbox._zxp_children.connect('items-changed', soon)
             color_icons()
@@ -1878,9 +1877,9 @@ class XpExplorer:
 
     # ------------------------------------------ "Outros locais" e "Atalhos"
     def _places_list(self, listbox):
-        """Outros locais só com O meu computador, Os meus documentos,
-        Recentes, Favoritos e Downloads, por esta ordem (e as pens/discos
-        ligados no fim, enquanto lá estiverem); sem as linhas de separação."""
+        """Other Places only with O meu computador, Os meus documentos, Recent,
+        Favorites and Downloads, in this order (and the pens/disks plugged in
+        at the end, while they are there); without the separator lines."""
         if listbox is None:
             return
         U = GLib.UserDirectory
@@ -1912,15 +1911,15 @@ class XpExplorer:
         listbox.set_header_func(None)
 
     def _open_place(self, uri):
-        # (como um clique nos locais: abre nesta janela)
+        # (like a click on the places: opens in this window)
         places = getattr(self, '_places', None)
         if places is not None:
             places.emit('open-location', Gio.File.new_for_uri(uri), OPEN_NORMAL)
 
     def _not_shortcuts(self):
-        """O que não vai para os Atalhos: a pasta pessoal e as do XDG (o
-        xdg-user-dirs põe-nas nos marcadores; estão nos Outros locais ou
-        dentro de Os meus documentos)."""
+        """What does not go into the Shortcuts: the home folder and the XDG ones
+        (xdg-user-dirs puts them in the bookmarks; they are in Other Places or
+        inside Os meus documentos)."""
         U = GLib.UserDirectory
         out = {Gio.File.new_for_path(GLib.get_home_dir()).get_uri()}
         for d in (U.DIRECTORY_DESKTOP, U.DIRECTORY_DOCUMENTS, U.DIRECTORY_DOWNLOAD,
@@ -1941,12 +1940,12 @@ class XpExplorer:
 
     @staticmethod
     def _same_uri(uri):
-        # (os marcadores podem ter outra forma de escrever o mesmo endereço)
+        # (bookmarks may write the same address another way)
         return Gio.File.new_for_uri(uri).get_uri()
 
     def _shortcuts(self):
-        """[(endereço, nome)]: os marcadores do GTK (os mesmos da barra do
-        Nautilus e das caixas de abrir e guardar), menos as pastas pessoais."""
+        """[(address, name)]: GTK's bookmarks (the same as Nautilus's sidebar and
+        the open/save dialogs'), minus the home folders."""
         skip = self._not_shortcuts()
         out = []
         for line in self._bookmark_lines():
@@ -1981,7 +1980,7 @@ class XpExplorer:
         self._sync_shortcuts()
 
     def _watch_shortcuts(self):
-        # (o Nautilus e as caixas de abrir também mexem nos marcadores)
+        # (Nautilus and the open dialogs also change the bookmarks)
         self._bookmarks_monitor = Gio.File.new_for_path(BOOKMARKS).monitor_file(
             Gio.FileMonitorFlags.NONE, None)
         self._shortcuts_idle = 0
@@ -2037,11 +2036,11 @@ class XpExplorer:
         return btn
 
     def _place_icon(self, uri, f):
-        """O ícone de um local (Atalhos, título, endereço; a barra de tarefas
-        faz o mesmo, explorerIcons.js): o escolhido (SHORTCUT_ICONS) ou, na
-        raiz de um disco montado (a ligação para /mnt/hdd, por exemplo), o do
-        disco do XP — de rede nos sistemas de ficheiros de rede. Recentes e
-        Favoritos com os ícones a cores da barra lateral."""
+        """A place's icon (Shortcuts, title, address; the taskbar does the same,
+        explorerIcons.js): the chosen one (SHORTCUT_ICONS) or, at the root of a
+        mounted disk (the link to /mnt/hdd, for example), XP's disk icon — a
+        network one for network file systems. Recent and Favorites with the
+        sidebar's colour icons."""
         special = SCHEME_ICONS.get(f.get_uri_scheme() or '')
         if special:
             return Gio.ThemedIcon.new(special)
@@ -2074,8 +2073,8 @@ class XpExplorer:
         item.set_action_and_target_value('xp.remove-shortcut', GLib.Variant('s', uri))
         bottom.append_item(item)
         menu.append_section(None, bottom)
-        # (pendurado na secção e não no botão: dentro do botão herdava o
-        # sublinhado e a cor dele ao passar o rato)
+        # (hung on the section and not on the button: inside the button it
+        # inherited its underline and colour on hover)
         holder = self.shortcuts_section
         ok, pt = btn.compute_point(holder, Graphene.Point().init(x, y))
         pop = Gtk.PopoverMenu.new_from_model(menu)
@@ -2086,13 +2085,13 @@ class XpExplorer:
         rect.x, rect.y = (int(pt.x), int(pt.y)) if ok else (int(x), int(y))
         rect.width = rect.height = 1
         pop.set_pointing_to(rect)
-        # (o menu sai da secção quando fecha)
+        # (the menu leaves the section when it closes)
         pop.connect('closed', lambda p: GLib.idle_add(lambda: p.unparent() and False))
         pop.popup()
 
     def _menu_shortcut(self, pop):
-        """"Adicionar atalho" (ou "Remover atalho") no menu do botão direito:
-        o da pasta selecionada, ou o do fundo para a pasta aberta."""
+        """"Adicionar atalho" (or "Remover atalho") in the right-click menu: the
+        selected folder's, or the background's for the open folder."""
         model = pop.get_menu_model()
         if not isinstance(model, Gio.Menu):
             return
@@ -2104,13 +2103,13 @@ class XpExplorer:
             slot = self._slot()
             loc = slot.get_property('location') if slot else None
             uri = loc.get_uri() if loc else None
-            # antes das Propriedades (a última secção)
+            # before Properties (the last section)
             pos = max(0, model.get_n_items() - 1)
         elif menu_has_action(model, 'view.cut'):
             sel = self._selection()
             if len(sel) == 1 and Nautilus.FileInfo.is_directory(sel[0]):
                 uri = Nautilus.FileInfo.get_uri(sel[0])
-            # depois de Abrir
+            # after Open
             pos = next((i + 1 for i in range(model.get_n_items())
                         if menu_has_action_at(model, i, 'view.open-item-new-window')), 1)
         if not uri or not self._can_shortcut(uri):
@@ -2127,7 +2126,7 @@ class XpExplorer:
 
     # --------------------------------------------- tarefas e detalhes
     def _selection(self):
-        """Ficheiros selecionados na vista atual (Gio.File, FileInfo do Nautilus)."""
+        """Files selected in the current view (Gio.File, Nautilus's FileInfo)."""
         view = self._files_view()
         widget = (find(view, 'GtkGridView') or find(view, 'GtkColumnView')) if view else None
         model = widget.get_model() if widget else None
@@ -2143,7 +2142,7 @@ class XpExplorer:
         it_ok, it, pos = Gtk.BitsetIter.init_first(bits)
         while it_ok and len(out) < 1000:
             item = model.get_item(pos)
-            if isinstance(item, Gtk.TreeListRow):   # (vista de lista)
+            if isinstance(item, Gtk.TreeListRow):   # (list view)
                 item = item.get_item()
             f = item.get_property('file') if item is not None else None
             if f is not None:
@@ -2164,7 +2163,7 @@ class XpExplorer:
         return None
 
     def _media(self, loc, prefix, limit=500):
-        """URIs dos ficheiros de um tipo (audio/, image/, video/) na pasta."""
+        """URIs of the files of a type (audio/, image/, video/) in the folder."""
         out = []
         try:
             en = loc.enumerate_children('standard::name,standard::content-type',
@@ -2228,7 +2227,7 @@ class XpExplorer:
         if not kind:
             return
         if not tasks:
-            # pasta ainda sem ficheiros: a secção fica, com a tarefa inativa
+            # folder still without files: the section stays, with the task disabled
             tasks.append(('slideshow' if kind == 'pictures' else 'play',
                           T['slideshow' if kind == 'pictures' else 'play-all'], None))
         body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -2274,7 +2273,7 @@ class XpExplorer:
                     continue
                 self.tasks_box.append(self._task(icon, T[f'task-{icon}-{what}'], action))
 
-        # detalhes: o item selecionado, ou a pasta aberta
+        # details: the selected item, or the open folder
         child = self.details_box.get_first_child()
         while child:
             nxt = child.get_next_sibling()
@@ -2288,7 +2287,7 @@ class XpExplorer:
         if len(files) > 1:
             self.details_box.append(Gtk.Label(label=T['n-selected'].format(len(files)), xalign=0,
                                               wrap=True, css_classes=['zxp-details-count']))
-            # tamanho total dos ficheiros (as pastas não contam, como no XP)
+            # total size of the files (folders do not count, as in XP)
             total, any_file = 0, False
             for f in files:
                 try:
@@ -2320,8 +2319,8 @@ class XpExplorer:
                 lines.append(T['dimensions'].format(w, h))
                 self._preview_image(target.get_path(), self._details_uri)
         elif ctype == 'application/pdf' and target.get_path():
-            # (como o XP não tinha miniaturas de PDF nos ícones, a primeira
-            # página aparece aqui, nos Detalhes)
+            # (as XP had no PDF thumbnails on the icons, the first page shows here,
+            # in Details)
             self._preview_pdf(target, info, self._details_uri)
         name = Gtk.Label(label=info.get_display_name(), xalign=0, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR,
                          css_classes=['zxp-details-name'])
@@ -2340,16 +2339,17 @@ class XpExplorer:
             self.details_box.append(lbl)
         return False
 
-    # ----------------------------------------------- menu do botão direito
-    # No fundo da pasta, como no XP: "Ver" (as vistas do Explorador), "Dispor
-    # ícones por" (Nome, Tamanho, Tipo, Modificado: a ordenação do Nautilus,
-    # com a bolinha na escolhida) e "Actualizar", por cima do que o Nautilus
-    # já tem. O menu é um popover filho da vista, criado no primeiro clique.
+    # ----------------------------------------------- right-click menu
+    # On the folder background, as in XP: "Ver" (the Explorer's views),
+    # "Dispor ícones por" (Name, Size, Type, Modified: Nautilus's sorting,
+    # with the dot on the chosen one) and "Actualizar", on top of what
+    # Nautilus already has. The menu is a popover child of the view, created
+    # on the first click.
     def _hook_menus(self, view):
         if view is None or getattr(view, '_zxp_menus', False):
             return False
         view._zxp_menus = True
-        # (a lista tem de ficar guardada: libertada, deixa de avisar)
+        # (the list must stay stored: freed, it stops notifying)
         children = view._zxp_children = view.observe_children()
 
         def check(*_):
@@ -2357,7 +2357,7 @@ class XpExplorer:
                 pop = children.get_item(i)
                 if isinstance(pop, Gtk.PopoverMenu) and not getattr(pop, '_zxp_menu', False):
                     pop._zxp_menu = True
-                    # submenus em cascata, ao lado (o GTK desliza-os dentro do mesmo menu)
+                    # cascading submenus, to the side (GTK slides them inside the same menu)
                     pop.set_flags(Gtk.PopoverMenuFlags.NESTED)
                     pop.connect('notify::menu-model', lambda p, _x: self._xp_background_menu(p))
                     pop.connect('notify::visible', lambda p, _x: p.get_visible() and (
@@ -2366,9 +2366,9 @@ class XpExplorer:
                     self._xp_background_menu(pop)
                 elif pop.__gtype__.name == 'NautilusRenameFilePopover' and \
                         not getattr(pop, '_zxp_menu', False):
-                    # (o "Mudar o nome" do Nautilus, se ainda aparecer: o do XP)
+                    # (Nautilus's "Rename", if it still shows: XP's)
                     pop._zxp_menu = True
-                    # (depois de o foco voltar à vista, senão a caixa fecha logo)
+                    # (after the focus goes back to the view, otherwise the box closes at once)
                     pop.connect('notify::visible', lambda p, _x: p.get_visible() and (
                         p.popdown(), GLib.timeout_add(150, lambda: self._rename_selected() and False)))
         children.connect('items-changed', lambda *_: check())
@@ -2380,9 +2380,9 @@ class XpExplorer:
         if not isinstance(model, Gio.Menu) or model.get_n_items() == 0:
             return
         if model.get_item_attribute_value(0, 'zxp', None) is not None:
-            return                                  # (já lá está)
+            return                                  # (it is already there)
         if not menu_has_action(model, 'view.current-directory-properties'):
-            return                                  # (é o menu dos itens selecionados)
+            return                                  # (it is the selected items' menu)
         views = Gio.Menu()
         for key in VIEW_MODES:
             views.append(T[key], f'xp.view-mode::{key}')
@@ -2397,8 +2397,8 @@ class XpExplorer:
         top.append(T['refresh'], 'win.reload')
         section = Gio.MenuItem.new_section(None, top)
         section.set_attribute_value('zxp', GLib.Variant('b', True))
-        # os itens soltos do início (Nova pasta, Novo documento...) numa secção,
-        # para a linha de separação ficar por baixo dos nossos, como no XP
+        # the loose items at the start (New Folder, New Document...) in a section,
+        # so the separator line sits below ours, as in XP
         loose = Gio.Menu()
         while model.get_n_items() and not menu_item_is_section(model, 0):
             loose.append_item(Gio.MenuItem.new_from_model(model, 0))
@@ -2407,14 +2407,14 @@ class XpExplorer:
             model.insert_section(0, None, loose)
         model.insert_item(0, section)
 
-    # ------------------------------------------- pré-visualização (Detalhes)
+    # ------------------------------------------- preview (Details)
     def _preview_size(self):
         width = self.details_box.get_width()
         return (min(PREVIEW_MAX[0], width) if width > 0 else PREVIEW_MAX[0]), PREVIEW_MAX[1]
 
     def _preview_image(self, path, uri):
-        """A imagem reduzida para caber no painel (nunca maior que o original):
-        o painel tem sempre a mesma largura."""
+        """The image scaled down to fit the pane (never bigger than the original):
+        the pane always has the same width."""
         max_w, max_h = self._preview_size()
         try:
             stream = Gio.File.new_for_path(path).read(None)
@@ -2427,7 +2427,7 @@ class XpExplorer:
             except GLib.Error:
                 return
             if getattr(self, '_details_uri', None) != uri:
-                return                          # (entretanto mudou a seleção)
+                return                          # (the selection changed in the meantime)
             pic = Gtk.Picture.new_for_paintable(Gdk.Texture.new_for_pixbuf(pixbuf))
             pic.set_can_shrink(False)
             pic.set_halign(Gtk.Align.CENTER)
@@ -2439,7 +2439,7 @@ class XpExplorer:
         GdkPixbuf.Pixbuf.new_from_stream_at_scale_async(stream, max_w, max_h, True, None, done)
 
     def _preview_pdf(self, target, info, uri):
-        """Primeira página do PDF (o evince-thumbnailer, numa cópia em cache)."""
+        """The PDF's first page (evince-thumbnailer, in a cached copy)."""
         import hashlib
         mtime = info.get_modification_date_time()
         key = hashlib.md5(f'{uri} {mtime.to_unix() if mtime else 0}'.encode()).hexdigest()
@@ -2451,8 +2451,8 @@ class XpExplorer:
         if not tool:
             return
         os.makedirs(PREVIEW_CACHE, exist_ok=True)
-        # (o AppArmor do Evince só deixa o thumbnailer escrever em
-        # /tmp/gnome-desktop-*: a imagem passa depois para a cache)
+        # (Evince's AppArmor only lets the thumbnailer write to
+        # /tmp/gnome-desktop-*: the image moves to the cache afterwards)
         tmp = f'/tmp/gnome-desktop-zxp-{key}.png'
         try:
             proc = Gio.Subprocess.new([tool, '-s', '256', uri, tmp], Gio.SubprocessFlags.STDERR_SILENCE)
@@ -2486,8 +2486,8 @@ class XpExplorer:
         self._slot_obj = slot
         self._slot_handler = slot.connect('notify::location', lambda *_: self._sync_location())
         if first:
-            # vista do XP guardada (ou Ícones a 48 px, em vez das pastas
-            # enormes), aplicada quando a primeira pasta já tem vista
+            # saved XP view (or Icons at 48 px, instead of the huge folders),
+            # applied when the first folder already has a view
             def apply_mode(tries=[20]):
                 if self._files_view() is None and tries[0] > 0:
                     tries[0] -= 1
@@ -2496,7 +2496,7 @@ class XpExplorer:
                 return False
             GLib.timeout_add(100, apply_mode)
         self._sync_location()
-        # a bandeira anima enquanto a pasta carrega
+        # the flag animates while the folder loads
         if getattr(self, '_loading_handler', None) and getattr(self, '_loading_slot', None):
             self._loading_slot.disconnect(self._loading_handler)
         self._loading_slot = slot
@@ -2512,7 +2512,7 @@ class XpExplorer:
         return loc.get_uri_scheme() if loc is not None else None
 
     def _sync_title(self, *_):
-        # o mesmo nome da barra lateral (o Nautilus põe "Recente" no título)
+        # the same name as the sidebar's (Nautilus puts "Recent" in the title)
         if self._location_scheme() == 'recent' and self.win.get_title() != T['recent']:
             self.win.set_title(T['recent'])
 
@@ -2544,7 +2544,7 @@ class XpExplorer:
                              GLib.PRIORITY_DEFAULT, None, done)
 
     def _go(self):
-        # o endereço vai para a caixa de localização do próprio Nautilus
+        # the address goes to Nautilus's own location box
         text = self.entry.get_text().strip()
         loc_entry = find(self.content_tv, 'NautilusLocationEntry')
         if not text or not loc_entry:
@@ -2597,7 +2597,7 @@ class _Click:
 
 
 def nav_click():
-    """O clique do Explorador do XP ao abrir uma pasta (uma vez por mudança)."""
+    """The XP Explorer's click when opening a folder (once per change)."""
     now = GLib.get_monotonic_time() // 1000
     if now - _Click.last < NAV_QUIET_MS:
         return
@@ -2609,7 +2609,7 @@ _SOUNDS = {}
 
 
 def play_sound(path):
-    """Um som do esquema do XP (se os sons de eventos estiverem ligados)."""
+    """A sound from XP's scheme (if event sounds are on)."""
     if _Click.sound is None:
         _Click.sound = Gio.Settings.new('org.gnome.desktop.sound')
     if not _Click.sound.get_boolean('event-sounds') or not os.path.exists(path):
@@ -2622,8 +2622,8 @@ def play_sound(path):
 
 
 def swap_menu_actions(model):
-    """Os itens dos menus do Nautilus que abrem as janelas dele (nova pasta,
-    mudar o nome, eliminar sem perguntar) passam a fazer o que o XP faz."""
+    """The Nautilus menu items that open its own windows (new folder, rename,
+    delete without asking) now do what XP does."""
     if not isinstance(model, Gio.Menu):
         return
     for i in range(model.get_n_items()):
@@ -2640,15 +2640,15 @@ def swap_menu_actions(model):
 
 
 def xp_wrap(text, width, measure, lines=2):
-    """text em até `lines` linhas de `width` px, como o DrawText do XP com
-    DT_WORDBREAK | DT_END_ELLIPSIS: parte nos espaços; uma palavra mais larga
-    que a linha é cortada com "..." e acaba ali; a última linha leva o resto
-    do texto, cortado no fim. lines=None: o texto inteiro (o nome do item com
-    foco no XP), com as palavras compridas partidas onde a linha acaba."""
+    """text in up to `lines` lines of `width` px, like XP's DrawText with
+    DT_WORDBREAK | DT_END_ELLIPSIS: breaks at spaces; a word wider than the
+    line is cut with "..." and ends there; the last line takes the rest of
+    the text, cut at the end. lines=None: the whole text (the focused item's
+    name in XP), with long words broken where the line ends."""
     if measure(text) <= width:
         return text
 
-    def fits(t):                        # o maior começo de t que cabe (>= 1)
+    def fits(t):                        # the longest start of t that fits (>= 1)
         lo, hi = 1, len(t)
         while lo < hi:
             mid = (lo + hi + 1) // 2
@@ -2662,7 +2662,7 @@ def xp_wrap(text, width, measure, lines=2):
         if measure(t) <= width:
             return t
         lo, hi = 0, len(t)
-        while lo < hi:                  # o maior começo que cabe com "..."
+        while lo < hi:                  # the longest start that fits with "..."
             mid = (lo + hi + 1) // 2
             if measure(t[:mid].rstrip() + '...') <= width:
                 lo = mid
@@ -2733,13 +2733,13 @@ def on_window(_app, win):
     if win.__gtype__.name != 'NautilusWindow' or getattr(win, '_zxp', None):
         return
 
-    # quando a janela é criada ainda não tem o conteúdo: reorganizar quando
-    # ela é preparada para aparecer (antes do primeiro desenho)
+    # when the window is created it does not have its content yet: rearrange
+    # when it is being prepared to show (before the first draw)
     def apply(*_):
         if getattr(win, '_zxp', None) is None and win.get_content() is not None:
             try:
                 win._zxp = XpExplorer(win)
-            except Exception as e:  # nunca impedir o Nautilus de abrir
+            except Exception as e:  # never stop Nautilus from opening
                 print(f'Zorin XP: {e}')
                 win._zxp = False
     if win.get_realized():
@@ -2756,20 +2756,20 @@ if app is not None:
 
 
 def _xp_size(info):
-    # Detalhes do XP: sempre em KB, arredondado para cima, com separador
-    # de milhares; vazio nas pastas
+    # XP's Details: always in KB, rounded up, with a thousands separator;
+    # empty for folders
     kb = (info.get_size() + 1023) // 1024
     return f'{kb:,}'.replace(',', '.' if LANG == 'pt' else ',') + ' KB'
 
 
 def _xp_type(ctype):
-    # o tipo com maiúscula, como os do registo do XP ("Imagem JPEG")
+    # the type capitalised, like the ones in XP's registry ("Imagem JPEG")
     text = Gio.content_type_get_description(ctype) if ctype else ''
     return text[:1].upper() + text[1:]
 
 
 def _image_size(loc, ctype):
-    """"960 x 957" para as imagens locais (só lê o cabeçalho)."""
+    """"960 x 957" for local images (only reads the header)."""
     path = loc.get_path()
     if not path or not ctype.startswith('image/'):
         return ''
@@ -2781,8 +2781,8 @@ def _image_size(loc, ctype):
 
 
 class ZorinXpExplorer(GObject.GObject, Nautilus.ColumnProvider, Nautilus.InfoProvider):
-    """Colunas dos Detalhes com os formatos do XP (tamanho em KB, "Pasta de
-    ficheiros", data dd-mm-aaaa hh:mm)."""
+    """Details columns with XP's formats (size in KB, "Pasta de ficheiros",
+    date dd-mm-yyyy hh:mm)."""
 
     def get_columns(self):
         return (
@@ -2809,9 +2809,9 @@ class ZorinXpExplorer(GObject.GObject, Nautilus.ColumnProvider, Nautilus.InfoPro
         ctype = info.get_content_type() or ''
         kind = T['folder-type'] if is_dir else _xp_type(ctype)
         file.add_string_attribute('zxp_type', kind)
-        # Mosaicos (uma legenda de duas linhas, como no XP): imagens com as
-        # dimensões e o tipo, os outros ficheiros com o tipo e o tamanho, as
-        # pastas só com o nome
+        # Tiles (a two-line caption, as in XP): images with the dimensions and the
+        # type, other files with the type and size, folders with the name only
+
         tile = ''
         if not is_dir:
             dims = _image_size(loc, ctype)

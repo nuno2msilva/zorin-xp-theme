@@ -1,23 +1,23 @@
 /*
- * Zen Browser com o aspeto do Internet Explorer 6 do Windows XP (Luna).
- * Medidas da captura real do IE6 (Screenshots/ie6-referencia.png), imagens
- * dos binários do XP (tools/builders/zenie.py). Coordenadas = área da janela.
+ * Zen Browser with the look of Windows XP's Internet Explorer 6 (Luna).
+ * Measurements from the real IE6 capture (Screenshots/ie6-referencia.png),
+ * images from XP's binaries (tools/builders/zenie.py). Coordinates = window area.
  *
- *   0..21   barra de menus (+ bandeira do Windows à direita)
- *   22..23  linha entre bandas
- *   24..61  barra de botões
- *   62..63  linha entre bandas
- *   64..85  barra de endereço
- *   86..    rebordo afundado + barra lateral + página
- *   fundo   barra de estado (23 px)
+ *   0..21   menu bar (+ Windows flag on the right)
+ *   22..23  line between bands
+ *   24..61  button bar
+ *   62..63  line between bands
+ *   64..85  address bar
+ *   86..    sunken border + sidebar + page
+ *   bottom  status bar (23 px)
  */
 :root {
     --ie-rebar: 86px;
     --ie-status: 23px;
-    --ie-font: 11px "ZXP Tahoma", sans-serif;      /* a Tahoma verdadeira, sem suavização */
-    /* largura das barras laterais (separadores, Favoritos, Histórico): a da
-       barra do Explorador do IE6, medida numa captura do XP (216 px + a
-       divisória de 4 px); fixa, como no XP não se arrastava sem querer */
+    --ie-font: 11px "ZXP Tahoma", sans-serif;      /* the real Tahoma, without smoothing */
+    /* width of the sidebars (tabs, Favorites, History): IE6's Explorer bar's,
+       measured in an XP capture (216 px + the 4 px divider); fixed, as in XP
+       it was not dragged by accident */
     --zxp-bar-width: 216px;
 }
 
@@ -31,8 +31,8 @@
     background: #ece9d8 !important;
 }
 
-/* fundo das três bandas: o Rebar do Luna (320x13) esticado sem suavizar
-   (as 4 linhas de baixo fixas), com as linhas entre bandas (y 22 e 62) */
+/* background of the three bands: Luna's Rebar (320x13) stretched without
+   smoothing (the bottom 4 rows fixed), with the lines between bands (y 22 and 62) */
 #zen-main-app-wrapper::before {
     content: "";
     position: fixed;
@@ -50,8 +50,8 @@
     pointer-events: none;
 }
 
-/* o rebordo afundado (WS_EX_CLIENTEDGE) só à volta da página: as barras do
-   Explorador encostam à janela e às bandas, como no IE6 (captura do XP) */
+/* the sunken border (WS_EX_CLIENTEDGE) only around the page: the Explorer
+   bars sit against the window and the bands, as in IE6 (XP capture) */
 #browser {
     padding: 0 !important;
     background: #ece9d8 !important;
@@ -62,12 +62,12 @@
     box-shadow: inset 1px 1px #716f64, inset -1px -1px #f1efe2 !important;
     padding: 1px !important;
 }
-/* (cada separador está em posição absoluta no tabpanels, por cima do
-   espaço da linha de dentro: 1 px para dentro) */
+/* (each tab is absolutely positioned in the tabpanels, on top of the space
+   of the inner line: 1 px inwards) */
 #tabbrowser-tabpanels > .browserSidebarContainer { margin: 1px !important; }
-/* com a barra dos separadores fixa ao lado, a página encosta à divisória
-   sem as linhas escuras (como do lado do Favoritos/Histórico e com a barra
-   em modo compacto por cima) */
+/* with the tab bar pinned beside it, the page meets the divider without
+   the dark lines (as on the Favorites/History side and with the bar on top
+   in compact mode) */
 :root:not([zen-compact-mode="true"]) #tabbrowser-tabpanels {
     border-left-width: 0 !important;
     padding-left: 0 !important;
@@ -75,7 +75,7 @@
 }
 :root:not([zen-compact-mode="true"]) #tabbrowser-tabpanels > .browserSidebarContainer { margin-left: 0 !important; }
 
-/* ---------- barra de menus ---------- */
+/* ---------- menu bar ---------- */
 #toolbar-menubar {
     display: flex !important;
     visibility: visible !important;
@@ -99,7 +99,7 @@
     appearance: none !important;
     height: 22px;
     margin: 0 !important;
-    padding: 0 8px !important;          /* medido: 8 px de cada lado do texto */
+    padding: 0 8px !important;          /* measured: 8 px on each side of the text */
     color: #000 !important;
     background: none !important;
     border: none !important;
@@ -111,8 +111,8 @@
     font: var(--ie-font);
     line-height: 22px;
 }
-/* só os menus do IE (o Firefox junta outros: "Partilha" com o microfone ou a
-   câmara em uso — esses avisos ficam na caixa de endereço) */
+/* only IE's menus (Firefox adds others: "Sharing" with the microphone or
+   camera in use — those notices stay in the address box) */
 #main-menubar > menu:not(#file-menu, #edit-menu, #view-menu, #bookmarksMenu, #tools-menu, #helpMenu) {
     display: none !important;
 }
@@ -128,7 +128,7 @@
     color: #fff !important;
 }
 
-/* bandeira do Windows (shell32.dll 240: 50 imagens de 22 px) */
+/* Windows flag (shell32.dll 240: 50 images of 22 px) */
 #toolbar-menubar::after {
     content: "";
     position: fixed;
@@ -148,7 +148,7 @@
     to { background-position: 10px -1100px; }
 }
 
-/* ---------- barras de botões e de endereço ---------- */
+/* ---------- button and address bars ---------- */
 #zen-appcontent-navbar-wrapper {
     position: fixed !important;
     inset: 24px 0 auto 0 !important;
@@ -178,7 +178,7 @@
     display: none !important;
 }
 
-/* botões: 36 px de altura, ícone de 24 px a 4 px da esquerda e 6 px do topo */
+/* buttons: 36 px high, 24 px icon 4 px from the left and 6 px from the top */
 #nav-bar .toolbarbutton-1 {
     appearance: none !important;
     height: 36px !important;
@@ -208,7 +208,7 @@
     border-radius: 0 !important;
 }
 #nav-bar .toolbarbutton-1 > .toolbarbutton-text { display: none !important; }
-#nav-bar .toolbarbutton-1 > * { opacity: 1 !important; }   /* o cinzento vem da imagem */
+#nav-bar .toolbarbutton-1 > * { opacity: 1 !important; }   /* the grey comes from the image */
 #nav-bar .toolbarbutton-1:not([disabled]):hover {
     border-image: url("img/toolbar-button-hover.png") 4 fill / 4px stretch;
 }
@@ -216,7 +216,7 @@
     border-image: url("img/toolbar-button-active.png") 4 fill / 4px stretch;
 }
 
-/* textos à direita do ícone (Tahoma 8) */
+/* texts to the right of the icon (Tahoma 8) */
 #back-button::after, #find-button::after, #bookmarks-menu-button::after {
     font: var(--ie-font);
     line-height: 24px;
@@ -227,7 +227,7 @@
 #bookmarks-menu-button::after { content: "Favoritos"; margin-inline-end: 6px; }
 #nav-bar .toolbarbutton-1[disabled]::after { color: #aca899; }
 
-/* ícones (shell32.dll 204/205) */
+/* icons (shell32.dll 204/205) */
 #back-button { list-style-image: url("img/tb-back.png") !important; }
 #back-button:hover { list-style-image: url("img/tb-back-hot.png") !important; }
 #back-button[disabled] { list-style-image: url("img/tb-back-disabled.png") !important; }
@@ -249,7 +249,7 @@
 #bookmarks-menu-button > .toolbarbutton-menubutton-dropmarker,
 #bookmarks-menu-button > dropmarker { display: none !important; }
 
-/* Parar e Atualizar sempre os dois, como no IE (o Parar nunca fica cinzento) */
+/* Stop and Refresh always both, as in IE (Stop never goes grey) */
 #stop-reload-button {
     display: flex !important;
     order: 0;
@@ -260,7 +260,7 @@
 }
 #stop-reload-button > #stop-button { order: -1; }
 
-/* separadores (1 px #cac6af, y 2..35 da banda) depois da Página inicial e do Histórico */
+/* separators (1 px #cac6af, y 2..35 of the band) after Home and History */
 #nav-bar :is(#home-button, #zorin-xp-ie-history_zorin-xp_local-browser-action) {
     position: relative;
     margin-inline-end: 5px !important;
@@ -272,12 +272,12 @@
     height: 34px;
     background: #cac6af;
 }
-/* (a posição conta a partir de dentro do rebordo: o botão tem 4 px, a caixa
-   da extensão nenhum) — linha em x+34 e y 2..35 da banda, como no IE */
+/* (the position counts from inside the border: the button has 4 px, the
+   extension's box none) — line at x+34 and y 2..35 of the band, as in IE */
 #home-button::after { right: -7px; top: -3px; }
 #zorin-xp-ie-history_zorin-xp_local-browser-action::after { right: -3px; top: 2px; }
 
-/* Retroceder e Avançar: a parte da seta (menu do histórico), 5x3 px */
+/* Back and Forward: the arrow part (history menu), 5x3 px */
 #back-button, #forward-button { position: relative; }
 #back-button { width: 110px !important; }
 #forward-button { width: 47px !important; }
@@ -293,8 +293,8 @@
 #forward-button::before { left: 33px; }
 :is(#back-button, #forward-button)[disabled]::before { background-image: url("img/arrow-disabled.png"); }
 
-/* ---------- barra de endereço (2.ª linha) ---------- */
-/* fixa na banda de baixo: "Endereço" (x 5), caixa (x 54 .. W-70), "Ir para" */
+/* ---------- address bar (second row) ---------- */
+/* fixed in the bottom band: "Endereço" (x 5), box (x 54 .. W-70), "Ir para" */
 #urlbar-container {
     position: fixed !important;
     inset: 64px 0 auto 0 !important;
@@ -340,10 +340,10 @@
     line-height: 22px;
     color: #000;
 }
-/* (o Zen põe a barra a "flutuar" a meio da janela num separador novo: no
-   IE fica sempre na banda) */
-/* (aberta, o Firefox põe-na na camada de topo — popover —, onde as
-   coordenadas contam a partir da janela: por isso sempre fixas na banda) */
+/* (Zen makes the bar "float" in the middle of the window on a new tab: in
+   IE it always stays in the band) */
+/* (when open, Firefox puts it in the top layer — popover —, where the
+   coordinates count from the window: so always fixed in the band) */
 #urlbar, #urlbar[breakout], #urlbar[breakout-extend], #urlbar[zen-floating-urlbar] {
     position: fixed !important;
     top: 64px !important;
@@ -362,7 +362,7 @@
     --urlbar-toolbar-height: 22px !important;
 }
 #urlbar .urlbar-background {
-    margin: 0 !important;                  /* (o Zen dá-lhe 1 px de margem) */
+    margin: 0 !important;                  /* (Zen gives it a 1 px margin) */
     border: 1px solid #7f9db9 !important;
     border-radius: 0 !important;
     background: #fff url("img/combo-drop.png") no-repeat right 1px top 1px !important;
@@ -370,7 +370,7 @@
     outline: none !important;
     inset: 0 !important;
 }
-/* só o ícone da página e o endereço, como no IE */
+/* only the page icon and the address, as in IE */
 #urlbar :is(#tracking-protection-icon-container, #urlbar-search-button,
             .urlbar-search-mode-indicator, #page-action-buttons, .urlbar-page-action,
             #remote-control-box, #trust-icon-container, .search-one-offs) {
@@ -379,17 +379,17 @@
 #urlbar .urlbar-input-container {
     height: 22px !important;
     min-height: 22px !important;
-    padding: 0 18px 0 3px !important;      /* ícone a 3 px do rebordo, texto a 23 */
+    padding: 0 18px 0 3px !important;      /* icon 3 px from the border, text at 23 */
     margin: 0 !important;
     border: none !important;
     background: none !important;
     align-items: center !important;
 }
-/* o ícone da página do IE é o botão do Zen que abre o painel com as opções
-   da página e todas as extensões (#zen-site-data-icon-button). Os avisos
-   (microfone/câmara/localização em uso, permissões, pedidos) passam para o
-   fim da caixa, antes da seta: com a caixa de identidade "display: contents"
-   os filhos dela ordenam-se na própria caixa de endereço. */
+/* IE's page icon is Zen's button that opens the panel with the page's
+   options and all the extensions (#zen-site-data-icon-button). The notices
+   (microphone/camera/location in use, permissions, requests) move to the
+   end of the box, before the arrow: with the identity box "display:
+   contents" its children are ordered in the address box itself. */
 #urlbar #identity-box {
     display: contents !important;
 }
@@ -409,7 +409,7 @@
     box-shadow: none !important;
 }
 #urlbar #zen-site-data-icon-button > * { display: none !important; }
-/* (o Zen esconde-a sempre; aqui aparece quando há avisos) */
+/* (Zen always hides it; here it shows when there are notices) */
 #urlbar #identity-permission-box:is([hasPermissions], [hasSharingIcon], [open]) {
     display: flex !important;
 }
@@ -438,7 +438,7 @@
 }
 #urlbar-input::placeholder { color: transparent !important; }
 
-/* ---------- barra de estado ---------- */
+/* ---------- status bar ---------- */
 #zen-main-app-wrapper::after {
     content: "Concluído";
     position: fixed;
@@ -459,8 +459,8 @@
         url("img/status-sep.png") no-repeat right 426px top 0,
         url("img/page.png") no-repeat 1px 4px,
         url("img/status-bg.png") repeat-x;
-    /* por baixo do #browser (z-index 1 do Zen), que não chega aqui: o
-       endereço da ligação (#statuspanel, lá dentro) fica por cima */
+    /* below #browser (Zen's z-index 1), which does not reach here: the link
+       address (#statuspanel, in there) stays on top */
     z-index: 0;
     pointer-events: none;
 }
@@ -468,8 +468,8 @@
     content: "A abrir a página...";
 }
 
-/* zona: "Internet" com o globo (no body: fora do #browser, que tem a sua
-   própria camada e ficaria por baixo da barra de estado) */
+/* zone: "Internet" with the globe (on body: outside #browser, which has its
+   own layer and would end up below the status bar) */
 body::after {
     content: "Internet";
     position: fixed;
@@ -487,8 +487,8 @@ body::after {
     pointer-events: none;
 }
 
-/* barra de progresso fictícia enquanto carrega: a calha aparece na barra de
-   estado e os blocos verdes (tira de 11) entram da esquerda, um a um */
+/* fake progress bar while loading: the trough appears in the status bar and
+   the green blocks (strip of 11) come in from the left, one by one */
 :root:has(.tabbrowser-tab[selected][busy]) #zen-main-app-wrapper::after {
     background:
         url("img/status-gripper.png") no-repeat right 0 top 0,
@@ -524,9 +524,9 @@ body::before {
     to { background-position: 0 0; }
 }
 
-/* endereço da ligação por baixo do rato / mensagens de carregamento: no painel
-   principal (o Zen põe translate: 0 no tabbox — mesmo a zero, prenderia o
-   painel fixo ao fundo da página em vez do da janela) */
+/* link address under the mouse / loading messages: in the main panel (Zen
+   puts translate: 0 on the tabbox — even at zero, it would tie the fixed
+   panel to the bottom of the page instead of the window's) */
 #tabbrowser-tabbox { translate: none !important; }
 #statuspanel {
     position: fixed !important;
@@ -553,21 +553,21 @@ body::before {
     box-shadow: none !important;
     background: none !important;
 }
-/* só o texto muda: o "Concluído" esconde-se e o endereço aparece no lugar */
+/* only the text changes: "Concluído" hides and the address shows in its place */
 :root:has(#statuspanel:not([inactive])) #zen-main-app-wrapper::after {
     color: transparent;
 }
 
-/* ---------- barra lateral: como a barra do Explorador do IE (Favoritos) ---------- */
+/* ---------- sidebar: like IE's Explorer bar (Favorites) ---------- */
 #navigator-toolbox {
     background: #fff !important;
-    border-right: 4px solid #ece9d8 !important;     /* divisória da barra */
+    border-right: 4px solid #ece9d8 !important;     /* the bar's divider */
     box-shadow: none !important;
     padding: 0 !important;
     --zen-toolbox-padding: 0px !important;
 }
 #zen-sidebar-top-buttons { display: none !important; }
-/* largura fixa (a do Zen vinha da barra arrastada; o puxador sai) */
+/* fixed width (Zen's came from the dragged bar; the handle goes) */
 #navigator-toolbox {
     --zen-sidebar-width: calc(var(--zxp-bar-width) + 4px) !important;
     width: calc(var(--zxp-bar-width) + 4px) !important;
@@ -586,25 +586,25 @@ body::before {
     margin: 0 !important;
     padding: 0 !important;
 }
-/* (o Zen pinta a cor/degradê do espaço por trás da barra: fora) */
+/* (Zen paints the space's colour/gradient behind the bar: out) */
 #zen-toolbar-background, #zen-browser-background { display: none !important; }
 
-/* a barra lateral dos separadores arrumada como a barra do Explorador do
-   IE6 (medida numa captura do XP, Favoritos): o título numa faixa de 22 px
-   com o fundo das bandas (a 1.ª linha da imagem esticada: o degradê da
-   esquerda para a direita) e a linha #aca899 por baixo; a faixa de botões de
-   22 px (o fundo das bandas, as 9 linhas de cima a dobrar), 3 px do fundo e
-   outra linha #aca899; a lista logo a seguir, linhas de 20 px */
+/* the tab sidebar laid out like IE6's Explorer bar (measured in an XP
+   capture, Favorites): the title in a 22 px strip with the band background
+   (the image's first row stretched: the left-to-right gradient) and the
+   #aca899 line below; the 22 px button strip (the band background, the top
+   9 rows doubled), 3 px of background and another #aca899 line; the list
+   right after, 20 px rows */
 #navigator-toolbox zen-workspace { padding-top: 0 !important; }
 
-/* cabeçalho do espaço: o título da barra (como "Histórico"), à esquerda */
+/* the space's header: the bar's title (like "Histórico"), on the left */
 .zen-current-workspace-indicator {
     box-sizing: border-box !important;
     height: 23px !important;
     min-height: 23px !important;
     max-height: 23px !important;
-    margin: 0 0 27px !important;          /* (a faixa de botões vai por cima: 26 px + 1, como a lista do IE) */
-    padding: 0 22px 0 6px !important;     /* (à direita, o pino) */
+    margin: 0 0 27px !important;          /* (the button strip goes on top: 26 px + 1, like IE's list) */
+    padding: 0 22px 0 6px !important;     /* (on the right, the pin) */
     gap: 3px !important;
     justify-content: flex-start !important;
     align-items: center !important;
@@ -618,13 +618,13 @@ body::before {
 }
 .zen-current-workspace-indicator::before,
 .zen-current-workspace-indicator::after { display: none !important; }
-/* (o Zen põe o ícone por cima do nome com margens negativas) */
+/* (Zen puts the icon over the name with negative margins) */
 .zen-current-workspace-indicator .zen-current-workspace-indicator-stack {
     margin: 0 !important;
 }
 .zen-current-workspace-indicator > .zen-workspaces-actions { display: none !important; }
-/* sem a seta de recolher: o ícone fica sempre (recolher e abrir os
-   separadores fixos com um clique continua a ser do Zen) */
+/* without the collapse arrow: the icon always stays (collapsing and
+   expanding the pinned tabs with a click is still Zen's) */
 .zen-current-workspace-indicator .zen-current-workspace-indicator-chevron { display: none !important; }
 .zen-current-workspace-indicator .zen-current-workspace-indicator-icon {
     display: flex !important;
@@ -637,7 +637,7 @@ body::before {
 .zen-current-workspace-indicator .zen-current-workspace-indicator-stack:has(> .zen-current-workspace-indicator-icon:empty) {
     display: none !important;
 }
-/* o nome: Tahoma 8 (fonte de píxeis), como o título da barra do IE */
+/* the name: Tahoma 8 (pixel font), like the IE bar's title */
 .zen-current-workspace-indicator .zen-current-workspace-indicator-name {
     position: static !important;
     padding: 0 !important;
@@ -655,10 +655,10 @@ body::before {
     white-space: nowrap !important;
 }
 
-/* o pino (src/zen-ie/sidebarpin), onde o Histórico tem o ×: o das barras do
-   Explorador do Luna sem cor — espetado com a barra fixa, deitado no modo
-   compacto (a barra esconde-se sozinha); com o rato por cima, a mesma imagem
-   com o realce dos botões planos, como o × */
+/* the pin (src/zen-ie/sidebarpin), where History has the ×: Luna's
+   Explorer bar pin without colour — pushed in with the bar pinned, lying in
+   compact mode (the bar hides itself); with the mouse over it, the same
+   image with the flat buttons' highlight, like the × */
 #zxp-sidebar-pin {
     appearance: none !important;
     position: absolute !important;
@@ -694,11 +694,11 @@ body::before {
 }
 #zxp-sidebar-pin > .toolbarbutton-text { display: none !important; }
 
-/* transferências, espaços, novo: a faixa de botões da barra do Explorador
-   ("Adicionar...", "Organizar..."), logo por baixo do título — 22 px do
-   fundo das bandas, 3 px do fundo e a linha da lista; botões de 22 px com
-   ícones de 16 px. Sai do fundo da barra e fica por cima do espaço que o
-   cabeçalho lhe deixa (os espaços deslizam por baixo dela ao mudar) */
+/* downloads, spaces, new: the Explorer bar's button strip ("Adicionar...",
+   "Organizar..."), right below the title — 22 px of band background, 3 px
+   of background and the list line; 22 px buttons with 16 px icons. It leaves
+   the bottom of the bar and sits on top of the space the header leaves for
+   it (the spaces slide beneath it when switching) */
 #zen-sidebar-foot-buttons {
     position: absolute !important;
     top: 23px !important;
@@ -755,10 +755,10 @@ body::before {
 #zen-sidebar-foot-buttons :is(.toolbarbutton-1, .subviewbutton):is(:hover:active, [open], [active="true"]) {
     border-image: url("img/toolbar-button-checked.png") 4 fill / 3px stretch !important;
 }
-/* "Limpar" (fecha os separadores não fixos do espaço): um × simples (o das
-   barras do Explorador do IE) em vez do texto, com o realce dos botões
-   planos; sempre à vista e clicável quando há o que fechar (o Zen só o
-   mostrava com o rato por cima da barra lateral) */
+/* "Limpar" (closes the space's unpinned tabs): a plain × (the one of IE's
+   Explorer bars) instead of the text, with the flat buttons' highlight;
+   always visible and clickable when there is something to close (Zen only
+   showed it with the mouse over the sidebar) */
 .zen-workspace-close-unpinned-tabs-button {
     appearance: none !important;
     width: 20px !important;
@@ -792,14 +792,14 @@ body::before {
 .zen-workspace-close-unpinned-tabs-button:hover:active {
     border-image: url("img/toolbar-button-active.png") 4 fill / 2px stretch !important;
 }
-/* transferências: o ícone de transferência do IE */
+/* downloads: IE's download icon */
 #downloads-button #downloads-indicator-icon {
     list-style-image: url("img/downloads.png") !important;
     -moz-context-properties: none !important;
     fill: none !important;
 }
-/* "+" (Criar espaço, Criar pasta, Nova divisão, Novo separador): só um +
-   preto simples (traço de 2 px, como o ×), botão quadrado como os outros */
+/* "+" (Create space, Create folder, New split, New tab): just a plain black
+   + (2 px stroke, like the ×), a square button like the others */
 #zen-create-new-button {
     list-style-image: url("img/plus.png") !important;
 }
@@ -815,7 +815,7 @@ body::before {
     flex: 1 !important;
     justify-content: center !important;
 }
-/* (o Zen tira cor aos espaços inativos; aqui o ativo é o botão carregado) */
+/* (Zen takes the colour away from inactive spaces; here the active one is the pressed button) */
 #zen-workspaces-button .subviewbutton,
 #zen-workspaces-button .subviewbutton * {
     opacity: 1 !important;
@@ -832,8 +832,8 @@ body::before {
     filter: none !important;
 }
 
-/* separadores: uma linha de 22 px, ícone de 16 px, Tahoma 8 pt (as listas
-   das barras Favoritos e Histórico têm as mesmas medidas) */
+/* tabs: a 22 px row, 16 px icon, Tahoma 8 pt (the Favorites and History
+   bars' lists have the same measurements) */
 #tabbrowser-tabs .tabbrowser-tab {
     margin: 0 !important;
     padding: 0 !important;
@@ -842,7 +842,7 @@ body::before {
     margin: 0 !important;
 }
 #tabbrowser-tabs .tabbrowser-tab .tab-background {
-    margin: 0 2px !important;             /* (a seleção como a da lista do IE: 2 px para dentro) */
+    margin: 0 2px !important;             /* (the selection like IE's list: 2 px inwards) */
     border-radius: 0 !important;
     background: none !important;
     box-shadow: none !important;
@@ -851,11 +851,11 @@ body::before {
 #tabbrowser-tabs .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
     background: #ece9d8 !important;
 }
-/* separador novo em segundo plano (barra lateral à vista): pisca como um
-   botão da barra de tarefas do XP a pedir atenção — o botão laranja do Luna
-   (TaskBand.FlashButton) por trás do nome, uma vez, e apaga-se (o mesmo
-   ritmo da faixa do modo compacto); ao escolhê-lo, pára, como no XP. O
-   atributo vem de src/zen-ie/tabflash. */
+/* new background tab (sidebar visible): flashes like an XP taskbar button
+   asking for attention — Luna's orange button (TaskBand.FlashButton) behind
+   the name, once, and fades (the same rhythm as the compact mode strip);
+   choosing it stops it, as in XP. The attribute comes from
+   src/zen-ie/tabflash. */
 #tabbrowser-tabs .tabbrowser-tab[zxp-flash] .tab-background { position: relative !important; }
 #tabbrowser-tabs .tabbrowser-tab[zxp-flash]:not([selected]) .tab-background::after {
     content: "";
@@ -869,7 +869,7 @@ body::before {
     padding: 0 4px 0 8px !important;
     gap: 3px;
 }
-/* (o Zen põe 3 px antes e 10 px depois do ícone: o nome ficava a 40 px) */
+/* (Zen puts 3 px before and 10 px after the icon: the name ended up at 40 px) */
 #tabbrowser-tabs .tabbrowser-tab :is(.tab-throbber, .tab-icon-pending, .tab-icon-image, .tab-sharing-icon-overlay, .tab-icon-overlay) {
     margin-inline: 0 !important;
 }
@@ -891,8 +891,8 @@ body::before {
     color: #000 !important;
 }
 
-/* ---------- barra de endereço: a escrever / editar ---------- */
-/* no IE a caixa não muda com o foco (sem contornos nem sombras) */
+/* ---------- address bar: typing / editing ---------- */
+/* in IE the box does not change with the focus (no outlines nor shadows) */
 #urlbar:is([focused], [open], [breakout-extend]) .urlbar-background {
     border: 1px solid #7f9db9 !important;
     box-shadow: none !important;
@@ -906,9 +906,9 @@ body::before {
 }
 #urlbar-input { caret-color: #000 !important; }
 
-/* ---------- lista de sugestões: a do preenchimento automático do IE ----------
-   colada por baixo da caixa, mesma largura, branca, rebordo preto de 1 px,
-   uma linha de texto (Tahoma 8) por sugestão, a escolhida a azul do XP */
+/* ---------- suggestion list: IE's autocomplete one ----------
+   stuck below the box, same width, white, 1 px black border, one line of
+   text (Tahoma 8) per suggestion, the chosen one in XP's blue */
 #urlbar .urlbarView {
     position: absolute !important;
     top: 22px !important;
@@ -963,7 +963,7 @@ body::before {
     padding: 0 !important;
     opacity: 1 !important;
 }
-/* o IE só mostra o endereço (sem ícones, títulos nem ações) */
+/* IE only shows the address (no icons, titles nor actions) */
 #urlbar .urlbarView-row :is(.urlbarView-favicon, .urlbarView-type-icon, .urlbarView-title-separator,
                             .urlbarView-action, .urlbarView-button, .urlbarView-row-buttons,
                             .urlbarView-tags, .urlbarView-userContext) {
@@ -981,14 +981,14 @@ body::before {
 }
 #urlbar .urlbarView-row strong { font-weight: normal !important; }
 
-/* ---------- modo compacto: esconde só a barra lateral ----------
-   aparece por cima da página, entre as barras do IE e a barra de estado;
-   escondida, não se vê nada: uma faixa invisível de 4 px na beira esquerda
-   da janela (parte da barra, para o rato) fá-la abrir.
-   Esconde-se com "left" e não com "translate" (o do Zen): um elemento
-   deslocado arrasta consigo os fixos lá de dentro — a barra de menus.
-   Aberta, fica exatamente onde fica a barra fixa: encostada à janela, por
-   baixo das bandas, com a mesma largura (o Zen alargava-a 4 px) */
+/* ---------- compact mode: hides only the sidebar ----------
+   it appears on top of the page, between the IE bars and the status bar;
+   when hidden, nothing shows: an invisible 4 px strip on the window's left
+   edge (part of the bar, for the mouse) makes it open.
+   It is hidden with "left" and not with "translate" (Zen's): a translated
+   element drags the fixed ones inside it along — the menu bar.
+   When open, it sits exactly where the pinned bar sits: against the window,
+   below the bands, with the same width (Zen made it 4 px wider) */
 :root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"]) {
     top: var(--ie-rebar) !important;
     bottom: var(--ie-status) !important;
@@ -1000,25 +1000,25 @@ body::before {
     left: calc(-1 * var(--zen-sidebar-width, 222px) - 6px) !important;
     transition: left 0.15s ease !important;
 }
-/* (o Zen dá ao #titlebar a largura toda da barra: o título e a faixa de
-   botões passavam por cima da divisória) */
+/* (Zen gives #titlebar the bar's whole width: the title and the button
+   strip went over the divider) */
 :root[zen-compact-mode="true"] #navigator-toolbox #titlebar { width: auto !important; }
 :root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"])::after {
     content: "";
     position: absolute;
     top: 0;
     bottom: 0;
-    /* (a barra escondida fica a -(largura + 6 px): a faixa começa na beira
-       da janela, seja qual for a largura) */
+    /* (the hidden bar sits at -(width + 6 px): the strip starts at the window's
+       edge, whatever the width) */
     left: calc(var(--zen-sidebar-width, 220px) + 6px);
     width: 4px;
     background: transparent;
 }
-/* novo separador em segundo plano: a beira esquerda (onde está a barra dos
-   separadores escondida) pisca a laranja uma vez e apaga-se, como um
-   botão da barra de tarefas do XP a pedir atenção (TaskBand.FlashButton do
-   luna.msstyles: orla #D37400, brilho #FFB649, corpo #E47B09, sombra
-   #A25500). O atributo vem da extensão src/zen-ie/tabflash. */
+/* new background tab: the left edge (where the hidden tab bar is) flashes
+   orange once and fades, like an XP taskbar button asking for attention
+   (luna.msstyles' TaskBand.FlashButton: edge #D37400, glow #FFB649, body
+   #E47B09, shadow #A25500). The attribute comes from the src/zen-ie/tabflash
+   extension. */
 @keyframes zxp-tab-flash {
     0% { opacity: 0; }
     10%, 50% { opacity: 1; }
@@ -1036,8 +1036,8 @@ body::before {
     background: linear-gradient(to right, #d37400 0 1px, #ffb649 1px 2px, #e47b09 2px 4px, #a25500 4px 5px);
     animation: zxp-tab-flash 1s linear forwards;
 }
-/* (a barra de menus vive dentro da barra lateral: o rato nela ou um menu
-   aberto não a fazem abrir) */
+/* (the menu bar lives inside the sidebar: the mouse on it or an open menu
+   do not make it open) */
 :root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"]):is(
     [zen-has-hover], [zen-user-show], [zen-has-empty-tab], [flash-popup],
     [has-popup-menu], [movingtab], [zen-compact-mode-active]):not(:has(#toolbar-menubar:hover, #main-menubar > menu[open])),
@@ -1045,15 +1045,15 @@ body::before {
     left: 0 !important;
 }
 
-/* extensões fixas na barra (no lugar de Correio/Imprimir/Editar): botões do
-   IE de 32 px, com o ícone de 16 px da extensão ao centro (a 24 px ficava
-   desfocado: o Firefox reduzia a imagem de 32) */
+/* extensions pinned to the bar (in place of Mail/Print/Edit): 32 px IE
+   buttons, with the extension's 16 px icon in the centre (at 24 px it was
+   blurry: Firefox scaled down the 32 px image) */
 #nav-bar .toolbarbutton-badge-stack {
     display: grid !important;
     place-items: center !important;
 }
 #nav-bar .toolbarbutton-badge-stack > .toolbarbutton-icon {
-    width: 20px !important;              /* um pouco maior, perto dos 24 px do IE */
+    width: 20px !important;              /* a little bigger, close to IE's 24 px */
     height: 20px !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -1062,9 +1062,9 @@ body::before {
     margin: 0 !important;
     padding: 0 !important;
 }
-/* o número das extensões (uBlock...): inteiro, por cima do canto do ícone,
-   sem ser cortado pelo botão (a letra de píxeis só existe a 11 px: a 9 px
-   ficava ilegível) */
+/* the extensions' number (uBlock...): whole, over the icon's corner, not
+   clipped by the button (the pixel font only exists at 11 px: at 9 px it
+   was unreadable) */
 #nav-bar .toolbarbutton-1:has(.toolbarbutton-badge-stack),
 #nav-bar .toolbarbutton-badge-stack { overflow: visible !important; }
 #nav-bar .toolbarbutton-badge {
@@ -1093,9 +1093,8 @@ body::before {
 }
 #statuspanel-label { flex: 1 !important; max-width: none !important; }
 
-/* menus da barra de menus: sem coluna de ícones (os do IE não tinham) e as
-   caixas de verificação à direita, para os textos começarem todos no mesmo
-   sítio */
+/* menu bar menus: no icon column (IE's did not have one) and the check
+   boxes on the right, so that all the texts start at the same place */
 #main-menubar menupopup :is(menuitem, menu) > .menu-icon {
     display: none !important;
 }
@@ -1105,12 +1104,12 @@ body::before {
     margin-inline-start: 8px !important;
 }
 
-/* ---------- ecrã inteiro (F11), vídeos em ecrã inteiro e janelas pop-up ----------
-   (pop-up: as dos sites e a janela Localizar — só o conteúdo, como no IE) 
-   a página ocupa o ecrã todo: sem barra de menus, botões, barra lateral nem
-   barra de estado. No F11, ao levar o rato ao topo desce só a banda
-   "Endereço" (uma faixa invisível de 3 px no topo deteta o rato) e fica à
-   vista enquanto se escreve ou a lista de sugestões está aberta. */
+/* ---------- full screen (F11), full-screen videos and pop-up windows ----------
+   (pop-up: the sites' ones and the Find window — only the content, as in IE)
+   the page takes the whole screen: no menu bar, buttons, sidebar nor status
+   bar. In F11, taking the mouse to the top drops only the "Endereço" band
+   (an invisible 3 px strip at the top detects the mouse) and it stays
+   visible while typing or while the suggestion list is open. */
 :root:is([inFullscreen], [inDOMFullscreen], [popup-window]) #zen-main-app-wrapper {
     padding: 0 !important;
 }
@@ -1166,8 +1165,8 @@ body::before {
 :root:is([inDOMFullscreen], [popup-window]) #urlbar-container { display: none !important; }
 
 
-/* ---------- Favoritos e Histórico: abrem as barras do Explorador ----------
-   (extensões zorin-xp-ie-favorites / -history: um botão e uma barra cada) */
+/* ---------- Favorites and History: they open the Explorer bars ----------
+   (extensions zorin-xp-ie-favorites / -history: one button and one bar each) */
 :is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .unified-extensions-item-action-button {
     list-style-image: none !important;
 }
@@ -1183,7 +1182,7 @@ body::before {
     content: "Procurar";
     font: var(--ie-font);
     line-height: 24px;
-    margin-inline: 4px 3px;               /* botão de 80 px, como no IE */
+    margin-inline: 4px 3px;               /* 80 px button, as in IE */
 }
 #zorin-xp-ie-favorites_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-favorites.png"); }
 #zorin-xp-ie-favorites_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-favorites-hot.png"); }
@@ -1193,15 +1192,15 @@ body::before {
     content: "Favoritos";
     font: var(--ie-font);
     line-height: 24px;
-    margin-inline: 4px 4px;               /* botão de 85 px, como no IE */
+    margin-inline: 4px 4px;               /* 85 px button, as in IE */
 }
-/* carregados enquanto a barra está aberta, como no IE */
+/* pressed while the bar is open, as in IE */
 :root:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie-favorites_zorin-xp_local-sidebar-action"]) #zorin-xp-ie-favorites_zorin-xp_local-browser-action .unified-extensions-item-action-button,
 :root:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie-history_zorin-xp_local-sidebar-action"]) #zorin-xp-ie-history_zorin-xp_local-browser-action .unified-extensions-item-action-button {
     border-image: url("img/toolbar-button-checked.png") 4 fill / 4px stretch !important;
 }
 
-/* ---------- a barra do Explorador (lado da página) ---------- */
+/* ---------- the Explorer bar (page side) ---------- */
 #sidebar-box {
     width: var(--zxp-bar-width) !important;
     min-width: var(--zxp-bar-width) !important;
@@ -1213,8 +1212,8 @@ body::before {
     margin: 0 !important;
     padding: 0 !important;
 }
-/* o título ("Favoritos" + ×): faixa de 22 px com o fundo das bandas (a 1.ª
-   linha da imagem esticada), linha #aca899 — medido numa captura do XP */
+/* the title ("Favoritos" + ×): 22 px strip with the band background (the
+   image's first row stretched), #aca899 line — measured in an XP capture */
 #sidebar-header {
     height: 23px !important;
     min-height: 23px !important;
@@ -1233,7 +1232,7 @@ body::before {
     padding: 0 !important;
     background: none !important;
     border: none !important;
-    pointer-events: none !important;      /* (o IE não tinha a lista de barras) */
+    pointer-events: none !important;      /* (IE did not have the list of bars) */
 }
 #sidebar-switcher-target > :is(#sidebar-icon, #sidebar-switcher-arrow),
 #sidebar-throbber { display: none !important; }
@@ -1249,7 +1248,7 @@ body::before {
     width: 18px !important;
     height: 16px !important;
     min-width: 0 !important;
-    align-self: flex-start !important;    /* (no XP o × fica 5 px abaixo do cimo da faixa) */
+    align-self: flex-start !important;    /* (in XP the × sits 5 px below the top of the strip) */
     margin: 1px 0 0 !important;
     padding: 0 !important;
     border: 1px solid transparent !important;
@@ -1267,7 +1266,7 @@ body::before {
     border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
 }
 #sidebar { background: #fff !important; }
-/* a divisória entre a barra e a página (4 px, cor de botão do XP) */
+/* the divider between the bar and the page (4 px, XP's button colour) */
 #sidebar-splitter {
     width: 4px !important;
     min-width: 4px !important;
@@ -1275,18 +1274,18 @@ body::before {
     border: none !important;
     background: #ece9d8 !important;
     opacity: 1 !important;
-    pointer-events: none !important;      /* (largura fixa: não se arrasta) */
+    pointer-events: none !important;      /* (fixed width: it is not dragged) */
 }
 
-/* controlos de multimédia do Zen: sem a barra de progresso (com a barra
-   lateral escondida ela fugia para o topo da janela) */
+/* Zen's media controls: without the progress bar (with the sidebar hidden
+   it ran off to the top of the window) */
 .zen-media-progress-hbox { display: none !important; }
 
-/* o leitor como o Windows Media Player 9 do XP (o leitor embutido): a barra
-   prateada com o botão redondo grande de reproduzir/pausa, anterior e
-   seguinte encostados, o mudo; o ícone do sítio (ir para o separador) à
-   direita. Com o rato por cima, o título por cima numa faixa preta, como a
-   área do vídeo do WMP. Imagens: wmploc.dll (tools/builders/zenie.py) */
+/* the player like XP's Windows Media Player 9 (the embedded player): the
+   silver bar with the big round play/pause button, previous and next
+   against it, mute; the site's icon (go to the tab) on the right. With the
+   mouse over it, the title on top in a black strip, like WMP's video area.
+   Images: wmploc.dll (tools/builders/zenie.py) */
 .zen-media-card {
     padding: 0 !important;
     border: 1px solid #000 !important;
@@ -1312,9 +1311,9 @@ body::before {
 .zen-media-card .zen-media-artist { color: #9cc4f0 !important; opacity: 1 !important; }
 .zen-media-card .zen-media-info-vbox { mask-image: none !important; }
 .zen-media-card .zen-media-info-vbox::before { display: none !important; }
-/* sem botões por cima do título (imagem na imagem, fechar): a faixa preta
-   toda leva ao separador que está a tocar (o Zen já o faz ao carregar em
-   qualquer sítio do cartão que não seja um botão) */
+/* no buttons over the title (picture in picture, close): the whole black
+   strip leads to the playing tab (Zen already does that when clicking
+   anywhere on the card that is not a button) */
 .zen-media-card .zen-media-buttons-hbox { display: none !important; }
 .zen-media-card .zen-media-info-vbox { width: 100% !important; flex-shrink: 1 !important; }
 .zen-media-card .zen-media-controls-hbox {
@@ -1372,17 +1371,17 @@ body::before {
 .zen-media-card .zen-media-nexttrack-button:hover { list-style-image: url("img/wmp-next-hover.png") !important; }
 .zen-media-card .zen-media-nexttrack-button:hover:active { list-style-image: url("img/wmp-next-down.png") !important; }
 .zen-media-card .zen-media-nexttrack-button[disabled] { list-style-image: url("img/wmp-next-disabled.png") !important; }
-/* mudo: o altifalante, carregado quando está sem som (como no WMP) */
+/* mute: the speaker, pressed when muted (as in WMP) */
 .zen-media-card .zen-media-mute-button { order: 2 !important; margin-left: 4px !important; list-style-image: url("img/wmp-mute.png") !important; }
 .zen-media-card .zen-media-mute-button:hover { list-style-image: url("img/wmp-mute-hover.png") !important; }
 .zen-media-card[muted] .zen-media-mute-button,
 .zen-media-card .zen-media-mute-button:hover:active { list-style-image: url("img/wmp-mute-down.png") !important; }
-/* o sítio que está a tocar (vai para o separador): à direita, 16 px */
+/* the site that is playing (goes to the tab): on the right, 16 px */
 .zen-media-card .zen-media-focus-button { order: 3 !important; margin: 9px 0 0 auto !important; align-self: flex-start !important; }
 .zen-media-card .zen-media-focus-button > .toolbarbutton-icon { width: 16px !important; height: 16px !important; }
 .zen-media-card .zen-media-playback-buttons { order: 1 !important; }
 
-/* ---------- Procurar (barra de procura): uma faixa do XP ---------- */
+/* ---------- Find (find bar): an XP strip ---------- */
 #main-window findbar {
     position: static !important;
     inset: auto !important;
@@ -1443,7 +1442,7 @@ body::before {
     color: #000 !important;
 }
 #main-window findbar .findbar-textbox[status="notfound"] { background: #fff4f4 !important; }
-/* Anterior / Seguinte: botões do XP com texto */
+/* Previous / Next: XP buttons with text */
 #main-window findbar toolbarbutton:is(.findbar-find-previous, .findbar-find-next) {
     appearance: none !important;
     min-width: 0 !important;
@@ -1467,7 +1466,7 @@ body::before {
 #main-window findbar .findbar-find-previous::after { content: "Anterior"; }
 #main-window findbar .findbar-find-next::after { content: "Seguinte"; }
 #main-window findbar toolbarseparator { display: none !important; }
-/* caixas de verificação do XP, com os textos em português */
+/* XP check boxes, with the texts in Portuguese */
 #main-window findbar checkbox {
     appearance: none !important;
     margin: 0 0 0 6px !important;
@@ -1513,8 +1512,8 @@ body::before {
     border-image: url("img/toolbar-button-hover.png") 4 fill / 2px stretch !important;
 }
 
-/* fechar (×) e descarregar (–) nos separadores: só o desenho, a preto (como o
-   × do título das barras do Explorador), com o realce dos botões planos do XP */
+/* close (×) and unload (–) on the tabs: only the drawing, in black (like
+   the × of the Explorer bars' title), with XP's flat buttons' highlight */
 #tabbrowser-tabs .tabbrowser-tab :is(.tab-close-button, .tab-reset-button) {
     width: 13px !important;
     height: 13px !important;
@@ -1538,7 +1537,7 @@ body::before {
     border-image: url("img/toolbar-button-active.png") 4 fill / 2px stretch !important;
 }
 
-/* ---------- painéis (opções da página / extensões, adicionar favorito) ---------- */
+/* ---------- panels (page options / extensions, add favorite) ---------- */
 #zen-unified-site-data-panel, #editBookmarkPanel {
     --panel-background: #fff !important;
     --panel-color: #000 !important;
@@ -1560,7 +1559,7 @@ body::before {
     color: #000 !important;
 }
 
-/* 5. opções da página e extensões: como um painel do XP */
+/* 5. page options and extensions: like an XP panel */
 #zen-site-data-header {
     gap: 0 !important;
     padding: 2px !important;
@@ -1654,14 +1653,14 @@ body::before {
 #zen-site-data-footer > .subviewbutton:hover { border-image-source: url("img/button-hover.png") !important; }
 #zen-site-data-footer > .subviewbutton:hover:active { border-image-source: url("img/button-active.png") !important; }
 
-/* 6. adicionar / editar favorito: o diálogo "Adicionar aos Favoritos" do IE */
+/* 6. add / edit favorite: IE's "Adicionar aos Favoritos" dialog */
 #editBookmarkPanel {
     --panel-background: #ece9d8 !important;
     --arrowpanel-background: #ece9d8 !important;
     --arrowpanel-border-color: #0831d9 !important;
     --panel-border-color: #0831d9 !important;
 }
-/* barra de título do Luna */
+/* Luna title bar */
 #editBookmarkPanel .panel-header {
     height: 26px !important;
     min-height: 26px !important;
@@ -1683,10 +1682,10 @@ body::before {
 }
 #editBookmarkPanelTitle[data-l10n-id*="edit"]::after { content: "Editar favorito"; }
 #editBookmarkHeaderSeparator, #editBookmarkSeparator { display: none !important; }
-/* o Zen põe a pré-visualização ao lado do resto, numa linha (o ::part que
-   o faz não se alcança daqui): a pré-visualização passa para o fim dessa linha
-   e recua para debaixo da barra de título, sem ocupar largura; o resto é a
-   coluna do diálogo */
+/* Zen puts the preview beside the rest, in a row (the ::part that does it
+   cannot be reached from here): the preview moves to the end of that row
+   and backs up under the title bar, taking no width; the rest is the
+   dialog's column */
 #editBookmarkPanel { --panel-width: 380px !important; }
 #editBookmarkPanel > vbox {
     flex: 1 !important;
@@ -1696,7 +1695,7 @@ body::before {
     margin: 0 !important;
     padding: 0 !important;
 }
-/* em vez da pré-visualização do Zen: o ícone e o texto do IE */
+/* instead of Zen's preview: IE's icon and text */
 #zenEditBookmarkPanelFaviconContainer {
     order: 1 !important;
     align-self: flex-start !important;
@@ -1721,7 +1720,7 @@ body::before {
     line-height: 13px;
     padding-top: 0;
 }
-/* os campos: "Nome:" e companhia numa coluna, as caixas ao lado */
+/* the fields: "Nome:" and company in a column, the boxes beside them */
 #editBookmarkPanelContent {
     display: grid !important;
     grid-template-columns: max-content 1fr !important;
@@ -1747,9 +1746,9 @@ body::before {
     background: #fff !important;
 }
 #editBMPanel_newFolderBox { justify-content: flex-end !important; }
-/* a árvore de pastas abre-se pelo "Escolher..." da própria lista */
+/* the folder tree opens through the list's own "Escolher..." */
 #editBMPanel_foldersExpander, #editBMPanel_tagsSelectorExpander { display: none !important; }
-/* "Espaços": uma combo do XP, com o botão do Zen como a seta */
+/* "Espaços": an XP combo, with Zen's button as the arrow */
 #editBMPanel_workspaceDropdown { position: relative !important; }
 #editBMPanel_workspaceSummary {
     height: 21px !important;
@@ -1789,7 +1788,7 @@ body::before {
 }
 #editBMPanel_workspaceList li > label { padding: 1px 4px !important; font: var(--ie-font) !important; color: #000 !important; }
 #editBMPanel_workspaceList li > label:hover { background: #316ac5 !important; color: #fff !important; }
-/* os botões: à direita, como num diálogo */
+/* the buttons: on the right, as in a dialog */
 #editBookmarkPanel .panel-footer {
     display: flex !important;
     justify-content: flex-end !important;
@@ -1822,8 +1821,8 @@ body::before {
     background: #fff !important;
     box-shadow: none !important;
 }
-/* a seta do Zen fica no shadow da lista (onde o userChrome não chega):
-   tapa-a o botão da combo do XP, e o texto deixa de ir a negrito */
+/* Zen's arrow stays in the list's shadow (where userChrome does not reach):
+   the XP combo button covers it, and the text is no longer bold */
 #editBookmarkPanel menulist {
     position: relative !important;
     --font-weight-semibold: normal;
@@ -1858,8 +1857,8 @@ body::before {
 #editBookmarkPanel :is(button, .panel-button, .footer-button):hover { border-image-source: url("img/button-hover.png") !important; }
 #editBookmarkPanel :is(button, .panel-button, .footer-button):hover:active { border-image-source: url("img/button-active.png") !important; }
 
-/* separadores fixos que saíram do endereço guardado: só o nome (sem a "/"
-   do Zen, o botão de repor, nem o ícone por cima dele) */
+/* pinned tabs that left their stored address: only the name (without Zen's
+   "/", the reset button, nor the icon over it) */
 #tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] .tab-reset-pin-button,
 #tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] .zen-tab-sublabel {
     display: none !important;
@@ -1870,9 +1869,9 @@ body::before {
     margin: 0 !important;
 }
 #tabbrowser-tabs .tabbrowser-tab[zen-pinned-changed] .tab-icon-image { opacity: 1 !important; }
-/* separadores não carregados (o Zen tira-os da memória): texto cinzento do XP
-   (como um item desativado), sem transparências — com a fonte de píxeis a
-   transparência deixava as letras "partidas" */
+/* unloaded tabs (Zen takes them out of memory): XP's grey text (like a
+   disabled item), without transparency — with the pixel font transparency
+   left the letters "broken" */
 #tabbrowser-tabs .tabbrowser-tab:is([pending], [discarded]) :is(.tab-label-container, .tab-label, .tab-icon-stack, .tab-icon-image, .tab-content) {
     opacity: 1 !important;
     filter: none !important;
@@ -1882,10 +1881,10 @@ body::before {
     color: #aca899 !important;
 }
 
-/* ---------- menus (barra de menus e menus de contexto): os do XP ----------
-   (as medidas aprovadas para os menus do ambiente de trabalho: branco, rebordo
-   #aca899, 2 px por dentro, itens de 17 px, texto a 17 px do realce, realce
-   #316ac5, separadores de 7 px) */
+/* ---------- menus (menu bar and context menus): XP's ----------
+   (the measurements approved for the desktop menus: white, #aca899 border,
+   2 px inside, 17 px items, text 17 px from the highlight, #316ac5
+   highlight, 7 px separators) */
 #main-window menupopup {
     --panel-background: #fff !important;
     --panel-color: #000 !important;
@@ -1941,10 +1940,11 @@ body::before {
 #main-window menupopup menuseparator::before { display: none !important; }
 
 /* ---------- dicas (tooltips): as amarelas do XP ---------- */
-/* fundo #ffffe1, contorno preto de 1 px, Tahoma 8 com 1 px em cima e em baixo
-   e 2 px dos lados — 17 px de altura (captura 171814) — e a sombra do XP à
-   direita e em baixo. A sombra vai nas camadas do fundo, nos 3 px
-   transparentes da direita e de baixo (um box-shadow ficava fora do popup) */
+/* #ffffe1 background, 1 px black outline, Tahoma 8 with 1 px above and
+   below and 2 px on the sides — 17 px high (capture 171814) — and XP's
+   shadow to the right and below. The shadow goes in the background layers,
+   in the transparent 3 px on the right and at the bottom (a box-shadow
+   ended up outside the popup) */
 tooltip {
     appearance: none !important;
     margin: 0 !important;
@@ -1967,10 +1967,10 @@ tooltip :is(.tooltip-label, description, label) {
     font: inherit !important;
 }
 
-/* ---------- alert / confirm / prompt das páginas ---------- */
-/* a caixa de mensagem do IE ("Microsoft Internet Explorer"): uma janela Luna
-   desenhada dentro do próprio diálogo (commonDialog.xhtml), onde está o botão
-   Cancelar que faz de X do título. Cá fora só se tira a caixa do Zen. */
+/* ---------- page alert / confirm / prompt ---------- */
+/* IE's message box ("Microsoft Internet Explorer"): a Luna window drawn
+   inside the dialog itself (commonDialog.xhtml), where the Cancel button
+   that acts as the title's X is. Out here only Zen's box is removed. */
 .content-prompt-dialog .dialogOverlay { background: transparent !important; }
 .content-prompt-dialog .dialogBox {
     margin: 0 !important;
@@ -2004,15 +2004,15 @@ tooltip :is(.tooltip-label, description, label) {
     background:
         url("img/caption-left-focused.png") left top / 12px 30px no-repeat,
         url("img/caption-right-focused.png") right top / 12px 30px no-repeat,
-        /* (o preenchimento também por baixo das pontas: a da esquerda tem um
-           buraco onde as janelas põem o ícone, e aqui não há ícone) */
+        /* (the fill also under the ends: the left one has a hole where windows
+           put the icon, and here there is no icon) */
         url("img/caption-focused-fill.png") 4px 0 / calc(100% - 8px) 30px no-repeat,
         url("img/frame-bottom-strip-focused.png") left bottom / 100% 4px no-repeat,
         url("img/frame-left-strip-focused.png") left 30px / 4px calc(100% - 30px) no-repeat,
         url("img/frame-right-strip-focused.png") right 30px / 4px calc(100% - 30px) no-repeat,
         linear-gradient(#ece9d8, #ece9d8) 4px 30px / calc(100% - 8px) calc(100% - 34px) no-repeat !important;
 }
-/* o título (sem ícone: começa onde estaria o ícone) */
+/* the title (no icon: it starts where the icon would be) */
 #commonDialogWindow[subdialog] dialog#commonDialog::before {
     content: "Microsoft Internet Explorer";
     position: absolute;
@@ -2041,7 +2041,7 @@ tooltip :is(.tooltip-label, description, label) {
     margin: 0 !important;
     padding: 0 !important;
 }
-/* ícone do user32: aviso no alert (MB_ICONEXCLAMATION), pergunta no confirm */
+/* user32 icon: warning on alert (MB_ICONEXCLAMATION), question on confirm */
 #commonDialogWindow[subdialog] #iconContainer {
     display: flex !important;
     flex: none !important;
@@ -2061,7 +2061,7 @@ tooltip :is(.tooltip-label, description, label) {
 #commonDialogWindow[subdialog] dialog:is([windowtype="prompt:confirm"], [windowtype="prompt:confirmEx"]) #infoIcon {
     list-style-image: url("img/mb-question.png") !important;
 }
-/* texto: ao meio do ícone quando é mais baixo, por baixo dele quando não */
+/* text: in the middle of the icon when shorter, below it when not */
 #commonDialogWindow[subdialog] #infoContainer {
     display: flex !important;
     flex-direction: column !important;
@@ -2078,18 +2078,18 @@ tooltip :is(.tooltip-label, description, label) {
     font: inherit !important;
     white-space: pre-wrap !important;
 }
-/* os botões (no shadow do <dialog>: as regras vão por uma consulta de estilo) */
+/* the buttons (in the <dialog>'s shadow: the rules go through a style query) */
 @container style(--zxp-dlg: 1) {
     .dialog-button-box {
         justify-content: center !important;
         gap: 6px !important;
         margin: 0 !important;
-        padding: 17px 0 11px !important;     /* texto -> botões 17, margem 11 */
+        padding: 17px 0 11px !important;     /* text -> buttons 17, margin 11 */
         border: none !important;
         background: none !important;
     }
     .dialog-button-box > .button-spacer { display: none !important; }
-    /* (o xul.css impõe o pack="end": os botões ficam ao meio entre dois espaços) */
+    /* (xul.css forces pack="end": the buttons sit in the middle between two spacers) */
     .dialog-button-box::before, .dialog-button-box::after { content: ""; flex: 1; }
     .dialog-button-box::before { order: -10; }
     .dialog-button-box::after { order: 10; }
@@ -2115,8 +2115,8 @@ tooltip :is(.tooltip-label, description, label) {
     .dialog-button-box > button:hover:active { border-image-source: url("img/button-active.png") !important; }
     .dialog-button-box > button:focus-visible .button-text { outline: 1px dotted #000 !important; outline-offset: 2px !important; }
     .dialog-button-box > button .button-text { margin: 0 !important; color: #000 !important; font: inherit !important; }
-    /* "Cancelar" em baixo: o botão extra1 (escondido nestes diálogos), que
-       responde como Cancelar — o Cancelar verdadeiro passou para o X */
+    /* "Cancelar" at the bottom: the extra1 button (hidden in these dialogs),
+       which answers like Cancel — the real Cancel moved to the X */
     .dialog-button-box > button[dlgtype="extra1"][hidden] { order: -1 !important; }
     .dialog-button-box:has(> button[dlgtype="cancel"]:not([hidden])) > button[dlgtype="extra1"][hidden] {
         display: flex !important;
@@ -2126,7 +2126,7 @@ tooltip :is(.tooltip-label, description, label) {
         content: "Cancelar";
         font: 11px "ZXP Tahoma", sans-serif;
     }
-    /* o X do título */
+    /* the title's X */
     .dialog-button-box > button[dlgtype="cancel"] {
         display: flex !important;
         position: absolute !important;
@@ -2144,8 +2144,8 @@ tooltip :is(.tooltip-label, description, label) {
     .dialog-button-box > button[dlgtype="cancel"]:hover:active { background-image: url("img/caption-close-focused-active.png") !important; }
     .dialog-button-box > button[dlgtype="cancel"] > * { display: none !important; }
 }
-/* prompt(): a "Linha de comandos do utilizador do Explorer" (shdoclc.dll,
-   diálogo 8131): 482x101 de área, OK e Cancelar à direita, caixa em baixo */
+/* prompt(): the "Explorer User Prompt" (shdoclc.dll, dialog 8131): 482x101
+   of area, OK and Cancel on the right, box at the bottom */
 #commonDialogWindow[subdialog]:has(dialog[windowtype="prompt:prompt"]) {
     height: 135px !important;
     min-height: 135px !important;
@@ -2208,11 +2208,11 @@ tooltip :is(.tooltip-label, description, label) {
     .dialog-button-box > button[dlgtype="extra1"][hidden] { position: absolute !important; left: 400px; top: 69px; }
 }
 
-/* ---------- barra de informações (IE6 SP2) ---------- */
-/* os avisos do separador (pop-up bloqueado...) numa faixa amarela por cima
-   da página, a toda a largura, que a empurra para baixo (o Zen põe-nos num
-   cartão no canto). A posição vem da área da página (anchor), por dentro do
-   rebordo afundado dela (2 px) e sem passar por cima das barras. */
+/* ---------- information bar (IE6 SP2) ---------- */
+/* the tab's notices (pop-up blocked...) in a yellow strip above the page,
+   full width, pushing it down (Zen puts them in a card in the corner). The
+   position comes from the page area (anchor), inside its sunken border
+   (2 px) and without going over the bars. */
 #tabbrowser-tabpanels { anchor-name: --zxp-page; }
 #tab-notification-deck > .notificationbox-stack[notificationside="top"] {
     position: fixed !important;
@@ -2228,7 +2228,7 @@ tooltip :is(.tooltip-label, description, label) {
     gap: 0 !important;
     z-index: 3 !important;
 }
-/* (cada separador está em posição absoluta no tabpanels: o espaço vai dentro) */
+/* (each tab is absolutely positioned in the tabpanels: the space goes inside) */
 :root:has(#tab-notification-deck > .notificationbox-stack[slot="selected"] > notification-message) #tabbrowser-tabpanels .browserContainer {
     padding-top: 20px !important;
 }
@@ -2305,7 +2305,7 @@ tooltip :is(.tooltip-label, description, label) {
     font: 11px "ZXP Tahoma", sans-serif !important;
     border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch !important;
 }
-/* pop-up bloqueado: o texto do IE, e a faixa toda é o botão das opções */
+/* pop-up blocked: IE's text, and the whole strip is the options button */
 #tab-notification-deck notification-message[value="popup-blocked"] {
     --zxp-ib-text: "Uma janela de pop-up foi bloqueada. Para ver esta janela de pop-up ou para opções adicionais, clique aqui...";
     --zxp-ib-icon: url("img/popup-blocked.png");
@@ -2327,8 +2327,8 @@ tooltip :is(.tooltip-label, description, label) {
     opacity: 0 !important;
 }
 
-/* o menu da faixa, com os textos do IE (xpsp2res.dll, menu 10201): primeiro
-   mostrar as janelas bloqueadas ("Permitir Temporariamente"), depois o resto */
+/* the strip's menu, with IE's texts (xpsp2res.dll, menu 10201): first show
+   the blocked windows ("Permitir Temporariamente"), then the rest */
 #blockedPopupOptions > menuitem[popupReportIndex] { order: -2; }
 #blockedPopupOptions > #blockedPopupsSeparator { order: -1; }
 :is(#blockedPopupAllowSite, #blockedPopupEdit) > .menu-text { font-size: 0 !important; }
@@ -2336,8 +2336,8 @@ tooltip :is(.tooltip-label, description, label) {
 #blockedPopupAllowSite > .menu-text::after { content: "Permitir Sempre Janelas de Pop-up deste Site..."; }
 #blockedPopupEdit > .menu-text::after { content: "Definições de bloqueador de janelas de pop-up..."; }
 
-/* ---------- pedidos de permissão (localização, notificações...) ---------- */
-/* também como a barra de informações: amarela, o aviso, os botões do XP */
+/* ---------- permission requests (location, notifications...) ---------- */
+/* also like the information bar: yellow, the warning, XP's buttons */
 #notification-popup {
     --panel-background: #ffffe1 !important;
     --panel-color: #000 !important;
@@ -2426,8 +2426,9 @@ tooltip :is(.tooltip-label, description, label) {
 }
 #notification-popup moz-button { --zxp-pn: 1; }
 
-/* ---------- cadeado (ligação segura) na barra de estado ---------- */
-/* no painel pequeno ao lado da zona, como no IE (shdocvw.dll ícone 103) */
+/* ---------- padlock (secure connection) in the status bar ---------- */
+/* in the small panel next to the zone, as in IE (shdocvw.dll icon 103) */
+
 :root:has(#identity-box:is(.verifiedDomain, .verifiedIdentity))::after {
     content: "";
     position: fixed;

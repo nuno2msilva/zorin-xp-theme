@@ -1,9 +1,9 @@
 /* >>> zorin-xp: ícones do ambiente de trabalho como no XP (install.sh) */
-/* legendas: Tahoma 8 pt normal, brancas, 7 px abaixo do ícone (o Zorin
-   deixa 4), com a sombra do XP: esbatida (desvio-padrão 1,5 px = raio 3 no
-   GTK), 1 px para baixo e um pouco mais forte que preto a 100 % (medida na
-   captura de referência: escurece o fundo até ~65 %).
-   (a extensão do Zorin usa peso 600 — na Tahoma é negrito) */
+/* labels: Tahoma 8 pt normal, white, 7 px below the icon (Zorin leaves
+   4), with XP's shadow: blurred (standard deviation 1.5 px = radius 3 in
+   GTK), 1 px down and a bit stronger than 100% black (measured in the
+   reference capture: it darkens the background to ~65%).
+   (the Zorin extension uses weight 600 — in Tahoma that is bold) */
 .file-label, label.file-label:backdrop {
     font-family: "Tahoma";
     font-size: 11px;
@@ -14,7 +14,7 @@
 }
 .file-item { border-radius: 0; }
 .file-item-hover { background-color: transparent; }
-/* selecionado: só a legenda fica com o azul de seleção do XP */
+/* selected: only the label gets XP's selection blue */
 .desktop-icons-selected, .desktop-icons-keyboard-selected:not(:backdrop) {
     background-color: transparent;
     border-color: transparent;

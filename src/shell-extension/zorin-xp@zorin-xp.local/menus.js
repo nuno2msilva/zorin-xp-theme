@@ -1,11 +1,11 @@
 /*
- * Menus de contexto do Shell (barra de tarefas, ícones da área de
- * notificação, menus das aplicações) com o aspeto dos menus do XP: caixa
- * branca quadrada, contorno #ACA899, realce #316AC5, itens de 17 px.
+ * The Shell's context menus (taskbar, notification area icons, application
+ * menus) with the look of XP's menus: square white box, #ACA899 outline,
+ * #316AC5 highlight, 17 px items.
  *
- * O CSS só chega aos menus marcados com .zxp-menu: os painéis do GNOME que
- * também são PopupMenu (definições rápidas, calendário, menu Iniciar) têm
- * aspeto próprio e ficam de fora.
+ * The CSS only reaches menus marked with .zxp-menu: the GNOME panels that
+ * are also PopupMenus (quick settings, calendar, Start menu) have their own
+ * look and stay out.
  */
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
@@ -20,8 +20,8 @@ function isXpMenu(menu) {
     return !menu.actor.has_style_class_name('zorin-menu');
 }
 
-// itens com marca (visto, ponto): a marca ocupa a coluna de 17 px à
-// esquerda do texto, como no XP
+// items with a mark (check, dot): the mark takes the 17 px column to the
+// left of the text, as in XP
 function markOrnaments(menu) {
     for (const item of menu._getMenuItems()) {
         if (item instanceof PopupMenu.PopupMenuSection)
@@ -31,10 +31,11 @@ function markOrnaments(menu) {
     }
 }
 
-// títulos de secção (separadores com texto): os menus do XP não os tinham,
-// e no separador de 7 px o texto ficava cortado pela linha. O "Janelas
-// abertas" do menu das aplicações (barra de tarefas) sai de todo — fica só a
-// lista das janelas, separada do resto; nos outros menus fica só a linha.
+// section titles (separators with text): XP's menus did not have them, and
+// in the 7 px separator the text was cut by the line. The "Janelas
+// abertas" (Open Windows) of the application menu (taskbar) goes away
+// entirely — only the window list stays, separated from the rest; in the
+// other menus only the line stays.
 function dropHeadings(menu, touched) {
     const header = menu._openWindowsHeader;
     for (const item of menu._getMenuItems()) {
@@ -44,7 +45,7 @@ function dropHeadings(menu, touched) {
             touched.set(item, item.connect('destroy', () => touched.delete(item)));
             item.label.visible = false;
             if (item === header) {
-                // (o GNOME mostra-o e esconde-o com as janelas: fica sem altura)
+                // (GNOME shows and hides it with the windows: it gets no height)
                 item._separator.visible = false;
                 item.add_style_class_name('zxp-gone');
             }

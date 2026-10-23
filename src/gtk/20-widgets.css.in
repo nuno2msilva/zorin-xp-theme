@@ -1,16 +1,16 @@
 /* =====================================================================
- * Separadores (Tab) — medidas confirmadas contra capturas do XP:
- *   não selecionado: 18 px, 2 px abaixo do topo do cabeçalho
- *   selecionado: +2 px em cima, +2 px de cada lado, sobrepõe 1 px do painel
- *   painel: Tab.Pane (borda #919B9C + sombra de 2 px) com Tab.Body em tamanho real
+ * Tabs (Tab) — measurements checked against XP captures:
+ *   not selected: 18 px, 2 px below the top of the header
+ *   selected: +2 px at the top, +2 px on each side, overlaps 1 px of the pane
+ *   pane: Tab.Pane (#919B9C border + 2 px shadow) with Tab.Body at real size
  * =================================================================== */
 notebook {
   padding: 0;
   border: 0;
   background: none;
 }
-/* (com show-border o GtkNotebook do GTK4 leva a classe .frame: sem o contorno
- * das caixas de grupo, a moldura é só a do separador) */
+/* (with show-border GTK4's GtkNotebook gets the .frame class: without the
+ * group boxes' outline, the frame is only the tab's) */
 notebook.frame { border: 0; border-radius: 0; box-shadow: none; }
 notebook > header {
   padding: 0;
@@ -54,14 +54,14 @@ notebook > stack:not(:only-child) {
   background-repeat: repeat-x;
   background-position: left top;
 }
-/* dentro de uma página com separadores o fundo é o do painel */
+/* inside a tabbed page the background is the pane's */
 notebook > stack:not(:only-child) > * { background: none; }
 /*@gtk4*/
-/* O XP (e o GTK3) desenha a moldura antes dos separadores e o selecionado
- * desce 1 px por cima da linha de cima dela; o GTK4 desenha a moldura depois
- * e tapava o separador. Aqui essa linha (#919B9C) é a borda de baixo do
- * cabeçalho — que o separador selecionado tapa — e a moldura perde a linha
- * de cima (TabPaneEdge sem a 1.ª linha) */
+/* XP (and GTK3) draws the frame before the tabs and the selected one comes
+ * down 1 px over its top line; GTK4 draws the frame after and covered the
+ * tab. Here that line (#919B9C) is the bottom border of the header — which
+ * the selected tab covers — and the frame loses its top line (TabPaneEdge
+ * without the first row) */
 notebook > header.top { border-bottom: 1px solid #919B9C; }
 notebook > header.top > tabs { padding: 0; }
 notebook > header.top ~ stack:not(:only-child) {
@@ -72,8 +72,8 @@ notebook > header.top ~ stack:not(:only-child) {
 /*@end*/
 
 /* ---------------------------------------------------------------------
- * Caixas de grupo (button.groupbox): contorno #D0D0BF arredondado,
- * título azul #0046D5
+ * Group boxes (button.groupbox): rounded #D0D0BF outline, blue #0046D5
+ * title
  * ------------------------------------------------------------------- */
 frame > border, .frame {
   margin: 0;
@@ -82,33 +82,33 @@ frame > border, .frame {
   border-radius: 3px;
   box-shadow: none;
 }
-/* título a 10 px da borda: 6 px de margem + 3 px de folga de cada lado (medido) */
+/* title 10 px from the border: 6 px of margin + 3 px of gap on each side (measured) */
 frame > label { color: @xp_groupbox_text; margin: 0 0 0 6px; padding: 0 3px; }
 frame > label:disabled { color: @xp_disabled_text; }
 frame.flat > border { border-style: none; }
-/* (no GTK4 o contorno é do próprio nó frame, sem nó border) */
+/* (in GTK4 the outline belongs to the frame node itself, with no border node) */
 /*@gtk4*/
 frame { border: 1px solid #D0D0BF; border-radius: 3px; box-shadow: none; }
 frame.flat { border-style: none; }
 /*@end*/
 
-/* Folhas de propriedades montadas a partir de aplicações modernas (ver
- * src/zorin-appearance-xp): listas sem moldura nem linhas, dentro de caixas
- * de grupo com o conteúdo a ~10 px do contorno */
+/* Property sheets built from modern applications (see
+ * src/zorin-appearance-xp): lists without frame nor lines, inside group
+ * boxes with the content ~10 px from the outline */
 list.zxp-plain-list { border: 0; background: none; box-shadow: none; }
 list.zxp-plain-list > row, list.zxp-plain-list > row:hover { background: none; border: 0; }
 frame.zxp-groupbox > list, frame.zxp-groupbox > box, frame.zxp-groupbox > grid,
 frame.zxp-groupbox > flowbox { margin: 3px 4px 6px 4px; }
 window.zxp-property-sheet flowbox > flowboxchild { padding: 3px; }
 
-/* Molduras de listas/vistas com scroll: 1 px #7F9DB9 como as do XP */
+/* Frames of scrolled lists/views: 1 px #7F9DB9 like XP's */
 scrolledwindow.frame, scrolledwindow > border, .frame.view {
   border: 1px solid @xp_field_border;
   border-radius: 0;
 }
 
 /* ---------------------------------------------------------------------
- * Dicas (InfoWindow): fundo #FFFFE1, contorno preto, 1×2 px, sem sombra
+ * Tooltips (InfoWindow): #FFFFE1 background, black outline, 1×2 px, no shadow
  * ------------------------------------------------------------------- */
 tooltip, tooltip.background, .tooltip {
   padding: 1px 2px;
@@ -123,12 +123,12 @@ tooltip * { padding: 0; margin: 0; background: none; color: @xp_text; }
 tooltip decoration { box-shadow: none; border-radius: 0; background: none; }
 
 /* ---------------------------------------------------------------------
- * Barra de menus e menus (FlatMenus=true)
- *   barra: 19 px · item: 3×6 px · destaque MenuHilight #316AC5
- *   menu: borda 1 px #ACA899, 2 px de margem, itens de 17 px,
- *         separador de 9 px com a linha 3 px abaixo do topo,
- *         texto a 17 px do início do destaque, seta a 6 px da direita
- *   sombra (CS_DROPSHADOW): 5 px à direita e em baixo
+ * Menu bar and menus (FlatMenus=true)
+ *   bar: 19 px · item: 3×6 px · MenuHilight highlight #316AC5
+ *   menu: 1 px #ACA899 border, 2 px margin, 17 px items,
+ *         9 px separator with the line 3 px below the top,
+ *         text 17 px from the start of the highlight, arrow 6 px from the right
+ *   shadow (CS_DROPSHADOW): 5 px to the right and below
  * ------------------------------------------------------------------- */
 menubar, .menubar {
   padding: 0;
@@ -181,12 +181,12 @@ menu > arrow, .menu > arrow {
 }
 menu > arrow.bottom, .menu > arrow.bottom { -gtk-icon-source: url("assets/menu-arrow-down-normal.png"); }
 /*@end*/
-/* itens de 17 px; o texto começa a 17 px do realce: é a coluna das marcas,
- * que o GtkMenu já reserva (medido) */
+/* 17 px items; the text starts 17 px from the highlight: it is the marks
+ * column, which GtkMenu already reserves (measured) */
 menu menuitem, .menu menuitem, .context-menu menuitem {
   min-height: 13px;
   min-width: 40px;
-  padding: 1px 6px 2px 1px;   /* (o texto Tahoma 8 tem 14 px de altura: 17 no total) */
+  padding: 1px 6px 2px 1px;   /* (the Tahoma 8 text is 14 px high: 17 in total) */
   border: 0;
   background: none;
   color: @xp_text;
@@ -224,9 +224,9 @@ menu menuitem:disabled check:checked { -gtk-icon-source: url("assets/menu-check-
 menu menuitem radio:checked, .menu menuitem radio:checked { -gtk-icon-source: url("assets/menu-bullet-normal.png"); }
 menu menuitem:hover radio:checked { -gtk-icon-source: url("assets/menu-bullet-selected.png"); }
 menu menuitem:disabled radio:checked { -gtk-icon-source: url("assets/menu-bullet-disabled.png"); }
-/* (as regras gerais dos botões de opção, radio:hover / check:hover, ganhavam a
- * estas: o círculo do botão de opção aparecia no item por baixo do rato.
- * Nos menus do XP só há o ponto ou o visto no item escolhido) */
+/* (the general option button rules, radio:hover / check:hover, won over
+ * these: the option button's circle showed on the item under the mouse.
+ * XP's menus only have the dot or the check on the chosen item) */
 menu menuitem radio:hover, menu menuitem radio:active, menu menuitem radio:disabled,
 menu menuitem check:hover, menu menuitem check:active, menu menuitem check:disabled,
 .menu menuitem radio:hover, .menu menuitem radio:active, .menu menuitem radio:disabled,
@@ -242,12 +242,12 @@ menu menuitem:disabled check:checked:disabled { -gtk-icon-source: url("assets/me
 
 menu separator, .menu separator, menu > menuitem.separator {
   min-height: 1px;
-  margin: 2px 2px 3px;   /* 3 px acima e abaixo da linha e 1 px dos lados, medido (o GTK junta 1 px acima e tira 1 dos lados) */
+  margin: 2px 2px 3px;   /* 3 px above and below the line and 1 px from the sides, measured (GTK adds 1 px above and takes 1 off the sides) */
   padding: 0;
   background-color: @xp_btnshadow;
 }
 
-/* Popovers (GTK3/GTK4) com o mesmo aspeto dos menus do XP */
+/* Popovers (GTK3/GTK4) with the same look as XP's menus */
 popover, popover.background {
   padding: 2px;
   border: 1px solid @xp_btnshadow;
@@ -269,12 +269,12 @@ popover > contents {
 }
 popover, popover.background { padding: 0; border: 0; box-shadow: none; background: none; }
 popover > arrow { background: none; border: 0; }
-/* menus do XP: 1 px de contorno e 2 de folga (no contents), itens de 17 px,
- * o texto a 17 px da borda do realce e a marca (bolinha, visto) ao meio
- * desses 17 (o GTK4 punha 6 px à volta dos itens e 4 em cada item) */
+/* XP menus: 1 px outline and 2 of padding (on contents), 17 px items, the
+ * text 17 px from the highlight's edge and the mark (dot, check) in the
+ * middle of those 17 (GTK4 put 6 px around the items and 4 on each item) */
 popover.menu stack > box, popover.menu stack > box > box { margin: 0; padding: 0; }
 popover.menu > contents modelbutton, popover.menu > contents row,
-popover.background.menu modelbutton.flat {   /* (mais forte que a regra dos botões planos) */
+popover.background.menu modelbutton.flat {   /* (stronger than the flat buttons rule) */
   min-height: 0;
   margin: 0;
   padding: 1px 6px 1px 0;
@@ -283,14 +283,14 @@ popover.background.menu modelbutton.flat {   /* (mais forte que a regra dos bot�
 popover.menu modelbutton > box { margin: 0; padding: 0; min-width: 17px; }
 popover.menu modelbutton radio.left, popover.menu modelbutton check.left { margin: 0 2px; }
 popover.menu modelbutton label { margin: 0; padding: 0; }
-/* atalhos na cor do texto e a seta preta dos submenus, como no XP */
+/* shortcuts in the text colour and the black submenu arrow, as in XP */
 popover.menu modelbutton accelerator { color: inherit; opacity: 1; margin-left: 20px; }
-popover.menu modelbutton arrow.right {   /* (fundo: um ícone seria esticado a 16 px) */
+popover.menu modelbutton arrow.right {   /* (background: an icon would be stretched to 16 px) */
   min-width: 4px;
   min-height: 7px;
   margin-left: 10px;
   -gtk-icon-source: none;
-  -gtk-icon-size: 7px;     /* (um ícone embutido mede sempre isto: 16 por omissão) */
+  -gtk-icon-size: 7px;     /* (a built-in icon always measures this: 16 by default) */
   opacity: 1;
   background: url("assets/menu-arrow-right-normal.png") no-repeat center;
 }
@@ -303,7 +303,7 @@ popover.menu row:hover, popover.menu row:selected {
   background-color: @xp_highlight;
   color: @xp_highlight_text;
 }
-popover.menu separator { margin: 3px 1px; }   /* separadores de 7 px, 1 px para dentro (medido) */
+popover.menu separator { margin: 3px 1px; }   /* 7 px separators, 1 px inwards (measured) */
 /*@end*/
 popover modelbutton, popover.background modelbutton {
   min-height: 13px;
@@ -317,7 +317,7 @@ popover modelbutton:hover, popover.background modelbutton:hover {
 }
 
 /* ---------------------------------------------------------------------
- * Barra de progresso (Progress): 13 px; blocos de 6 px + 2 px de espaço
+ * Progress bar (Progress): 13 px; 6 px blocks + 2 px of space
  * ------------------------------------------------------------------- */
 progressbar { padding: 0; min-width: 0; min-height: 0; color: @xp_text; }
 progressbar > text { color: @xp_text; }
@@ -363,9 +363,9 @@ levelbar block.low { background-color: #FAC458; }
 levelbar block.high, levelbar block.full { background-color: #2ED331; }
 
 /* ---------------------------------------------------------------------
- * Controlo de deslize (TrackBar): calha de 4 px, cursor 11×21. Sempre o
- * cursor retangular (TrackBar.Thumb/ThumbVert, o do controlo de volume do
- * XP), mesmo com marcas só de um lado (a pedido, em vez do pontiagudo)
+ * Slider (TrackBar): 4 px trough, 11×21 thumb. Always the rectangular
+ * thumb (TrackBar.Thumb/ThumbVert, the one of XP's volume control), even
+ * with marks on one side only (on request, instead of the pointed one)
  * ------------------------------------------------------------------- */
 scale { min-height: 21px; min-width: 21px; padding: 0 5px; }
 scale.vertical { padding: 5px 0; }
@@ -388,7 +388,7 @@ scale slider {
   background-position: center;
   background-image: url("assets/trackbar-thumb-normal.png");
   box-shadow: none;
-  /*@gtk4*/transform: none;/*@end*/  /* o libadwaita roda-o 45° quando há marcas */
+  /*@gtk4*/transform: none;/*@end*/  /* libadwaita rotates it 45° when there are marks */
 }
 scale slider:hover { background-image: url("assets/trackbar-thumb-hover.png"); }
 scale slider:active { background-image: url("assets/trackbar-thumb-active.png"); }
@@ -407,9 +407,9 @@ scale mark indicator { min-height: 1px; min-width: 1px; background-color: #A1A19
 scale value { color: @xp_text; }
 
 /* ---------------------------------------------------------------------
- * Interruptor: o XP não os tinha — as opções de ligar/desligar eram caixas
- * de verificação —, por isso é desenhado como a caixa do Luna (13×13, com
- * os mesmos estados) e o cursor fica invisível
+ * Switch: XP did not have them — on/off options were check boxes —, so it
+ * is drawn as Luna's check box (13×13, with the same states) and the
+ * slider is invisible
  * ------------------------------------------------------------------- */
 switch {
   min-width: 13px;
@@ -449,7 +449,7 @@ switch image { -gtk-icon-size: 1px; }
 /*@end*/
 
 /* ---------------------------------------------------------------------
- * Listas e árvores (ListView/TreeView)
+ * Lists and trees (ListView/TreeView)
  * ------------------------------------------------------------------- */
 treeview.view {
   /*@gtk3*/-GtkTreeView-grid-line-width: 0; -GtkTreeView-tree-line-width: 1; -GtkTreeView-tree-line-pattern: '\1\1';/*@end*/
@@ -479,7 +479,7 @@ treeview.view header button, columnview > header > button, treeview > header > b
   color: @xp_text;
   box-shadow: none;
 }
-/* (o GTK4 do Nautilus usa columnview: a linha laranja ao passar o rato também) */
+/* (Nautilus's GTK4 uses columnview: the orange line on hover too) */
 treeview.view header button:hover, treeview > header > button:hover,
 columnview > header > button:hover { {{state:header-item:hover}} }
 treeview.view header button:active, treeview > header > button:active,
@@ -505,7 +505,7 @@ list.content, list.boxed-list, .boxed-list {
 }
 
 /* ---------------------------------------------------------------------
- * Barras de ferramentas, estado, painéis, expansores, barras de informação
+ * Toolbars, status bars, panes, expanders, info bars
  * ------------------------------------------------------------------- */
 toolbar, .toolbar, .primary-toolbar, actionbar > revealer > box, searchbar > revealer > box {
   padding: 2px;
@@ -558,7 +558,7 @@ calendar.header { border-bottom: 1px solid @xp_field_border; }
 calendar.highlight { color: @xp_groupbox_text; }
 calendar:indeterminate { color: @xp_graytext; }
 
-/* Barra lateral (Explorador): o painel de tarefas azul do XP (ExplorerBar) */
+/* Sidebar (Explorer): XP's blue task pane (ExplorerBar) */
 .sidebar, placessidebar, stacksidebar, .navigation-sidebar {
   background-color: #7A96DF;
   background-image: linear-gradient(to bottom, #7BA2E7, #6375D6);
@@ -579,15 +579,16 @@ placessidebar row:selected, .sidebar row:selected, stacksidebar row:selected {
 }
 placessidebar > viewport.frame, .sidebar.view { border: 0; }
 
-/* Caminho do seletor de ficheiros: botões de barra de ferramentas */
+/* File chooser path bar: toolbar buttons */
 .path-bar button label, .path-bar button image { padding: 0 1px; }
 
-/* Etiquetas de ligação */
+/* Link labels */
 *:link, button:link, button:visited { color: #0000FF; }
 *:visited { color: #800080; }
 *:link:hover { text-decoration-line: underline; }
 
-/* Diálogos */
+/* Dialogs */
+
 messagedialog .dialog-action-box, dialog .dialog-action-area, .dialog-action-area { padding: 8px; }
 messagedialog .titlebar, messagedialog.csd .titlebar { min-height: 0; }
 messagedialog .dialog-action-box button, .dialog-action-area button { min-width: 61px; }

@@ -1,7 +1,7 @@
 /*
- * Barra do Explorador do IE6 (Favoritos / Histórico) no Zen — o conteúdo do
- * painel lateral. O título ("Favoritos" + ×) é o cabeçalho da barra lateral
- * do Firefox, estilizado no ie.css.
+ * IE6's Explorer bar (Favorites / History) in Zen — the side panel's
+ * content. The title ("Favoritos" + ×) is Firefox's sidebar header, styled
+ * in ie.css.
  */
 html, body {
     margin: 0;
@@ -18,10 +18,10 @@ body {
     flex-direction: column;
 }
 
-/* faixa de botões ("Adicionar... Organizar..."), medida numa captura do XP:
-   22 px do fundo das bandas (as 9 linhas de cima a dobrar, as 4 de baixo
-   fixas) e 3 px do fundo (a 1.ª linha esticada) antes da linha da lista;
-   ícone a 7 px da beira, texto 5 px depois do ícone */
+/* button strip ("Adicionar... Organizar..."), measured in an XP capture:
+   22 px of band background (the top 9 rows doubled, the bottom 4 fixed)
+   and 3 px of background (the first row stretched) before the list line;
+   icon 7 px from the edge, text 5 px after the icon */
 #toolbar {
     flex: none;
     display: flex;
@@ -29,8 +29,8 @@ body {
     box-sizing: border-box;
     height: 25px;
     padding: 0 2px 3px;
-    /* (no XP a banda dos botões acaba 1 px antes da beira: a última coluna
-       é o fundo, com um ponto branco em cima) */
+    /* (in XP the button band ends 1 px before the edge: the last column is the
+       background, with a white dot at the top) */
     background:
         linear-gradient(#fff, #fff) 100% 0 / 1px 1px no-repeat,
         url("img/rebar-bottom.png") 0 18px / calc(100% - 1px) 4px no-repeat,
@@ -66,9 +66,9 @@ body {
     background: url("img/arrow.png");
 }
 
-/* a lista: branca, só a linha #aca899 por cima (captura do XP); linhas de
-   20 px, 2 px para dentro dos lados, a seleção na linha toda; ícone a 6 px
-   do início da linha, texto 3 px depois (as mesmas medidas nos separadores) */
+/* the list: white, only the #aca899 line above it (XP capture); 20 px rows,
+   2 px in from the sides, the selection on the whole row; icon 6 px from
+   the start of the row, text 3 px after (the same measurements on the tabs) */
 #list {
     flex: 1;
     overflow: auto;
@@ -93,7 +93,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     position: relative;
-    top: -1px;                            /* (como no XP: 6 px até ao cimo das maiúsculas) */
+    top: -1px;                            /* (as in XP: 6 px to the top of the capitals) */
 }
 .row:hover > span {
     color: #0066cc;
@@ -118,7 +118,7 @@ body {
     color: #000;
 }
 
-/* caixas que aparecem por baixo da faixa (Adicionar, Organizar, Procurar) */
+/* boxes that appear below the strip (Add, Organize, Search) */
 .box {
     flex: none;
     padding: 6px;
@@ -155,14 +155,14 @@ button {
     color: #000;
     background: none;
     border: none;
-    /* (sem rebordo: a imagem pinta-se pela largura da própria imagem) */
+    /* (no border: the image is painted across the image's own width) */
     border-image: url("img/button-normal.png") 9 8 9 8 fill / 9px 8px stretch;
     box-sizing: border-box;
 }
 button:hover { border-image-source: url("img/button-hover.png"); }
 button:hover:active { border-image-source: url("img/button-active.png"); }
 
-/* menu "Ver" (como os menus do XP) */
+/* "View" menu (like XP's menus) */
 .menu {
     position: absolute;
     z-index: 5;

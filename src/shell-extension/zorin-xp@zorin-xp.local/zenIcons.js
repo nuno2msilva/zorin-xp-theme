@@ -1,13 +1,13 @@
 /*
- * O Zen (o "Internet Explorer") com o ícone da página aberta na legenda da
- * janela e no botão da barra de tarefas, em vez do ícone da aplicação.
+ * Zen (the "Internet Explorer") with the open page's icon in the window
+ * caption and on the taskbar button, instead of the application's icon.
  *
- * A extensão do Zen src/zen-ie/title guarda, para cada janela, o favicon da
- * página escolhida (16 px; sem favicon, a página do IE) numa pasta da cache
- * do Flatpak, com um index.json "título da janela -> ficheiro". Aqui lê-se esse
- * índice (com um monitor da pasta) e procura-se cada janela do Zen pelo
- * título; a legenda vem do frames.js (setIcon) e o botão como os do
- * Explorador (explorerIcons.js).
+ * The Zen extension src/zen-ie/title saves, for each window, the favicon of
+ * the selected page (16 px; without a favicon, IE's page) in a folder of the
+ * Flatpak's cache, with an index.json "window title -> file". Here that
+ * index is read (with a folder monitor) and each Zen window is looked up by
+ * its title; the caption comes from frames.js (setIcon) and the button like
+ * the Explorer's (explorerIcons.js).
  */
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -24,7 +24,7 @@ const DIRS = [
 export class ZenIcons {
     constructor(ext) {
         this._ext = ext;
-        this._index = new Map();       // título -> caminho do ícone
+        this._index = new Map();       // title -> icon path
         this._windows = new Set();
         this._buttons = new Set();
         this._timer = 0;
@@ -59,8 +59,8 @@ export class ZenIcons {
             }, this);
     }
 
-    // (o índice muda várias vezes seguidas; o botão de uma janela nova
-    // aparece pouco depois da janela)
+    // (the index changes several times in a row; a new window's button appears
+    // shortly after the window)
     _soon() {
         if (this._timer)
             return;

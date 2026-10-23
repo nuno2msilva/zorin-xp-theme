@@ -1,9 +1,10 @@
 /*
- * Os diálogos do XP "Desligar o computador" (msgina.dll, diálogo 20100) e
- * "Terminar sessão" (shell32.dll, diálogo 1089), com as imagens e os textos
- * desses binários. Partilhado: a extensão da sessão usa-o no menu Iniciar e o
- * build copia-o para a extensão do ecrã de boas-vindas (botão "Desligar
- * computador"). Os estilos (classes zxp-dialog e zxp-tooltip) vêm com ele.
+ * XP's "Desligar o computador" (msgina.dll, dialog 20100) and "Terminar
+ * sessão" (shell32.dll, dialog 1089) dialogs, with the images and texts from
+ * those binaries. Shared: the session extension uses it in the Start menu and
+ * the build copies it into the welcome screen extension ("Desligar
+ * computador" button). The styles (classes zxp-dialog and zxp-tooltip) come
+ * with it.
  */
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
@@ -16,19 +17,19 @@ import {label} from './gdiText.js';
 
 export const LOGOUT = 0, SHUTDOWN = 1, RESTART = 2;
 
-// medidas dos modelos dos diálogos (DLU de Tahoma 8: x * 1,5 e y * 1,625 px)
-export const DLG_W = 313, DLG_H = 198;    // fundo (msgina 20142); contorno de 1 px por fora
+// measurements of the dialog templates (Tahoma 8 DLU: x * 1.5 and y * 1.625 px)
+export const DLG_W = 313, DLG_H = 198;    // background (msgina 20142); 1 px outline outside
 const TITLE = {x: 10, y: 0, w: 243, h: 42};
 const FLAG = {x: 264, y: 1};
 const ICON_Y = 80;
-const LABEL_Y = 119;           // rótulos: 50x8 DLU por baixo dos ícones, centrados
+const LABEL_Y = 119;           // labels: 50x8 DLU below the icons, centred
 const CANCEL = {x: 242, y: 167, w: 60, h: 20};
 const TURN_OFF_BUTTONS = [   // Suspender, Desligar, Reiniciar
     {icon: 'standby', x: 54},
     {icon: 'turnoff', x: 140},
     {icon: 'restart', x: 225},
 ];
-const LOG_OFF_BUTTONS = [    // Mudar de utilizador, Terminar sessão
+const LOG_OFF_BUTTONS = [    // Switch User, Log Off
     {icon: 'switchuser', x: 72},
     {icon: 'logoff', x: 210},
 ];
@@ -36,7 +37,7 @@ const TOOLTIP_DELAY = 500;
 
 
 class XpTooltip {
-    // dica em balão do XP: título a negrito e texto, fundo #FFFFE1
+    // XP balloon tooltip: bold title and text, #FFFFE1 background
     constructor(parent, title, text) {
         const W = 260, PAD = 8, R = 6;
         this.actor = new St.Widget({layout_manager: new Clutter.FixedLayout(), reactive: false});
@@ -74,7 +75,7 @@ class XpTooltip {
 }
 
 export class XpDialog {
-    // imgDir: pasta com as imagens (dialog-bg, ícones...); s: textos do XP
+    // imgDir: folder with the images (dialog-bg, icons...); s: XP's texts
     constructor(imgDir, s, type, onAction) {
         this._img = imgDir;
         this._onAction = onAction;
@@ -138,7 +139,7 @@ export class XpDialog {
         const setState = st => {
             icon.style = `background-image: url("${this._img}/${spec.icon}-${st}.png");`;
         };
-        // rótulo centrado por baixo do ícone (o St não centra uma linha só)
+        // label centred below the icon (St does not centre a single line)
         const text_ = label(`zxp-dialog-label${enabled ? '' : ' disabled'}`, text, {y: LABEL_Y, ellipsize: false});
         text_.connect('notify::width', () => {
             text_.x = Math.round(spec.x + 16 - text_.width / 2);

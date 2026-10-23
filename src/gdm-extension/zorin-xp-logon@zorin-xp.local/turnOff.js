@@ -1,12 +1,12 @@
-// Zorin XP — botão "Desligar computador" do ecrã de boas-vindas (início de
-// sessão e ecrã bloqueado), como no XP:
-//   1. o diálogo "Desligar o computador" do menu Iniciar (xpDialog.js), com o
-//      ecrã a perder a cor por trás;
-//   2. com alguém com sessão iniciada, a caixa de aviso do user32 ("Janelas",
-//      texto 713/714, Sim/Não) — arrastável pelo título, como qualquer janela;
-//      enquanto pergunta, as contas e a ajuda desaparecem;
-//   3. "O Windows está a encerrar..." com o som de encerrar, e só depois
-//      desliga/reinicia.
+// Zorin XP — the welcome screen's "Desligar computador" button (login and
+// lock screen), as in XP:
+//   1. the Start menu's "Desligar o computador" dialog (xpDialog.js), with
+//      the screen losing its colour behind it;
+//   2. with someone logged in, user32's warning box ("Janelas", text
+//      713/714, Sim/Não) — draggable by its title, like any window; while it
+//      asks, the accounts and the help disappear;
+//   3. "O Windows está a encerrar..." with the shutdown sound, and only then
+//      turns off/restarts.
 
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -17,7 +17,7 @@ import * as SystemActions from 'resource:///org/gnome/shell/misc/systemActions.j
 
 import {XpDialog, DLG_W, DLG_H, SHUTDOWN} from './xpDialog.js';
 
-const GRAY_DELAY = 2000;      // como o diálogo do menu Iniciar (medido no XP)
+const GRAY_DELAY = 2000;      // like the Start menu's dialog (measured in XP)
 const GRAY_TIME = 3000;
 const SOUND_MAX_MS = 6000;
 
@@ -30,7 +30,7 @@ function loadJson(path) {
     }
 }
 
-// toca um ficheiro de som e espera que acabe (no XP só desliga depois)
+// plays a sound file and waits for it to end (XP only turns off afterwards)
 function playFile(path, maxMs) {
     return new Promise(resolve => {
         let done = false;
@@ -53,7 +53,7 @@ function playFile(path, maxMs) {
     });
 }
 
-// Caixa de mensagem do user32 no estilo clássico (imagens de tools/builders/msgbox.py)
+// user32 message box in the classic style (images from tools/builders/msgbox.py)
 export class XpMessageBox {
     constructor(dir, kind, onAnswer) {
         const img = `${dir}/images`;
@@ -124,11 +124,11 @@ export class XpMessageBox {
             this.grabFocus();
             return Clutter.EVENT_STOP;
         }
-        // (MB_YESNO: sem Esc nem fechar)
+        // (MB_YESNO: no Esc nor close)
         return Clutter.EVENT_STOP;
     }
 
-    // arrastar pelo título, como uma janela
+    // drag by the title, like a window
     _onPress(ev) {
         if (ev.get_button() !== 1)
             return Clutter.EVENT_PROPAGATE;
@@ -142,7 +142,7 @@ export class XpMessageBox {
             if (t === Clutter.EventType.MOTION) {
                 const [x, y] = e.get_coords();
                 const parent = this.actor.get_parent();
-                // (o título nunca sai do ecrã)
+                // (the title never leaves the screen)
                 const nx = Math.round(px + x - sx);
                 const ny = Math.round(py + y - sy);
                 this.actor.set_position(
@@ -178,8 +178,8 @@ export class XpMessageBox {
 }
 
 /*
- * parent: o diálogo de boas-vindas (ocupa o monitor); ui: XpWelcome;
- * opts.loggedIn(): há sessões iniciadas; opts.power(action): desliga/reinicia.
+ * parent: the welcome dialog (it covers the monitor); ui: XpWelcome;
+ * opts.loggedIn(): there are open sessions; opts.power(action): turns off/restarts.
  */
 export class TurnOff {
     constructor(parent, ui, dir, opts) {
@@ -196,7 +196,7 @@ export class TurnOff {
     open() {
         if (this.busy)
             return;
-        // (modal: nada por trás responde enquanto o diálogo está aberto)
+        // (modal: nothing behind responds while the dialog is open)
         this._blocker = new St.Widget({reactive: true, x: 0, y: 0,
             width: this._parent.width, height: this._parent.height});
         this._parent.add_child(this._blocker);
@@ -262,7 +262,7 @@ export class TurnOff {
         this._blocker = null;
     }
 
-    // ------------------------------------------- fundo a perder a cor
+    // ------------------------------------------- background losing its colour
     _startGray() {
         this._stopGray();
         const target = this._ui.actor;
@@ -305,11 +305,10 @@ export class TurnOff {
     }
 }
 
-// desligar/reiniciar pelo logind (o ecrã de início de sessão não tem sessão
-// do utilizador para fechar)
+// turn off/restart through logind (the login screen has no user session to close)
 export function login1Power(action) {
     const method = action === 'restart' ? 'Reboot' : 'PowerOff';
-    // (os testes falam com o logind verdadeiro: nunca desligar a máquina)
+    // (the tests talk to the real logind: never turn the machine off)
     if (GLib.getenv('ZXP_LOGON_TEST')) {
         log(`Zorin XP: [teste] login1.${method}`);
         return;

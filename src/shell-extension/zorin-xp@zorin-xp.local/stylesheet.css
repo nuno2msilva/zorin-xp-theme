@@ -1,5 +1,5 @@
-/* Título das janelas: Trebuchet MS Bold 10 pt (13 px), branco com sombra
- * 1,1 #0A1883; inativo #D8E4F8 sem sombra (Window / InactiveCaptionText) */
+/* Window titles: Trebuchet MS Bold 10 pt (13 px), white with a 1,1 #0A1883
+ * shadow; inactive #D8E4F8 without shadow (Window / InactiveCaptionText) */
 .zxp-title {
   font-family: "Trebuchet MS";
   font-weight: bold;
@@ -12,8 +12,8 @@
   text-shadow: none;
 }
 
-/* Ecrãs de boas-vindas / estado do XP (logonui.exe, UIFILE 1000); tamanhos
-   em px arredondados como o GDI do XP (14 pt = 19 px, 8 pt = 11 px, 36 pt = 48 px) */
+/* XP welcome / status screens (logonui.exe, UIFILE 1000); sizes in px
+   rounded like XP's GDI (14 pt = 19 px, 8 pt = 11 px, 36 pt = 48 px) */
 .zxp-screen { background-color: rgb(90,126,220); }
 .zxp-screen-top { background-color: rgb(0,48,156); }
 .zxp-screen-bottom {
@@ -47,9 +47,9 @@
   color: rgb(239,247,255);
 }
 
-/* >>> xpDialog (o build copia este bloco para a extensão do ecrã de boas-vindas) */
-/* Desligar o computador / Terminar sessão (msgina 20100, shell32 1089):
-   título Franklin Gothic 14, rótulos Tahoma 8 (msgina 20125..20128) */
+/* >>> xpDialog (the build copies this block into the welcome screen extension) */
+/* Turn Off Computer / Log Off (msgina 20100, shell32 1089): title Franklin
+   Gothic 14, labels Tahoma 8 (msgina 20125..20128) */
 .zxp-dialog { border: 1px solid rgb(23,48,99); }
 .zxp-dialog-title {
   font-family: "Franklin Gothic XP", "Franklin Gothic Medium", sans-serif;

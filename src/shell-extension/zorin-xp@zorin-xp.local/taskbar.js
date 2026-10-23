@@ -1,13 +1,12 @@
 /*
- * Geometria dos botões da barra de tarefas como no Windows XP.
+ * Geometry of the taskbar buttons as in Windows XP.
  *
- * A zorin-taskbar define por código (estilo inline) o tamanho do ícone e as
- * margens dos botões, e desenha indicadores de execução; o CSS do tema não
- * os consegue alterar. Aqui ajustam-se esses métodos em tempo de execução
- * (os ficheiros do sistema não são tocados). Medidas tiradas de capturas
- * reais do XP (barra de 30 px):
- *   botão 160×30 sem espaço entre botões, ícone 16×16 em (11, 8),
- *   texto a partir de x = 31, sem pontos/realces de execução.
+ * zorin-taskbar sets in code (inline style) the icon size and the buttons'
+ * margins, and draws running indicators; the theme's CSS cannot change
+ * them. Here those methods are adjusted at runtime (the system's files are
+ * not touched). Measurements taken from real XP captures (30 px bar):
+ *   160×30 button with no space between buttons, 16×16 icon at (11, 8),
+ *   text from x = 31, no running dots/highlights.
  */
 import Clutter from 'gi://Clutter';
 import GdkPixbuf from 'gi://GdkPixbuf';
@@ -21,29 +20,29 @@ import {XP_DIR, savedImage, slicedImage} from './images.js';
 
 const TASKBAR_UUID = 'zorin-taskbar@zorinos.com';
 const ICON_SIZE = 16;
-const ICON_PADDING = 'padding: 8px 4px 6px 11px;';  // 11 + 16 + 4 = 31 px até ao texto
+const ICON_PADDING = 'padding: 8px 4px 6px 11px;';  // 11 + 16 + 4 = 31 px to the text
 
-// Área de notificação (TrayNotifyHoriz, medida em capturas do XP): a seta
-// "mostrar ícones ocultos" (19×20) no início da área, centrada na borda
-// curva; ícones de 16 px com passo de 18 a partir de x=19 (ContentMargins);
-// ao abrir, os ícones ocultos voltam a esconder-se 2 s depois de o rato sair
-// da área, como no XP
+// Notification area (TrayNotifyHoriz, measured in XP captures): the "show
+// hidden icons" arrow (19×20) at the start of the area, centred on the
+// curved edge; 16 px icons with an 18 px step from x=19 (ContentMargins);
+// when opened, the hidden icons hide again 2 s after the mouse leaves the
+// area, as in XP
 const TRAY_PAD_L = 19;
 const ICON_GAP = 2;
 const COLLAPSE_MS = 2000;
-// "Ver ADT" (botão Mostrar ambiente de trabalho da zorin-taskbar): invisível e
-// sem ocupar lugar, só uma zona de clique sobre o canto inferior direito
+// "Show Desktop" (zorin-taskbar's Show Desktop button): invisible and taking
+// no space, only a click zone over the bottom right corner
 const DESKTOP_HIT_W = 4;
 const DESKTOP_STYLE = 'width: 0; padding: 0; margin: 0; border: 0; background: none;';
-const SLIDE_MS = 250;   // os ícones ocultos deslizam a partir da seta
-// atividade da rede: quanto tempo (ms, ao acaso no intervalo) cada estado dos
-// ecrãs dos monitores se mantém — apagados ~2 s, acesos um pouco mais
+const SLIDE_MS = 250;   // the hidden icons slide out from the arrow
+// network activity: how long (ms, random within the range) each state of the
+// monitors' screens lasts — off ~2 s, lit a little longer
 const NET_OFF_MS = [1500, 2500];
 const NET_ON_MS = [2500, 4000];
 
-// Bytes recebidos e enviados pelas placas de rede físicas (contadores do
-// kernel em /sys/class/net: sem capturar pacotes nem permissões especiais).
-// As virtuais (lo, docker, pontes, VirtualBox) não têm "device" e ficam de fora
+// Bytes received and sent by the physical network cards (kernel counters in
+// /sys/class/net: no packet capture nor special permissions). The virtual
+// ones (lo, docker, bridges, VirtualBox) have no "device" and are left out
 let _ifaces = null, _ifacesAt = 0;
 const _decoder = new TextDecoder();
 function netCounters() {
@@ -72,14 +71,14 @@ function netCounters() {
             rx += Number(_decoder.decode(r));
             tx += Number(_decoder.decode(t));
         } catch (e) {
-            // a placa desapareceu: a lista é refeita daqui a pouco
+            // the card disappeared: the list is rebuilt shortly
         }
     }
     return [rx, tx];
 }
 
-// Ícone do XP (tray-ico-*.png, extraídos de stobject/netshell/sapi/intl/
-// irprops/batmeter) para um ícone de estado do GNOME; null = não havia no XP
+// XP icon (tray-ico-*.png, extracted from stobject/netshell/sapi/intl/
+// irprops/batmeter) for a GNOME status icon; null = XP did not have one
 function xpTrayIcon(name) {
     const n = name.replace(/-symbolic$/, '');
     if (n.startsWith('audio-volume-'))
@@ -95,11 +94,11 @@ function xpTrayIcon(name) {
             return 'network-busy';
         if (/offline|disconnected|disabled/.test(n))
             return 'network-off';
-        return 'network';    // o XP usa os dois monitores também na rede sem fios
+        return 'network';    // XP uses the two monitors for the wireless network too
     }
     if (n.startsWith('battery')) {
         if (/charging|charged/.test(n))
-            return 'battery-ac';     // ligado à corrente: ficha com bateria
+            return 'battery-ac';     // on mains power: plug with battery
         if (n.includes('missing'))
             return 'battery-missing';
         const m = /battery-level-(\d+)/.exec(n);
@@ -120,13 +119,13 @@ function xpTrayIcon(name) {
     return null;
 }
 
-// --- Ícones das aplicações a cores, como no XP -----------------------------
-// Muitas apps (Claude, Telegram, LocalSend…) dão à área de notificação um
-// ícone monocromático. Se o ícone não tiver cor, usa-se o ícone da própria
-// aplicação; os pormenores coloridos do original (p. ex. a bolinha vermelha
-// de mensagens por ler) ficam por cima. Os que já têm cor ficam como estão.
-// Apps cujo ícone monocromático fica como está (o a cores não contrasta com o
-// azul da área de notificação)
+// --- Application icons in colour, as in XP ---------------------------------
+// Many apps (Claude, Telegram, LocalSend…) give the notification area a
+// monochrome icon. If the icon has no colour, the application's own icon is
+// used; the coloured details of the original (e.g. the red dot of unread
+// messages) go on top. The ones that already have colour stay as they are.
+// Apps whose monochrome icon stays as it is (the colour one does not
+// contrast with the notification area's blue)
 const TRAY_KEEP_ORIGINAL = ['org.localsend.localsend_app'];
 
 let _iconTheme = null;
@@ -154,7 +153,7 @@ const isColored = (r, g, b) => {
     return mx > 0 && (mx - Math.min(r, g, b)) / mx > 0.3;
 };
 
-// Píxeis opacos e com cor: [com cor, opacos]
+// Opaque and coloured pixels: [coloured, opaque]
 function colorStats(pb) {
     const px = pb.get_pixels(), n = pb.get_n_channels(), rs = pb.get_rowstride();
     let colored = 0, total = 0;
@@ -171,8 +170,8 @@ function colorStats(pb) {
     return [colored, total];
 }
 
-// Aplicação dona do indicador: a que a extensão de indicadores já conhece ou,
-// se não (apps Flatpak), procurada pelo nome do ícone e pelo identificador
+// Application owning the indicator: the one the indicators extension already
+// knows or, if not (Flatpak apps), looked up by the icon name and the identifier
 const _appCache = new Map();
 function trayApp(indicator, gicon) {
     if (indicator?._appInfo?.get_icon?.())
@@ -221,14 +220,14 @@ function trayApp(indicator, gicon) {
     return found;
 }
 
-// Ícone a cores para o ícone da área de notificação, ou null para o manter
+// Colour icon for the notification area icon, or null to keep it
 function coloredTrayIcon(indicator, gicon) {
     const orig = iconPixbuf(gicon, 16);
     if (!orig)
         return null;
     const [colored, total] = colorStats(orig);
     if (!total || colored / total >= 0.25)
-        return null;            // já tem cor
+        return null;            // it already has colour
     const app = trayApp(indicator, gicon);
     if (TRAY_KEEP_ORIGINAL.includes((app?.get_id() ?? '').replace(/\.desktop$/, '')))
         return null;
@@ -237,7 +236,7 @@ function coloredTrayIcon(indicator, gicon) {
         return null;
     if (!colored)
         return appIcon;
-    // pormenores coloridos do original por cima do ícone da aplicação
+    // coloured details of the original on top of the application's icon
     let base = iconPixbuf(appIcon, 16);
     if (!base)
         return appIcon;
@@ -263,13 +262,13 @@ function coloredTrayIcon(indicator, gicon) {
     return Gio.FileIcon.new(Gio.File.new_for_path(savedImage(`trayapp-${sum}`, composed)));
 }
 
-// Ícone de aplicação a 16 px (o tamanho original, a pedido do utilizador em
-// 2026-10-13); a separação entre eles vem de TRAY_APP_HPAD
+// Application icon at 16 px (the original size, at the user's request on
+// 2026-10-13); the gap between them comes from TRAY_APP_HPAD
 const TRAY_APP_SIZE = 16;
-// margem de cada lado dos ícones das aplicações: 2 px a mais entre eles (passo de 20)
+// margin on each side of the application icons: 2 px more between them (20 px step)
 const TRAY_APP_HPAD = 1;
 function paddedTrayIcon(gicon) {
-    // (os simbólicos são recoloridos pelo St: carregados à parte perdiam a cor)
+    // (symbolic ones are recoloured by St: loaded separately they lost their colour)
     if (gicon instanceof Gio.ThemedIcon && gicon.get_names().some(n => n.endsWith('-symbolic')))
         return null;
     const pb = iconPixbuf(gicon, TRAY_APP_SIZE);
@@ -284,9 +283,9 @@ function paddedTrayIcon(gicon) {
     return Gio.FileIcon.new(Gio.File.new_for_path(savedImage(`trayapp${TRAY_APP_SIZE}-${sum}`, canvas)));
 }
 
-// Fundo, seta e ícones ocultos da área de notificação de um painel. Os ícones
-// das aplicações (#panelRight) escondem-se atrás da seta; os do sistema
-// (definições rápidas) e o relógio ficam sempre à vista.
+// Background, arrow and hidden icons of a panel's notification area. The
+// application icons (#panelRight) hide behind the arrow; the system ones
+// (quick settings) and the clock are always visible.
 class XpTray {
     constructor(p) {
         this._p = p;
@@ -302,13 +301,13 @@ class XpTray {
         this._boxes = new Set();
         this._appIcons = new Set();
 
-        // O fundo vai no próprio painel interno da zorin-taskbar (transparente,
-        // a toda a largura): um ator acrescentado ao painel não seria disposto
+        // The background goes in zorin-taskbar's own inner panel (transparent,
+        // full width): an actor added to the panel would not be laid out
         this._panel = p.panel;
-        // (o painel da zorin-taskbar só dispõe os filhos que conhece: este é
-        // posto à mão em _syncBg; mexer só nele é barato, ao contrário de
-        // mudar o estilo do painel, que refaz o estilo da barra inteira)
-        // (restos de uma vez anterior que não se desmontou: fora)
+        // (zorin-taskbar's panel only lays out the children it knows: this one is
+        // placed by hand in _syncBg; touching only it is cheap, unlike
+        // changing the panel's style, which restyles the whole bar)
+        // (leftovers from an earlier time that was not torn down: out)
         for (const c of this._panel.get_children()) {
             if (c.name === 'zxpTrayBg')
                 c.destroy();
@@ -345,23 +344,23 @@ class XpTray {
         for (const c of this._right.get_children())
             this._onAdded(c);
 
-        // ícones do sistema com os do XP
+        // system icons with XP's
         if (this._system?._indicators)
             this._hookIcons(this._system._indicators);
 
-        // ícones do sistema seguidos, com o passo do XP, e 2 px antes do relógio
-        // (2 px de margem à esquerda — o enchimento era ignorado neste botão: os
-        // ícones do sistema enchem os 16 px, sem a margem transparente dos das
-        // aplicações; assim o espaço visível na passagem fica igual aos outros)
+        // system icons in a row, with XP's step, and 2 px before the clock
+        // (2 px of left margin — padding was ignored on this button: the
+        // system icons fill the 16 px, without the transparent margin of the
+        // application ones; this way the visible gap at the join matches the others)
         this._style(this._system, '-natural-hpadding: 0; -minimum-hpadding: 0; padding: 0; margin-left: 2px;');
         this._style(this._system?.container, `margin-right: ${ICON_GAP}px;`);
-        // o -natural-hpadding não invalida a largura em cache do botão (ficavam
-        // 9 px de cada lado entre os ícones das aplicações e os do sistema)
+        // -natural-hpadding does not invalidate the button's cached width (there
+        // were 9 px on each side between the application and system icons)
         this._system?.queue_relayout();
-        // relógio como no XP em português: "0:14", sem o zero à esquerda da hora
-        // e com os dois pontos normais (o GNOME escreve "00\u200e∶14": marca de
-        // direção invisível e "∶", U+2236, que o Tahoma nem tem e que vinha de
-        // outra fonte, mais alta)
+        // clock as in Portuguese XP: "0:14", without the hour's leading zero and
+        // with a normal colon (GNOME writes "00‎∶14": an invisible
+        // direction mark and "∶", U+2236, which Tahoma does not even have and
+        // which came from another, taller font)
         const clock = this._date?._clockDisplay;
         if (clock) {
             const fix = () => {
@@ -376,8 +375,8 @@ class XpTray {
         this._apply();
     }
 
-    // Troca os ícones de estado do GNOME pelos do XP, também nos indicadores
-    // acrescentados depois e sempre que o GNOME muda o ícone
+    // Swaps GNOME's status icons for XP's, also in indicators added later and
+    // every time GNOME changes the icon
     _hookIcons(actor) {
         if (actor instanceof St.Icon) {
             this._hookIcon(actor);
@@ -403,9 +402,9 @@ class XpTray {
             if (!key)
                 return;
             icon._zxpOrig = g;
-            icon.set_style('-st-icon-style: regular;');   // a cores, sem recolorir
+            icon.set_style('-st-icon-style: regular;');   // in colour, not recoloured
             if (key === 'network') {
-                // ligado: os ecrãs acendem com o tráfego (ver _netTick)
+                // connected: the screens light up with the traffic (see _netTick)
                 this._netIcon = icon;
                 this._setIcon(icon, icon._zxpNet ?? 'network');
                 if (!this._netTimer)
@@ -420,8 +419,7 @@ class XpTray {
         sync();
     }
 
-    // Ícones das aplicações monocromáticos -> ícone da aplicação a cores,
-    // todos a 16 px
+    // Monochrome application icons -> the application's colour icon, all at 16 px
     _hookAppIcon(button) {
         const icon = button._icon;
         if (this._appIcons.has(icon))
@@ -432,8 +430,8 @@ class XpTray {
             if (!g || g === icon._zxpColor)
                 return;
             icon._zxpTrayOrig = g;
-            // a extensão de indicadores embrulha os ícones num EmblemedIcon (e
-            // chama get_icon() sobre o atual): desembrulhar e voltar a embrulhar
+            // the indicators extension wraps the icons in an EmblemedIcon (and calls
+            // get_icon() on the current one): unwrap and wrap again
             const inner = g instanceof Gio.EmblemedIcon ? g.get_icon() : g;
             const base = coloredTrayIcon(button._indicator, inner) ?? inner;
             const color = paddedTrayIcon(base) ?? (base !== inner ? base : null);
@@ -463,11 +461,12 @@ class XpTray {
         });
     }
 
-    // Como no XP, o ecrã da frente acende quando o computador envia e o de
-    // trás quando recebe. Com o tráfego contínuo de hoje ficariam sempre os
-    // dois acesos: enquanto houver tráfego num sentido, o ecrã respetivo
-    // acende ao acaso (mais vezes no sentido com mais tráfego), sem repetir o
-    // estado anterior; sem tráfego ficam apagados
+    // As in XP, the front screen lights up when the computer sends and the
+    // back one when it receives. With today's continuous traffic both would
+    // always be lit: while there is traffic in one direction, the matching
+    // screen lights up at random (more often in the direction with more
+    // traffic), without repeating the previous state; without traffic they
+    // stay off
     _netTick() {
         const icon = this._netIcon;
         if (!icon) {
@@ -484,8 +483,8 @@ class XpTray {
                 const pRx = dRx ? 0.25 + 0.5 * dRx / total : 0;
                 const pTx = dTx ? 0.25 + 0.5 * dTx / total : 0;
                 const keyOf = (rx, tx) => rx && tx ? 'network-txrx' : tx ? 'network-tx' : rx ? 'network-rx' : 'network';
-                // sorteia até sair um estado diferente do anterior (o apagado
-                // também conta: é o que dá o efeito de piscar)
+                // draws until a state different from the previous one comes up (off also
+                // counts: that is what gives the blinking effect)
                 for (let i = 0; i < 6 && (i === 0 || key === icon._zxpNet); i++)
                     key = keyOf(Math.random() < pRx, Math.random() < pTx);
             }
@@ -513,15 +512,15 @@ class XpTray {
     _onAdded(c) {
         if (c === this._chevron)
             return;
-        // a seta é sempre o primeiro elemento
+        // the arrow is always the first element
         if (this._right.get_child_at_index(0) !== this._chevron)
             this._right.set_child_at_index(this._chevron, 0);
         const button = c.get_first_child?.() ?? c;
         if (!this._watched.has(button)) {
             this._watched.add(button);
             button.connectObject('notify::visible', () => this._apply(), this);
-            // os indicadores de aplicações (modo compacto) impõem por código
-            // 10 px de cada lado; aqui TRAY_APP_HPAD (passo de 20)
+            // the application indicators (compact mode) force 10 px on each side in
+            // code; here TRAY_APP_HPAD (20 px step)
             if (button.has_style_class_name?.('panel-button')) {
                 button._zxpStyle = button.get_style();
                 const fix = () => {
@@ -530,7 +529,7 @@ class XpTray {
                     if (st.includes(pad))
                         return;
                     button.set_style(`${st.replace(/-(natural|minimum)-hpadding:[^;]*;?/g, '')}${pad}`);
-                    button.queue_relayout();  // (largura em cache, ver acima)
+                    button.queue_relayout();  // (cached width, see above)
                 };
                 button.connectObject('notify::style', fix, this);
                 fix();
@@ -539,17 +538,17 @@ class XpTray {
                 this._hookAppIcon(button);
         }
         if (!this._watched.has(c)) {
-            // o GNOME volta a mostrar o contentor ao mudá-lo de painel
+            // GNOME shows the container again when it moves to another panel
             this._watched.add(c);
             c.connectObject('notify::visible', () => this._apply(), this);
         }
         this._apply();
     }
 
-    // Esconde/mostra os ícones das aplicações (o contentor de cada um só fica
-    // visível se a seta estiver aberta e o ícone existir: contentores vazios
-    // ocupavam 2 px). A seta só aparece se houver algum ícone para esconder;
-    // sem ela, a área começa 19 px antes do 1.º ícone do sistema
+    // Hides/shows the application icons (each one's container is only visible
+    // if the arrow is open and the icon exists: empty containers took 2 px).
+    // The arrow only appears if there is some icon to hide; without it, the
+    // area starts 19 px before the first system icon
     _apply() {
         if (this._applying)
             return;
@@ -583,7 +582,7 @@ class XpTray {
         this._timer = 0;
         if (!expanded)
             return;
-        // fecha 2 s depois de o rato sair da área (e sem menus abertos)
+        // closes 2 s after the mouse leaves the area (and with no menus open)
         let since = null;
         this._timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
             if (this._pointerInside() || this._menuOpen()) {
@@ -600,11 +599,11 @@ class XpTray {
         });
     }
 
-    // Como no XP (comparado com uma gravação da área do XP): ao abrir, os
-    // ícones ficam logo no sítio e a seta — com a borda do fundo claro —
-    // desliza para a esquerda e vai-os destapando; ao fechar, a seta e os
-    // ícones deslizam juntos para a direita e somem no limite dos ícones do
-    // sistema. Nada encolhe nem estica: só translação e recorte.
+    // As in XP (compared with a recording of XP's area): when opening, the
+    // icons are in place at once and the arrow — with the edge of the light
+    // background — slides left and uncovers them; when closing, the arrow and
+    // the icons slide right together and vanish at the edge of the system
+    // icons. Nothing shrinks or stretches: only translation and clipping.
     _slide(expanded) {
         this._stopSlide();
         const items = this._items().filter(c => (c.get_first_child?.() ?? c).visible);
@@ -645,19 +644,19 @@ class XpTray {
         };
 
         if (expanded) {
-            // mostra os ícones e espera pela disposição final para saber a
-            // distância; até lá ficam invisíveis
+            // shows the icons and waits for the final layout to know the distance;
+            // until then they are invisible
             for (const c of items) {
                 c.opacity = 0;
                 c.show();
             }
-            // (já disposto, ainda antes de desenhar: sem saltos)
+            // (already laid out, still before drawing: no jumps)
             const id = global.stage.connect('before-paint', () => {
                 global.stage.disconnect(id);
                 const dist = this._right.width - chev.width;
                 for (const c of items)
                     c.opacity = 255;
-                // só se vê o que fica à direita da seta
+                // only what is to the right of the arrow is visible
                 run(dist, 0, t => {
                     const edge = t + chev.width;
                     for (const c of items) {
@@ -670,7 +669,7 @@ class XpTray {
         } else {
             const end = this._right.width;
             const dist = end - chev.width;
-            // os ícones acompanham a seta e são cortados no limite da área
+            // the icons follow the arrow and are clipped at the edge of the area
             run(0, dist, t => {
                 for (const c of items) {
                     c.translation_x = t;
@@ -705,9 +704,10 @@ class XpTray {
         return this._items().some(c => (c.get_first_child?.() ?? c).menu?.isOpen);
     }
 
-    // Fundo (TaskbarTray) do início de #panelRight até à direita do painel,
-    // composto no tamanho exato (o border-image do St deforma as fatias) num
-    // ator próprio por baixo dos ícones; durante a animação a borda segue a seta
+    // Background (TaskbarTray) from the start of #panelRight to the right of the
+    // panel, composed at the exact size (St's border-image distorts the slices)
+    // in its own actor below the icons; during the animation the edge follows
+    // the arrow
     _syncBg() {
         const box = this._right.get_allocation_box();
         const w = Math.round(this._panel.width), h = Math.round(this._panel.height);
@@ -733,9 +733,9 @@ class XpTray {
         this._bg.allocate(new Clutter.ActorBox({x1: x, y1: 0, x2: w, y2: h}));
     }
 
-    // O botão continua a ser o da zorin-taskbar (é ela que trata o clique);
-    // aqui fica sem largura na disposição (não empurra o relógio), sem traço
-    // nem ícone, e é posto à mão por cima do canto direito do painel
+    // The button is still zorin-taskbar's (it handles the click); here it gets
+    // no width in the layout (it does not push the clock), no line nor icon,
+    // and it is placed by hand over the panel's right corner
     _syncDesktop() {
         const b = this._p._showDesktopButton;
         if (!b)
@@ -749,8 +749,8 @@ class XpTray {
                 if (b.get_style() !== DESKTOP_STYLE)
                     b.set_style(DESKTOP_STYLE);
             };
-            // (a zorin-taskbar volta a dispô-lo com largura 0 sempre que
-            // reorganiza o painel: repor logo a seguir)
+            // (zorin-taskbar lays it out again with width 0 whenever it rearranges
+            // the panel: put it back right after)
             b.connectObject('notify::style', strip, 'child-added', strip,
                 'notify::allocation', () => this._placeDesktop(), this);
             strip();
@@ -771,10 +771,10 @@ class XpTray {
     }
 
     destroy() {
-        // Cada passo à parte: ao bloquear o ecrã, a zorin-taskbar destrói o
-        // botão "Mostrar o ambiente de trabalho" (e outros atores) antes de
-        // isto correr; um erro a meio deixava a seta e o fundo no painel, e
-        // ao desbloquear vinha outra por cima (seta duplicada)
+        // Each step separately: when the screen locks, zorin-taskbar destroys the
+        // "Show Desktop" button (and other actors) before this runs; an error
+        // halfway left the arrow and the background on the panel, and after
+        // unlocking another one came on top (duplicated arrow)
         const step = fn => {
             try {
                 fn();
@@ -864,7 +864,7 @@ export class TaskbarTweaks {
         const tb = Main.extensionManager.lookup(TASKBAR_UUID);
         if (!tb)
             return;
-        // Mesmo URL que o carregador de extensões usa -> mesmas instâncias dos módulos
+        // Same URL the extension loader uses -> same module instances
         const appIcons = await import(`file://${tb.path}/appIcons.js`);
         const taskbar = await import(`file://${tb.path}/taskbar.js`);
         if (this._destroyed)
@@ -877,8 +877,8 @@ export class TaskbarTweaks {
             this.set_style('padding: 0;');
             this._iconContainer.set_style(ICON_PADDING);
         });
-        // Botão da janela ativa "carregado" (xp.css: .focused). Com as janelas
-        // desagrupadas a zorin-taskbar só põe .focused no modo agrupado.
+        // The active window's button "pressed" (xp.css: .focused). With ungrouped
+        // windows zorin-taskbar only sets .focused in grouped mode.
         const setIconStyle = AppIcon.prototype._setIconStyle;
         this._patch(AppIcon.prototype, '_setIconStyle', function (isFocused) {
             setIconStyle.call(this, isFocused);
@@ -900,8 +900,8 @@ export class TaskbarTweaks {
                 c.child?._delegate?.icon?.setIconSize(ICON_SIZE);
         });
         this._watchTaskbar();
-        // ZXP_DEBUG=1 no ambiente do Shell ou ~/.cache/zorin-xp-debug: árvore
-        // de atores no diário
+        // ZXP_DEBUG=1 in the Shell's environment or ~/.cache/zorin-xp-debug: actor
+        // tree in the journal
         if (GLib.getenv('ZXP_DEBUG') ||
             GLib.file_test(`${GLib.get_user_cache_dir()}/zorin-xp-debug`, GLib.FileTest.EXISTS))
             GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 5, () => {
@@ -918,7 +918,7 @@ export class TaskbarTweaks {
         this._patches.push([proto, name, orig]);
     }
 
-    // Diagnóstico: árvore de atores do painel no diário (journalctl -o cat | grep ZXP)
+    // Diagnostics: the panel's actor tree in the journal (journalctl -o cat | grep ZXP)
     dumpPanels() {
         const walk = (a, d) => {
             if (d > 9 || !a)
@@ -944,9 +944,10 @@ export class TaskbarTweaks {
             walk(p, 0);
     }
 
-    // A zorin-taskbar pode ativar-se depois desta extensão (o enable dela é
-    // assíncrono) e cria um global.zorinTaskbar novo, e painéis novos, sempre
-    // que é (re)ativada: ligar ao objeto atual e acompanhar as mudanças
+    // zorin-taskbar may get enabled after this extension (its enable is
+    // asynchronous) and it creates a new global.zorinTaskbar, and new
+    // panels, every time it is (re)enabled: connect to the current object and
+    // follow the changes
     _watchTaskbar() {
         const attach = () => {
             const zt = global.zorinTaskbar;
@@ -976,7 +977,8 @@ export class TaskbarTweaks {
     }
 
     _refresh() {
-        // painéis que deixaram de existir (a zorin-taskbar recriou-os)
+        // panels that no longer exist (zorin-taskbar recreated them)
+
         const panels = global.zorinTaskbar?.panels ?? [];
         for (const [p, tray] of this._trays) {
             if (!panels.includes(p)) {

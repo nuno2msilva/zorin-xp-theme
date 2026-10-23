@@ -1,9 +1,10 @@
 /*
- * Ecrã de boas-vindas do XP (logonui.exe) dentro da sessão: o "bem-vindo"
- * enquanto a sessão carrega e os ecrãs de estado ao terminar a sessão ou
- * desligar ("A terminar a sessão...", "O Windows está a encerrar...").
- * Mesmas medidas do UIFILE 1000 que a extensão do GDM usa; as imagens e os
- * textos vêm do logonui.exe/winlogon.exe (logon/, gerado pelo build).
+ * XP's welcome screen (logonui.exe) inside the session: the "bem-vindo"
+ * while the session loads and the status screens when logging off or
+ * turning off ("A terminar a sessão...", "O Windows está a encerrar...").
+ * The same measurements of UIFILE 1000 that the GDM extension uses; the
+ * images and texts come from logonui.exe/winlogon.exe (logon/, made by the
+ * build).
  */
 import AccountsService from 'gi://AccountsService';
 import Clutter from 'gi://Clutter';
@@ -47,8 +48,8 @@ export class XpScreen {
     constructor(dir) {
         this._img = `${dir}/logon/images`;
         this.strings = xpStrings(dir);
-        // por cima de tudo (fora do uiGroup, que o GNOME anima ao arrancar) e
-        // a apanhar o rato: no XP não se mexe em nada durante estes ecrãs
+        // on top of everything (outside uiGroup, which GNOME animates on startup)
+        // and catching the mouse: in XP nothing can be touched during these screens
         this.actor = new St.Widget({
             style_class: 'zxp-screen',
             reactive: true,
@@ -62,7 +63,7 @@ export class XpScreen {
         this._topLine = image('divider-top', 800, LINE_H);
         this._glow = image('glow', 219, 207);
         this._bottom = new St.Widget({style_class: 'zxp-screen-bottom'});
-        // (o bitmap 126 tem 3 px de altura; o XP estica-o para os 2 px da linha)
+        // (bitmap 126 is 3 px high; XP stretches it to the line's 2 px)
         this._bottomLine = image('divider-bottom', 800, LINE_H);
         this._bottomLine.style += ' background-size: 800px 2px;';
         this._divider = image('divider-v', 1, 340);
@@ -82,7 +83,7 @@ export class XpScreen {
             this._divider, this._logo, this._status, this._welcomeShadow, this._welcome, this._tile])
             this.actor.add_child(a);
         this._mode = 'status';
-        // as medidas dos textos só são certas depois de o tipo de letra estar aplicado
+        // the text measurements are only right after the font has been applied
         for (const l of [this._status, this._welcome, this._welcomeShadow, this._name])
             l.connect('style-changed', () => this._relayout());
         this._monitorsId = Main.layoutManager.connect('monitors-changed', () => this._relayout());
@@ -94,7 +95,7 @@ export class XpScreen {
         this._relayout();
     }
 
-    // "bem-vindo" à esquerda; a conta à direita com o estado por baixo
+    // "bem-vindo" on the left; the account on the right with the status below
     showWelcome(status) {
         this._mode = 'welcome';
         const um = AccountsService.UserManager.get_default();
@@ -113,7 +114,7 @@ export class XpScreen {
         this.show();
     }
 
-    // estado sozinho: logótipo e texto, o painel esquerdo centrado no ecrã
+    // status alone: logo and text, the left panel centred on the screen
     showStatus(status) {
         this._mode = 'status';
         this.setStatus(status);
@@ -156,15 +157,15 @@ export class XpScreen {
             for (const [l, dx, dy] of [[this._welcomeShadow, 2, 3], [this._welcome, 0, 0]]) {
                 const [, w] = l.get_preferred_width(-1);
                 const [, h] = l.get_preferred_height(w);
-                // (alinhado pela última largura: o itálico passa para lá dela, como no XP)
+                // (aligned by the last width: italic reaches past it, as in XP)
                 l.set_position(div - 22 - l.textWidth + dx, top + Math.floor((contentH - h) / 2) + dy);
             }
             this._tile.set_position(div + LIST_X, top + Math.floor((contentH - ITEM_H) / 2));
             const [, nameH] = this._name.get_preferred_height(-1);
             this._tileStatus.y = 7 + nameH;
         } else {
-            // sem o painel direito, o esquerdo fica centrado (medido no XP)
-            // (alinhado à direita à mão: o St não alinha uma linha só)
+            // without the right panel, the left one is centred (measured in XP)
+            // (right-aligned by hand: St does not align a single line)
             const right = Math.floor(W / 2) + PANEL_W / 2;
             this._status.set_width(-1);
             const [, statusW] = this._status.get_preferred_width(-1);
@@ -194,20 +195,21 @@ export class XpScreen {
     }
 }
 
-// boas-vindas enquanto a sessão carrega (XP: "bem-vindo" e "A carregar as
-// suas definições pessoais..."); some de uma vez quando o ambiente de
-// trabalho está pronto
+// welcome while the session loads (XP: "bem-vindo" and "A carregar as
+// suas definições pessoais..."); it disappears at once when the desktop
+// is ready
 export function sessionWelcome(dir) {
     if (!isSessionStart())
         return null;
     const screen = new XpScreen(dir);
     screen.showWelcome(screen.strings.loadingSettings);
-    // o GNOME Shell só mostraria o ecrã depois de carregar o fundo (o preto ao
-    // entrar): com isto, a primeira imagem da sessão já é o ecrã do XP
+    // GNOME Shell would only show the screen after loading the background (the
+    // black when logging on): with this, the session's first image is already
+    // the XP screen
     global.stage.show();
     log('Zorin XP: [sessão] ecrã de boas-vindas mostrado');
-    // o ecrã de carregamento do início da sessão (zorin-xp-splash, lançado pelo
-    // ~/.xprofile) fecha-se quando este já está desenhado
+    // the loading screen at the start of the session (zorin-xp-splash, launched
+    // by ~/.xprofile) closes once this one has been drawn
     GLib.timeout_add(GLib.PRIORITY_DEFAULT, 150, () => {
         try {
             GLib.file_set_contents(

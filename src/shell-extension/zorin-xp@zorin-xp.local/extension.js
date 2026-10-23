@@ -1,23 +1,23 @@
 /*
- * Zorin XP — extensão do GNOME Shell que completa o tema Windows XP Luna
- * onde o CSS não chega:
- *   frames.js  — bordas, ícone e título das janelas com moldura do mutter
- *   taskbar.js — geometria dos botões da zorin-taskbar (ícone 16 px, texto,
- *                sem indicadores) e fundo da área de notificação
- *   startmenu.js — menu Zorin com as faixas e cores do menu Iniciar do XP
- *   prefsRedirect.js — definições da zorin-taskbar como folha de propriedades
- *   menus.js   — menus de contexto do Shell com o aspeto dos menus do XP
- *   logonSound.js — música de arranque / som de início de sessão do XP
- *   xpScreen.js / endSession.js — boas-vindas ao entrar, diálogos Desligar o
- *                computador / Terminar sessão, ecrãs de saída e sons
- *   desktopNames.js — "O meu computador" e "Reciclagem" nos ícones do
- *                ambiente de trabalho
- *   explorerIcons.js — na barra de tarefas, cada janela do Ficheiros com o
- *                ícone da pasta aberta (o clique ao mudar de pasta e o zoom
- *                fixo estão na extensão do próprio Nautilus, src/nautilus-xp)
- *   ieFind.js  — a janela Localizar do IE (Zen) fora da barra de tarefas
- *   zenIcons.js — o IE (Zen) com o favicon da página na legenda e no botão
- *                da barra de tarefas (o ícone vem da extensão src/zen-ie/title)
+ * Zorin XP — GNOME Shell extension that completes the Windows XP Luna theme
+ * where CSS cannot reach:
+ *   frames.js  — borders, icon and title of windows with a mutter frame
+ *   taskbar.js — geometry of the zorin-taskbar buttons (16 px icon, text,
+ *                no indicators) and the notification area background
+ *   startmenu.js — Zorin menu with the bands and colours of XP's Start menu
+ *   prefsRedirect.js — zorin-taskbar settings as a property sheet
+ *   menus.js   — the Shell's context menus with the look of XP's menus
+ *   logonSound.js — XP's startup music / logon sound
+ *   xpScreen.js / endSession.js — welcome when logging on, the Turn Off
+ *                Computer / Log Off dialogs, exit screens and sounds
+ *   desktopNames.js — "O meu computador" and "Reciclagem" on the desktop
+ *                icons
+ *   explorerIcons.js — on the taskbar, each Files window with the icon of
+ *                the open folder (the click when changing folders and the
+ *                fixed zoom are in Nautilus's own extension, src/nautilus-xp)
+ *   ieFind.js  — IE's (Zen's) Find window off the taskbar
+ *   zenIcons.js — IE (Zen) with the page's favicon in the caption and on the
+ *                taskbar button (the icon comes from the src/zen-ie/title extension)
  */
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
@@ -49,15 +49,15 @@ export default class ZorinXpExtension extends Extension {
         this._explorerIcons = new ExplorerIcons();
         this._zenIcons = new ZenIcons(this);
         this._ieFind = new IeFind(this.path);
-        // de volta depois de bloquear o ecrã / mudar de utilizador: som de logon
+        // back after locking the screen / switching user: logon sound
         if (this._locked)
             playSound('service-login');
         this._locked = false;
     }
 
     disable() {
-        // bloquear o ecrã (ou mudar de utilizador) desliga as extensões: som de
-        // terminar sessão do XP, e o de logon ao voltar
+        // locking the screen (or switching user) disables the extensions: XP's
+        // log off sound, and the logon one when coming back
         if (Main.sessionMode.isLocked) {
             playSound('service-logout');
             this._locked = true;

@@ -1,12 +1,13 @@
-// Zorin XP — ecrã bloqueado (Win+L, mudar de utilizador) é o ecrã de boas-vindas
-// do XP, como no XP com a mudança rápida de utilizador.
+// Zorin XP — the lock screen (Win+L, switch user) is XP's welcome screen, as
+// in XP with fast user switching.
 //
-// Substitui o UnlockDialog do GNOME (Main.sessionMode.unlockDialog): como no
-// XP, abre com a lista de contas sem nenhuma selecionada; clicar na conta com
-// a sessão bloqueada mostra a caixa da palavra-passe (Esc ou um clique no fundo
-// voltam à lista) e clicar noutra conta passa para o ecrã de início de sessão (GDM). A verificação é a
-// reautenticação do GDM (auth.js); quando aceita, o GDM desbloqueia a sessão
-// (sinal Unlock do logind) e o ScreenShield fecha este diálogo.
+// Replaces GNOME's UnlockDialog (Main.sessionMode.unlockDialog): as in XP, it
+// opens with the account list and none selected; clicking the account with
+// the locked session shows the password box (Esc or a click on the background
+// go back to the list) and clicking another account moves to the login
+// screen (GDM). The check is GDM's reauthentication (auth.js); when it
+// accepts, GDM unlocks the session (logind's Unlock signal) and ScreenShield
+// closes this dialog.
 
 import AccountsService from 'gi://AccountsService';
 import Clutter from 'gi://Clutter';
@@ -45,10 +46,10 @@ export const XpUnlockDialog = GObject.registerClass({
         this._ui.onDeselect = () => this._guard(() => this._deselect());
         this._ui.onTurnOff = () => this._guard(() => {
             this._turnOffFlow ??= new TurnOff(this, this._ui, ext.path, {
-                loggedIn: () => true,        // a própria sessão está iniciada
+                loggedIn: () => true,        // the session itself is logged in
                 power: action => {
-                    // pelo gnome-session (as aplicações fecham como deve ser),
-                    // através da extensão da sessão; senão, pelo logind
+                    // through gnome-session (applications close properly), via the session
+                    // extension; otherwise, through logind
                     const es = Main.extensionManager.lookup('zorin-xp@zorin-xp.local')?.stateObj?._endSession;
                     if (es?.requestPower)
                         es.requestPower(action);
@@ -78,7 +79,7 @@ export const XpUnlockDialog = GObject.registerClass({
             'user-changed', () => this._guard(() => this._syncUsers()), this);
         this._syncUsers();
 
-        // qualquer tecla ou movimento acorda o ecrã (se tiver escurecido)
+        // any key or movement wakes the screen (if it has dimmed)
         this.connect('captured-event', (_a, ev) => {
             const t = ev.type();
             if (t === Clutter.EventType.KEY_PRESS || t === Clutter.EventType.MOTION ||
@@ -99,7 +100,7 @@ export const XpUnlockDialog = GObject.registerClass({
 
     _syncUsers() {
         let users = this._userManager.is_loaded ? listUsers(this._userManager) : [];
-        // a própria conta aparece sempre, mesmo antes de o AccountsService carregar
+        // one's own account always shows, even before AccountsService loads
         if (!users.some(u => u.get_user_name() === this._userName)) {
             const me = this._userManager.get_user(this._userName);
             users = [me, ...users];
@@ -111,7 +112,7 @@ export const XpUnlockDialog = GObject.registerClass({
 
     _select(name) {
         if (name !== this._userName) {
-            // outra conta: o ecrã de início de sessão do GDM (mudar de utilizador)
+            // another account: GDM's login screen (switch user)
             try {
                 Gdm.goto_login_session_sync(null);
             } catch (e) {
@@ -132,7 +133,7 @@ export const XpUnlockDialog = GObject.registerClass({
         this._auth = null;
         this._pending = null;
         this._ui.select(null);
-        // (as setas voltam a andar pela lista)
+        // (the arrows move through the list again)
         super.grab_key_focus();
     }
 
@@ -151,7 +152,7 @@ export const XpUnlockDialog = GObject.registerClass({
             this._ui.showBalloon();
         }));
         this._auth.connect('reset', () => this._guard(() => {
-            // recomeçar; se o GDM não responder e isto entrar em ciclo, fica o GNOME
+            // start over; if GDM does not answer and this loops, GNOME stays
             const now = GLib.get_monotonic_time();
             this._resets = (this._resets ?? []).filter(t => now - t < 5e6);
             this._resets.push(now);
@@ -163,8 +164,8 @@ export const XpUnlockDialog = GObject.registerClass({
         this._auth.begin(this._userName);
     }
 
-    // -------------------------------------------- o que o ScreenShield usa
-    // (o ScreenShield dá o foco ao diálogo: vai para a caixa da palavra-passe)
+    // -------------------------------------------- what ScreenShield uses
+    // (ScreenShield gives the focus to the dialog: it goes to the password box)
     grab_key_focus() {
         if (this._ui.entry.mapped && this._ui.entry.reactive)
             this._ui.entry.grab_key_focus();
@@ -204,7 +205,7 @@ export const XpUnlockDialog = GObject.registerClass({
     }
 
     addCharacter(unichar) {
-        // como no XP, só se escreve depois de escolher a conta
+        // as in XP, typing only works after choosing the account
         if (!this._ui.selected)
             return;
         if (this._ui.entry.reactive && this._ui.entry.mapped)

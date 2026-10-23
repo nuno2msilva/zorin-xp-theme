@@ -1,12 +1,12 @@
-/* Zorin XP — a pasta do "Guardar como" lembrada por sítio, não global.
+/* Zorin XP — the "Save As" folder remembered per site, not globally.
  *
- * O Zen (DownloadLastDir) guarda a pasta onde se gravou duas vezes: no sítio
- * (content-prefs, por domínio) e numa preferência global,
- * browser.download.lastDir, que serve de reserva aos sítios onde ainda não
- * se gravou nada. Apagando a global logo a seguir a cada gravação, fica só a
- * memória por sítio; num sítio novo o Zen propõe a pasta das transferências
- * (Downloads.getPreferredDownloadsDirectory), que é onde a janela abre.
- * As janelas privadas usam uma memória só da sessão e não mudam. */
+ * Zen (DownloadLastDir) stores the folder where something was saved twice:
+ * per site (content-prefs, per domain) and in a global preference,
+ * browser.download.lastDir, which is the fallback for sites where nothing
+ * was saved yet. Deleting the global one right after every save leaves only
+ * the per-site memory; on a new site Zen suggests the downloads folder
+ * (Downloads.getPreferredDownloadsDirectory), which is where the dialog
+ * opens. Private windows use a session-only memory and do not change. */
 "use strict";
 
 /* global ExtensionAPI, Services */
@@ -15,7 +15,7 @@ const PREF = "browser.download.lastDir";
 this.zxpLastDir = class extends ExtensionAPI {
   onStartup() {
     this.clear = () => {
-      // (depois de o Zen acabar de gravar: a do sítio é escrita antes)
+      // (after Zen has finished saving: the site's one is written before)
       Services.tm.dispatchToMainThread(() => {
         if (Services.prefs.prefHasUserValue(PREF)) {
           Services.prefs.clearUserPref(PREF);

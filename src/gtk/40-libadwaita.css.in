@@ -1,9 +1,9 @@
 /*@gtk4*/
 /* =====================================================================
- * Apps libadwaita. Este CSS também é carregado como folha de utilizador
- * (~/.config/gtk-4.0/gtk.css), por cima do Adwaita do libadwaita: aqui
- * anulam-se os cantos arredondados, "pílulas" e cartões do Adwaita e
- * aplicam-se os equivalentes do XP.
+ * libadwaita apps. This CSS is also loaded as a user stylesheet
+ * (~/.config/gtk-4.0/gtk.css), on top of libadwaita's Adwaita: here
+ * Adwaita's rounded corners, "pills" and cards are cancelled and XP's
+ * equivalents applied.
  * =================================================================== */
 window, window.background, window.csd, window.solid-csd, dialog-host > dialog.floating sheet {
   border-radius: 8px 8px 0 0;
@@ -13,9 +13,9 @@ window.tiled-top, window.tiled-bottom { border-radius: 0; }
 window.background { background-color: @xp_btnface; color: @xp_text; }
 .background { background-color: @xp_btnface; }
 
-/* Barra de título com 30 px como no XP: o Adwaita põe 6/7 px de padding na
- * caixa interior, min-height 47 px (37 nas decorações por omissão), margens de
- * -1 px, contorno interior e esbate o conteúdo das janelas inativas */
+/* 30 px title bar as in XP: Adwaita puts 6/7 px of padding on the inner
+ * box, min-height 47 px (37 on the default decorations), -1 px margins, an
+ * inner outline and it dims the content of inactive windows */
 headerbar, headerbar.default-decoration { min-height: 21px; margin-left: 0; margin-right: 0; box-shadow: none; }
 headerbar > windowhandle > box, headerbar.default-decoration > windowhandle > box { padding: 0; min-height: 0; }
 headerbar:backdrop > windowhandle { filter: none; }
@@ -24,9 +24,9 @@ headerbar button.image-button, headerbar menubutton > button, headerbar splitbut
   padding: 2px 4px 3px;
 }
 
-/* Moldura de 4 px (FrameLeft/Right/Bottom) nas janelas libadwaita: vai no
- * dialog-host (só existe no libadwaita; a janela do mutter-x11-frames não o
- * tem) e as barras de topo estendem-se por cima das colunas, como no XP */
+/* 4 px frame (FrameLeft/Right/Bottom) on libadwaita windows: it goes on the
+ * dialog-host (it only exists in libadwaita; mutter-x11-frames' window does
+ * not have it) and the top bars stretch over the columns, as in XP */
 window.csd > dialog-host {
   border-style: solid;
   border-width: 0 4px 4px 4px;
@@ -46,10 +46,10 @@ window.csd > dialog-host .content-pane toolbarview > .top-bar headerbar { margin
 window.csd.maximized > dialog-host toolbarview > .top-bar headerbar,
 window.csd.tiled > dialog-host toolbarview > .top-bar headerbar { margin-left: 0; margin-right: 0; }
 
-/* AdwToolbarView: as barras de topo/fundo são legendas XP ou barras de ferramentas */
+/* AdwToolbarView: the top/bottom bars are XP captions or toolbars */
 toolbarview > .top-bar, toolbarview > .bottom-bar { background: none; box-shadow: none; }
-/* com mais de uma barra em cima (legenda + pesquisa) o libadwaita junta
- * 3 px por cima e por baixo: a legenda descia em relação à do lado */
+/* with more than one bar at the top (caption + search) libadwaita adds 3 px
+ * above and below: the caption sat lower than the one beside it */
 toolbarview > .top-bar .collapse-spacing, toolbarview > .bottom-bar .collapse-spacing { padding-top: 0; padding-bottom: 0; }
 toolbarview > .bottom-bar { background-color: @xp_btnface; border-top: 1px solid #D8D2BD; }
 toolbarview > .top-bar.raised, toolbarview > .bottom-bar.raised { box-shadow: none; }
@@ -57,7 +57,7 @@ toolbarview > .top-bar.raised, toolbarview > .bottom-bar.raised { box-shadow: no
   {{part:caption:focused}}
 }
 
-/* Botões: aspeto XP mesmo nas variantes do Adwaita */
+/* Buttons: XP look even in Adwaita's variants */
 button.suggested-action, button.destructive-action, button.pill, button.opaque,
 button.raised, splitbutton > button, splitbutton > menubutton > button,
 menubutton > button:not(.flat) {
@@ -80,7 +80,7 @@ button.pill { padding: 3px 16px; }
 button.circular, button.osd { border-radius: 0; }
 button.osd { background-color: rgba(0, 0, 0, 0.6); color: #FFFFFF; border-image: none; }
 
-/* Listas e cartões (AdwPreferencesGroup, boxed-list, AdwActionRow) */
+/* Lists and cards (AdwPreferencesGroup, boxed-list, AdwActionRow) */
 .card, list.boxed-list, .boxed-list, listview.card {
   border: 1px solid @xp_field_border;
   border-radius: 0;
@@ -100,10 +100,10 @@ row .title { font-weight: normal; }
 row .subtitle { color: #444444; font-size: 8pt; }
 preferencesgroup > box > box.header > box > label.heading,
 preferencesgroup .heading, .heading { font-weight: bold; color: @xp_groupbox_text; }
-/* Grupos convertidos em caixas de grupo do XP (src/zorin-taskbar-xp/prefs.js),
- * medidas numa folha do XP: contorno #D0D0BF de cantos arredondados, título
- * Tahoma 8 azul com o traço centrado nele, intervalo de 3 px de cada lado e
- * a 7 px do canto; 12 px entre caixas, conteúdo a 10 px do contorno */
+/* Groups turned into XP group boxes (src/zorin-taskbar-xp/prefs.js),
+ * measured on an XP sheet: #D0D0BF outline with rounded corners, blue
+ * Tahoma 8 title with the line centred on it, a 3 px gap on each side and
+ * 7 px from the corner; 12 px between boxes, content 10 px from the outline */
 window.zxp-property-sheet preferencespage > scrolledwindow > viewport > clamp > box { margin: 10px 8px; border-spacing: 12px; }
 .zxp-gb-tl, .zxp-gb-tr { margin-top: 7px; border-top: 1px solid #D0D0BF; }
 .zxp-gb-tl { min-width: 6px; border-left: 1px solid #D0D0BF; border-top-left-radius: 3px; }
@@ -127,11 +127,11 @@ label.zxp-gb-title { padding: 0 3px; color: @xp_groupbox_text; }
 row.entry, row.spin, row.combo { padding: 2px 6px; }
 row.entry > box > editablelabel, row.entry text { background: none; }
 
-/* Separadores de vistas (AdwViewSwitcher / AdwTabBar). Nas janelas de
- * preferências do libadwaita ficam na barra de título: separadores do XP só
- * com texto (Tahoma 8 normal, como nas folhas de propriedades), compactos e
- * assentes no fundo da legenda azul; o selecionado é 3 px mais alto e 2 px
- * mais largo de cada lado (medidas do XP) */
+/* View switchers (AdwViewSwitcher / AdwTabBar). In libadwaita's preferences
+ * windows they sit on the title bar: XP tabs with text only (normal Tahoma 8,
+ * as on property sheets), compact and resting on the bottom of the blue
+ * caption; the selected one is 3 px taller and 2 px wider on each side (XP
+ * measurements) */
 viewswitcher button.toggle, tabbar tab {
   border-radius: 0;
   {{part:tab:normal}}
@@ -147,20 +147,20 @@ headerbar viewswitcher { margin-bottom: -3px; border-spacing: 0; }
 headerbar viewswitcher button.toggle { margin: 6px 0 0 0; }
 headerbar viewswitcher button.toggle:checked { margin: 3px -2px 0 -2px; }
 viewswitcher button.toggle > stack > box.wide { padding: 0; border-spacing: 0; }
-/* (o libadwaita impõe ~120 px de largura natural a cada separador: ficam com
- * largura fixa e centrados, como os separadores TCS_FIXEDWIDTH do XP) */
+/* (libadwaita imposes ~120 px of natural width on each tab: they get a fixed
+ * width and are centred, like XP's TCS_FIXEDWIDTH tabs) */
 viewswitcher button.toggle > stack > box.wide > indicatorbin { opacity: 0; margin-right: -16px; }
 viewswitcher button.toggle label { font-weight: normal; }
 
-/* Definições da zorin-taskbar como folha de propriedades do XP (ver
- * src/zorin-taskbar-xp/prefs.js): título à esquerda, a 6 px da borda */
+/* zorin-taskbar settings as an XP property sheet (see
+ * src/zorin-taskbar-xp/prefs.js): title on the left, 6 px from the border */
 window.zxp-property-sheet headerbar .title { padding: 0; margin: 0 0 0 1px; }
-/* Nautilus como Explorador (src/nautilus-xp): ícone e nome da pasta na
- * legenda, com 4 px entre os dois, como no XP */
+/* Nautilus as the Explorer (src/nautilus-xp): the folder's icon and name in
+ * the caption, with 4 px between them, as in XP */
 window.zxp-explorer headerbar .zxp-explorer-title { border-spacing: 4px; margin: 0; padding: 0; }
 window.zxp-explorer headerbar .zxp-explorer-title .title { padding: 0; margin: 1px 0 0 -4px; }
 
-/* Barra lateral (AdwNavigationSplitView / Definições) — painel claro como o XP */
+/* Sidebar (AdwNavigationSplitView / Settings) — light pane like XP */
 .navigation-sidebar, .sidebar-pane, navigation-view.sidebar {
   background-image: none;
   background-color: @xp_window;
@@ -177,10 +177,10 @@ window.zxp-explorer headerbar .zxp-explorer-title .title { padding: 0; margin: 1
   color: @xp_highlight_text;
 }
 .navigation-sidebar label { color: inherit; }
-/* Vistas divididas (Definições, …): a barra da barra lateral e a do
- * conteúdo formam uma só legenda do XP — metade esquerda com o canto
- * esquerdo, metade direita com o direito, sem traço entre as duas; o título
- * da barra lateral ("Definições") some e fica o da página */
+/* Split views (Settings, …): the sidebar's bar and the content's form a
+ * single XP caption — left half with the left corner, right half with the
+ * right one, no line between them; the sidebar's title ("Definições")
+ * disappears and the page's stays */
 navigation-split-view > .sidebar-pane headerbar, overlay-split-view > .sidebar-pane headerbar { {{part:caption-split-left:focused}} }
 navigation-split-view > .sidebar-pane headerbar:backdrop, overlay-split-view > .sidebar-pane headerbar:backdrop { {{state:caption-split-left:unfocused}} }
 navigation-split-view > .content-pane headerbar, overlay-split-view > .content-pane headerbar { {{part:caption-split-right:focused}} }
@@ -191,7 +191,7 @@ navigation-split-view > .content-pane headerbar:backdrop, overlay-split-view > .
 .maximized overlay-split-view > .sidebar-pane headerbar:backdrop, .maximized overlay-split-view > .content-pane headerbar:backdrop { {{state:caption-max:unfocused}} }
 navigation-split-view > .sidebar-pane headerbar .title { color: transparent; text-shadow: none; }
 
-/* Diálogos (AdwAlertDialog / AdwDialog) */
+/* Dialogs (AdwAlertDialog / AdwDialog) */
 dialog.alert .message-area, dialog .dialog-contents { background-color: @xp_btnface; }
 dialog.floating sheet, dialog.alert sheet { border-radius: 0; box-shadow: 0 0 0 1px @xp_btnshadow; }
 dialog.alert .response-area > button { border-radius: 0; margin: 4px; }
@@ -210,15 +210,15 @@ banner > revealer > widget { background-color: @xp_infobk; color: @xp_text; }
 /* Placeholders (AdwStatusPage) */
 statuspage > scrolledwindow > viewport > box > clamp > box > .title { color: @xp_groupbox_text; }
 
-/* O libadwaita põe o texto dos botões (e das listas pendentes) a negrito;
- * no XP é Tahoma 8 normal */
+/* libadwaita makes the text of buttons (and drop-down lists) bold; in XP it
+ * is normal Tahoma 8 */
 button, button label, buttoncontent > box > label, button.font > box > box > label { font-weight: normal; }
 
-/* Folha de propriedades da zorin-taskbar (src/zorin-taskbar-xp/prefs.js) */
-/* deslizador numa linha própria, por baixo do título */
+/* zorin-taskbar property sheet (src/zorin-taskbar-xp/prefs.js) */
+/* slider on a row of its own, below the title */
 .zxp-gb-body list.boxed-list > row > box.header.zxp-slider-row { border-spacing: 0; padding-bottom: 4px; }
 .zxp-slider-row > .suffixes { margin-left: 12px; }
-/* barra de deslocamento com setas (o GTK4 não as tem) */
+/* scrollbar with arrows (GTK4 does not have them) */
 .zxp-vscroll > button.zxp-scroll-arrow {
   min-width: 17px;
   min-height: 17px;
@@ -241,7 +241,7 @@ button, button label, buttoncontent > box > label, button.font > box > box > lab
 .zxp-vscroll > scrollbar { margin: 0; }
 /* OK / Cancelar / Aplicar: 75 × 23 */
 .zxp-dialog-buttons > button { min-height: 17px; }
-/* setas ↑ ↓ soltas, sem botão (glifo das barras de deslocamento em azul) */
+/* bare ↑ ↓ arrows, without a button (the scrollbar glyph in blue) */
 button.zxp-arrow {
   min-width: 13px;
   min-height: 13px;
@@ -263,12 +263,12 @@ button.zxp-arrow.down:disabled { background-image: url("assets/arrow-glyph-down-
 .zxp-slider-row > .suffixes > .zxp-radios { margin-top: 2px; }
 
 /* =====================================================================
- * Nautilus como Explorador do XP (src/nautilus-xp/zorin_xp_explorer.py),
- * medido numa captura do Explorador maximizado: menus 22 px | linha
- * #D8D2BD + branca | ferramentas 38 px (ícones de 24 em y = 7, o 1.º em
- * x = 8) | linha | endereço 22 px com sombra em baixo | painel de tarefas
- * de 250 px (shellstyle.dll: degradê #7BA2E7 → #6375D6, secções a 12 px,
- * cabeçalho azul #215DC6 a negrito, corpo #D6DFF7 com contorno branco)
+ * Nautilus as XP's Explorer (src/nautilus-xp/zorin_xp_explorer.py),
+ * measured on a capture of the maximized Explorer: menus 22 px | #D8D2BD +
+ * white line | toolbar 38 px (24 px icons at y = 7, the first at x = 8) |
+ * line | address 22 px with a shadow below | 250 px task pane
+ * (shellstyle.dll: #7BA2E7 → #6375D6 gradient, sections 12 px apart, bold
+ * #215DC6 blue header, #D6DFF7 body with a white outline)
  * ===================================================================== */
 window.zxp-explorer .zxp-explorer-menubar {
   min-height: 22px;
@@ -277,7 +277,7 @@ window.zxp-explorer .zxp-explorer-menubar {
   border-bottom: 1px solid #D8D2BD;
 }
 window.zxp-explorer .zxp-explorer-menubar menubar { background: none; padding: 0; margin: 0; min-height: 0; }
-/* bandeira do Windows: quadrado branco de 40×22 com o traço #D8D2BD à esquerda */
+/* Windows flag: a 40×22 white square with the #D8D2BD line on the left */
 window.zxp-explorer .zxp-explorer-brand {
   min-width: 40px;
   background-color: #FFFFFF;
@@ -309,17 +309,17 @@ window.zxp-explorer .zxp-explorer-toolbar > button {
   padding: 5px 6px 5px 5px;
 }
 window.zxp-explorer .zxp-explorer-toolbar > button label { padding: 0; }
-/* posições medidas no XP: Avançar a 2 px de Retroceder, Acima colado */
+/* positions measured in XP: Forward 2 px from Back, Up right against it */
 window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-forward { margin-left: 2px; }
 window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-up { margin-left: -2px; }
 window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-forward image.zxp-dropdown.split { margin-left: 5px; }
 window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-folders { margin-right: 4px; }
 window.zxp-explorer .zxp-explorer-toolbar > button.zxp-tool-views { margin-left: 1px; }
-/* o libadwaita esbate os botões inativos: no XP só o ícone fica cinzento */
+/* libadwaita dims disabled buttons: in XP only the icon goes grey */
 window.zxp-explorer .zxp-explorer-toolbar > button:disabled,
 window.zxp-explorer .zxp-explorer-toolbar > button:disabled > box > image { filter: none; opacity: 1; }
 window.zxp-explorer .zxp-explorer-toolbar > button:disabled label { color: #ACA899; }
-/* setinha de lista pendente (Retroceder, Avançar, Vistas) */
+/* little drop-down arrow (Back, Forward, Views) */
 window.zxp-explorer .zxp-explorer-toolbar image.zxp-dropdown { -gtk-icon-size: 5px; min-width: 5px; }
 window.zxp-explorer .zxp-explorer-toolbar image.zxp-dropdown.split { margin: 0 0 0 6px; }
 window.zxp-explorer .zxp-explorer-toolbar image.zxp-dropdown.attached { margin: 0 0 0 -2px; }
@@ -345,7 +345,7 @@ window.zxp-explorer .zxp-explorer-address > entry > image.left { margin-right: 3
 window.zxp-explorer .zxp-explorer-address > entry > image.right { -gtk-icon-size: 18px; min-width: 15px; }
 window.zxp-explorer .zxp-explorer-address > button { min-height: 0; margin: 0; padding: 0 3px 0 1px; }
 
-/* painel de tarefas: os locais do Nautilus numa secção do XP */
+/* task pane: Nautilus's places in an XP section */
 window.zxp-explorer .zxp-taskpane {
   background-image: linear-gradient(to bottom, #7BA2E7, #6375D6);
   border: 0;
@@ -354,7 +354,7 @@ window.zxp-explorer .zxp-taskpane {
 window.zxp-explorer .zxp-taskpane > .top-bar, window.zxp-explorer .zxp-taskpane revealer,
 window.zxp-explorer .zxp-taskpane windowhandle { background: none; }
 window.zxp-explorer .zxp-taskpane-scroller, window.zxp-explorer .zxp-taskpane-scroller > viewport { background: none; }
-/* secções a 12 px do topo, 11/15 px dos lados, 15 px entre elas */
+/* sections 12 px from the top, 11/15 px from the sides, 15 px between them */
 window.zxp-explorer .zxp-taskpane-sections { margin: 12px 15px 12px 11px; border-spacing: 15px; }
 window.zxp-explorer button.zxp-taskpane-header {
   min-height: 25px;
@@ -404,7 +404,7 @@ window.zxp-explorer .zxp-taskpane-body list.navigation-sidebar > separator {
   margin: 4px 0 0 0;
   background: none;
 }
-/* tarefas: ligações azuis (#215DC6), #428EFF sublinhado ao passar o rato */
+/* tasks: blue links (#215DC6), #428EFF underlined on hover */
 window.zxp-explorer .zxp-taskpane-body > button.zxp-task {
   min-height: 16px;
   margin: 4px 0 0 0;
@@ -418,28 +418,28 @@ window.zxp-explorer .zxp-taskpane-body > button.zxp-task {
 window.zxp-explorer .zxp-taskpane-body > button.zxp-task:hover { color: #428EFF; }
 window.zxp-explorer .zxp-taskpane-body > button.zxp-task:hover label { text-decoration-line: underline; }
 window.zxp-explorer .zxp-taskpane-body > button.zxp-task label { padding: 0; }
-/* detalhes: nome a negrito, linha em branco antes das propriedades */
+/* details: name in bold, a blank line before the properties */
 window.zxp-explorer .zxp-taskpane-body label.zxp-details-name { font-weight: bold; margin-top: 2px; }
 window.zxp-explorer .zxp-taskpane-body label.zxp-details-first { margin-top: 6px; }
 window.zxp-explorer .zxp-taskpane-body picture.zxp-details-preview { margin: 4px 0 2px 0; }
 
-/* Mosaicos (vista do XP): células deitadas de 218 × 56 — ícone de 48 à
- * esquerda, nome e legendas (tipo, tamanho) a cinzento ao lado */
+/* Tiles (XP view): horizontal 218 × 56 cells — 48 px icon on the left,
+ * name and captions (type, size) in grey beside it */
 window.zxp-explorer .nautilus-grid-view gridview { padding: 8px 4px; border-spacing: 0; }
 window.zxp-explorer .nautilus-grid-view gridview > child,
 window.zxp-explorer .nautilus-grid-view #NautilusViewCell { border-radius: 0; }
 window.zxp-explorer .zxp-tiles gridview > child { min-width: 218px; min-height: 56px; }
 window.zxp-explorer .zxp-tiles #NautilusViewCell { padding: 0 0 0 3px; }
-/* o texto 9 px depois do ícone e 1 px acima do centro, como no XP */
+/* the text 9 px after the icon and 1 px above the centre, as in XP */
 window.zxp-explorer .zxp-tiles gridview > child .icon-ui-labels-box { margin: -1px 0 1px -1px; }
 window.zxp-explorer .zxp-tiles #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
 window.zxp-explorer .zxp-tiles gridview > child label.caption { color: #808080; }
 
-/* Miniaturas como no XP (medidas em capturas): a imagem em 96x96 com a
- * moldura de 1 px #ECE9D8 desenhada por cima da orla (outline, que fica por
- * cima da imagem); selecionada, a orla aparece e a moldura passa a azul,
- * 3 px por fora, sem tingir a imagem. Colunas de 125 px (src/nautilus-xp:
- * _thumb_cells, _tile_columns), linhas de 139, o nome com 121 px */
+/* Thumbnails as in XP (measured in captures): the image at 96x96 with the
+ * 1 px #ECE9D8 frame drawn over its edge (outline, which goes on top of the
+ * image); when selected, the edge shows and the frame turns blue, 3 px
+ * outside, without tinting the image. 125 px columns (src/nautilus-xp:
+ * _thumb_cells, _tile_columns), 139 px rows, the name 121 px wide */
 window.zxp-explorer .nautilus-grid-view clamp.zxp-thumb-frame {
   min-width: 96px;
   min-height: 96px;
@@ -451,8 +451,8 @@ window.zxp-explorer .nautilus-grid-view gridview > child:selected clamp.zxp-thum
   outline: 3px solid @xp_highlight;
   outline-offset: 0;
 }
-/* sem o foco na vista (a escrever o nome, noutra parte da janela) ou com a
- * janela inativa: a moldura de 3 px fica bege, como no XP */
+/* without the focus on the view (typing the name, elsewhere in the window)
+ * or with the window inactive: the 3 px frame turns beige, as in XP */
 window.zxp-explorer .nautilus-grid-view gridview:not(:focus-within) > child:selected clamp.zxp-thumb-frame,
 window.zxp-explorer:backdrop .nautilus-grid-view gridview > child:selected clamp.zxp-thumb-frame {
   outline: 3px solid #ECE9D8;
@@ -460,31 +460,31 @@ window.zxp-explorer:backdrop .nautilus-grid-view gridview > child:selected clamp
 }
 window.zxp-explorer .zxp-thumbs #NautilusViewCell { padding: 0 2px; }
 window.zxp-explorer .zxp-thumbs gridview > child { min-height: 139px; }
-/* o nome 8 px abaixo da moldura (até ao topo das letras), como no XP; o
- * nome inteiro do item com foco passa por cima da linha de baixo em vez de a
- * empurrar (margem de baixo negativa: até 3 linhas; uma margem maior daria
- * tamanho negativo aos nomes de uma linha) */
+/* the name 8 px below the frame (to the top of the letters), as in XP; the
+ * full name of the focused item goes over the line below instead of pushing
+ * it (negative bottom margin: up to 3 lines; a bigger margin would give
+ * one-line names a negative size) */
 window.zxp-explorer .zxp-thumbs .icon-ui-labels-box { margin-top: -1px; margin-bottom: -12px; }
-/* sem o estilo de miniatura do Nautilus (xadrez, cantos, contorno): nas
- * Miniaturas a moldura é a do XP, nos Ícones e Mosaicos ficam os ícones */
+/* without Nautilus's thumbnail style (checkerboard, corners, outline): in
+ * Thumbnails the frame is XP's, in Icons and Tiles the icons stay */
 window.zxp-explorer .nautilus-grid-view picture.thumbnail,
 window.zxp-explorer .nautilus-list-view picture.thumbnail { background: none; box-shadow: none; border-radius: 0; }
-/* nem a sombra que o Nautilus põe em todos os ícones e imagens (filter:
- * drop-shadow; nas Miniaturas parecia uma moldura grossa à volta da imagem) */
+/* nor the shadow Nautilus puts on every icon and image (filter:
+ * drop-shadow; in Thumbnails it looked like a thick frame around the image) */
 window.zxp-explorer .nautilus-grid-view picture,
 window.zxp-explorer .nautilus-list-view picture { filter: none; }
-/* linhas de 13 px nos nomes e legendas, como a Tahoma 8 no XP; as legendas
- * com a letra do nome (o Nautilus aumenta-as) */
+/* 13 px lines in names and captions, like Tahoma 8 in XP; the captions with
+ * the name's font (Nautilus makes them bigger) */
 window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label { line-height: 13px; }
 window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.caption { font-size: 11px; }
-/* Ícones: o nome 7 px abaixo do ícone (até ao topo das letras), como no XP */
+/* Icons: the name 7 px below the icon (to the top of the letters), as in XP */
 window.zxp-explorer .zxp-icons .icon-ui-labels-box { margin-top: -2px; margin-bottom: -11px; }
-/* Ícones como no XP: ícones de 32, colunas de 75 px, nome com 71 px */
+/* Icons as in XP: 32 px icons, 75 px columns, name 71 px wide */
 window.zxp-explorer .zxp-icons #NautilusViewCell { padding: 0 2px; }
 window.zxp-explorer .zxp-icons gridview > child { min-height: 75px; }
 
-/* Detalhes / Lista (vista de lista do Nautilus) como no Explorador: linhas de
- * 17 px, ícone de 16 a 4 px da margem, sem cantos nem espaços entre linhas */
+/* Details / List (Nautilus's list view) as in the Explorer: 17 px rows,
+ * 16 px icon 4 px from the edge, no corners nor gaps between rows */
 window.zxp-explorer .nautilus-list-view columnview { padding-left: 4px; padding-right: 0; }
 window.zxp-explorer .nautilus-list-view columnview > listview {
   padding: 0;
@@ -508,25 +508,25 @@ window.zxp-explorer .nautilus-list-view #NautilusViewCell label,
 window.zxp-explorer .nautilus-list-view #NautilusViewCell image,
 window.zxp-explorer .nautilus-list-view #NautilusViewCell picture { min-height: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
 window.zxp-explorer .nautilus-list-view columnview > header > button { color: @xp_text; }
-/* a seta de ordenação só ocupa espaço na coluna ordenada, como no XP */
+/* the sort arrow only takes space in the sorted column, as in XP */
 window.zxp-explorer .nautilus-list-view columnview > header > button > box { border-spacing: 0; }
 window.zxp-explorer .nautilus-list-view columnview > header > button sort-indicator.unsorted { -gtk-icon-size: 1px; min-width: 0; opacity: 0; }
 window.zxp-explorer .nautilus-list-view columnview > header > button sort-indicator.ascending,
 window.zxp-explorer .nautilus-list-view columnview > header > button sort-indicator.descending { margin-left: 6px; margin-right: 2px; }
-/* o cabeçalho do XP vai até ao fim da janela: o cabeçalho do GTK só tem a
- * largura das colunas, por isso o resto da faixa é pintado por baixo, na
- * lista, com as cores medidas no XP (#EBEADB e 3 linhas de sombra) */
+/* XP's header goes to the end of the window: GTK's header is only as wide
+ * as the columns, so the rest of the strip is painted underneath, in the
+ * list, with the colours measured in XP (#EBEADB and 3 shadow lines) */
 window.zxp-explorer .nautilus-list-view columnview {
   background-image: linear-gradient(to bottom, #EEEAD8 0, #EEEAD8 17px, #E2DECD 17px, #E2DECD 18px,
                                     #D6D2C2 18px, #D6D2C2 19px, #CBC7B8 19px, #CBC7B8 20px, transparent 20px);
   background-size: 100% 20px;
   background-repeat: no-repeat;
 }
-/* linhas sem fundo próprio: por baixo fica a coluna ordenada a cinzento
- * (src/nautilus-xp: _sort_band) */
+/* rows without their own background: underneath is the sorted column in
+ * grey (src/nautilus-xp: _sort_band) */
 window.zxp-explorer .nautilus-list-view columnview > listview > row,
 window.zxp-explorer .nautilus-list-view columnview > listview > row > cell { background-color: transparent; }
-/* (a Lista não tem cabeçalho: nem a faixa) */
+/* (List has no header: nor the strip) */
 window.zxp-explorer .zxp-list .nautilus-list-view columnview { background-image: none; }
 window.zxp-explorer .nautilus-list-view columnview > header > button label {
   color: @xp_text;
@@ -536,9 +536,9 @@ window.zxp-explorer .nautilus-list-view columnview > header > button label {
   font-weight: normal;
 }
 window.zxp-explorer .nautilus-list-view .dim-label { opacity: 1; }
-/* folga de 6 px nas células de texto das colunas (Tamanho, Tipo, Data) */
+/* 6 px gap in the columns' text cells (Size, Type, Date) */
 window.zxp-explorer .nautilus-list-view #NautilusViewCell label.numeric { margin-left: 6px; margin-right: 6px; color: @xp_text; }
-/* seleção nos Detalhes/Lista: só o nome fica realçado, como no XP */
+/* selection in Details/List: only the name is highlighted, as in XP */
 window.zxp-explorer .nautilus-list-view columnview > listview > row:selected { background: none; color: @xp_text; }
 window.zxp-explorer .nautilus-list-view columnview > listview > row:selected label { color: @xp_text; }
 window.zxp-explorer .nautilus-list-view columnview > listview > row:selected .column-name-labels-box > box > label {
@@ -546,9 +546,9 @@ window.zxp-explorer .nautilus-list-view columnview > listview > row:selected .co
   color: @xp_highlight_text;
   padding: 0 1px;
 }
-/* secções especiais (Música, Imagens, Vídeos): cabeçalho azul (110) com o
- * ícone de 32 px a sair 9 px por cima, título branco a 32 px da borda; corpo
- * #EFF3FF com a marca de água ao canto */
+/* special sections (Music, Pictures, Videos): blue header (110) with the
+ * 32 px icon sticking out 9 px above it, white title 32 px from the border;
+ * #EFF3FF body with the watermark in the corner */
 window.zxp-explorer button.zxp-taskpane-header.special {
   margin-top: 9px;
   background-image: url("assets/explorer-special-header.png");
@@ -561,14 +561,15 @@ window.zxp-explorer .zxp-taskpane-section > .zxp-taskpane-body.special { backgro
 window.zxp-explorer .zxp-taskpane-body.zxp-wm-music { background-image: url("assets/explorer-music-section.png"); }
 window.zxp-explorer .zxp-taskpane-body.zxp-wm-pictures { background-image: url("assets/explorer-pictures-section.png"); }
 window.zxp-explorer .zxp-taskpane-body.zxp-wm-videos { background-image: url("assets/explorer-videos-section.png"); }
-/* fundo branco fixo no contentor da vista (a lista e a grelha transparentes
- * por cima): a marca de água fica presa ao canto, não se desloca */
+/* fixed white background on the view's container (the list and the grid
+ * transparent on top): the watermark stays stuck to the corner, it does not
+ * scroll */
 window.zxp-explorer .nautilus-grid-view, window.zxp-explorer .nautilus-list-view { background-color: #FFFFFF; }
 window.zxp-explorer .nautilus-grid-view gridview, window.zxp-explorer .nautilus-grid-view scrolledwindow,
 window.zxp-explorer .nautilus-list-view scrolledwindow, window.zxp-explorer .nautilus-list-view columnview,
 window.zxp-explorer .nautilus-list-view columnview > listview { background-color: transparent; }
-/* marca de água grande no canto inferior direito da área dos ficheiros (no
- * contentor da vista: a lista dos Detalhes só tem a largura das colunas) */
+/* big watermark in the bottom right corner of the files area (on the view's
+ * container: the Details list is only as wide as the columns) */
 window.zxp-explorer .zxp-wm-music .nautilus-grid-view, window.zxp-explorer .zxp-wm-music .nautilus-list-view {
   background-image: url("assets/explorer-music-view.png");
   background-position: right bottom;
@@ -586,11 +587,11 @@ window.zxp-explorer .zxp-wm-videos .nautilus-grid-view, window.zxp-explorer .zxp
 }
 window.zxp-explorer .zxp-taskpane-body > button.zxp-task:disabled,
 window.zxp-explorer .zxp-taskpane-body > button.zxp-task:disabled label { color: #ACA899; filter: none; opacity: 1; }
-/* caixa de mudar o nome por cima do item (como no XP, medida: contorno
- * preto de 1 px, sem relevo, 17 px de altura, o texto no sítio do nome):
- * centrada (Ícones, Miniaturas) com 5 px de cada lado; à esquerda (Mosaicos)
- * com 4 px antes e 15 depois; na Lista e nos Detalhes com 2 px antes, para
- * não tocar no ícone (no XP tocava) */
+/* rename box over the item (as in XP, measured: 1 px black outline, no
+ * relief, 17 px high, the text where the name was): centred (Icons,
+ * Thumbnails) with 5 px on each side; on the left (Tiles) with 4 px before
+ * and 15 after; in List and Details with 2 px before, so it does not touch
+ * the icon (in XP it did) */
 window.zxp-explorer entry.zxp-rename {
   min-height: 0;
   padding: 0 5px;
@@ -604,10 +605,10 @@ window.zxp-explorer entry.zxp-rename {
 }
 window.zxp-explorer entry.zxp-rename.zxp-rename-left { padding: 0 15px 0 4px; }
 window.zxp-explorer entry.zxp-rename.zxp-rename-list { padding: 0 15px 0 2px; }
-/* (a linha da Tahoma no GTK tem 15 px: 15 + o contorno = os 17 do XP) */
+/* (Tahoma's line in GTK is 15 px: 15 + the outline = XP's 17) */
 window.zxp-explorer entry.zxp-rename > text { padding: 0; min-height: 0; }
 window.zxp-explorer entry.zxp-rename > text > selection { background-color: @xp_highlight; color: @xp_highlight_text; }
-/* (nomes compridos nos Ícones/Miniaturas: caixa de várias linhas) */
+/* (long names in Icons/Thumbnails: a multi-line box) */
 window.zxp-explorer scrolledwindow.zxp-rename {
   padding: 0 5px;
   border: 1px solid #000000;
@@ -619,10 +620,11 @@ window.zxp-explorer scrolledwindow.zxp-rename {
 window.zxp-explorer scrolledwindow.zxp-rename textview,
 window.zxp-explorer scrolledwindow.zxp-rename textview > text { background-color: #FFFFFF; color: #000000; padding: 0; }
 window.zxp-explorer scrolledwindow.zxp-rename textview > text > selection { background-color: @xp_highlight; color: @xp_highlight_text; }
-/* seleção na grelha (Miniaturas, Mosaicos, Ícones) como no XP: a célula
- * não muda de fundo; o nome fica realçado (azul, branco); o ícone fica
- * misturado com o azul de realce (src/nautilus-xp: _blend, píxel a píxel
- * como no XP); com a janela inativa, o nome em cinzento claro e o ícone normal */
+/* selection in the grid (Thumbnails, Tiles, Icons) as in XP: the cell does
+ * not change its background; the name is highlighted (blue, white); the
+ * icon is blended with the highlight blue (src/nautilus-xp: _blend, pixel
+ * by pixel as in XP); with the window inactive, the name in light grey and
+ * the icon normal */
 window.zxp-explorer .nautilus-grid-view gridview > child:selected,
 window.zxp-explorer .nautilus-grid-view gridview > child:selected #NautilusViewCell { background: none; box-shadow: none; outline: 0; }
 window.zxp-explorer .nautilus-grid-view gridview > child:selected .icon-ui-labels-box > label:first-child,
@@ -638,20 +640,21 @@ window.zxp-explorer:backdrop .nautilus-list-view columnview > listview > row:sel
   background-color: #ECE9D8;
   color: @xp_text;
 }
-/* o realce do nome rente às letras como no XP: 2 px dos lados, 1 px em cima
- * e em baixo (sem mexer no sítio do texto) */
+/* the name's highlight tight around the letters as in XP: 2 px on the
+ * sides, 1 px above and below (without moving the text) */
 window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.zxp-name { padding: 1px 2px; margin: -1px -2px; }
-/* (nas Miniaturas o texto fica 1 px mais acima no realce, como no XP) */
+/* (in Thumbnails the text sits 1 px higher in the highlight, as in XP) */
 window.zxp-explorer .zxp-thumbs .icon-ui-labels-box > label.zxp-name { padding: 0 2px 2px; }
-/* sem o sombreado ao passar o rato pelos itens (o XP não tem) */
+/* no shading when the mouse goes over the items (XP has none) */
 window.zxp-explorer .nautilus-grid-view gridview > child:hover,
 window.zxp-explorer .nautilus-grid-view gridview > child:hover #NautilusViewCell,
 window.zxp-explorer .nautilus-list-view columnview > listview > row:hover,
 window.zxp-explorer .nautilus-list-view columnview > listview > row:hover > cell { background: none; box-shadow: none; }
-/* sem o contorno de foco do GTK à volta das linhas e células (o XP não tem) */
+/* without GTK's focus outline around rows and cells (XP has none) */
 window.zxp-explorer .nautilus-list-view columnview > listview > row,
 window.zxp-explorer .nautilus-grid-view gridview > child { outline: none; }
-/* sem o contorno de foco à volta da vista inteira */
+/* without the focus outline around the whole view */
+
 window.zxp-explorer .nautilus-grid-view gridview, window.zxp-explorer .nautilus-list-view columnview,
 window.zxp-explorer .nautilus-list-view columnview > listview { outline: none; }
 /*@end*/

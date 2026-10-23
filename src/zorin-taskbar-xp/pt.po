@@ -1,6 +1,6 @@
-# Zorin XP — tradução pt-PT das definições da zorin-taskbar (a Zorin só traz
-# pt_BR, incompleta). Termos do Windows XP português: ambiente de trabalho,
-# ecrã, rato, definições.
+# Zorin XP — pt-PT translation of the zorin-taskbar settings (Zorin only
+# ships pt_BR, incomplete). Terms from Portuguese Windows XP: ambiente de
+# trabalho, ecrã, rato, definições.
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"

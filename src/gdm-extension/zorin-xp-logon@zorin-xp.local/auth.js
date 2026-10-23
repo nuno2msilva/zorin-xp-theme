@@ -1,11 +1,11 @@
-// Zorin XP — autenticação dos ecrãs XP: o verificador do GNOME Shell
-// (GdmUtil.ShellUserVerifier: PAM pelo GDM, impressão digital, cartão), sem
-// nenhuma interface do GNOME. Sinais:
-//   'question' (pergunta, secreta)   o PAM pede algo (normalmente a palavra-passe)
-//   'message'  (texto, tipo)         mensagem do PAM (erros, avisos)
-//   'failed'   (podeRepetir)         falhou; se podeRepetir, o verificador volta a perguntar
-//   'complete'                      autenticação aceite
-//   'reset'                         o verificador desistiu/recomeçou (voltar à lista)
+// Zorin XP — authentication for the XP screens: GNOME Shell's verifier
+// (GdmUtil.ShellUserVerifier: PAM through GDM, fingerprint, smartcard),
+// without any GNOME interface. Signals:
+//   'question' (question, secret)   PAM asks for something (normally the password)
+//   'message'  (text, type)         a PAM message (errors, warnings)
+//   'failed'   (canRetry)           failed; if canRetry, the verifier asks again
+//   'complete'                      authentication accepted
+//   'reset'                         the verifier gave up/started over (back to the list)
 
 import GLib from 'gi://GLib';
 
@@ -28,7 +28,7 @@ export class XpAuth extends Signals.EventEmitter {
                 this._verifier.answerQuery(service, answer);
                 return;
             }
-            // "Password:" do PAM -> a legenda do XP (o resto como vem)
+            // PAM's "Password:" -> XP's label (the rest as it comes)
             this.emit('question', question.replace(/[:：] *$/, '').trim(), secret);
         });
         this._verifier.connect('show-message', (_v, _service, message, type) => {
@@ -54,7 +54,7 @@ export class XpAuth extends Signals.EventEmitter {
         this.complete = false;
         this._query = null;
         this._preemptive = null;
-        // testes (shell de teste): nunca falar com o GDM/PAM verdadeiros
+        // tests (test shell): never talk to the real GDM/PAM
         if (GLib.getenv('ZXP_LOGON_TEST'))
             return;
         this._verifier.begin(userName, new Batch.Hold());
@@ -84,7 +84,7 @@ export class XpAuth extends Signals.EventEmitter {
         this._verifier.cancel();
     }
 
-    // espera pelas mensagens pendentes do PAM antes de continuar (como o GNOME)
+    // waits for PAM's pending messages before going on (like GNOME)
     finish(onComplete) {
         if (!this._verifier.hasPendingMessages) {
             this._verifier.clear();

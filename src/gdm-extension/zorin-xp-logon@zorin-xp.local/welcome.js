@@ -1,6 +1,6 @@
-// Zorin XP — o ecrã de boas-vindas do Windows XP (logonui.exe): só a parte
-// visual, usada pelo diálogo de início de sessão (GDM) e pelo de desbloqueio.
-// Medidas do UIFILE 1000 do logonui.exe (px a 96 ppp) e de capturas do XP.
+// Zorin XP — the Windows XP welcome screen (logonui.exe): only the visual
+// part, used by the login dialog (GDM) and by the unlock dialog.
+// Measurements from logonui.exe's UIFILE 1000 (px at 96 dpi) and from XP captures.
 
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
@@ -9,17 +9,17 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-// (textos com as larguras de letra do XP: gdiText.js, copiado da extensão da sessão)
+// (texts with XP's glyph widths: gdiText.js, copied from the session extension)
 import {label} from './gdiText.js';
 
-// o cursor de escrita pisca como no XP (GetCaretBlinkTime: 530 ms); o GNOME
-// Shell não faz piscar o das suas caixas
+// the text cursor blinks as in XP (GetCaretBlinkTime: 530 ms); GNOME Shell
+// does not blink the one in its entries
 const BLINK_MS = 530;
-const TOP_H = 80;           // toppanel height=80rp (inclui a linha de 2)
-const BOTTOM_H = 96;        // 2 + padding 20 + botão 26 + 2 + botão 26 + 20
+const TOP_H = 80;           // toppanel height=80rp (includes the 2 px line)
+const BOTTOM_H = 96;        // 2 + padding 20 + button 26 + 2 + button 26 + 20
 const LINE_H = 2;
 const PANEL_W = 384;        // leftpanel/rightpanel width=384rp
-const LIST_X = 1 + 26;      // divisória 1rp + margem do scroller 26rp
+const LIST_X = 1 + 26;      // divider 1rp + the scroller's margin 26rp
 const ITEM_W = PANEL_W - LIST_X - 5;
 const ITEM_H = 80;
 const PANE_H = 72;          // userpane: borda 5 + padding 2 + moldura 58 + 2 + 5
@@ -27,15 +27,15 @@ const FRAME = 58;
 const PICTURE = 48;
 const TEXT_X = 7 + FRAME + 7;
 const PASS_X = 71;          // passwordpanelayer padding-left 71rp
-const PASS_Y = 51;          // linha da palavra-passe dentro da conta (medido)
+const PASS_Y = 51;          // password row inside the account (measured)
 const EDIT_W = 163;
 const EDIT_H = 28;
 const OPTIONS_PAD = 25;     // options padding 25,20,25,20
-const DIMMED = 96;          // hotaccountlistss: alpha 96 nas outras contas
+const DIMMED = 96;          // hotaccountlistss: alpha 96 on the other accounts
 const LIST_PAD = 26;        // selector padding rect(0,26,5,26): em cima e em baixo
-const SCROLL_W = 17;        // barra do tema (SM_CXVSCROLL); setas 17x17 (SM_CYVSCROLL)
+const SCROLL_W = 17;        // the theme's bar (SM_CXVSCROLL); 17x17 arrows (SM_CYVSCROLL)
 const SCROLL_STEP = 40;     // roda do rato / setas
-const REPEAT_DELAY = 330;   // repetição das setas enquanto premidas (como no XP)
+const REPEAT_DELAY = 330;   // arrow repetition while pressed (as in XP)
 const REPEAT_RATE = 50;
 
 export function loadStrings(dir) {
@@ -54,9 +54,9 @@ function hand(actor) {
 }
 
 /*
- * Chamadas para fora (definidas por quem usa o ecrã):
- *   onUserClicked(nome), onSubmit(texto), onCancel(), onDeselect(), onTurnOff()
- * Contas: [{name, realName, iconFile, loggedIn}]
+ * Outgoing calls (defined by whoever uses the screen):
+ *   onUserClicked(name), onSubmit(text), onCancel(), onDeselect(), onTurnOff()
+ * Accounts: [{name, realName, iconFile, loggedIn}]
  */
 export class XpWelcome {
     constructor(dir) {
@@ -64,7 +64,7 @@ export class XpWelcome {
         this.strings = loadStrings(dir);
         this._users = new Map();
         this._selected = null;
-        this._hot = null;           // a conta realçada pelo teclado (como o rato)
+        this._hot = null;           // the account highlighted by the keyboard (like the mouse)
         this._blinkId = 0;
         this._welcome = false;
         this.onUserClicked = this.onSubmit = this.onCancel = this.onDeselect = this.onTurnOff = () => {};
@@ -85,7 +85,7 @@ export class XpWelcome {
             reactive: true,
             layout_manager: new Clutter.FixedLayout(),
         });
-        // XP: clicar no fundo (fora das contas) tira a seleção e volta à lista
+        // XP: clicking the background (outside the accounts) removes the selection and goes back to the list
         this.actor.connect('button-press-event', (_a, ev) => {
             if (ev.get_button() !== 1 || this._welcome || !this._selected)
                 return Clutter.EVENT_PROPAGATE;
@@ -109,11 +109,11 @@ export class XpWelcome {
         this._welcomeShadow = label('zxp-logon-welcome-shadow', s.welcome, {opacity: 0});
         this._welcomeText = label('zxp-logon-welcome', s.welcome, {opacity: 0});
         this._divider = this._image('divider-v', {width: 1, height: 340});
-        // lista de contas: recortada, com deslocamento quando não cabe
+        // account list: clipped, with scrolling when it does not fit
         this._list = new St.Widget({layout_manager: new Clutter.FixedLayout(),
             clip_to_allocation: true, reactive: true});
         this._list.connect('scroll-event', (_a, ev) => {
-            // (cada passo da roda chega também como cópia "suave" emulada)
+            // (each wheel step also arrives as an emulated "smooth" copy)
             if (ev.is_pointer_emulated())
                 return Clutter.EVENT_STOP;
             const dir = ev.get_scroll_direction();
@@ -129,7 +129,7 @@ export class XpWelcome {
         this._buildScrollbar();
 
         this._bottom = new St.Widget({style_class: 'zxp-logon-bottom'});
-        // (o bitmap 126 tem 3 px de altura; o XP estica-o para os 2 px da linha)
+        // (bitmap 126 is 3 px high; XP stretches it to the line's 2 px)
         this._bottomLine = this._image('divider-bottom', {width: 800, height: LINE_H});
         this._bottomLine.style += ' background-size: 800px 2px;';
         const powerBox = new St.BoxLayout({});
@@ -149,7 +149,7 @@ export class XpWelcome {
         for (const l of [this._help, this._status, this._welcomeShadow, this._welcomeText])
             l.connect('style-changed', () => this.relayout());
 
-        // linha da palavra-passe (vai para dentro da conta selecionada)
+        // password row (goes inside the selected account)
         this._pass = new St.Widget({layout_manager: new Clutter.FixedLayout(), visible: false,
             width: ITEM_W, height: ITEM_H});
         this._passLabel = label('zxp-logon-instruct', s.password);
@@ -159,7 +159,7 @@ export class XpWelcome {
         });
         if ('show_peek_icon' in this.entry)
             this.entry.show_peek_icon = false;
-        // bolinhas ao centro da área branca da caixa (medido)
+        // dots in the centre of the box's white area (measured)
         this.entry.clutter_text.translation_y = -1;
         this.entry.clutter_text.connect('activate', () => this._submit());
         this.entry.clutter_text.connect('text-changed', () => this.hideBalloon());
@@ -171,7 +171,7 @@ export class XpWelcome {
             this._restartBlink();
             return Clutter.EVENT_PROPAGATE;
         });
-        // o cursor de escrita a piscar (sempre visível logo a seguir a escrever)
+        // the blinking text cursor (always visible right after typing)
         this.entry.clutter_text.connect('key-focus-in', () => this._restartBlink());
         this.entry.clutter_text.connect('key-focus-out', () => this._stopBlink());
         this.entry.clutter_text.connect('text-changed', () => this._restartBlink());
@@ -205,11 +205,11 @@ export class XpWelcome {
         this._blinkId = 0;
     }
 
-    // ------------------------------------------------- teclado (lista de contas)
-    // XP: com a lista à vista (nenhuma conta escolhida), as setas realçam as
-    // contas como se o rato estivesse por cima (↓ começa pela primeira, ↑ pela
-    // última), Enter escolhe a realçada e abre a palavra-passe; Esc tira o
-    // realce. Devolve true se a tecla foi usada.
+    // ------------------------------------------------- keyboard (account list)
+    // XP: with the list showing (no account chosen), the arrows highlight
+    // the accounts as if the mouse were over them (↓ starts at the first, ↑
+    // at the last), Enter chooses the highlighted one and opens the password;
+    // Esc removes the highlight. Returns true if the key was used.
     handleListKey(ev) {
         if (this._welcome || this._selected || this._listHidden || !this.actor.visible)
             return false;
@@ -252,7 +252,7 @@ export class XpWelcome {
         this.onSubmit(this.entry.get_text());
     }
 
-    // ------------------------------------------------------------ disposição
+    // ------------------------------------------------------------ layout
     relayout() {
         const mon = Main.layoutManager.primaryMonitor;
         if (!mon)
@@ -280,9 +280,9 @@ export class XpWelcome {
         if (statusMode || this._listHidden)
             this._scrollbar.hide();
         this._help.visible = !statusMode && !this._welcome && !this._listHidden;
-        // (nos ecrãs de estado do XP a barra de baixo fica vazia)
+        // (on XP's status screens the bottom bar is empty)
         this._power.visible = this._instruct.visible = !statusMode && !this._welcome;
-        // no ecrã de estado (sem contas) o painel esquerdo fica centrado
+        // on the status screen (no accounts) the left panel is centred
         const div = statusMode ? Math.floor(W / 2) + PANEL_W / 2 : Math.floor(W / 2) - 2;
         this._divider.set_position(div, top);
         this._divider.scale_y = contentH / 340;
@@ -290,7 +290,7 @@ export class XpWelcome {
         let textH;
         let text = this._help;
         if (statusMode) {
-            // (alinhado à direita à mão: o St não alinha uma linha só)
+            // (right-aligned by hand: St does not align a single line)
             text = this._status;
             text.set_width(-1);
             const [, w] = text.get_preferred_width(-1);
@@ -310,7 +310,7 @@ export class XpWelcome {
         for (const [l, dx, dy] of [[this._welcomeShadow, 2, 3], [this._welcomeText, 0, 0]]) {
             const [, w] = l.get_preferred_width(-1);
             const [, h] = l.get_preferred_height(w);
-            // (alinhado pela última largura: o itálico passa para lá dela, como no XP)
+            // (aligned by the last width: italic reaches past it, as in XP)
             l.set_position(div - 22 - l.textWidth + dx, top + Math.floor((contentH - h) / 2) + dy);
         }
 
@@ -358,10 +358,10 @@ export class XpWelcome {
             width: PICTURE, height: PICTURE});
         u.nameLabel = label('zxp-logon-name', '', {x: TEXT_X, y: 7, width: ITEM_W - TEXT_X - 14});
         u.status = label('zxp-logon-status', '', {x: TEXT_X});
-        // (a imagem é filha da moldura no XP: fica por cima)
+        // (the picture is a child of the frame in XP: it goes on top)
         for (const a of [u.select, u.frame, u.picture, u.nameLabel, u.status])
             u.actor.add_child(a);
-        // XP: com o rato numa conta, as outras esbatem-se; fora da lista, nenhuma
+        // XP: with the mouse on an account, the others fade; outside the list, none
         u.actor.connect('notify::hover', () => {
             for (const v of this._users.values())
                 this._updateUser(v);
@@ -416,8 +416,8 @@ export class XpWelcome {
             return;
         const list = [...this._users.values()];
         const total = LIST_PAD * 2 + list.length * ITEM_H;
-        // XP: se couberem, centradas na vertical; senão, a partir de cima com a
-        // barra de deslocamento do tema encostada ao fim do painel
+        // XP: if they fit, centred vertically; otherwise, from the top with the
+        // theme's scrollbar against the end of the panel
         this._overflow = total > this._contentH;
         this._maxScroll = Math.max(0, total - this._contentH);
         this._scrollY = Math.min(Math.max(0, this._scrollY), this._maxScroll);
@@ -442,7 +442,7 @@ export class XpWelcome {
         u.nameLabel.width = w - TEXT_X - 14;
     }
 
-    // ---------------------------------------------------- barra de deslocamento
+    // ---------------------------------------------------- scrollbar
     _scrollImage(name) {
         return `background-image: url("${this._dir}/images/scroll-${name}.png");`;
     }
@@ -461,7 +461,7 @@ export class XpWelcome {
         this._track.connect('button-release-event', () => this._stopRepeat());
         this._up = this._arrow('up', -SCROLL_STEP);
         this._down = this._arrow('down', SCROLL_STEP);
-        // cursor: topo, meio esticado e base (as margens do Luna são 5 px) + riscas
+        // thumb: top, stretched middle and bottom (Luna's margins are 5 px) + grip lines
         this._thumb = new St.Widget({layout_manager: new Clutter.FixedLayout(), reactive: true,
             track_hover: true, width: SCROLL_W});
         this._thumbTop = new St.Widget({width: SCROLL_W, height: 5});
@@ -584,7 +584,7 @@ export class XpWelcome {
         this._repeatId = 0;
     }
 
-    // a conta escolhida fica toda à vista
+    // the chosen account is fully visible
     _ensureVisible(name) {
         const list = [...this._users.keys()];
         const i = list.indexOf(name);
@@ -607,7 +607,7 @@ export class XpWelcome {
 
     select(name) {
         this._selected = name;
-        this._hot = null;           // (Esc volta à lista sem realce, como no XP)
+        this._hot = null;           // (Esc goes back to the list without a highlight, as in XP)
         this._statusText = null;
         this.hideBalloon();
         if (!name)
@@ -653,13 +653,13 @@ export class XpWelcome {
         this.entry.reactive = !busy;
     }
 
-    // "A iniciar sessão...", etc., por baixo do nome da conta selecionada
+    // "A iniciar sessão...", etc., below the selected account's name
     setUserStatus(text) {
         this._statusText = text;
         this.hidePrompt();
     }
 
-    // XP: depois de entrar, o logótipo dá lugar a "bem-vindo" e as outras contas somem
+    // XP: after logging in, the logo gives way to "bem-vindo" and the other accounts vanish
     showWelcome(text) {
         this._welcome = true;
         this._statusText = text;
@@ -677,21 +677,21 @@ export class XpWelcome {
         }
     }
 
-    // XP: enquanto pergunta se desliga com outras sessões abertas, as contas e
-    // a ajuda desaparecem (fica o logótipo e a barra de baixo)
+    // XP: while asking whether to turn off with other sessions open, the
+    // accounts and the help disappear (the logo and the bottom bar stay)
     setListHidden(hidden) {
         this._listHidden = hidden;
         this.relayout();
     }
 
-    // ecrã de estado sem contas ("O Windows está a iniciar...")
+    // status screen without accounts ("O Windows está a iniciar...")
     showStatus(text) {
         this._status.text = text || '';
         this._status.visible = !!text;
         this.relayout();
     }
 
-    // -------------------------------------------- balão de palavra errada
+    // -------------------------------------------- wrong password balloon
     showBalloon(title, text) {
         this.hideBalloon();
         const u = this._users.get(this._selected);
@@ -711,7 +711,7 @@ export class XpWelcome {
             cr.newSubPath();
             cr.arc(l + R, t + R, R, Math.PI, 1.5 * Math.PI);
             cr.lineTo(l + 20, t);
-            cr.lineTo(l + 20, 0.5);           // ponta do balão, a apontar para a caixa
+            cr.lineTo(l + 20, 0.5);           // the balloon's tip, pointing at the box
             cr.lineTo(l + 20 + STEM, t);
             cr.arc(r - R, t + R, R, 1.5 * Math.PI, 0);
             cr.arc(r - R, b - R, R, 0, 0.5 * Math.PI);

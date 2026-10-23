@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Zorin XP: tipos do Office que o sistema não conhece (eram "application/octet-stream"),
-     para terem o ícone e o nome que tinham na VM do XP de referência (HKCR\<ProgID>,
-     Office 2010 em inglês). Instalado em ~/.local/share/mime pelo install.sh (icons). -->
+<!-- Zorin XP: Office types the system does not know (they were "application/octet-stream"),
+     so they get the icon and the name they had in the reference XP VM (HKCR\<ProgID>,
+     Office 2010 in English). Installed in ~/.local/share/mime by install.sh (icons). -->
+
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
   <mime-type type="application/x-msaccess-accdb">
     <comment>Microsoft Access Database</comment>

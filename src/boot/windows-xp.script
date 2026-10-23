@@ -1,15 +1,15 @@
-# Zorin XP — ecrã de arranque do Windows XP (usado por tools/builders/bootscreen.py)
+# Zorin XP — the Windows XP boot screen (used by tools/builders/bootscreen.py)
 #
-# Arranque: o ecrã de 640x480 do ntoskrnl.exe refeito à resolução do ecrã,
-# com as peças no tamanho original: o logótipo e a caixa da barra ao centro,
-# "Copyright © Microsoft Corporation" no canto de baixo à esquerda e
-# "Microsoft" à direita, às mesmas distâncias das margens que no XP. Acende do
-# preto e os três blocos azuis correm na caixa. Desligar/reiniciar: o ecrã de
-# estado do XP, "O Windows está a encerrar...".
+# Boot: ntoskrnl.exe's 640x480 screen rebuilt at the screen's resolution,
+# with the pieces at their original size: the logo and the bar box in the
+# centre, "Copyright © Microsoft Corporation" in the bottom left corner and
+# "Microsoft" on the right, at the same distances from the edges as in XP. It
+# fades in from black and the three blue blocks run in the box. Turn
+# off/restart: XP's status screen, "O Windows está a encerrar...".
 #
-# No arranque o script corre antes de existir o ecrã gráfico (o Plymouth espera
-# pela placa e a largura/altura começam a 0): a disposição é refeita sempre que
-# o tamanho muda, e um fundo preto tapa o logótipo do fabricante.
+# At boot the script runs before the graphical screen exists (Plymouth waits
+# for the card and width/height start at 0): the layout is redone whenever
+# the size changes, and a black background covers the vendor logo.
 
 Window.SetBackgroundTopColor(0, 0, 0);
 Window.SetBackgroundBottomColor(0, 0, 0);
@@ -35,7 +35,7 @@ fun layout_boot() {
         global.microsoft.SetOpacity(0);
         global.bar.SetOpacity(0);
     }
-    # o centro do ecrã do XP no centro deste; os textos presos aos cantos de baixo
+    # the centre of XP's screen at the centre of this one; the texts stuck to the bottom corners
     ox = Math.Int((W - 640) / 2);
     oy = Math.Int((H - 480) / 2);
     global.boot.SetPosition(ox + @CENTER_X@, oy + @CENTER_Y@, 0);
@@ -47,7 +47,7 @@ fun layout_boot() {
 fun layout_shutdown() {
     W = global.W;
     H = global.H;
-    # medidas do logonui.exe (UIFILE 1000), como a extensão da sessão
+    # logonui.exe's measurements (UIFILE 1000), like the session extension
     global.top = Sprite(Image("top.png").Scale(W, 78));
     global.top.SetPosition(0, 0, 0);
     global.topline = Sprite(Image("divider-top.png").Scale(W, 2));
@@ -60,7 +60,7 @@ fun layout_shutdown() {
     global.bottomline.SetPosition(0, H - 96, 1);
     global.bottom = Sprite(Image("bottom.png").Scale(W, 94));
     global.bottom.SetPosition(0, H - 94, 0);
-    # painel esquerdo centrado: logótipo e o texto alinhados à direita
+    # left panel centred: logo and text aligned to the right
     right = Math.Int(W / 2) + 192;
     text = Image("shutting-down.png");
     blockh = 86 + 20 + text.GetHeight();
@@ -106,7 +106,7 @@ fun refresh_callback() {
 Plymouth.SetRefreshFunction(refresh_callback);
 relayout();
 
-# palavra-passe (discos cifrados): o XP não tinha; texto simples por baixo da barra
+# password (encrypted disks): XP did not have it; plain text below the bar
 fun display_password_callback(prompt, bullets) {
     W = Window.GetWidth();
     H = Window.GetHeight();

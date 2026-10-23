@@ -1,16 +1,17 @@
-/* Zorin XP — o ambiente de trabalho como o do XP (zorin-desktop-icons).
+/* Zorin XP — the desktop like XP's (zorin-desktop-icons).
  *
- * tools/setup/dingcopy.py põe este ficheiro na cópia do programa dos ícones e liga-o
- * em desktopManager.js:
- *  - doRename: o nome editado no sítio — caixa branca com moldura preta por
- *    cima da legenda (várias linhas ao centro se o nome não couber), em vez do
- *    balão do GNOME; Enter ou clicar fora confirma, Esc cancela; a pergunta do
- *    XP ao mudar a extensão e o erro do XP se o nome já existir;
- *  - doTrash / doDeletePermanently: a pergunta do XP (diálogos 1011-1013 do
- *    shell32) com o ícone da Reciclagem e, ao mandar para lá, o som dela;
- *  - o menu do fundo do XP: Dispor ícones por, Actualizar, Colar, Colar
- *    atalho, Anular, Novo > Pasta e modelos, Propriedades.
- * Os textos e ícones vêm do XP (dingcopy.py -> zxp/strings.json, zxp/msg-*.png).
+ * tools/setup/dingcopy.py puts this file in the copy of the icons program and
+ * hooks it into desktopManager.js:
+ *  - doRename: the name edited in place — a white box with a black frame
+ *    over the label (several centred lines if the name does not fit),
+ *    instead of GNOME's balloon; Enter or clicking outside confirms, Esc
+ *    cancels; XP's question when changing the extension and XP's error if
+ *    the name already exists;
+ *  - doTrash / doDeletePermanently: XP's question (shell32 dialogs
+ *    1011-1013) with the Recycle Bin's icon and, when sending to it, its sound;
+ *  - XP's background menu: Arrange Icons By, Refresh, Paste, Paste
+ *    Shortcut, Undo, New > Folder and templates, Properties.
+ * The texts and icons come from XP (dingcopy.py -> zxp/strings.json, zxp/msg-*.png).
  */
 /* exported startRename, confirmDelete, xpMenu, prepareMenu */
 'use strict';
@@ -24,7 +25,7 @@ const Enums = imports.enums;
 const DATA = '@DATA@';
 const RECYCLE = GLib.build_filenamev([GLib.get_user_data_dir(), 'sounds', 'WindowsXP', 'xp',
     'Windows XP Recycle.wav']);
-const LINE = 13;                        // Tahoma 8 no XP: linhas de 13 px
+const LINE = 13;                        // Tahoma 8 in XP: 13 px lines
 const DEFAULTS = {
     yes: '&Sim', no: '&Não', ok: 'OK', rename: '&Mudar o nome', newFolder: 'Nova pasta',
     confirmFile: 'Confirmar eliminação de ficheiro(s)', confirmFolder: 'Confirmar eliminação de pasta(s)',
@@ -117,8 +118,8 @@ function playSound(file, event) {
     }
 }
 
-/* text em linhas de width px como o DrawText do XP (DT_WORDBREAK): parte nos
-   espaços; lines = null -> o texto todo, as palavras compridas partidas */
+/* text in lines of width px like XP's DrawText (DT_WORDBREAK): breaks at
+   spaces; lines = null -> the whole text, long words broken */
 function xpWrap(text, width, measure, lines = null) {
     if (measure(text) <= width)
         return text;
@@ -176,10 +177,10 @@ function xpWrap(text, width, measure, lines = null) {
 
 /* ------------------------------------------------------------ caixas do XP */
 
-/* Uma caixa do XP; callback(índice do botão). shell: a confirmação de
-   eliminar do shell32 (412 x 127, vários itens 412 x 97, ícone em (15, 15),
-   Sim / Não em baixo à direita); senão uma MessageBox do user32 (margem de
-   11 px, texto a 62 px, botões de 75 x 23 ao centro, 17 px abaixo). */
+/* An XP box; callback(button index). shell: shell32's delete confirmation
+   (412 x 127, several items 412 x 97, icon at (15, 15), Sim / Não at the
+   bottom right); otherwise a user32 MessageBox (11 px margin, text at 62 px,
+   75 x 23 buttons in the centre, 17 px below). */
 function messageBox({title, text, icon, buttons = ['ok'], def = 0, escape = null, shell = false, many = false},
     callback) {
     ensureCss();
@@ -307,7 +308,7 @@ function confirmDelete(dm, permanent) {
             playSound(RECYCLE);
             return;
         }
-        // (de vez: aqui mesmo — o Ficheiros voltaria a perguntar, à maneira do GNOME)
+        // (permanently: right here — Files would ask again, the GNOME way)
         try {
             Gio.Subprocess.new(['rm', '-rf', '--', ...paths], Gio.SubprocessFlags.NONE);
         } catch (e) {
@@ -343,14 +344,14 @@ var Editor = class {
         this._holder = null;
         this._rect = null;
         dm.showPopup();
-        // (o desktopManager volta a ligá-lo ao item quando redesenha: updateFileItem)
+        // (desktopManager connects it to the item again when it redraws: updateFileItem)
         dm._renameWindow = this;
         dm._renamingFile = item.fileName;
         this.updateFileItem(item);
     }
 
     _build(item) {
-        // largura da legenda: a da célula menos as margens
+        // label width: the cell's minus the margins
         const width = Math.max(24, item.container.get_allocated_width() -
             item._label.margin_start - item._label.margin_end);
         this._width = width;
@@ -386,7 +387,7 @@ var Editor = class {
         this._editor.connect('focus-out-event', () => {
             if (this._finished)
                 return false;
-            // (logo a seguir a abrir, o foco ainda pode fugir para a grelha)
+            // (right after opening, the focus may still slip to the grid)
             if (GLib.get_monotonic_time() - this._since < 400000) {
                 GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                     if (!this._finished && this._editor)
@@ -401,7 +402,7 @@ var Editor = class {
             });
             return false;
         });
-        // (numa janela própria: os ícones têm as suas, que ficariam por cima)
+        // (in a window of its own: the icons have theirs, which would end up on top)
         this._holder = new Gtk.EventBox({visible_window: true});
         this._holder.add(this._widget);
         this._holder.connect('realize', w => w.get_window().raise());
@@ -417,7 +418,7 @@ var Editor = class {
         return this._editor.get_text();
     }
 
-    /* o item foi redesenhado (null: a sair; depois o novo) */
+    /* the item was redrawn (null: leaving; then the new one) */
     updateFileItem(item) {
         if (this._finished)
             return;
@@ -442,7 +443,7 @@ var Editor = class {
         this._holder.show_all();
         this._since = GLib.get_monotonic_time();
         this._editor.grab_focus();
-        // o nome sem a extensão fica selecionado, como no XP
+        // the name without the extension is selected, as in XP
         const stem = DesktopIconsUtil.getFileExtensionOffset(this._text, {isDirectory: this._isDir}).offset;
         if (this._multi) {
             const buf = this._editor.get_buffer();
@@ -450,7 +451,7 @@ var Editor = class {
         } else {
             this._editor.select_region(0, stem);
         }
-        // clicar fora da caixa confirma (antes de o clique chegar aos ícones)
+        // clicking outside the box confirms (before the click reaches the icons)
         const window = item._grid._window;
         if (this._gestureWindow !== window) {
             if (this._gesture)
@@ -502,7 +503,7 @@ var Editor = class {
             h = 17;
             x = cx - tw / 2 - 6;
         }
-        // (o texto da caixa no sítio do da legenda: moldura de 1 px)
+        // (the box's text where the label's was: 1 px frame)
         const rect = [Math.round(x), Math.round(ly - 1), Math.round(w), Math.round(h)];
         if (this._rect && rect.every((v, i) => v === this._rect[i]))
             return;
@@ -619,7 +620,7 @@ function launch(desktopId) {
 
 const ARRANGE = [['colName', 'NAME'], ['colSize', 'SIZE'], ['colType', 'KIND'], ['modified', 'MODIFIEDTIME']];
 
-/* "Dispor ícones por > Nome...": arruma já por essa ordem, como no XP */
+/* "Dispor ícones por > Nome...": arranges right away in that order, as in XP */
 function arrangeBy(dm, order) {
     if (Prefs.getSortOrder() === order)
         dm.doSorts(true);
@@ -627,7 +628,7 @@ function arrangeBy(dm, order) {
         Prefs.setSortOrder(order);
 }
 
-/* "Colar atalho": ligações para o que está copiado ("Atalho para ...") */
+/* "Colar atalho": links to what was copied ("Atalho para ...") */
 function pasteShortcuts(dm) {
     for (const uri of dm._clipboardFiles || []) {
         const src = Gio.File.new_for_uri(uri);
@@ -646,13 +647,13 @@ function pasteShortcuts(dm) {
     }
 }
 
-/* o menu do XP no lugar do do Zorin (os itens dele continuam a existir,
-   escondidos, para o resto do programa os poder usar) */
+/* XP's menu in place of Zorin's (its items still exist, hidden, so the rest
+   of the program can use them) */
 function xpMenu(dm) {
     const menu = DesktopIconsUtil.createDesktopMenu();
     const arrange = menuItem(t('arrange'));
     const sub = DesktopIconsUtil.createDesktopMenu();
-    // (como no XP: sem ponto na ordem; sem as opções que ficariam desativadas)
+    // (as in XP: no dot on the order; without the options that would be disabled)
     for (const [key, order] of ARRANGE)
         sub.add(menuItem(t(key), () => arrangeBy(dm, Enums.SortOrder[order])));
     sub.add(new Gtk.SeparatorMenuItem());
@@ -694,7 +695,7 @@ function xpMenu(dm) {
     }
 }
 
-/* antes de mostrar o menu: Novo (Pasta e os modelos, com os ícones) */
+/* before showing the menu: New (Folder and the templates, with the icons) */
 function prepareMenu(dm) {
     if (!dm._zxpNew)
         return;

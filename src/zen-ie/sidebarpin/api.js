@@ -1,15 +1,15 @@
-/* Zorin XP — pino da barra dos separadores.
+/* Zorin XP — the tab bar pin.
  *
- * Põe em cada janela um botão (#zxp-sidebar-pin) dentro da barra lateral; o
- * userChrome (src/zen-ie/ie.css) coloca-o à direita do título do espaço, como
- * o pino das barras do Explorador do XP (ExplorerBar.HeaderPin do Luna), e
- * escolhe a imagem pelo modo: espetado = barra fixa, deitado = modo compacto.
- * O clique é o comando do próprio Zen (cmd_zenCompactModeToggle, o Ctrl+S). */
+ * Puts a button (#zxp-sidebar-pin) inside the sidebar of each window;
+ * userChrome (src/zen-ie/ie.css) places it to the right of the space's
+ * title, like the pin of XP's Explorer bars (Luna's ExplorerBar.HeaderPin),
+ * and picks the image by mode: pushed in = pinned bar, lying = compact mode.
+ * The click is Zen's own command (cmd_zenCompactModeToggle, Ctrl+S). */
 "use strict";
 
 /* global ExtensionAPI, Services */
 const ID = "zxp-sidebar-pin";
-// (o "Ocultar automaticamente" da barra de tarefas do XP, explorer.exe)
+// (the "Ocultar automaticamente" (Auto-hide) of XP's taskbar, explorer.exe)
 const TIP_HIDE = "Ocultar automaticamente";
 const TIP_PIN = "Afixar a barra";
 
@@ -30,7 +30,7 @@ this.zxpSidebarPin = class extends ExtensionAPI {
       const button = doc.createXULElement("toolbarbutton");
       button.id = ID;
       button.addEventListener("command", () => cmd.doCommand());
-      // (a dica diz o que o clique vai fazer)
+      // (the tooltip says what the click will do)
       button.addEventListener("mouseover", () => {
         const compact = doc.documentElement.getAttribute("zen-compact-mode") == "true";
         button.setAttribute("tooltiptext", compact ? TIP_PIN : TIP_HIDE);
