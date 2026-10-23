@@ -11,8 +11,8 @@ irregular (in VSCode, unreadable).
 Besides, these engines use the system font (Tahoma 8.25 in the theme) for
 the interface and for "system-ui", and XP's rules turn off Tahoma's
 smoothing at small sizes: with fractional positions it ends up jagged and
-unreadable. In these applications Tahoma becomes Zorin's original font
-(Inter), smoothed.
+unreadable. In these applications Tahoma becomes Microsoft Sans Serif
+(XP's font for the older programs; the user's choice), smoothed.
 
 This script detects those applications and applies both things to them,
 without touching the others:
@@ -44,6 +44,8 @@ BACKUP = os.path.join(STATE, 'backup/desktop-files')
 USER_APPS = os.path.join(HOME, '.local/share/applications')
 USER_BIN = os.path.join(HOME, '.local/bin')
 MARK = '# zorin-xp-browser-fonts'
+# the interface font in these applications (the user's choice, 2026-10-23)
+UI_FONT = 'Microsoft Sans Serif'
 
 # files that give away a browser engine in the executable's folder
 ENGINE_FILES = ('chrome-sandbox', 'icudtl.dat', 'libxul.so', 'libcef.so', 'resources.pak')
@@ -74,7 +76,13 @@ def log_add(line):
 
 
 def ui_family():
-    """The system's default interface font (before the theme)."""
+    """UI_FONT; without it (XP fonts not installed), the system's default
+    interface font (before the theme)."""
+    try:
+        if subprocess.run(['fc-list', UI_FONT], capture_output=True, text=True).stdout.strip():
+            return UI_FONT
+    except OSError:
+        pass
     try:
         import gi
         gi.require_version('Pango', '1.0')
@@ -148,6 +156,12 @@ def engine_kind(path):
     real = os.path.realpath(path)
     if not os.path.isfile(real):
         return None
+    # one of our own command wrappers (e.g. the "claude-desktop" in
+    # ~/.local/bin, which an application's own launcher may now point to):
+    # the program it runs
+    target = own_wrapper_target(real)
+    if target:
+        return engine_kind(target)
     d = os.path.dirname(real)
     if any(os.path.exists(os.path.join(d, f)) for f in ENGINE_FILES):
         return 'dir'
@@ -160,6 +174,24 @@ def engine_kind(path):
         text = head.decode('utf-8', 'replace').lower()
         if any(h in text for h in SCRIPT_HINTS):
             return 'script'
+    return None
+
+
+def own_wrapper_target(path):
+    """The program one of our wrappers in ~/.local/bin runs, or None."""
+    if os.path.dirname(path) != USER_BIN:
+        return None
+    try:
+        with open(path, errors='replace') as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return None
+    if MARK not in lines:
+        return None
+    for line in lines:
+        if line.startswith('exec env '):
+            args = shlex.split(line)
+            return next((a for a in args[2:] if '=' not in a), None)
     return None
 
 
@@ -221,7 +253,7 @@ def fix_desktop_files():
             kind = engine_kind(prog) if prog else None
             if not kind:
                 continue
-            real = os.path.realpath(prog)
+            real = os.path.realpath(own_wrapper_target(os.path.realpath(prog)) or prog)
             engines.add(os.path.dirname(real) if kind == 'dir' else real)
             with open(path, encoding='utf-8') as f:
                 text = f.read()
