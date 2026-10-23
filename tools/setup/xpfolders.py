@@ -8,7 +8,8 @@
 
 The folders are renamed and the old name stays as a shortcut (symbolic link)
 hidden in Files (~/.hidden): paths stored in programs, shortcuts and links
-pointing to ~/Documentos/... keep working.
+pointing to ~/Documentos/... keep working. Undo does not need these
+shortcuts: one that nothing uses can be deleted.
 "As minhas imagens", "A minha música", "Os meus vídeos" and "Downloads" move
 inside "Os meus documentos", as in XP (also when the folders already had
 the XP names): on the same disk it is only a rename, nothing is copied; the
@@ -370,9 +371,12 @@ def undo():
     for old, new in reversed(state["renames"]):
         if not old:
             continue
-        # only if the old name is still our shortcut
-        if points(old, new) and os.path.isdir(new):
-            os.remove(old)
+        # only if the old name is still our shortcut, or free (the shortcut
+        # may have been deleted): never over anything else
+        free = not os.path.lexists(old)
+        if (free or points(old, new)) and os.path.isdir(new):
+            if not free:
+                os.remove(old)
             Gio.File.new_for_path(new).move(Gio.File.new_for_path(old),
                                             Gio.FileCopyFlags.NOFOLLOW_SYMLINKS, None, None)
             print(f"  {os.path.basename(new)} -> {os.path.basename(old)}")
