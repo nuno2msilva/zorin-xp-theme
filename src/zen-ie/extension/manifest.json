@@ -1,0 +1,103 @@
+{
+  "manifest_version": 2,
+  "name": "Zorin XP: Internet Explorer",
+  "description": "O Internet Explorer 6 do Windows XP no Zen: os botões Procurar, Favoritos e Histórico, as barras do Explorador, a janela Localizar, os sons, o título e o ícone, as barras de deslocamento, o pino e o aviso dos separadores e a pasta de cada sítio. Cada um liga-se e desliga-se nas Preferências.",
+  "version": "2.0",
+  "browser_specific_settings": {
+    "gecko": { "id": "zorin-xp-ie@zorin-xp.local" }
+  },
+  "icons": { "16": "img/ie-16.png", "32": "img/ie-32.png", "48": "img/ie-48.png" },
+  "permissions": ["bookmarks", "history", "tabs", "find", "menus", "menus.overrideContext"],
+  "incognito": "spanning",
+  "background": {
+    "scripts": ["background.js", "sounds.js", "find-background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["infobar.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "localizar": {
+      "suggested_key": { "default": "Ctrl+F" },
+      "description": "Localizar nesta página"
+    }
+  },
+  "sidebar_action": {
+    "default_panel": "favorites.html",
+    "default_title": "Favoritos",
+    "default_icon": "img/tb-favorites-16.png",
+    "open_at_install": false
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "experiment_apis": {
+    "zxpSettings": {
+      "schema": "experiments/settings/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/settings/api.js",
+        "paths": [["zxpSettings"]]
+      }
+    },
+    "zxpButtons": {
+      "schema": "experiments/buttons/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/buttons/api.js",
+        "events": ["startup"],
+        "paths": [["zxpButtons"]]
+      }
+    },
+    "zxpLastDir": {
+      "schema": "experiments/lastdir/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/lastdir/api.js",
+        "events": ["startup"],
+        "paths": [["zxpLastDir"]]
+      }
+    },
+    "zxpTabFlash": {
+      "schema": "experiments/tabflash/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/tabflash/api.js",
+        "events": ["startup"],
+        "paths": [["zxpTabFlash"]]
+      }
+    },
+    "zxpSidebarPin": {
+      "schema": "experiments/sidebarpin/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/sidebarpin/api.js",
+        "events": ["startup"],
+        "paths": [["zxpSidebarPin"]]
+      }
+    },
+    "zxpTitle": {
+      "schema": "experiments/title/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/title/api.js",
+        "events": ["startup"],
+        "paths": [["zxpTitle"]]
+      }
+    },
+    "zxpScrollbars": {
+      "schema": "experiments/scrollbars/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiments/scrollbars/api.js",
+        "events": ["startup"],
+        "paths": [["zxpScrollbars"]]
+      }
+    }
+  }
+}

@@ -10,6 +10,9 @@
  * "regular" window closes), and it closes when there are no normal windows
  * left. The GNOME extension takes it off the taskbar and Alt+Tab. Without the
  * private windows permission, the window really closes, as before.
+ *
+ * Turned off in the Preferences (enabled, background.js), the Search button
+ * goes (experiments/buttons) and Ctrl+F opens Zen's own find bar.
  */
 const WIDTH = 384, HEIGHT = 152;
 let find = null;          // {id, parent, keep}
@@ -22,10 +25,10 @@ function placement(parent) {
     };
 }
 
-// (in Zen the click may arrive without the tab: the last focused window)
-async function parentOf(tab) {
-    if (tab && (!find || tab.windowId !== find.id))
-        return browser.windows.get(tab.windowId);
+// (in Zen the shortcut may arrive without the tab: the last focused window)
+async function parentOf(windowId) {
+    if (windowId != null && (!find || windowId !== find.id))
+        return browser.windows.get(windowId);
     if (find && find.parent)
         return browser.windows.get(find.parent).catch(() => browser.windows.getLastFocused({windowTypes: ["normal"]}));
     return browser.windows.getLastFocused({windowTypes: ["normal"]});
@@ -79,24 +82,35 @@ function serial(fn) {
     };
 }
 
-// the Search button opens and closes
-browser.browserAction.onClicked.addListener(serial(async tab => {
+// the Search button (background.js) opens and closes
+const findButton = serial(async windowId => {
     if (await visible())
         await hide();
     else
-        await show(await parentOf(tab));
-}));
+        await show(await parentOf(windowId));
+});
 
 // Ctrl+F opens, or brings to the front the one already open
 browser.commands.onCommand.addListener(serial(async (command, tab) => {
     if (command !== "localizar")
         return;
+    if (!enabled("find")) {
+        const win = tab ? {id: tab.windowId} : await browser.windows.getLastFocused({windowTypes: ["normal"]});
+        await browser.zxpButtons.nativeFind(win.id);
+        return;
+    }
     if (await visible() && tab && tab.windowId === find.id) {
         browser.runtime.sendMessage({op: "shown"}).catch(() => {});
         return;
     }
-    await show(await parentOf(tab));
+    await show(await parentOf(tab && tab.windowId));
 }));
+
+// turned off with the window open: it goes
+browser.zxpSettings.onChanged.addListener((name, value) => {
+    if (name === "find" && !value)
+        serial(hide)();
+});
 
 // the Find page asks where to search, and asks to hide itself
 browser.runtime.onMessage.addListener(msg => {

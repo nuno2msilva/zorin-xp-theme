@@ -376,12 +376,14 @@ PY
             install_dir "$BUILD/zen/fonts" "$HOME/.local/share/fonts/zorin-xp-ie"
             fc-cache -f "$HOME/.local/share/fonts/zorin-xp-ie" >/dev/null 2>&1 || true
             install_dir "$BUILD/zen/zorin-xp-ie" "$P/chrome/zorin-xp-ie"
-            # the IE click when a page opens; the Favorites and History bars;
-            # Find; the "Save As" folder remembered per site; the new tab
-            # notice; the tab bar pin; the IE title; the XP scrollbars
+            # one extension with the IE features (the click when a page opens,
+            # the Favorites and History bars, Find, the "Save As" folder per
+            # site, the new tab notice, the tab bar pin, the IE title, the XP
+            # scrollbars), each turned on and off in its Preferences page
+            install_file "$BUILD/zen/zorin-xp-ie@zorin-xp.local.xpi" "$P/extensions/zorin-xp-ie@zorin-xp.local.xpi"
+            # (the nine extensions of earlier versions: Zen forgets them on its next start)
             for x in sounds favorites history find lastdir tabflash sidebarpin title scrollbars; do
-                install_file "$BUILD/zen/zorin-xp-ie-$x@zorin-xp.local.xpi" \
-                    "$P/extensions/zorin-xp-ie-$x@zorin-xp.local.xpi"
+                rm -f "$P/extensions/zorin-xp-ie-$x@zorin-xp.local.xpi"
             done
             # the window (userChrome.css) and what goes inside pages (userContent.css)
             for x in "userChrome.css ie.css" "userContent.css content.css"; do

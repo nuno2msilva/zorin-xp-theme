@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<title>Opções do Internet Explorer</title>
+<style>
+/* An XP options window: the 3D face background, Tahoma 8 (the "ZXP Tahoma"
+   pixel font, src/zen-ie), group boxes with the blue title and Luna's check
+   boxes (images from the GTK theme) */
+html {
+    background: #ece9d8;
+    color: #000;
+    font: 11px "ZXP Tahoma", sans-serif;
+    cursor: default;
+    user-select: none;
+}
+body {
+    max-width: 470px;
+    margin: 24px auto;
+    padding: 0 12px;
+}
+header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+header img { width: 32px; height: 32px; }
+h1 {
+    margin: 0;
+    font: bold 11px "ZXP Tahoma", sans-serif;
+}
+p { margin: 0; line-height: 13px; }
+fieldset {
+    margin: 0 0 12px;
+    padding: 4px 9px 8px;
+    border: 1px solid #d0d0bf;
+    border-radius: 3px;
+}
+legend {
+    padding: 0 3px;
+    margin-left: -2px;
+    color: #0046d5;
+}
+label.item {
+    display: grid;
+    grid-template-columns: 13px 1fr;
+    column-gap: 5px;
+    row-gap: 1px;
+    padding: 4px 0 3px;
+    line-height: 13px;
+}
+label.item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+label.item i {
+    width: 13px;
+    height: 13px;
+    background: url("img/check-unchecked-normal.png");
+}
+label.item:hover i { background-image: url("img/check-unchecked-hover.png"); }
+label.item input:checked + i { background-image: url("img/check-checked-normal.png"); }
+label.item:hover input:checked + i { background-image: url("img/check-checked-hover.png"); }
+/* (the keyboard focus: XP's dotted rectangle around the text) */
+label.item input:focus-visible ~ b { outline: 1px dotted #000; }
+label.item b { font-weight: normal; justify-self: start; padding: 0 1px; margin-left: -1px; }
+label.item small {
+    grid-column: 2;
+    font-size: inherit;
+    color: #444;
+}
+</style>
+</head>
+<body>
+<header>
+    <img src="img/ie-32.png" alt="">
+    <div>
+        <h1>Opções do Internet Explorer</h1>
+        <p>Escolha o que o Zen tem do Internet Explorer 6 do Windows XP. As alterações aplicam-se logo.</p>
+    </div>
+</header>
+<fieldset>
+    <legend>Barra de ferramentas</legend>
+    <label class="item"><input type="checkbox" data-feature="find"><i></i><b>Procurar</b>
+        <small>O botão Procurar e Ctrl+F abrem a janela Localizar do IE6. Desligado, Ctrl+F abre a barra de localizar do Zen.</small></label>
+    <label class="item"><input type="checkbox" data-feature="favorites"><i></i><b>Favoritos</b>
+        <small>O botão Favoritos e a barra Favoritos, com os marcadores do Zen.</small></label>
+    <label class="item"><input type="checkbox" data-feature="history"><i></i><b>Histórico</b>
+        <small>O botão Histórico e a barra Histórico.</small></label>
+</fieldset>
+<fieldset>
+    <legend>Janela</legend>
+    <label class="item"><input type="checkbox" data-feature="title"><i></i><b>Título e ícone do Internet Explorer</b>
+        <small>«Página - Microsoft Internet Explorer» na barra de título, e o ícone da página na barra de título e na barra de tarefas.</small></label>
+    <label class="item"><input type="checkbox" data-feature="scrollbars"><i></i><b>Barras de deslocamento do XP</b>
+        <small>As setas, o polegar e a calha das barras de deslocamento do Windows XP, nas páginas.</small></label>
+</fieldset>
+<fieldset>
+    <legend>Separadores</legend>
+    <label class="item"><input type="checkbox" data-feature="sidebarpin"><i></i><b>Pino da barra dos separadores</b>
+        <small>Espetado, a barra fica fixa; deitado, esconde-se sozinha (o modo compacto do Zen).</small></label>
+    <label class="item"><input type="checkbox" data-feature="tabflash"><i></i><b>Aviso de novo separador</b>
+        <small>Um separador aberto em segundo plano pisca a laranja, como um botão da barra de tarefas do XP a pedir atenção.</small></label>
+</fieldset>
+<fieldset>
+    <legend>Sons e transferências</legend>
+    <label class="item"><input type="checkbox" data-feature="sounds"><i></i><b>Sons do Internet Explorer</b>
+        <small>O clique ao abrir uma página e os sons da barra de informações (pop-up bloqueado, pedidos de permissão).</small></label>
+    <label class="item"><input type="checkbox" data-feature="lastdir"><i></i><b>Pasta de cada sítio</b>
+        <small>«Guardar como» abre na última pasta usada nesse sítio; num sítio novo, nas Transferências.</small></label>
+</fieldset>
+<script src="options.js"></script>
+</body>
+</html>

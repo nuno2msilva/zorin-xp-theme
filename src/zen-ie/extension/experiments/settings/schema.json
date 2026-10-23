@@ -1,0 +1,36 @@
+[
+  {
+    "namespace": "zxpSettings",
+    "description": "The features the Preferences page turns on and off (Zen preferences extensions.zorin-xp-ie.*).",
+    "functions": [
+      {
+        "name": "get",
+        "type": "function",
+        "async": true,
+        "description": "Every feature and whether it is on.",
+        "parameters": []
+      },
+      {
+        "name": "set",
+        "type": "function",
+        "async": true,
+        "description": "Turns a feature on or off.",
+        "parameters": [
+          {"name": "name", "type": "string"},
+          {"name": "value", "type": "boolean"}
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "onChanged",
+        "type": "function",
+        "description": "A feature was turned on or off.",
+        "parameters": [
+          {"name": "name", "type": "string"},
+          {"name": "value", "type": "boolean"}
+        ]
+      }
+    ]
+  }
+]

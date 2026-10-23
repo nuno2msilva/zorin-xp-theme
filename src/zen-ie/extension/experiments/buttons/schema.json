@@ -1,0 +1,38 @@
+[
+  {
+    "namespace": "zxpButtons",
+    "description": "IE's Search, Favorites and History toolbar buttons and the Explorer bar.",
+    "functions": [
+      {
+        "name": "showBar",
+        "type": "function",
+        "async": true,
+        "description": "Marks which bar the window shows (favorites or history) and opens the side bar.",
+        "parameters": [
+          {"name": "windowId", "type": "integer"},
+          {"name": "bar", "type": "string"}
+        ]
+      },
+      {
+        "name": "nativeFind",
+        "type": "function",
+        "async": true,
+        "description": "Opens the browser's own find bar in the window.",
+        "parameters": [
+          {"name": "windowId", "type": "integer"}
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "onClicked",
+        "type": "function",
+        "description": "Search, or a bar that is not open yet, was clicked: find, favorites or history.",
+        "parameters": [
+          {"name": "button", "type": "string"},
+          {"name": "windowId", "type": "integer"}
+        ]
+      }
+    ]
+  }
+]

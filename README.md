@@ -102,8 +102,8 @@ modified. Only two components write outside it, with sudo, into folders of
 their own: `logon` (the `gdm` user's folder, `/var/lib/gdm3`) and `boot`
 (`/usr/share/plymouth/themes/windows-xp`).
 
-The Zen extensions only start from the **second** time Zen opens after they
-are installed.
+The Zen extension only starts from the **second** time Zen opens after it is
+installed.
 
 ## Uninstall
 
@@ -229,6 +229,9 @@ out).
   tooltips, the IE click when a page opens, and media controls styled like
   Windows Media Player.
 - Opens the last visited page; Save As remembers the folder per site.
+- All of it comes in one extension, *Zorin XP: Internet Explorer*: its
+  **Preferences** (`about:addons`, ⋯ > Preferências) turn each feature on and
+  off at once.
 
 ---
 

@@ -6,10 +6,12 @@
 const list = document.getElementById("list");
 let selected = null;           // id do item seleccionado
 
-// open folders (kept between openings of the bar)
-const openFolders = new Set(JSON.parse(localStorage.getItem("open") || "[]"));
+// open folders (kept between openings of the bar; one list per bar: both
+// pages share the extension's storage)
+const OPEN_KEY = `${location.pathname.replace(/^\/|\.html$/g, "")}-open`;
+const openFolders = new Set(JSON.parse(localStorage.getItem(OPEN_KEY) || "[]"));
 function saveOpen() {
-    localStorage.setItem("open", JSON.stringify([...openFolders]));
+    localStorage.setItem(OPEN_KEY, JSON.stringify([...openFolders]));
 }
 
 function row(depth, icon, text, id) {

@@ -261,11 +261,11 @@
 #stop-reload-button > #stop-button { order: -1; }
 
 /* separators (1 px #cac6af, y 2..35 of the band) after Home and History */
-#nav-bar :is(#home-button, #zorin-xp-ie-history_zorin-xp_local-browser-action) {
+#nav-bar :is(#home-button, #zxp-ie-history) {
     position: relative;
     margin-inline-end: 5px !important;
 }
-#home-button::after, #zorin-xp-ie-history_zorin-xp_local-browser-action::after {
+#home-button::after, #zxp-ie-history::after {
     content: "";
     position: absolute;
     width: 1px;
@@ -275,7 +275,7 @@
 /* (the position counts from inside the border: the button has 4 px, the
    extension's box none) — line at x+34 and y 2..35 of the band, as in IE */
 #home-button::after { right: -7px; top: -3px; }
-#zorin-xp-ie-history_zorin-xp_local-browser-action::after { right: -3px; top: 2px; }
+#zxp-ie-history::after { right: -3px; top: 2px; }
 
 /* Back and Forward: the arrow part (history menu), 5x3 px */
 #back-button, #forward-button { position: relative; }
@@ -1166,37 +1166,39 @@ body::before {
 
 
 /* ---------- Favorites and History: they open the Explorer bars ----------
-   (extensions zorin-xp-ie-favorites / -history: one button and one bar each) */
-:is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .unified-extensions-item-action-button {
+   (buttons made by the extension, src/zen-ie/extension/experiments/buttons,
+   with the inside of an extension's button; both bars share its side bar) */
+:is(#zxp-ie-favorites, #zxp-ie-history, #zxp-ie-search) .unified-extensions-item-action-button {
     list-style-image: none !important;
 }
-#nav-bar :is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .toolbarbutton-badge-stack {
+#nav-bar :is(#zxp-ie-favorites, #zxp-ie-history, #zxp-ie-search) .toolbarbutton-badge-stack {
     width: 24px !important;
     height: 24px !important;
     background: var(--zxp-icon) no-repeat !important;
 }
-#nav-bar :is(#zorin-xp-ie-favorites_zorin-xp_local-browser-action, #zorin-xp-ie-history_zorin-xp_local-browser-action, #zorin-xp-ie-find_zorin-xp_local-browser-action) .toolbarbutton-badge-stack > .toolbarbutton-icon { display: none !important; }
-#zorin-xp-ie-find_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-search.png"); }
-#zorin-xp-ie-find_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-search-hot.png"); }
-#zorin-xp-ie-find_zorin-xp_local-browser-action .unified-extensions-item-action-button::after {
+#nav-bar :is(#zxp-ie-favorites, #zxp-ie-history, #zxp-ie-search) .toolbarbutton-badge-stack > .toolbarbutton-icon { display: none !important; }
+#zxp-ie-search { --zxp-icon: url("img/tb-search.png"); }
+#zxp-ie-search:hover { --zxp-icon: url("img/tb-search-hot.png"); }
+#zxp-ie-search .unified-extensions-item-action-button::after {
     content: "Procurar";
     font: var(--ie-font);
     line-height: 24px;
     margin-inline: 4px 3px;               /* 80 px button, as in IE */
 }
-#zorin-xp-ie-favorites_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-favorites.png"); }
-#zorin-xp-ie-favorites_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-favorites-hot.png"); }
-#zorin-xp-ie-history_zorin-xp_local-browser-action { --zxp-icon: url("img/tb-history.png"); }
-#zorin-xp-ie-history_zorin-xp_local-browser-action:hover { --zxp-icon: url("img/tb-history-hot.png"); }
-#zorin-xp-ie-favorites_zorin-xp_local-browser-action .unified-extensions-item-action-button::after {
+#zxp-ie-favorites { --zxp-icon: url("img/tb-favorites.png"); }
+#zxp-ie-favorites:hover { --zxp-icon: url("img/tb-favorites-hot.png"); }
+#zxp-ie-history { --zxp-icon: url("img/tb-history.png"); }
+#zxp-ie-history:hover { --zxp-icon: url("img/tb-history-hot.png"); }
+#zxp-ie-favorites .unified-extensions-item-action-button::after {
     content: "Favoritos";
     font: var(--ie-font);
     line-height: 24px;
     margin-inline: 4px 4px;               /* 85 px button, as in IE */
 }
-/* pressed while the bar is open, as in IE */
-:root:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie-favorites_zorin-xp_local-sidebar-action"]) #zorin-xp-ie-favorites_zorin-xp_local-browser-action .unified-extensions-item-action-button,
-:root:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie-history_zorin-xp_local-sidebar-action"]) #zorin-xp-ie-history_zorin-xp_local-browser-action .unified-extensions-item-action-button {
+/* pressed while the bar is open, as in IE (one side bar for both: the
+   window's zxp-ebar says which page it shows) */
+:root[zxp-ebar="favorites"]:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie_zorin-xp_local-sidebar-action"]) #zxp-ie-favorites .unified-extensions-item-action-button,
+:root[zxp-ebar="history"]:has(#sidebar-box:not([hidden])[sidebarcommand="zorin-xp-ie_zorin-xp_local-sidebar-action"]) #zxp-ie-history .unified-extensions-item-action-button {
     border-image: url("img/toolbar-button-checked.png") 4 fill / 4px stretch !important;
 }
 

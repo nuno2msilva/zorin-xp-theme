@@ -8,29 +8,60 @@
 "use strict";
 
 /* global ExtensionAPI, Services, Cc, Ci */
-this.zxpScrollbars = class extends ExtensionAPI {
-  onStartup() {
-    const file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-    for (const part of ["chrome", "zorin-xp-ie", "scrollbars.css"]) {
-      file.append(part);
+// (the privileged scripts of one extension share a global: each keeps
+// its names inside this block, only the API class goes out)
+{
+  const FEATURE = "extensions.zorin-xp-ie.scrollbars";
+  this.zxpScrollbars = class extends ExtensionAPI {
+    // turned on and off by the Preferences page, at once (the Zen preference
+    // FEATURE, extensions.zorin-xp-ie.*, true by default)
+    onStartup() {
+      this.toggle = () => {
+        const on = Services.prefs.getBoolPref(FEATURE, true);
+        if (on !== !!this.running) {
+          this.running = on;
+          if (on) {
+            this.start();
+          } else {
+            this.stop();
+          }
+        }
+      };
+      Services.prefs.addObserver(FEATURE, this.toggle);
+      this.toggle();
     }
-    if (!file.exists()) {
-      return;
-    }
-    this.uri = Services.io.newFileURI(file);
-    this.sss = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-    if (!this.sss.sheetRegistered(this.uri, this.sss.AGENT_SHEET)) {
-      this.sss.loadAndRegisterSheet(this.uri, this.sss.AGENT_SHEET);
-    }
-  }
 
-  onShutdown() {
-    if (this.uri && this.sss.sheetRegistered(this.uri, this.sss.AGENT_SHEET)) {
-      this.sss.unregisterSheet(this.uri, this.sss.AGENT_SHEET);
+    onShutdown() {
+      Services.prefs.removeObserver(FEATURE, this.toggle);
+      if (this.running) {
+        this.running = false;
+        this.stop();
+      }
     }
-  }
 
-  getAPI() {
-    return { zxpScrollbars: {} };
-  }
-};
+    start() {
+      const file = Services.dirsvc.get("ProfD", Ci.nsIFile);
+      for (const part of ["chrome", "zorin-xp-ie", "scrollbars.css"]) {
+        file.append(part);
+      }
+      if (!file.exists()) {
+        return;
+      }
+      this.uri = Services.io.newFileURI(file);
+      this.sss = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+      if (!this.sss.sheetRegistered(this.uri, this.sss.AGENT_SHEET)) {
+        this.sss.loadAndRegisterSheet(this.uri, this.sss.AGENT_SHEET);
+      }
+    }
+
+    stop() {
+      if (this.uri && this.sss.sheetRegistered(this.uri, this.sss.AGENT_SHEET)) {
+        this.sss.unregisterSheet(this.uri, this.sss.AGENT_SHEET);
+      }
+    }
+
+    getAPI() {
+      return { zxpScrollbars: {} };
+    }
+  };
+}

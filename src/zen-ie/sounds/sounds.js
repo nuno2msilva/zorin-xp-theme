@@ -4,7 +4,8 @@
 // internal pages (about:) do not click.
 // (webNavigation does not fire in Zen: the tab's "loading" state is used,
 // which arrives several times per navigation — redirects — so only the
-// first one every 1.5 s counts; Zen does not play WAV: it goes as OGG)
+// first one every 1.5 s counts; Zen does not play WAV: it goes as OGG).
+// Silent while turned off in the Preferences (enabled, background.js).
 const click = new Audio(browser.runtime.getURL("start.ogg"));
 const QUIET_MS = 1500;
 const lastClick = new Map();        // tab -> time of the last click
@@ -15,7 +16,8 @@ function play() {
 }
 
 browser.tabs.onUpdated.addListener((tabId, info, tab) => {
-    if (info.status !== "loading" || !tab.active || !/^(https?|ftp|file):/.test(tab.url))
+    if (info.status !== "loading" || !tab.active || !/^(https?|ftp|file):/.test(tab.url) ||
+            !enabled("sounds"))
         return;
     const now = Date.now();
     if (now - (lastClick.get(tabId) || 0) < QUIET_MS)
@@ -36,7 +38,7 @@ let lastInfobar = 0;
 browser.runtime.onMessage.addListener(msg => {
     const sound = infobar[msg.op];
     const now = Date.now();
-    if (!sound || now - lastInfobar < QUIET_MS)
+    if (!sound || now - lastInfobar < QUIET_MS || !enabled("sounds"))
         return;
     lastInfobar = now;
     sound.currentTime = 0;

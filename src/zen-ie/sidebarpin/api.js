@@ -8,55 +8,86 @@
 "use strict";
 
 /* global ExtensionAPI, Services */
-const ID = "zxp-sidebar-pin";
-// (the "Ocultar automaticamente" (Auto-hide) of XP's taskbar, explorer.exe)
-const TIP_HIDE = "Ocultar automaticamente";
-const TIP_PIN = "Afixar a barra";
+// (the privileged scripts of one extension share a global: each keeps
+// its names inside this block, only the API class goes out)
+{
+  const FEATURE = "extensions.zorin-xp-ie.sidebarpin";
+  const ID = "zxp-sidebar-pin";
+  // (the "Ocultar automaticamente" (Auto-hide) of XP's taskbar, explorer.exe)
+  const TIP_HIDE = "Ocultar automaticamente";
+  const TIP_PIN = "Afixar a barra";
 
-this.zxpSidebarPin = class extends ExtensionAPI {
-  onStartup() {
-    this.windows = new Set();
-    this.track = win => {
-      if (this.windows.has(win) || !win.gBrowser) {
-        return;
+  this.zxpSidebarPin = class extends ExtensionAPI {
+    // turned on and off by the Preferences page, at once (the Zen preference
+    // FEATURE, extensions.zorin-xp-ie.*, true by default)
+    onStartup() {
+      this.toggle = () => {
+        const on = Services.prefs.getBoolPref(FEATURE, true);
+        if (on !== !!this.running) {
+          this.running = on;
+          if (on) {
+            this.start();
+          } else {
+            this.stop();
+          }
+        }
+      };
+      Services.prefs.addObserver(FEATURE, this.toggle);
+      this.toggle();
+    }
+
+    onShutdown() {
+      Services.prefs.removeObserver(FEATURE, this.toggle);
+      if (this.running) {
+        this.running = false;
+        this.stop();
       }
-      const doc = win.document;
-      const toolbox = doc.getElementById("navigator-toolbox");
-      const cmd = doc.getElementById("cmd_zenCompactModeToggle");
-      if (!toolbox || !cmd || doc.getElementById(ID)) {
-        return;
+    }
+
+    start() {
+      this.windows = new Set();
+      this.track = win => {
+        if (this.windows.has(win) || !win.gBrowser) {
+          return;
+        }
+        const doc = win.document;
+        const toolbox = doc.getElementById("navigator-toolbox");
+        const cmd = doc.getElementById("cmd_zenCompactModeToggle");
+        if (!toolbox || !cmd || doc.getElementById(ID)) {
+          return;
+        }
+        this.windows.add(win);
+        const button = doc.createXULElement("toolbarbutton");
+        button.id = ID;
+        button.addEventListener("command", () => cmd.doCommand());
+        // (the tooltip says what the click will do)
+        button.addEventListener("mouseover", () => {
+          const compact = doc.documentElement.getAttribute("zen-compact-mode") == "true";
+          button.setAttribute("tooltiptext", compact ? TIP_PIN : TIP_HIDE);
+        });
+        toolbox.append(button);
+        win.addEventListener("unload", () => this.windows.delete(win), { once: true });
+      };
+      for (const win of Services.wm.getEnumerator("navigator:browser")) {
+        this.track(win);
       }
-      this.windows.add(win);
-      const button = doc.createXULElement("toolbarbutton");
-      button.id = ID;
-      button.addEventListener("command", () => cmd.doCommand());
-      // (the tooltip says what the click will do)
-      button.addEventListener("mouseover", () => {
-        const compact = doc.documentElement.getAttribute("zen-compact-mode") == "true";
-        button.setAttribute("tooltiptext", compact ? TIP_PIN : TIP_HIDE);
-      });
-      toolbox.append(button);
-      win.addEventListener("unload", () => this.windows.delete(win), { once: true });
-    };
-    for (const win of Services.wm.getEnumerator("navigator:browser")) {
-      this.track(win);
+      this.observer = subject => this.track(subject);
+      Services.obs.addObserver(this.observer, "browser-delayed-startup-finished");
     }
-    this.observer = subject => this.track(subject);
-    Services.obs.addObserver(this.observer, "browser-delayed-startup-finished");
-  }
 
-  onShutdown() {
-    if (this.observer) {
-      Services.obs.removeObserver(this.observer, "browser-delayed-startup-finished");
-      this.observer = null;
+    stop() {
+      if (this.observer) {
+        Services.obs.removeObserver(this.observer, "browser-delayed-startup-finished");
+        this.observer = null;
+      }
+      for (const win of this.windows) {
+        win.document.getElementById(ID)?.remove();
+      }
+      this.windows.clear();
     }
-    for (const win of this.windows) {
-      win.document.getElementById(ID)?.remove();
-    }
-    this.windows.clear();
-  }
 
-  getAPI() {
-    return { zxpSidebarPin: {} };
-  }
-};
+    getAPI() {
+      return { zxpSidebarPin: {} };
+    }
+  };
+}

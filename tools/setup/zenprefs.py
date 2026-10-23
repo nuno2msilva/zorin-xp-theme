@@ -19,13 +19,19 @@ import sys
 # (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Favorites and History: the buttons of the Explorer bars' extensions
-FAVORITES = "zorin-xp-ie-favorites_zorin-xp_local-browser-action"
-HISTORY = "zorin-xp-ie-history_zorin-xp_local-browser-action"
-FIND = "zorin-xp-ie-find_zorin-xp_local-browser-action"       # Search: the Find window
+# Search, Favorites and History: the buttons the extension makes
+# (src/zen-ie/extension/experiments/buttons)
+FAVORITES = "zxp-ie-favorites"
+HISTORY = "zxp-ie-history"
+FIND = "zxp-ie-search"       # Search: the Find window
 NAV = ["back-button", "forward-button", "stop-reload-button", "home-button",
        FIND, FAVORITES, HISTORY]
-REPLACED = ["bookmarks-menu-button", "history-panelmenu", "find-button"]   # (the previous ones: removed)
+# (the previous ones: removed — Zen's, and the browser actions of the nine
+# extensions of earlier versions)
+REPLACED = ["bookmarks-menu-button", "history-panelmenu", "find-button",
+            "zorin-xp-ie-favorites_zorin-xp_local-browser-action",
+            "zorin-xp-ie-history_zorin-xp_local-browser-action",
+            "zorin-xp-ie-find_zorin-xp_local-browser-action"]
 PREFS = {
     "toolkit.legacyUserProfileCustomizations.stylesheets": True,
     "browser.tabs.inTitlebar": 0,
@@ -61,7 +67,7 @@ PREFS = {
     "layout.css.scrollbar-width-thin.disabled": True,
 }
 # the Find window is kept ready in a private window (see src/zen-ie/find)
-PRIVATE = ["zorin-xp-ie-find@zorin-xp.local"]
+PRIVATE = ["zorin-xp-ie@zorin-xp.local"]
 PB = "internal:privateBrowsingAllowed"
 # Zen shortcuts turned off: Ctrl+F becomes the Find window's
 SHORTCUTS_OFF = ["key_find"]

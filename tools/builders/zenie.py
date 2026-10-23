@@ -24,12 +24,17 @@ Text: "ZXP Tahoma" (tools/lib/pixelfont.py), XP's Tahoma 8 in pixels with
 GDI's widths — Firefox does not use the hinted widths and with the normal
 Tahoma the letters are irregularly spaced.
 
-Sounds: the src/zen-ie/sounds extension with XP's click ("Iniciar
+The extension (one, zorin-xp-ie@zorin-xp.local, with a Preferences page that
+turns each feature on and off: src/zen-ie/extension) gathers the features
+below; each lives in its folder of src/zen-ie and goes to the extension's root
+(pages and scripts) or to experiments/<name>/ (privileged parts).
+
+Sounds: src/zen-ie/sounds, with XP's click ("Iniciar
 navegação", Media/Windows XP Start.wav) and SP2's information bar ones
 (Windows XP Pop-up Blocked.wav, Windows XP Information Bar.wav).
 
-IE6 Favorites and History bars: the src/zen-ie/favorites and
-src/zen-ie/history extensions (+ the shared explorerbar/), with the
+IE6 Favorites and History bars: src/zen-ie/favorites and src/zen-ie/history
+(+ the shared explorerbar/), in the extension's one side bar, with the
 Explorer bar icons: shdocvw.dll 534/535 (Add, Organize, View; 18x16, magenta
 = transparent), browseui.dll 563/564 (Search), shdocvw.dll icon 20783
 (history days), shell32.dll icons 4/5 (folders), XP's buttons from msstyles.
@@ -38,7 +43,7 @@ Network error page: IE6's (shdoclc.dll, DNSERROR.HTM), tools/builders/ieerror.py
 
 build(gtk_assets, out) -> out/zorin-xp-ie/{ie.css, content.css, img/*.png},
                           out/fonts/ZXPTahoma{,-Bold,13-Bold}.ttf, ZXPVerdanaIE.ttf,
-                          out/zorin-xp-ie-sounds@zorin-xp.local.xpi
+                          out/zorin-xp-ie@zorin-xp.local.xpi
 """
 import base64
 import os
@@ -58,6 +63,10 @@ from lib import pixelfont
 from lib import winicons
 from lib import assets
 
+# the extensions of earlier versions, now all in zorin-xp-ie@zorin-xp.local
+OLD_EXTENSIONS = [f"zorin-xp-ie-{n}@zorin-xp.local" for n in
+                  ("sounds", "favorites", "history", "find", "lastdir", "tabflash", "sidebarpin", "title",
+                   "scrollbars")]
 IE_BUTTONS = ["back", "forward", "stop", "refresh", "home", "search", "favorites", "print",
               "font", "edit", "tools", "media", "history", "mail", "fullscreen", "discuss"]
 LUNA = ["toolbar-button-hover", "toolbar-button-active", "toolbar-button-checked",
@@ -119,9 +128,8 @@ def build(gtk_assets, out):
     with open(os.path.join(dst, "content.css"), "w", encoding="utf-8") as f:
         f.write(content)
 
-    # sounds extension (the XPI is a zip with the manifest at the root): the
-    # click and SP2's information bar ones
-    src = os.path.join(ROOT, "src", "zen-ie", "sounds")
+    # the IE sounds (src/zen-ie/sounds): the click and SP2's information bar
+    # ones, which go into the extension (extension())
     oggs = {}
     for wav_name, ogg_name in (("windows xp start.wav", "start.ogg"),
                                ("windows xp pop-up blocked.wav", "popup-blocked.ogg"),
@@ -133,22 +141,6 @@ def build(gtk_assets, out):
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", wav, "-c:a", "libvorbis",
                         "-q:a", "6", "-fflags", "+bitexact", "-flags:a", "+bitexact",
                         "-serial_offset", "1", oggs[ogg_name]], check=True)
-    with zipfile.ZipFile(os.path.join(out, "zorin-xp-ie-sounds@zorin-xp.local.xpi"), "w",
-                         zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(os.listdir(src)):
-            z.write(os.path.join(src, f), f)
-        for name, path in oggs.items():
-            z.write(path, name)
-            os.remove(path)
-    # the "Save As" folder remembered per site (src/zen-ie/lastdir), the new tab
-    # notice (src/zen-ie/tabflash), the tab bar pin (src/zen-ie/sidebarpin),
-    # the IE title (src/zen-ie/title) and XP's scrollbars (src/zen-ie/scrollbars)
-    for name in ("lastdir", "tabflash", "sidebarpin", "title", "scrollbars"):
-        src = os.path.join(ROOT, "src", "zen-ie", name)
-        with zipfile.ZipFile(os.path.join(out, f"zorin-xp-ie-{name}@zorin-xp.local.xpi"), "w",
-                             zipfile.ZIP_DEFLATED) as z:
-            for f in sorted(os.listdir(src)):
-                z.write(os.path.join(src, f), f)
 
     normal = assets.image("ie/toolbar")
     hot = assets.image("ie/toolbar-hot")
@@ -251,7 +243,7 @@ def build(gtk_assets, out):
             src = os.path.join(gtk_assets, f"{name}{suffix}.png")
             if os.path.exists(src):
                 shutil.copyfile(src, os.path.join(img, f"{name}{suffix}.png"))
-    explorer_bars(gtk_assets, img, out)
+    extension(gtk_assets, img, out, oggs)
     return dst
 
 
@@ -291,8 +283,12 @@ def _strip18(name, i):
     return im.crop((i * 18, 0, i * 18 + 18, 16))
 
 
-def explorer_bars(gtk_assets, img, out):
-    """XPIs of the Favorites and History bars (see the header)."""
+def extension(gtk_assets, img, out, oggs):
+    """The extension, zorin-xp-ie@zorin-xp.local.xpi (see the header): the
+    core (src/zen-ie/extension: manifest, background, Preferences page,
+    experiments/settings and experiments/buttons) at the root, with the
+    features' pages and scripts; their privileged parts in experiments/<name>/;
+    the images and the sounds."""
     shared = {
         "img/page.png": assets.icon("ie-page", 16),
         "img/folder.png": assets.icon("folder", 16),
@@ -324,21 +320,38 @@ def explorer_bars(gtk_assets, img, out):
               "check-unchecked-disabled", "radio-unchecked-normal", "radio-unchecked-hover", "radio-checked-normal", "radio-checked-hover"):
         copies[f"img/{n}.png"] = os.path.join(gtk_assets, f"{n}.png")
     copies["img/tb-search.png"] = os.path.join(img, "tb-search.png")
-    common = os.path.join(ROOT, "src", "zen-ie", "explorerbar")
+    images = {**shared, **extra["favorites"], **extra["history"], **extra["find"]}
+    # the extension's icon (about:addons): IE's page, iexplore.exe
+    for size in (16, 32, 48):
+        images[f"img/ie-{size}.png"] = assets.icon("ie-page", size)
+    zen = os.path.join(ROOT, "src", "zen-ie")
     import io
-    for name in ("favorites", "history", "find"):
-        src = os.path.join(ROOT, "src", "zen-ie", name)
-        xpi = os.path.join(out, f"zorin-xp-ie-{name}@zorin-xp.local.xpi")
-        with zipfile.ZipFile(xpi, "w", zipfile.ZIP_DEFLATED) as z:
-            for d in ((src, common) if name != "find" else (src,)):
-                for f in sorted(os.listdir(d)):
-                    z.write(os.path.join(d, f), f)
-            for arc, path in copies.items():
-                z.write(path, arc)
-            for arc, im in {**shared, **extra[name]}.items():
-                buf = io.BytesIO()
-                im.save(buf, "PNG")
-                z.writestr(arc, buf.getvalue())
+    with zipfile.ZipFile(os.path.join(out, "zorin-xp-ie@zorin-xp.local.xpi"), "w", zipfile.ZIP_DEFLATED) as z:
+        core = os.path.join(zen, "extension")
+        for d, _dirs, files in sorted(os.walk(core)):
+            for f in sorted(files):
+                path = os.path.join(d, f)
+                z.write(path, os.path.relpath(path, core))
+        for name in ("sounds", "favorites", "history", "explorerbar", "find"):
+            for f in sorted(os.listdir(os.path.join(zen, name))):
+                z.write(os.path.join(zen, name, f), f)
+        for name in ("lastdir", "tabflash", "sidebarpin", "title", "scrollbars"):
+            for f in ("api.js", "schema.json"):
+                z.write(os.path.join(zen, name, f), f"experiments/{name}/{f}")
+        for arc, path in copies.items():
+            z.write(path, arc)
+        for arc, im in images.items():
+            buf = io.BytesIO()
+            im.save(buf, "PNG")
+            z.writestr(arc, buf.getvalue())
+        for name, path in oggs.items():
+            z.write(path, name)
+            os.remove(path)
+    # (the nine extensions of earlier versions: install.sh takes them out of the profile)
+    for old in OLD_EXTENSIONS:
+        stale = os.path.join(out, f"{old}.xpi")
+        if os.path.exists(stale):
+            os.remove(stale)
 
 
 def statusbar(img):
