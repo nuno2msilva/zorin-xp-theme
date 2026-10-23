@@ -15,6 +15,13 @@ import {label} from './gdiText.js';
 // the text cursor blinks as in XP (GetCaretBlinkTime: 530 ms); GNOME Shell
 // does not blink the one in its entries
 const BLINK_MS = 530;
+// XP's text cursor in the password box (measured): 1 px wide, 21 px high,
+// 3 px below the top of the box. GNOME's is 2 px wide and as high as Pango's
+// line, so it is made transparent (caret-color in the CSS) and this one is
+// drawn at the cursor position instead
+const CARET_W = 1;
+const CARET_H = 21;
+const CARET_Y = 3;
 const TOP_H = 80;           // toppanel height=80rp (includes the 2 px line)
 const BOTTOM_H = 96;        // 2 + padding 20 + button 26 + 2 + button 26 + 20
 const LINE_H = 2;
@@ -29,7 +36,7 @@ const TEXT_X = 7 + FRAME + 7;
 const PASS_X = 71;          // passwordpanelayer padding-left 71rp
 const PASS_Y = 51;          // password row inside the account (measured)
 const EDIT_W = 163;
-const EDIT_H = 28;
+const EDIT_H = 29;          // (163x29 in an XP capture: 1 px more than its 28 px line)
 const OPTIONS_PAD = 25;     // options padding 25,20,25,20
 const DIMMED = 96;          // hotaccountlistss: alpha 96 on the other accounts
 const LIST_PAD = 26;        // selector padding rect(0,26,5,26): em cima e em baixo
@@ -37,6 +44,9 @@ const SCROLL_W = 17;        // the theme's bar (SM_CXVSCROLL); 17x17 arrows (SM_
 const SCROLL_STEP = 40;     // roda do rato / setas
 const REPEAT_DELAY = 330;   // arrow repetition while pressed (as in XP)
 const REPEAT_RATE = 50;
+const UP_KEYS = [Clutter.KEY_Up, Clutter.KEY_KP_Up];
+const DOWN_KEYS = [Clutter.KEY_Down, Clutter.KEY_KP_Down];
+const ENTER_KEYS = [Clutter.KEY_Return, Clutter.KEY_KP_Enter];
 
 export function loadStrings(dir) {
     try {
@@ -159,28 +169,39 @@ export class XpWelcome {
         });
         if ('show_peek_icon' in this.entry)
             this.entry.show_peek_icon = false;
-        // dots in the centre of the box's white area (measured)
-        this.entry.clutter_text.translation_y = -1;
+        // dots 3 px below the centre of the box's white area (measured in an XP capture)
+        this.entry.clutter_text.translation_y = 2;
         this.entry.clutter_text.connect('activate', () => this._submit());
         this.entry.clutter_text.connect('text-changed', () => this.hideBalloon());
         this.entry.clutter_text.connect('key-press-event', (_a, ev) => {
-            if (ev.get_key_symbol() === Clutter.KEY_Escape) {
+            const sym = ev.get_key_symbol();
+            if (sym === Clutter.KEY_Escape) {
                 this.onCancel();
+                return Clutter.EVENT_STOP;
+            }
+            // ↑/↓ take the password box to the previous/next account
+            if (UP_KEYS.includes(sym) || DOWN_KEYS.includes(sym)) {
+                this._promptStep(DOWN_KEYS.includes(sym) ? 1 : -1);
                 return Clutter.EVENT_STOP;
             }
             this._restartBlink();
             return Clutter.EVENT_PROPAGATE;
         });
         // the blinking text cursor (always visible right after typing)
-        this.entry.clutter_text.connect('key-focus-in', () => this._restartBlink());
-        this.entry.clutter_text.connect('key-focus-out', () => this._stopBlink());
-        this.entry.clutter_text.connect('text-changed', () => this._restartBlink());
+        this._caret = new St.Widget({style: 'background-color: black;',
+            width: CARET_W, height: CARET_H, visible: false});
+        const ct = this.entry.clutter_text;
+        ct.connect('key-focus-in', () => this._restartBlink());
+        ct.connect('key-focus-out', () => this._stopBlink());
+        ct.connect('text-changed', () => this._restartBlink());
+        ct.connect('cursor-changed', () => this._placeCaret());
+        ct.connect('notify::allocation', () => this._placeCaret());
         this._kbd = new St.Button({style_class: 'zxp-logon-kbd', can_focus: false});
         this._kbd.connect('clicked', () => this._nextInputSource());
         this._go = new St.Button({style_class: 'zxp-logon-go', can_focus: false, track_hover: true});
         this._go.connect('clicked', () => this._submit());
         hand(this._go);
-        for (const a of [this._passLabel, this.entry, this._kbd, this._go])
+        for (const a of [this._passLabel, this.entry, this._caret, this._kbd, this._go])
             this._pass.add_child(a);
 
         this._sourceId = Main.inputSourceManager?.connect('current-source-changed', () => this._syncKeyboard());
@@ -189,12 +210,12 @@ export class XpWelcome {
 
     _restartBlink() {
         this._stopBlink();
-        const ct = this.entry.clutter_text;
-        if (!ct.has_key_focus())
+        if (!this.entry.clutter_text.has_key_focus())
             return;
-        ct.cursor_visible = true;
+        this._placeCaret();
+        this._caret.show();
         this._blinkId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, BLINK_MS, () => {
-            ct.cursor_visible = !ct.cursor_visible;
+            this._caret.visible = !this._caret.visible;
             return GLib.SOURCE_CONTINUE;
         });
     }
@@ -203,13 +224,29 @@ export class XpWelcome {
         if (this._blinkId)
             GLib.source_remove(this._blinkId);
         this._blinkId = 0;
+        this._caret.hide();
+    }
+
+    // the cursor at the boundary of the character it stands before (in the
+    // password row's coordinates)
+    _placeCaret() {
+        const ct = this.entry.clutter_text;
+        const n = ct.get_text().length;
+        const pos = ct.cursor_position < 0 || ct.cursor_position > n ? n : ct.cursor_position;
+        const [ok, x] = ct.position_to_coords(pos);
+        if (!ok)
+            return;
+        const box = ct.get_allocation_box();
+        this._caret.set_position(Math.round(this.entry.x + box.x1 + ct.translation_x + x),
+            this.entry.y + CARET_Y);
     }
 
     // ------------------------------------------------- keyboard (account list)
-    // XP: with the list showing (no account chosen), the arrows highlight
-    // the accounts as if the mouse were over them (↓ starts at the first, ↑
-    // at the last), Enter chooses the highlighted one and opens the password;
-    // Esc removes the highlight. Returns true if the key was used.
+    // With the list showing (no account chosen): Enter opens the password of
+    // the highlighted account, or of the first one if none is highlighted; ↑/↓
+    // highlight an account with the selected account's blue panel, without the
+    // password (either arrow starts at the first account); Esc removes the
+    // highlight. Returns true if the key was used.
     handleListKey(ev) {
         if (this._welcome || this._selected || this._listHidden || !this.actor.visible)
             return false;
@@ -218,16 +255,13 @@ export class XpWelcome {
             return false;
         const sym = ev.get_key_symbol();
         const i = names.indexOf(this._hot);
-        if (sym === Clutter.KEY_Down || sym === Clutter.KEY_KP_Down || sym === Clutter.KEY_Right) {
-            this._setHot(names[i < 0 ? 0 : Math.min(i + 1, names.length - 1)]);
+        const down = DOWN_KEYS.includes(sym) || sym === Clutter.KEY_Right;
+        if (down || UP_KEYS.includes(sym) || sym === Clutter.KEY_Left) {
+            this._setHot(names[i < 0 ? 0 : Math.min(Math.max(i + (down ? 1 : -1), 0), names.length - 1)]);
             return true;
         }
-        if (sym === Clutter.KEY_Up || sym === Clutter.KEY_KP_Up || sym === Clutter.KEY_Left) {
-            this._setHot(names[i < 0 ? names.length - 1 : Math.max(i - 1, 0)]);
-            return true;
-        }
-        if ((sym === Clutter.KEY_Return || sym === Clutter.KEY_KP_Enter || sym === Clutter.KEY_space) && this._hot) {
-            this.onUserClicked(this._hot);
+        if (ENTER_KEYS.includes(sym) || (sym === Clutter.KEY_space && this._hot)) {
+            this.onUserClicked(this._hot ?? names[0]);
             return true;
         }
         if (sym === Clutter.KEY_Escape && this._hot) {
@@ -235,6 +269,29 @@ export class XpWelcome {
             return true;
         }
         return false;
+    }
+
+    // whether an account can show the password box here (the lock screen
+    // only asks for its own: the others go to the login screen)
+    canPrompt(_name) {
+        return true;
+    }
+
+    // ↑/↓ in the password box: the box goes to the previous/next account (it
+    // stays at the ends of the list); an account that cannot ask here is only
+    // highlighted, and Enter takes it to the login screen
+    _promptStep(step) {
+        const names = [...this._users.keys()];
+        const i = names.indexOf(this._selected);
+        const next = i < 0 ? undefined : names[i + step];
+        if (!next)
+            return;
+        if (this.canPrompt(next)) {
+            this.onUserClicked(next);
+        } else {
+            this.onDeselect();
+            this._setHot(next);
+        }
     }
 
     _setHot(name) {
@@ -393,11 +450,13 @@ export class XpWelcome {
         const pic = info.iconFile && GLib.file_test(info.iconFile, GLib.FileTest.EXISTS)
             ? info.iconFile : `${this._dir}/images/picture.png`;
         u.picture.style = `background-image: url("${pic}"); background-size: ${PICTURE}px ${PICTURE}px;`;
-        const hot = u.actor.hover || this._hot === u.name;
+        // (the keyboard highlight looks like the selected account, without the password)
+        const kbd = this._hot === u.name && !this._selected;
+        const hot = u.actor.hover || kbd;
         u.frame.style = `background-image: url("${this._dir}/images/${
             selected || hot ? 'frame-hot' : 'frame'}.png");`;
-        u.select.visible = selected && !this._welcome;
-        u.status.style_class = selected ? 'zxp-logon-status selected' : 'zxp-logon-status';
+        u.select.visible = (selected || kbd) && !this._welcome;
+        u.status.style_class = selected || kbd ? 'zxp-logon-status selected' : 'zxp-logon-status';
         let status = '';
         if (selected && this._statusText)
             status = this._statusText;
@@ -407,7 +466,8 @@ export class XpWelcome {
         u.status.visible = !!status && !(selected && this._pass.visible);
         const [, nameH] = u.nameLabel.get_preferred_height(-1);
         u.status.y = 7 + nameH;
-        const hovering = [...this._users.values()].some(v => v.actor.hover || this._hot === v.name);
+        // (only the mouse fades the others)
+        const hovering = [...this._users.values()].some(v => v.actor.hover);
         u.actor.opacity = hovering && !selected && !hot ? DIMMED : 255;
     }
 
@@ -606,13 +666,15 @@ export class XpWelcome {
     }
 
     select(name) {
+        const prev = this._selected;
         this._selected = name;
         this._hot = null;           // (Esc goes back to the list without a highlight, as in XP)
         this._statusText = null;
         this.hideBalloon();
-        if (!name)
+        // (another account: the box leaves the previous one until GDM asks again)
+        if (!name || name !== prev)
             this.hidePrompt();
-        else
+        if (name)
             this._ensureVisible(name);
         for (const u of this._users.values())
             this._updateUser(u);

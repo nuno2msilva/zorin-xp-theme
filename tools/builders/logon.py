@@ -7,7 +7,7 @@ composes at the exact sizes the ones XP stretched (GNOME 46's St does not do
 
 Images (assets/images/logon; see the UIFILE):
   glow             glow in the top left corner (content, unscaled)
-  edit             password box (borderthickness 3,3,5,5) -> 163x28
+  edit             password box (borderthickness 3,3,5,5) -> 163x29
   go / go-focus    "go" button (green arrow) normal/focused
   info / -focus    "?" button (password hint)
   power / -hot     "Desligar computador" normal/hover
@@ -33,7 +33,7 @@ UUID = "zorin-xp-logon@zorin-xp.local"
 PLAIN = ["glow", "go", "go-focus", "info", "info-focus", "power", "power-hot", "undock",
          "undock-hot", "frame", "frame-hot", "picture", "logo",
          "divider-v", "divider-top", "divider-bottom"]
-EDIT_SIZE = (163, 28)       # edit [id=password] width=163rp; 28 px line
+EDIT_SIZE = (163, 29)       # edit [id=password] width=163rp; 29 px high in an XP capture
 EDIT_BORDER = (3, 3, 5, 5)  # borderthickness: esquerda, cima, direita, baixo
 SELECT_W = 352              # 384 - divider 1 - margin 26 - padding 5
 FONTS = ["tahoma.ttf", "tahomabd.ttf", "arial.ttf", "arialbd.ttf", "arialbi.ttf",

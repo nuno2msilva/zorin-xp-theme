@@ -85,7 +85,7 @@
 .zxp-logon-go { background-image: url("images/go.png"); width: 26px; height: 26px; }
 .zxp-logon-go:hover, .zxp-logon-go:focus { background-image: url("images/go-focus.png"); }
 
-/* password box (logonui.exe's edit 102, 163x28; borderthickness 3,3,5,5) */
+/* password box (logonui.exe's edit 102, 163x29 in an XP capture; borderthickness 3,3,5,5) */
 .zxp-logon-entry,
 .zxp-logon-entry:hover,
 .zxp-logon-entry:focus {
@@ -96,13 +96,14 @@
   box-shadow: none;
   /* (St centres the line and the dot sits in its bottom half: the text
      sticks to the top, see also translation_y in welcome.js — measured) */
-  padding: 0px 5px 6px 3px;
+  padding: 0px 5px 6px 7px;
   margin: 0;
   min-height: 0;
   width: 163px;
-  height: 28px;
+  height: 29px;
   color: black;
-  caret-color: black;
+  /* (XP's 1x21 px cursor is drawn by welcome.js: GNOME's is hidden) */
+  caret-color: rgba(0,0,0,0);
   selection-background-color: rgb(49,106,197);
   selected-color: white;
   font-family: "Arial", sans-serif;

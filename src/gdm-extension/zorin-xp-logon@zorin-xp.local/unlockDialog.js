@@ -40,6 +40,9 @@ export const XpUnlockDialog = GObject.registerClass({
 
         this._ui = new XpWelcome(ext.path);
         this.add_child(this._ui.actor);
+        this._userName = GLib.get_user_name();
+        // (only one's own account asks for the password here)
+        this._ui.canPrompt = name => name === this._userName;
         this._ui.onUserClicked = name => this._guard(() => this._select(name));
         this._ui.onSubmit = text => this._guard(() => this._auth?.answer(text));
         this._ui.onCancel = () => this._guard(() => this._deselect());
@@ -62,7 +65,6 @@ export const XpUnlockDialog = GObject.registerClass({
         this._ui.relayout();
         Main.layoutManager.connectObject('monitors-changed', () => this._ui.relayout(), this);
 
-        this._userName = GLib.get_user_name();
         this._userManager = AccountsService.UserManager.get_default();
         this._gdmClient = new Gdm.Client();
         try {
