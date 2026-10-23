@@ -1086,6 +1086,7 @@ class XpExplorer:
         flags = row.get_state_flags() if row is not None else 0
         focused = bool(flags & Gtk.StateFlags.FOCUSED) and bool(flags & Gtk.StateFlags.SELECTED) and \
             self.win.is_active()
+        self._name_on_top(lbl, focused and width is not None)
         key = (name, width, focused)
         if key == getattr(lbl, '_zxp_key', None) and text == getattr(lbl, '_zxp_text', None):
             return
@@ -1096,6 +1097,56 @@ class XpExplorer:
         lbl._zxp_text = out
         if out != text:
             lbl.set_label(out)
+
+    def _name_on_top(self, lbl, expanded):
+        """The whole name of the selected item goes over the rows below it, as
+        in XP. GtkGridView draws the following cells after it (on top), so a
+        live copy of the label (Gtk.WidgetPaintable: the same text, highlight
+        and state) is shown in the view's overlay, following the label every
+        frame while it is expanded."""
+        cur = getattr(self, '_name_over', None)
+        if not expanded:
+            if cur is not None and cur[1] is lbl:
+                self._drop_name_over()
+            return
+        if cur is not None and cur[1] is lbl:
+            return
+        self._drop_name_over()
+        view = self._files_view()
+        overlay = view.get_first_child() if view else None
+        if not isinstance(overlay, Gtk.Overlay):
+            return
+        pic = Gtk.Picture(paintable=Gtk.WidgetPaintable.new(lbl), can_shrink=False,
+                          can_target=False, focusable=False, content_fit=Gtk.ContentFit.FILL,
+                          halign=Gtk.Align.START, valign=Gtk.Align.START, opacity=0)
+        overlay.add_overlay(pic)
+        # (inside the files' area only: not over the view's scrollbar)
+        overlay.set_clip_overlay(pic, True)
+
+        def follow(*_):
+            ok, r = lbl.compute_bounds(overlay)
+            # (hidden while the rename box is over the name, or the cell is gone)
+            show = ok and lbl.get_mapped() and lbl.get_opacity() > 0
+            if show:
+                pic.set_margin_start(max(0, int(r.get_x())))
+                pic.set_margin_top(max(0, int(r.get_y())))
+                pic.set_size_request(int(r.get_width()), int(r.get_height()))
+            # (shown and hidden by opacity: a hidden widget gets no frame ticks)
+            if (pic.get_opacity() > 0) != show:
+                pic.set_opacity(1 if show else 0)
+            return GLib.SOURCE_CONTINUE
+        follow()
+        self._name_over = (pic, lbl, overlay, pic.add_tick_callback(follow))
+
+    def _drop_name_over(self):
+        cur = getattr(self, '_name_over', None)
+        if cur is None:
+            return
+        self._name_over = None
+        pic, _lbl, overlay, tick = cur
+        pic.remove_tick_callback(tick)
+        if pic.get_parent() is overlay:
+            overlay.remove_overlay(pic)
 
     # ------------------------------------------------------------ thumbnails
     # Thumbnails: XP's 96x96 frame (1 px #ECE9D8, white background), images
