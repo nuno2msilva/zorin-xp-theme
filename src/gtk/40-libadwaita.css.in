@@ -485,15 +485,14 @@ window.zxp-explorer .zxp-icons #NautilusViewCell { padding: 0 2px; }
 window.zxp-explorer .zxp-icons gridview > child { min-height: 75px; }
 /* List as in XP (measured): the grid on its side, columns filled from top to
  * bottom (src/nautilus-xp: _tile_columns, _list_rows); 17 px rows from the
- * view's top-left corner, the 16 px icon at the edge and the name 18 px from
- * it, one whole line */
-window.zxp-explorer .zxp-list .nautilus-grid-view gridview { padding: 0; }
+ * view's top, the 16 px icon and the name 18 px from its edge, one whole
+ * line. 4 px before the first column, as Details' icon (the user's wish:
+ * XP's List starts at the view's edge) */
+window.zxp-explorer .zxp-list .nautilus-grid-view gridview { padding: 0 0 0 4px; }
 window.zxp-explorer .zxp-list gridview > child { min-height: 17px; min-width: 0; padding: 0; }
 window.zxp-explorer .zxp-list #NautilusViewCell { padding: 0; }
 window.zxp-explorer .zxp-list #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
-/* (the name as far from the icon as in Details — 4 px more than XP's List,
-   at the user's wish: XP's touches the icon) */
-window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 6px; }
+window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 2px; }
 
 /* Details / List (Nautilus's list view) as in the Explorer: 17 px rows,
  * 16 px icon 4 px from the edge, no corners nor gaps between rows */
