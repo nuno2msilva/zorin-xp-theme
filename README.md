@@ -51,9 +51,10 @@ version is planned.
 - Packages (most already come with Zorin):
 
   ```bash
-  sudo apt install python3-pil python3-gi python3-nautilus gcc ffmpeg gnome-session-canberra plymouth
+  sudo apt install git python3-pil python3-gi python3-nautilus gcc ffmpeg gnome-session-canberra plymouth
   ```
 
+  - `git`: to clone the project (a fresh Zorin does not have it);
   - `python3-nautilus`: Files as the XP Explorer (`explorer` component);
   - `gcc`: "O meu computador" (My Computer) and "Reciclagem" (Recycle Bin)
     in Files (`folders` component);

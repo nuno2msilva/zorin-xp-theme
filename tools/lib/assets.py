@@ -10,6 +10,8 @@ and texts — never to the Windows copy.
   cursor("default")    [(image, hotspot)] of the .cur, like wincursor
   icon("folder", 16)   the icon's 16 px image (assets/icons/folder.ico)
   image("ie/toolbar")  an image from the DLLs (assets/images/ie/toolbar.png)
+  capture("ie6/status-bg")  a piece cropped from a real XP capture
+                       (assets/captures/ie6/status-bg.png; not in any Windows file)
   raw_bitmap("boot/screen")  a bitmap as it is (the DIB, without the header)
   string("shell32", 9092), dialog("comdlg32", 1552), menu_item("shell32", 215, 28717)
                        texts of the language (assets/locales/pt-PT), by Windows id
@@ -92,6 +94,12 @@ def icon(name, size):
 def image(name):
     """RGBA image of assets/images/<area>/<name>.png (e.g. "ie/toolbar")."""
     return Image.open(os.path.join(ASSETS, "images", f"{name}.png")).convert("RGBA")
+
+
+def capture(name):
+    """RGB image of assets/captures/<name>.png: what XP draws without a file of
+    its own, cropped from a real capture (see the folder's ORIGEM.md)."""
+    return Image.open(os.path.join(ASSETS, "captures", f"{name}.png")).convert("RGB")
 
 
 def raw_bitmap(name):

@@ -16,7 +16,7 @@ Images, all from XP's binaries:
                band bar background (Rebar: the 13 px stretched without
                smoothing to 86 px, with the bottom 4 rows fixed — identical to
                the capture), combo box button.
-  Screenshots/ie6-referencia.png (IE6 capture from the user's VM) — the
+  assets/captures/ie6 (cropped from an IE6 capture in the user's VM) — the
                status bar (background, dividers, grip, progress bar), which
                IE draws over the theme's background with other colours.
 
@@ -355,23 +355,21 @@ def extension(gtk_assets, img, out, oggs):
 
 
 def statusbar(img):
-    ref = Image.open(os.path.join(ROOT, "Screenshots", "ie6-referencia.png")).convert("RGB")
-    y0, y1 = 910, 933                      # 23 px
-    ref.crop((1300, y0, 1301, y1)).save(os.path.join(img, "status-bg.png"))
-    ref.crop((1488, y0, 1490, y1)).save(os.path.join(img, "status-sep.png"))
-    ref.crop((1898, y0, 1915, y1)).save(os.path.join(img, "status-gripper.png"))
+    # (pieces of an IE6 capture, 23 px high: assets/captures/ie6/ORIGEM.md)
+    for name in ("status-bg", "status-sep", "status-gripper"):
+        assets.capture(f"ie6/{name}").save(os.path.join(img, f"{name}.png"))
     # empty progress bar (the block columns covered with one from the middle)
-    bar = ref.crop((1493, y0, 1586, y1))
+    bar = assets.capture("ie6/progress")
     mid = bar.crop((50, 0, 51, bar.height))
     for x in range(4, 40):
         bar.paste(mid, (x, 0))
     bar.save(os.path.join(img, "progress.png"))
     # address box drop-down button (15x18, inside the border)
-    ref.crop((1828, 96, 1843, 114)).save(os.path.join(img, "combo-drop.png"))
+    assets.capture("ie6/combo-drop").save(os.path.join(img, "combo-drop.png"))
     # strip of 11 green blocks (each: block + gap, 8 px), only the block rows
     # (y 917..927): it comes in from the left block by block
 
-    chunk = ref.crop((1497, 917, 1505, 928))
+    chunk = assets.capture("ie6/progress-chunk")
     strip = Image.new("RGB", (88, chunk.height))
     for i in range(11):
         strip.paste(chunk, (i * 8, 0))
