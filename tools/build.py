@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Constrói o tema Zorin XP a partir de assets/ (os recursos extraídos do XP
-por tools/extract.py) e de src/ (o código e as folhas de estilo do tema).
+"""Builds the Zorin XP theme from assets/ (the resources extracted from XP
+by tools/extract.py) and src/ (the theme's code and stylesheets).
 
-Uso: build.py [--out build] [componentes...]
-Componentes: sounds cursors fonts gtk shell extension icons filechooser zen
-logon boot (por omissão: sounds cursors fonts gtk shell extension icons)
+Usage: build.py [--out build] [components...]
+Components: sounds cursors fonts gtk shell extension icons filechooser zen
+logon boot (default: sounds cursors fonts gtk shell extension icons)
 """
 import argparse
 import os
@@ -28,16 +28,16 @@ from lib.paths import ROOT
 
 
 def _fc_faces(path):
-    """(família, peso, inclinação) de cada letra do ficheiro (um .ttc tem várias)."""
+    """(family, weight, slant) of each font in the file (a .ttc has several)."""
     r = subprocess.run(["fc-scan", "--format", "%{family[0]}|%{weight}|%{slant}\n", path],
                        capture_output=True, text=True)
     return {tuple(l.split("|")) for l in r.stdout.splitlines() if l}
 
 
 def build_fonts(out):
-    """Todas as letras TrueType do XP (as da interface com as larguras do GDI,
-    fontfix.py) e as de mapa de bits da interface; mais a regra do fontconfig
-    que dá preferência às do XP sobre cópias do sistema com o mesmo nome."""
+    """All the XP TrueType fonts (the UI ones with GDI's widths,
+    fontfix.py) and the UI bitmap fonts; plus the fontconfig rule that
+    prefers the XP ones over system copies with the same name."""
     dst = os.path.join(out, "WindowsXP")
     os.makedirs(dst, exist_ok=True)
     from lib import fontfix
@@ -49,21 +49,21 @@ def build_fonts(out):
         if low.endswith((".ttf", ".ttc")):
             family = fontfix.family_of(low)
             if family:
-                # larguras dos caracteres como no GDI do XP (ver fontfix.py)
+                # character widths as in XP's GDI (see fontfix.py)
                 fontfix.fix(src, os.path.join(dst, low), family)
             else:
                 shutil.copyfile(src, os.path.join(dst, low))
             families |= _fc_faces(src)
-        elif low.endswith(".fon"):      # (só as da interface: ver catalog.py)
+        elif low.endswith(".fon"):      # (only the UI ones: see catalog.py)
             shutil.copyfile(src, os.path.join(dst, low))
     for conf in ("60-windows-xp.conf", "61-windows-xp-arial.conf"):
         shutil.copyfile(os.path.join(ROOT, "src", "fontconfig", conf), os.path.join(out, conf))
 
-    # cópias das mesmas famílias noutras pastas (ex.: msttcorefonts): rejeitadas,
-    # para valer a versão do XP; e as de mapa de bits do XP aceites (o Ubuntu
-    # rejeita letras de mapa de bits por omissão)
+    # copies of the same families in other folders (e.g. msttcorefonts): rejected,
+    # so that the XP version wins; and the XP bitmap fonts accepted (Ubuntu
+    # rejects bitmap fonts by default)
     home_fonts = os.path.join(os.path.expanduser("~"), ".local", "share", "fonts", "WindowsXP")
-    # (só as que o XP substitui: mesma família, mesmo peso e inclinação)
+    # (only the ones XP replaces: same family, same weight and slant)
     listing = subprocess.run(["fc-list", "--format", "%{family[0]}|%{weight}|%{slant}|%{file}\n"],
                              capture_output=True, text=True).stdout.splitlines()
     clashes = sorted({parts[3] for parts in (l.split("|", 3) for l in listing)
@@ -85,7 +85,7 @@ def build_fonts(out):
 
 
 def build_extension(out):
-    """Extensão do GNOME Shell + os assets de moldura que ela usa."""
+    """GNOME Shell extension + the frame assets it uses."""
     from lib import msstyles
     from builders import gtkassets
     src = os.path.join(ROOT, "src", "shell-extension")
@@ -93,11 +93,11 @@ def build_extension(out):
         dst = os.path.join(out, uuid)
         shutil.copytree(os.path.join(src, uuid), dst)
         if uuid.startswith("zorin-xp@"):
-            # ecrã de boas-vindas, ecrãs de saída e diálogos de desligar/terminar
-            # sessão (logonui, winlogon, msgina, shell32)
+            # welcome screen, exit screens and the turn off / log off dialogs
+            # (logonui, winlogon, msgina, shell32)
             from builders import logon
             logon.export_session(os.path.join(dst, "logon"))
-            # larguras das letras como o GDI do XP (gdiText.js)
+            # font widths as XP's GDI uses them (gdiText.js)
             from lib import gdimetrics
             gdimetrics.export(assets.fonts_dir(), os.path.join(dst, "gdi-metrics.json"))
             tmp = os.path.join(out, ".assets")
@@ -120,7 +120,7 @@ def main():
     comps = a.components or ["sounds", "cursors", "fonts", "gtk", "shell", "extension", "icons"]
     for c in comps:
         if c in ("folders", "explorer"):
-            continue        # (nada a gerar: o install.sh trata das pastas, traduções e do Ficheiros)
+            continue        # (nothing to generate: install.sh handles the folders, translations and Files)
         out = os.path.join(a.out, c)
         if os.path.exists(out):
             shutil.rmtree(out)
@@ -144,7 +144,7 @@ def main():
         elif c == "filechooser":
             filechooser.build(out)
         elif c == "zen":
-            # usa as peças do Luna já feitas para o tema GTK
+            # uses the Luna pieces already made for the GTK theme
             gtk_assets = os.path.join(os.path.dirname(out), "gtk", "WindowsXP-Luna", "gtk-assets")
             if not os.path.isdir(gtk_assets):
                 gtktheme.build(os.path.join(os.path.dirname(out), "gtk"))

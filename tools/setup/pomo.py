@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Compila um ficheiro .po simples (msgid/msgstr, sem plurais) para .mo.
+"""Compiles a simple .po file (msgid/msgstr, no plurals) into .mo.
 
-Uso: pomo.py <entrada.po> <saida.mo>  (o msgfmt nem sempre está instalado)
+Usage: pomo.py <in.po> <out.mo>  (msgfmt is not always installed)
 """
 import ast
 import struct
 import sys
 import os
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 

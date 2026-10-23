@@ -1,6 +1,6 @@
 #!/bin/bash
-# Zorin XP — grava o ecrã no próximo arranque (diagnóstico, uma vez só).
-# Uso: sudo tools/test/rec/zxp-bootrec.sh install | remove
+# Zorin XP — records the screen on the next boot (diagnostics, only once).
+# Usage: sudo tools/test/rec/zxp-bootrec.sh install | remove
 set -euo pipefail
 H="$(dirname "$(readlink -f "$0")")/bootrec"
 D=/var/tmp/zxp-bootrec

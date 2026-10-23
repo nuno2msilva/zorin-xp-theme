@@ -1,17 +1,17 @@
-"""Leitura dos ficheiros de registo do Windows (formato "regf": os de
-system32/config, como o "software", que é o HKLM\\SOFTWARE).
+"""Reading Windows registry files ("regf" format: the ones in
+system32/config, such as "software", which is HKLM\\SOFTWARE).
 
-  hive = Hive(caminho)
-  hive.value("Classes\\Folder")            -> o valor (Predefinição) da chave
+  hive = Hive(path)
+  hive.value("Classes\\Folder")            -> the key's (Default) value
   hive.value("Classes\\.doc", "Content Type")
-  hive.subkeys("Classes")                  -> nomes das subchaves
+  hive.subkeys("Classes")                  -> names of the subkeys
 
-Só leitura, só o necessário: chaves (nk), listas de subchaves (lf, lh, li,
-ri), valores (vk) de texto (REG_SZ / REG_EXPAND_SZ) e números (REG_DWORD).
+Read only, only what is needed: keys (nk), subkey lists (lf, lh, li, ri),
+text values (vk) (REG_SZ / REG_EXPAND_SZ) and numbers (REG_DWORD).
 """
 import struct
 
-HBIN = 0x1000          # os deslocamentos das células contam a partir daqui
+HBIN = 0x1000          # cell offsets count from here
 
 
 class Hive:
@@ -23,14 +23,14 @@ class Hive:
         self.root = struct.unpack_from("<I", self.d, 0x24)[0]
 
     def _cell(self, off):
-        return HBIN + off + 4            # (o tamanho da célula vem antes)
+        return HBIN + off + 4            # (the cell size comes first)
 
     def _name(self, o, length, ascii_name):
         raw = self.d[o:o + length]
         return raw.decode("latin-1") if ascii_name else raw.decode("utf-16le")
 
     def _key(self, off):
-        """(nome, nº de subchaves, lista de subchaves, nº de valores, lista de valores)."""
+        """(name, number of subkeys, subkey list, number of values, value list)."""
         o = self._cell(off)
         if self.d[o:o + 2] != b"nk":
             raise ValueError("chave inválida")
@@ -49,7 +49,7 @@ class Hive:
             return [struct.unpack_from("<I", self.d, o + 4 + i * 8)[0] for i in range(n)]
         if sig == b"li":
             return [struct.unpack_from("<I", self.d, o + 4 + i * 4)[0] for i in range(n)]
-        if sig == b"ri":                  # lista de listas
+        if sig == b"ri":                  # list of lists
             out = []
             for i in range(n):
                 out += self._subkey_offsets(struct.unpack_from("<I", self.d, o + 4 + i * 4)[0])
@@ -75,7 +75,7 @@ class Hive:
         return [self._key(k)[0] for k in self._children(self._find(path)).values()]
 
     def value(self, path, name=""):
-        """Um valor de uma chave ("" = o valor predefinido); None se não houver."""
+        """A value of a key ("" = the default value); None if there is none."""
         _n, _ns, _s, nval, valist = self._key(self._find(path))
         lo = self._cell(valist)
         for i in range(nval):
@@ -86,7 +86,7 @@ class Hive:
             vname = self._name(vo + 0x14, nlen, flags & 1)
             if vname.lower() != name.lower():
                 continue
-            if size & 0x80000000:         # dados guardados no próprio campo
+            if size & 0x80000000:         # data stored in the field itself
                 size &= 0x7FFFFFFF
                 data = struct.pack("<I", data_off)[:size]
             else:

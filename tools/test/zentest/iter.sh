@@ -1,10 +1,10 @@
 #!/bin/bash
-# reconstrói o tema do IE, põe-no no perfil de teste, reinicia o Zen de teste
-# e tira uma captura: ./iter.sh saida.png [url]
+# rebuilds the IE theme, puts it in the test profile, restarts the test Zen
+# and takes a capture: ./iter.sh out.png [url]
 D="$(dirname "$(readlink -f "$0")")"; P="$(dirname "$(dirname "$(dirname "$D")")")"
 T="$HOME/.var/app/app.zen_browser.zen/zxp-test-profile"
 "$D/stop.sh"; sleep 2
-# (uma sessão com janelas popup prende o arranque do Marionette)
+# (a session with popup windows blocks Marionette's start)
 rm -rf "$T/sessionstore.jsonlz4" "$T"/zen-sessions*.jsonlz4 "$T/sessionstore-backups"
 python3 "$P/tools/build.py" --out "$P/build" zen >/dev/null || exit 1
 rm -rf "$T/chrome/zorin-xp-ie"; cp -r "$P/build/zen/zorin-xp-ie" "$T/chrome/"

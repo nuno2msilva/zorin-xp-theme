@@ -1,13 +1,13 @@
-"""Leitura mínima de ficheiros TrueType (as tabelas, sem dependências).
+"""Minimal reading of TrueType files (the tables, no dependencies).
 
   t = tables("tahoma.ttf")         {"head": bytes, "OS/2": bytes, ...}
-  gdi_ascent_descent(t, 19)        (tmAscent, tmDescent) do GDI nesse tamanho
+  gdi_ascent_descent(t, 19)        GDI's (tmAscent, tmDescent) at that size
 """
 import struct
 
 
 def tables(path):
-    """{etiqueta: bytes} de todas as tabelas do ficheiro."""
+    """{tag: bytes} of every table in the file."""
     with open(path, "rb") as f:
         data = f.read()
     n, = struct.unpack_from(">H", data, 4)
@@ -19,8 +19,8 @@ def tables(path):
 
 
 def gdi_ascent_descent(t, px):
-    """A subida e a descida que o GDI dá à letra (tmAscent/tmDescent): as
-    métricas Windows da tabela OS/2 (usWinAscent/usWinDescent) à escala."""
+    """The ascent and descent GDI gives the font (tmAscent/tmDescent): the
+    Windows metrics of the OS/2 table (usWinAscent/usWinDescent), scaled."""
     upem, = struct.unpack_from(">H", t["head"], 18)
     win_asc, win_desc = struct.unpack_from(">HH", t["OS/2"], 74)
     return round(win_asc * px / upem), round(win_desc * px / upem)

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Desenha uma galeria de widgets GTK3 fora do ecrã e grava em PNG.
+"""Draws a GTK3 widget gallery off screen and saves it as PNG.
 
-Uso: GTK_THEME=<tema> XDG_DATA_HOME=<dir> gtk3shot.py <saida.png> [css-extra]
+Usage: GTK_THEME=<theme> XDG_DATA_HOME=<dir> gtk3shot.py <out.png> [extra-css]
 """
 import sys
 
 import gi
 import os
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 gi.require_version("Gtk", "3.0")

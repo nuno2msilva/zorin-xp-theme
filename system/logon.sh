@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# Zorin XP — ecrã de boas-vindas do XP no ecrã de início de sessão (GDM).
+# Zorin XP — the XP welcome screen on the login screen (GDM).
 #
-# O ecrã de início de sessão corre como o utilizador "gdm", por isso isto
-# precisa de root. Não mexe em /usr; quase tudo fica na pasta do utilizador
-# gdm (/var/lib/gdm3), como se fosse a configuração pessoal dele:
+# The login screen runs as the "gdm" user, so this needs root. It does not
+# touch /usr; almost everything goes into the gdm user's folder
+# (/var/lib/gdm3), as if it were that user's personal configuration:
 #   .local/share/gnome-shell/extensions/zorin-xp-logon@zorin-xp.local
-#   .local/share/fonts/zorin-xp           (Tahoma e Arial do XP)
-#   .config/fontconfig/conf.d/6x-*.conf   (nitidez dos tipos de letra do XP)
-#   .local/share/icons/WindowsXP-Cursors  (cursores do XP, se instalados)
-#   .icons/WindowsXP-Cursors              (ligação: o Xcursor só procura aí)
-#   .config/environment.d/60-zorin-xp-freetype.conf (interpretador v35)
-#   dconf do gdm: enabled-extensions, cursor-theme, cursor-size, font-hinting,
-#                 font-antialiasing
-# Os valores anteriores ficam em .local/share/zorin-xp-logon/previous.
-# (Uma versão anterior punha um bloco marcado em /etc/gdm3/Prime/Default;
-# o install e o remove tiram-no se lá estiver.)
+#   .local/share/fonts/zorin-xp           (XP Tahoma and Arial)
+#   .config/fontconfig/conf.d/6x-*.conf   (XP font sharpness)
+#   .local/share/icons/WindowsXP-Cursors  (XP cursors, if installed)
+#   .icons/WindowsXP-Cursors              (link: Xcursor only looks there)
+#   .config/environment.d/60-zorin-xp-freetype.conf (v35 interpreter)
+#   gdm's dconf: enabled-extensions, cursor-theme, cursor-size, font-hinting,
+#                font-antialiasing
+# The previous values are kept in .local/share/zorin-xp-logon/previous.
+# (An earlier version put a marked block in /etc/gdm3/Prime/Default;
+# install and remove take it out if it is there.)
 #
-# Uso:  sudo system/logon.sh install <build/logon> [<pasta dos cursores XP>]
-#       sudo system/logon.sh remove
-# Tem efeito na próxima vez que o ecrã de início de sessão aparecer.
+# Usage:  sudo system/logon.sh install <build/logon> [<XP cursors folder>]
+#         sudo system/logon.sh remove
+# Takes effect the next time the login screen appears.
 #
-# Emergência (o ecrã não deixa entrar): Ctrl+Alt+F3, entrar no terminal e
-#   sudo <pasta do projeto>/system/logon.sh remove && sudo systemctl restart gdm3
+# Emergency (the screen does not let you in): Ctrl+Alt+F3, log in on the terminal and
+#   sudo <project folder>/system/logon.sh remove && sudo systemctl restart gdm3
 set -euo pipefail
 
 UUID=zorin-xp-logon@zorin-xp.local
 if [ -n "${ZXP_TEST_HOME:-}" ]; then
-    # ensaio sem root: uma pasta qualquer faz de pasta do gdm
+    # dry run without root: any folder can stand in for gdm's folder
     GDM_USER=$(id -un); GDM_HOME=$ZXP_TEST_HOME
 elif getent passwd gdm >/dev/null; then GDM_USER=gdm; else GDM_USER=Debian-gdm; fi
 GDM_HOME=${GDM_HOME:-$(getent passwd "$GDM_USER" | cut -d: -f6)}
@@ -35,11 +35,11 @@ EXT=$GDM_HOME/.local/share/gnome-shell/extensions/$UUID
 FONTS=$GDM_HOME/.local/share/fonts/zorin-xp
 FC=$GDM_HOME/.config/fontconfig/conf.d
 CURSORS=$GDM_HOME/.local/share/icons/WindowsXP-Cursors
-# (o Xcursor — que dá os cursores ao ecrã de início de sessão — só procura
-# em ~/.icons e /usr/share/icons: sem esta ligação ficavam os do sistema)
+# (Xcursor — which gives the login screen its cursors — only looks in
+# ~/.icons and /usr/share/icons: without this link the system ones stayed)
 CURSORS_LINK=$GDM_HOME/.icons/WindowsXP-Cursors
 FC_FILES=(60-windows-xp.conf 61-windows-xp-arial.conf)
-# interpretador TrueType do XP (traços encaixados no píxel, como o GDI)
+# XP's TrueType interpreter (strokes snapped to the pixel, like GDI)
 ENVD=$GDM_HOME/.config/environment.d/60-zorin-xp-freetype.conf
 SPLASH=$GDM_HOME/.local/bin/zorin-xp-splash
 PRIME=${ZXP_TEST_PRIME:-/etc/gdm3/Prime/Default}
@@ -50,7 +50,7 @@ END='# <<< zorin-xp'
 [ "$(id -u)" -eq 0 ] || [ -n "${ZXP_TEST_HOME:-}" ] || { echo "Correr com sudo." >&2; exit 1; }
 [ -d "$GDM_HOME" ] || { echo "Utilizador do GDM não encontrado." >&2; exit 1; }
 
-as_gdm() {  # como o próprio GDM faz (/usr/share/gdm/generate-config)
+as_gdm() {  # as GDM itself does (/usr/share/gdm/generate-config)
     if [ -n "${ZXP_TEST_HOME:-}" ]; then
         env -i PATH=/usr/bin:/bin HOME="$GDM_HOME" XDG_CONFIG_HOME="$GDM_HOME/.config" \
             XDG_DATA_HOME="$GDM_HOME/.local/share" XDG_CACHE_HOME="$GDM_HOME/.cache" "$@"
@@ -62,12 +62,12 @@ as_gdm() {  # como o próprio GDM faz (/usr/share/gdm/generate-config)
 gs() { as_gdm dbus-run-session -- gsettings "$@"; }
 gdm_dir() { install -d -o "$GDM_USER" -g "$GDM_USER" -m 755 "$@"; }
 
-# tira o bloco do zorin-xp do gancho Prime (fica o resto como estava)
+# take the zorin-xp block out of the Prime hook (the rest stays as it was)
 prime_unhook() {
     [ -n "$PRIME" ] && [ -f "$PRIME" ] && grep -qF "$BEGIN" "$PRIME" || return 0
     local tmp; tmp=$(mktemp)
     awk -v b="$BEGIN" -v e="$END" '$0 == b {skip=1} !skip {print} $0 == e {skip=0}' "$PRIME" > "$tmp"
-    cat "$tmp" > "$PRIME"   # (mantém o dono e as permissões)
+    cat "$tmp" > "$PRIME"   # (keeps the owner and the permissions)
     rm -f "$tmp"
 }
 
@@ -80,7 +80,7 @@ install_logon() {
         "$GDM_HOME/.local/share/gnome-shell/extensions" "$GDM_HOME/.local/share/fonts" \
         "$GDM_HOME/.local/share/icons" "$GDM_HOME/.config" "$GDM_HOME/.config/fontconfig" "$FC" "$STATE"
 
-    # valores anteriores (cada chave só da primeira vez que é alterada)
+    # previous values (each key only the first time it is changed)
     touch "$STATE/previous"
     for kv in org.gnome.shell:enabled-extensions \
               org.gnome.desktop.interface:cursor-theme org.gnome.desktop.interface:cursor-size \

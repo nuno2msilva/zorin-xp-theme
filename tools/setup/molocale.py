@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
-"""Catálogos de tradução com os nomes do XP para o Ficheiros e o ambiente de
-trabalho: "Pasta pessoal" -> "O meu computador", "Lixo" -> "Reciclagem",
+"""Translation catalogues with XP's names for Files and the desktop:
+"Pasta pessoal" -> "O meu computador", "Lixo" -> "Reciclagem",
 "Desktop" -> "Ambiente de trabalho".
 
-Copia o catálogo do sistema (o mesmo que a sessão usaria, pela ordem de
-LANGUAGE) e muda só essas frases, com a concordância portuguesa ("o lixo" ->
-"a Reciclagem", "O lixo está vazio" -> "A Reciclagem está vazia"). O
-resultado fica em <saída>/<língua>/LC_MESSAGES/<domínio>.mo; a biblioteca
-zorin-xp-gettext.so faz o Ficheiros e o ambiente de trabalho usá-los (os
-catálogos do sistema não se mexem).
+Copies the system's catalogue (the same one the session would use, in
+LANGUAGE order) and changes only those phrases, with Portuguese agreement
+("o lixo" -> "a Reciclagem", "O lixo está vazio" -> "A Reciclagem está
+vazia"). The result goes to <out>/<language>/LC_MESSAGES/<domain>.mo; the
+zorin-xp-gettext.so library makes Files and the desktop use them (the
+system's catalogues are not touched).
 
-Uso: molocale.py <pasta de saída>
+Usage: molocale.py <output folder>
 """
 import os
 import re
 import struct
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 DOMAINS = ("nautilus", "zorin-desktop-icons")
 BASES = ("/usr/share/locale-langpack", "/usr/share/locale")
 HOME_NAME = "O meu computador"          # shell32.dll 9216
 TRASH_NAME = "Reciclagem"               # shell32.dll 8964
-DESKTOP_NAME = "Ambiente de trabalho"   # o nome da pasta do XP (o catálogo diz "Desktop")
+DESKTOP_NAME = "Ambiente de trabalho"   # XP's folder name (the catalogue says "Desktop")
 
-# (padrão, substituição) pela ordem; os mnemónicos "_" mantêm-se
+# (pattern, replacement) in order; the "_" mnemonics are kept
 RULES = [
     (r"\bO _?lixo está vazio\b", "A Reciclagem está vazia"),
     (r"(?<![\w])(_?[Ee]svaziar) (?:o )?(_?)(?:lixo|lixeira)\b", r"\1 a \2Reciclagem"),
@@ -41,7 +41,7 @@ RULES = [
     (r"\b(d)a pasta pessoal\b", rf"\1e '{HOME_NAME}'"),
     (r"\b(?:a )?[Pp]asta [Pp]essoal\b", f"'{HOME_NAME}'"),
 ]
-# mensagens que são o próprio nome (rótulos): sem aspas
+# messages that are the name itself (labels): without quotes
 EXACT = {b"Home": HOME_NAME, b"Trash": TRASH_NAME, b"Desktop": DESKTOP_NAME}
 
 
@@ -109,11 +109,11 @@ def build(out):
         for orig, trans in read_mo(src):
             if orig in EXACT:
                 trans = EXACT[orig].encode()
-            elif orig:          # (o cabeçalho fica)
+            elif orig:          # (the header stays)
                 trans = b"\0".join(convert(t.decode("utf-8")).encode() for t in trans.split(b"\0"))
             entries.append((orig, trans))
             seen.add(orig)
-        # rótulos que o catálogo não traduzia
+        # labels the catalogue did not translate
         for orig, name in EXACT.items():
             if orig not in seen:
                 entries.append((orig, name.encode()))

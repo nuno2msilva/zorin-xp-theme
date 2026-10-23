@@ -1,10 +1,10 @@
-"""Pastas do projeto, num só sítio.
+"""The project's folders, in one place.
 
-  windows/<cópia>/   cópias da pasta Windows do XP (fora do git): a origem
-                     dos recursos, só lida por tools/extract.py
-  assets/            os recursos extraídos, com nomes legíveis: a única
-                     entrada da construção (tools/build.py)
-  build/             o tema construído (fora do git)
+  windows/<copy>/    copies of the XP Windows folder (outside git): the
+                     source of the resources, only read by tools/extract.py
+  assets/            the extracted resources, with readable names: the only
+                     input of the build (tools/build.py)
+  build/             the built theme (outside git)
 """
 import os
 
@@ -14,15 +14,15 @@ ASSETS = os.path.join(ROOT, "assets")
 BUILD = os.path.join(ROOT, "build")
 SRC = os.path.join(ROOT, "src")
 
-# a cópia do Windows de onde se extrai, e a língua dos textos extraídos
+# the Windows copy to extract from, and the language of the extracted texts
 DEFAULT_WINDOWS = os.path.join(WINDOWS, "xp-pro-pt")
 DEFAULT_LOCALE = "pt-PT"
 
 
 def find_ci(directory, *names):
-    """Caminho dentro de uma cópia do Windows sem olhar a maiúsculas
-    (system32/SHELL32.DLL, Fonts/TAHOMA.TTF...): find_ci(raiz, "system32",
-    "shell32.dll"). Erro se não existir."""
+    """Path inside a Windows copy, case-insensitively
+    (system32/SHELL32.DLL, Fonts/TAHOMA.TTF...): find_ci(root, "system32",
+    "shell32.dll"). Error if it does not exist."""
     path = directory
     for name in names:
         low = name.lower()

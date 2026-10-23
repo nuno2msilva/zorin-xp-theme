@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Corre Python dentro do Nautilus de teste (zxp_test_hook.py) e mostra o que
-ele imprimiu:  nt.py '<código>'   ou   nt.py shot <ficheiro.png>"""
+"""Runs Python inside the test Nautilus (zxp_test_hook.py) and shows what
+it printed:  nt.py '<code>'   or   nt.py shot <file.png>"""
 import os
 import sys
 import time

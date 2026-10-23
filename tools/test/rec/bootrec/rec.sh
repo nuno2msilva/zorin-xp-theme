@@ -1,6 +1,6 @@
 #!/bin/bash
-# Zorin XP — grava o ecrã (KMS, ao nível da placa) durante um arranque, uma vez.
-# Instalado por tools/test/rec/zxp-bootrec.sh; corre como serviço do systemd.
+# Zorin XP — records the screen (KMS, at the graphics card level) during one boot.
+# Installed by tools/test/rec/zxp-bootrec.sh; runs as a systemd service.
 D=/var/tmp/zxp-bootrec
 rm -f "$D/arm"
 exec >"$D/rec.log" 2>&1

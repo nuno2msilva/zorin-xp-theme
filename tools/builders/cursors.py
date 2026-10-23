@@ -1,8 +1,8 @@
-"""Tema Xcursor com os cursores do esquema "Predefinição do Windows" do XP.
+"""Xcursor theme with the cursors of XP's "Windows Default" scheme.
 
-Os cursores estão em assets/cursors (um .cur por cursor, extraídos das DLL
-do sistema: ver tools/catalog.py). Aqui ganham o halo dos píxeis de
-inversão, a sombra do XP, as versões a 2x e os nomes alternativos.
+The cursors are in assets/cursors (one .cur per cursor, extracted from the
+system DLLs: see tools/catalog.py). Here they get the halo of the inverting
+pixels, XP's shadow, the 2x versions and the alternative names.
 """
 import os
 import struct
@@ -11,8 +11,8 @@ from PIL import Image, ImageFilter
 
 from lib import assets
 
-# nome Xcursor principal (= assets/cursors/<nome>.cur, origem em
-# tools/catalog.py) e os outros nomes que apontam para ele
+# main Xcursor name (= assets/cursors/<name>.cur, source in
+# tools/catalog.py) and the other names that point to it
 CURSORS = [
     ("default", ["left_ptr", "arrow", "top_left_arrow", "context-menu",
                  "zoom-in", "zoom-out", "grab", "openhand", "x-cursor", "X_cursor"]),
@@ -43,8 +43,8 @@ CURSORS = [
     ("ne-scroll", []),
     ("se-scroll", []),
     ("sw-scroll", []),
-    ("ns-scroll", []),       # deslocamento automático só vertical
-    ("ew-scroll", []),       # ... só horizontal
+    ("ns-scroll", []),       # automatic scrolling, vertical only
+    ("ew-scroll", []),       # ... horizontal only
     ("dnd-move", []),
     ("copy", ["dnd-copy"]),
     ("alias", ["dnd-link", "link"]),
@@ -55,7 +55,7 @@ CURSORS = [
 ]
 
 
-# Nomes legados (hashes de cursores X11 usados por Qt/Mozilla)
+# Legacy names (hashes of X11 cursors used by Qt/Mozilla)
 LEGACY_HASHES = {
     "pointer": ["e29285e634086352946a0e7090d73106", "9d800788f1b08800ae810202380a0822"],
     "copy": ["1081e37283d90000800003c07f3ef6bf", "6407b0e94181790501fd1e167b474872",
@@ -76,11 +76,11 @@ LEGACY_HASHES = {
 
 
 def drop_shadow(img, offset=(2, 2), blur=1.0, opacity=0.35):
-    """Sombra do ponteiro (SPI_SETCURSORSHADOW, ativa por omissão no XP).
+    """Pointer shadow (SPI_SETCURSORSHADOW, on by default in XP).
 
-    Parâmetros aproximados — o algoritmo do win32k não está documentado.
-    A sombra só se desloca para a direita e para baixo (sem dar a volta à
-    imagem: o ImageChops.offset fazia aparecer uma faixa por cima do cursor).
+    Approximate parameters — win32k's algorithm is not documented. The
+    shadow only moves right and down (without wrapping around the image:
+    ImageChops.offset made a band appear above the cursor).
     """
     alpha = img.getchannel("A").point(lambda v: int(v * opacity))
     shifted = Image.new("L", img.size, 0)
@@ -94,9 +94,9 @@ def drop_shadow(img, offset=(2, 2), blur=1.0, opacity=0.35):
 
 
 def invert_halo(img, inverted):
-    """Os píxeis de inversão (o I do texto, a cruz) não existem no Xcursor:
-    ficam pretos (como sobre fundos claros) com um contorno branco de 1 px, para
-    se verem também sobre fundos escuros, como a inversão do XP permite."""
+    """Inverting pixels (the text I-beam, the cross) do not exist in Xcursor:
+    they become black (as on light backgrounds) with a 1 px white outline, so
+    they also show on dark backgrounds, as XP's inversion allows."""
     if not inverted:
         return img
     out = img.copy()
@@ -112,7 +112,7 @@ def invert_halo(img, inverted):
 
 
 def xcursor_bytes(images):
-    """images: [(PIL RGBA, (hotx, hoty), nominal_size, delay_ms)] -> ficheiro Xcursor."""
+    """images: [(PIL RGBA, (hotx, hoty), nominal_size, delay_ms)] -> Xcursor file."""
     ntoc = len(images)
     out = bytearray(struct.pack("<4sIII", b"Xcur", 16, 0x10000, ntoc))
     pos = 16 + ntoc * 12
@@ -132,12 +132,12 @@ def xcursor_bytes(images):
 
 
 def build(out_dir, name="WindowsXP", shadow=True, scales=(1, 2)):
-    """Tema Xcursor em out_dir/<name>, com os cursores de assets/cursors."""
+    """Xcursor theme in out_dir/<name>, with the cursors from assets/cursors."""
     theme = os.path.join(out_dir, name)
     cdir = os.path.join(theme, "cursors")
     os.makedirs(cdir, exist_ok=True)
     with open(os.path.join(theme, "index.theme"), "w") as f:
-        # (nomes que o XP não tem: os do Adwaita, em vez do cursor antigo do X11)
+        # (names XP does not have: Adwaita's, instead of the old X11 cursor)
         f.write("[Icon Theme]\nName=Windows XP\nComment=Cursores predefinidos do Windows XP\n"
                 "Inherits=Adwaita\n")
     for main, aliases in CURSORS:

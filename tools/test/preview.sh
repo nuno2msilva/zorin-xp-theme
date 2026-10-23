@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Corre um comando com o tema gerado em build/ sem o instalar no sistema:
-# tema GTK, tipos de letra e regras do fontconfig ficam isolados neste processo.
-# Uso: tools/test/preview.sh <comando> [args...]
+# Runs a command with the theme generated in build/ without installing it:
+# GTK theme, fonts and fontconfig rules stay isolated in this process.
+# Usage: tools/test/preview.sh <command> [args...]
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/../.." && pwd)"
 SANDBOX="$HERE/build/.preview"

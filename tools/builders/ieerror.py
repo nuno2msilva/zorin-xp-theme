@@ -1,24 +1,24 @@
-"""A página "Não é possível apresentar a página" do IE6 para a página de erro
-de rede do Zen (src/zen-ie/content.css).
+"""IE6's "A página não pode ser apresentada" page for Zen's network error
+page (src/zen-ie/content.css).
 
-A página de erro do Firefox só aceita recursos chrome: (CSP), por isso nada
-de imagens: tudo é CSS que não carrega nada. O texto e as imagens são os do
-próprio DNSERROR.HTM do XP (recurso HTML da shdoclc.dll, em pt-PT, com
-pagerror.gif, refresh.gif, search.gif e back.gif da mesma DLL):
+Firefox's error page only accepts chrome: resources (CSP), so no images:
+everything is CSS that loads nothing. The text and the images are those of
+XP's own DNSERROR.HTM (an HTML resource of shdoclc.dll, in pt-PT, with
+pagerror.gif, refresh.gif, search.gif and back.gif from the same DLL):
 
-  - a página é disposta aqui como o IE6 a desenha (tabela com cellspacing 5 e
-    cellpadding 3, margens do IE, quebra de linha com as larguras do GDI);
-  - o texto vai em dois blocos (preto, e vermelho para as ligações), cada um
-    num pseudo-elemento com a fonte "ZXP Verdana IE" (tools/lib/pixelfont.py mix):
-    a Verdana do XP em píxeis, com o negrito e o título de 13 pt em códigos
-    privados e um espaço de 1 px para pôr cada linha no seu x; as linhas
-    têm 1 px de altura, para cada uma ficar no seu y;
-  - as imagens e as marcas da lista são box-shadow de 1 px por píxel;
-  - a linha e os sublinhados das ligações são gradientes.
+  - the page is laid out here as IE6 draws it (table with cellspacing 5 and
+    cellpadding 3, IE's margins, line breaking with GDI's widths);
+  - the text goes in two blocks (black, and red for the links), each one in a
+    pseudo-element with the "ZXP Verdana IE" font (tools/lib/pixelfont.py mix):
+    XP's Verdana in pixels, with the bold and the 13 pt heading in private
+    codes and a 1 px space to put each line at its x; the lines are 1 px
+    high, so that each one sits at its y;
+  - the images and the list bullets are box-shadows of 1 px per pixel;
+  - the rule and the links' underlines are gradients.
 
 css(widths) -> {"text", "links", "icons", "background", "detect"}
-(a página e as imagens vêm de assets: locales/<língua>/ie/dnserror.htm e
-images/ie/*.gif)
+(the page and the images come from assets: locales/<language>/ie/dnserror.htm
+and images/ie/*.gif)
 """
 import html.parser
 import io
@@ -28,15 +28,15 @@ from PIL import Image
 import os
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 BOLD, BIG, SPACER = 0xE000, 0xE400, 0xF8F0
 LINE, H1_LINE = 15, 20               # 8/11 pt e 13/15 pt a 96 ppp
-BASE, H1_BASE = 12, 16               # linha de base dentro da linha
-LAYER_BASE = 4                       # nas linhas de 1 px da fonte de 11 px (medido)
+BASE, H1_BASE = 12, 16               # baseline within the line
+LAYER_BASE = 4                       # in the 1 px lines of the 11 px font (measured)
 BODY_X, BODY_Y = 10, 15              # margens do <body> do IE
-SPACING, PADDING = 5, 3              # da <table>
+SPACING, PADDING = 5, 3              # of the <table>
 TABLE_W = 400
 H1_MARGIN, P_MARGIN, HR_MARGIN, UL_INDENT = 11, 12, 6, 40
 DISC = [".###.", "#####", "#####", "#####", ".###."]
@@ -58,8 +58,8 @@ class _Events(html.parser.HTMLParser):
 
 
 def _blocks(page):
-    """[(tipo, [itens])]: itens = ("w", texto, estilo) | ("s", estilo) |
-    ("img", nome, alinhamento, ligação) | ("br",); estilo: "n", "b" ou "a"."""
+    """[(type, [items])]: items = ("w", text, style) | ("s", style) |
+    ("img", name, alignment, link) | ("br",); style: "n", "b" or "a"."""
     p = _Events()
     p.feed(page)
     blocks, cur = [], None
@@ -77,7 +77,7 @@ def _blocks(page):
                 skip += 1
             elif a == "td":
                 cells += 1
-                if cells == 3:                  # a primeira célula larga: o parágrafo
+                if cells == 3:                  # the first wide cell: the paragraph
                     new("p")
             elif a in ("h1", "h2", "p", "li"):
                 new(a)
@@ -113,22 +113,22 @@ class _Layout:
     def __init__(self, widths, images):
         self.w = widths
         self.images = images
-        self.text = {}          # y da linha de base -> [(x, texto, estilo)]
+        self.text = {}          # baseline y -> [(x, text, style)]
         self.links = {}
         self.icons = []         # (x, y, nome)
         self.discs = []
-        self.rules = []         # (x, y, largura, altura, cor)
-        self.detect = None      # a ligação "Detectar definições de rede"
+        self.rules = []         # (x, y, width, height, colour)
+        self.detect = None      # the "Detectar definições de rede" link
 
     def adv(self, s, style):
         table = self.w["h" if style == "h" else ("b" if style == "b" else "n")]
         return sum(table.get(str(ord(c)), table["32"]) for c in s)
 
     def flow(self, items, x0, width, top, big=False):
-        """Dispõe os itens em linhas a partir de (x0, top); devolve o y a seguir."""
+        """Lays the items out in lines starting at (x0, top); returns the next y."""
         line_h, base = (H1_LINE, H1_BASE) if big else (LINE, BASE)
-        # palavras: o que vem seguido sem espaço (um negrito e a vírgula a seguir,
-        # uma imagem e o texto) não se separa ao quebrar a linha
+        # words: what follows without a space (a bold part and the comma after it,
+        # an image and the text) is not split when breaking the line
         words, cur, gap = [], [], None
         for it in items:
             if it[0] == "br":
@@ -211,7 +211,7 @@ def css(widths):
     lay = _Layout(widths, images)
     blocks = _blocks(page)
 
-    # 1.ª linha da tabela: o ícone e o título (célula alinhada ao meio)
+    # first table row: the icon and the title (cell aligned to the middle)
     top = BODY_Y + SPACING
     icon = images["pagerror.gif"]
     icon_cell = icon.width + 2 * PADDING
@@ -226,12 +226,12 @@ def css(widths):
     lay.flow(h1[1], title_x, title_w, top + PADDING + (row - h1_h) // 2 + H1_MARGIN, big=True)
     top += row + 2 * PADDING + SPACING
 
-    # 2.ª linha: o parágrafo; 3.ª: a linha, "Experimente o seguinte:", a lista...
+    # second row: the paragraph; third: the rule, "Experimente o seguinte:", the list...
     rest = [b for b in blocks if b[0] != "h1"]
     y = lay.flow(rest.pop(0)[1], full_x, full_w, top + PADDING)
     y += PADDING + SPACING + PADDING
     first = True
-    margin = 0                          # margem de baixo pendente (as margens colapsam)
+    margin = 0                          # pending bottom margin (margins collapse)
     in_list = False
     for kind, items in rest:
         if kind == "hr":
@@ -290,7 +290,7 @@ def css(widths):
 
 
 if __name__ == "__main__":
-    # (depuração) ieerror.py <larguras.json>: o CSS da página de erro
+    # (debugging) ieerror.py <widths.json>: the error page's CSS
     import json
     import sys
     r = css(json.load(open(sys.argv[1])))

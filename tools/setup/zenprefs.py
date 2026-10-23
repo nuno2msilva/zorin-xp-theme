@@ -1,70 +1,69 @@
 #!/usr/bin/env python3
-"""Preferências do Zen para o aspeto do Internet Explorer (src/zen-ie).
+"""Zen preferences for the Internet Explorer look (src/zen-ie).
 
-  apply <perfil>   botões do IE na barra de navegação (Página inicial,
-                   Procurar, Favoritos, Histórico), userChrome.css ligado,
-                   moldura do sistema (a barra de título XP), barra de menus
-                   sempre visível, a janela Localizar autorizada em janelas
-                   privadas e o Ctrl+F do Zen desligado (fica o da janela
-                   Localizar). Guarda os valores antigos em
-                   <perfil>/zorin-xp-ie.json.
-  undo <perfil>    repõe os valores guardados.
+  apply <profile>  IE buttons on the navigation bar (Home, Search,
+                   Favorites, History), userChrome.css enabled, system
+                   frame (the XP title bar), menu bar always visible, the
+                   Find window allowed in private windows and Zen's Ctrl+F
+                   turned off (the Find window's stays). Saves the old
+                   values in <profile>/zorin-xp-ie.json.
+  undo <profile>   restores the saved values.
 
-O Zen tem de estar fechado (escreve no prefs.js à saída).
+Zen must be closed (it writes prefs.js when it exits).
 """
 import json
 import os
 import re
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Favoritos e Histórico: os botões das extensões das barras do Explorador
+# Favorites and History: the buttons of the Explorer bars' extensions
 FAVORITES = "zorin-xp-ie-favorites_zorin-xp_local-browser-action"
 HISTORY = "zorin-xp-ie-history_zorin-xp_local-browser-action"
-FIND = "zorin-xp-ie-find_zorin-xp_local-browser-action"       # Procurar: a janela Localizar
+FIND = "zorin-xp-ie-find_zorin-xp_local-browser-action"       # Search: the Find window
 NAV = ["back-button", "forward-button", "stop-reload-button", "home-button",
        FIND, FAVORITES, HISTORY]
-REPLACED = ["bookmarks-menu-button", "history-panelmenu", "find-button"]   # (os de antes: tirados)
+REPLACED = ["bookmarks-menu-button", "history-panelmenu", "find-button"]   # (the previous ones: removed)
 PREFS = {
     "toolkit.legacyUserProfileCustomizations.stylesheets": True,
     "browser.tabs.inTitlebar": 0,
     "zen.view.use-single-toolbar": False,
-    # endereço completo na caixa, como o IE ("https://" incluído)
+    # full address in the box, like IE ("https://" included)
     "browser.urlbar.trimURLs": False,
     "browser.urlbar.trimHttps": False,
-    # modo compacto: esconde só a barra lateral (as barras do IE ficam)
+    # compact mode: hides only the sidebar (the IE bars stay)
     "zen.view.compact.hide-toolbar": False,
     "zen.view.compact.hide-tabbar": True,
-    # ao abrir, volta à última página vista (o Zen escolhia um separador vazio)
+    # on start, go back to the last page seen (Zen picked an empty tab)
     "zen.workspaces.continue-where-left-off": True,
-    # mudar de espaço troca logo os separadores e o nome, sem deslizar
+    # switching spaces swaps the tabs and the name at once, without sliding
     "zen.workspaces.switch-animation-duration": 0,
-    # sem o aviso "Novo separador aberto em segundo plano!" (o IE não o tinha)
+    # without the "New tab opened in the background!" notice (IE did not have it)
     "zen.view.compact.show-background-tab-toast": False,
-    # ao abrir, a caixa de endereço fica fechada (o Zen abria-a com a lista
-    # de sugestões quando o separador inicial está vazio)
+    # on start, the address box stays closed (Zen opened it with the
+    # suggestion list when the initial tab is empty)
     "zen.urlbar.open-on-startup": False,
-    # a extensão dos sons do IE (local, sem assinatura da Mozilla), posta na
-    # pasta extensions do perfil: ativa sem pedir confirmação
+    # the IE sounds extension (local, without Mozilla's signature), put in the
+    # profile's extensions folder: enabled without asking
     "xpinstall.signatures.required": False,
     "extensions.autoDisableScopes": 14,
-    # (a da pasta por sítio usa uma API experimental: o Zen deixa por omissão)
+    # (the per-site folder one uses an experimental API: Zen allows it by default)
     "extensions.experiments.enabled": True,
-    # barras de deslocamento das páginas como as do XP: sempre à vista, 17 px,
-    # com as setas em cima e em baixo (as imagens do Luna vêm da extensão
-    # src/zen-ie/scrollbars; o userContent.css só dá as cores de reserva)
+    # page scrollbars like XP's: always visible, 17 px, with the arrows at the
+    # top and bottom (Luna's images come from the src/zen-ie/scrollbars
+    # extension; userContent.css only gives the fallback colours)
     "widget.gtk.overlay-scrollbars.enabled": False,
     "widget.non-native-theme.scrollbar.style": 4,
     "ui.scrollArrowStyle": 4097,
-    # (as finas que alguns sítios pedem ficam normais, como no XP)
+    # (the thin ones some sites ask for stay normal, as in XP)
     "layout.css.scrollbar-width-thin.disabled": True,
 }
-# a janela Localizar fica pronta numa janela privada (ver src/zen-ie/find)
+# the Find window is kept ready in a private window (see src/zen-ie/find)
 PRIVATE = ["zorin-xp-ie-find@zorin-xp.local"]
 PB = "internal:privateBrowsingAllowed"
-# atalhos do Zen desligados: o Ctrl+F passa a ser o da janela Localizar
+# Zen shortcuts turned off: Ctrl+F becomes the Find window's
 SHORTCUTS_OFF = ["key_find"]
 STATE = "zorin-xp-ie.json"
 LINE = re.compile(r'^user_pref\("([^"]+)",\s*(.*)\);\s*$')
@@ -125,8 +124,8 @@ def xulstore(profile, autohide):
 
 
 def private_windows(profile, ids, allow):
-    """Dá (ou tira) a permissão de correr em janelas privadas; devolve os ids
-    em que mudou alguma coisa."""
+    """Grants (or removes) the permission to run in private windows; returns
+    the ids where something changed."""
     p = os.path.join(profile, "extension-preferences.json")
     d = json.load(open(p)) if os.path.exists(p) else {}
     changed = []
@@ -148,7 +147,7 @@ def private_windows(profile, ids, allow):
 
 
 def shortcuts(profile, states):
-    """Põe o "disabled" dos atalhos do Zen (id -> bool); devolve os de antes."""
+    """Sets the "disabled" flag of Zen's shortcuts (id -> bool); returns the previous ones."""
     p = os.path.join(profile, "zen-keyboard-shortcuts.json")
     if not os.path.exists(p):
         return {}
@@ -170,7 +169,7 @@ def apply(profile):
         saved = {"prefs": {k: cur.get(k) for k in keys}}
         saved["menubar_autohide"] = xulstore(profile, "false")
     else:
-        # (de uma versão anterior: guardam-se também as preferências novas)
+        # (from an earlier version: the new preferences are saved too)
         saved = json.load(open(st))
         for k in keys:
             saved["prefs"].setdefault(k, cur.get(k))

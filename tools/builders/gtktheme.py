@@ -1,4 +1,4 @@
-"""Constrói os temas GTK3/GTK4 a partir de src/gtk/*.css.in e do luna.msstyles."""
+"""Builds the GTK3/GTK4 themes from src/gtk/*.css.in and luna.msstyles."""
 import os
 import re
 import shutil
@@ -12,7 +12,7 @@ SRC = os.path.join(ROOT, "src", "gtk")
 
 
 def preprocess(text, target):
-    """Mantém os blocos /*@<target>*/ … /*@end*/ e remove os dos outros alvos."""
+    """Keeps the /*@<target>*/ … /*@end*/ blocks and removes the other targets' ones."""
     out = []
     keep = True
     for line in text.splitlines(keepends=True):
@@ -23,7 +23,7 @@ def preprocess(text, target):
         if keep:
             out.append(line)
     text = "".join(out)
-    # blocos condicionais dentro de uma linha: /*@gtk3*/ ... /*@end*/
+    # conditional blocks within a line: /*@gtk3*/ ... /*@end*/
     def inline(m):
         return m.group(2) if m.group(1) == target else ""
     return re.sub(r"/\*@(gtk3|gtk4)\*/(.*?)/\*@end\*/", inline, text, flags=re.S)
@@ -73,7 +73,7 @@ def substitute(text, info):
 
 
 def build(out_dir, name="WindowsXP-Luna", theme_name="luna"):
-    """Temas GTK3/GTK4 em out_dir/<name>, com as peças do tema theme_name."""
+    """GTK3/GTK4 themes in out_dir/<name>, with the pieces of the theme theme_name."""
     ms = assets.theme(theme_name)
     theme = os.path.join(out_dir, name)
     shared_assets = os.path.join(theme, "gtk-assets")
@@ -87,7 +87,7 @@ def build(out_dir, name="WindowsXP-Luna", theme_name="luna"):
                       for f in sources)
         with open(os.path.join(d, "gtk.css"), "w") as f:
             f.write(css)
-        # GTK3/GTK4 resolvem url() relativamente ao ficheiro CSS
+        # GTK3/GTK4 resolve url() relative to the CSS file
         link = os.path.join(d, "assets")
         if os.path.lexists(link):
             os.remove(link)

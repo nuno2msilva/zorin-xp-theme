@@ -1,9 +1,9 @@
 #!/bin/bash
-# Grava o ecrã que estiver ativo — a sessão OU o ecrã de início de sessão do
-# GDM (outro servidor X, do utilizador gdm) — com o cursor, mudando de servidor
-# quando se termina sessão / entra. Corre como root fora da sessão
-# (systemd-run), por isso sobrevive a terminar sessão.
-# Uso: zxp-recorder.sh <pasta> [segundos máx]   Parar: touch /tmp/zxp-rec.stop
+# Records whichever screen is active — the session OR GDM's login screen
+# (another X server, the gdm user's) — with the cursor, switching servers
+# when logging off / on. Runs as root outside the session (systemd-run), so
+# it survives logging off.
+# Usage: zxp-recorder.sh <folder> [max seconds]   Stop: touch /tmp/zxp-rec.stop
 OUT="$1"; MAX="${2:-1200}"; STOP=/tmp/zxp-rec.stop
 mkdir -p "$OUT"; rm -f "$STOP"; start=$(date +%s); n=0
 log() { echo "$(date +%T) $*" >> "$OUT/recorder.log"; }

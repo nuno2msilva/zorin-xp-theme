@@ -1,9 +1,9 @@
-"""Exporta os assets PNG do tema a partir do luna.msstyles.
+"""Exports the theme's PNG assets from luna.msstyles.
 
-Cada entrada declara a parte do INI, os nomes dos estados (pela ordem do
-bitmap, que é a ordem dos estados do uxtheme) e como exportar:
-  raw      -> cada estado tal como está (usado com border-image + slice do INI)
-  fixed    -> pré-desenhado com uxrender num tamanho fixo (+ glifo centrado)
+Each entry declares the INI part, the state names (in the bitmap's order,
+which is uxtheme's state order) and how to export:
+  raw      -> each state as it is (used with border-image + the INI slice)
+  fixed    -> pre-drawn with uxrender at a fixed size (+ centred glyph)
 """
 import os
 
@@ -74,7 +74,7 @@ RAW = [
     ("frame-bottom", "Window.FrameBottom", CAPTION),
 ]
 
-# Partes com vários ficheiros por DPI (ImageFile1..n): usa o de 96 ppp
+# Parts with several files per DPI (ImageFile1..n): use the 96 dpi one
 DPI_PARTS = [
     ("check", "button.checkbox", CHECK, "ImageFile1"),
     ("radio", "button.radiobutton", RADIO, "ImageFile1"),
@@ -86,8 +86,8 @@ DPI_PARTS = [
     ("balloon-close", "Tooltip.Close", ["normal", "hover", "active"], "ImageFile"),
 ]
 
-# Botões com glifo, pré-desenhados no tamanho fixo do XP
-# nome, parte, estados, tamanho, chave do glifo
+# Buttons with a glyph, pre-drawn at XP's fixed size
+# name, part, states, size, glyph key
 FIXED_GLYPH = [
     ("scroll-arrow", "ScrollBar.ArrowBtn", ARROWS, (17, 17), "ImageFile2"),
     ("caption-close", "Window.CloseButton", CAPBTN, (21, 21), "ImageFile3"),
@@ -96,13 +96,13 @@ FIXED_GLYPH = [
     ("caption-min", "Window.MinButton", CAPBTN, (21, 21), "ImageFile3"),
     ("caption-help", "Window.HelpButton", CAPBTN, (21, 21), "ImageFile3"),
     ("caption-small-close", "Window.SmallCloseButton", CAPBTN, (13, 13), "GlyphImageFile"),
-    # lista pendente: botão de 15×18 dentro do campo de 22 px (medido no XP)
+    # drop-down list: 15×18 button inside the 22 px field (measured in XP)
     ("combo-arrow", "Combobox.DropDownButton", FOUR, (15, 18), "GlyphImageFile"),
     ("spin-left-btn", "Spin.Downhorz", FOUR, (15, 18), "GlyphImageFile"),
     ("spin-right-btn", "Spin.Uphorz", FOUR, (15, 18), "GlyphImageFile"),
 ]
 
-# Glifos exportados à parte (desenhados por cima de fundos esticáveis)
+# Glyphs exported separately (drawn on top of stretchable backgrounds)
 GLYPHS = [
     ("combo-glyph", "Combobox.DropDownButton", FOUR),
     ("spin-up-glyph", "Spin.Up", FOUR),
@@ -115,8 +115,8 @@ GLYPHS = [
 ARROW_GLYPH_COLORS = {"normal": (0x21, 0x5D, 0xC6), "hover": (0x42, 0x8E, 0xFF),
                       "active": (0x21, 0x5D, 0xC6), "disabled": (201, 201, 194)}
 
-# Glifos dos menus: tipo de letra Marlett a 13 px, monocromático com hinting
-# (é como o USER32 os desenha; confirmado contra capturas reais do XP)
+# Menu glyphs: the Marlett font at 13 px, monochrome with hinting
+# (that is how USER32 draws them; checked against real XP captures)
 MARLETT = {"check": "a", "arrow-right": "8", "arrow-left": "7", "bullet": "h",
            "arrow-down": "6", "arrow-up": "5"}
 MENU_GLYPH_COLORS = {"normal": (0, 0, 0), "selected": (255, 255, 255), "disabled": (172, 168, 153)}
@@ -139,8 +139,8 @@ def export_marlett(fonts_dir, out):
 
 
 def export_extras(ms, out):
-    # Blocos de progresso: ProgressChunkSize=6 + ProgressSpaceSize=2, altura útil 7
-    # (barra de 13 px). Confirmado ao píxel contra a caixa "A copiar…" do XP.
+    # Progress blocks: ProgressChunkSize=6 + ProgressSpaceSize=2, usable height 7
+    # (13 px bar). Checked to the pixel against XP's "Copying…" box.
     p = ms.part("Progress")
     size, space = int(p.get("ProgressChunkSize")), int(p.get("ProgressSpaceSize"))
     chunk = _states(ms, "Progress.Chunk", ["normal"])[0]
@@ -153,8 +153,8 @@ def export_extras(ms, out):
     tile = Image.new("RGBA", (7, size + space), (0, 0, 0, 0))
     tile.paste(c, (0, space))
     save(tile, os.path.join(out, "progress-chunk-tile-vert.png"))
-    # Moldura de janela (esquerda, direita, base) desenhada a 4 px pelo uxtheme,
-    # num único 9-slice para o nó "decoration" das janelas CSD
+    # Window frame (left, right, bottom) drawn at 4 px by uxtheme, in a single
+    # 9-slice for the "decoration" node of CSD windows
     fl = _states(ms, "Window.FrameLeft", CAPTION)
     fr = _states(ms, "Window.FrameRight", CAPTION)
     fb = _states(ms, "Window.FrameBottom", CAPTION)
@@ -166,15 +166,15 @@ def export_extras(ms, out):
         img.alpha_composite(uxrender.render(fr[i], 4, side, margins(ms.part("Window.FrameRight"))), (W - 4, 0))
         img.alpha_composite(uxrender.render(fb[i], W, 4, margins(ms.part("Window.FrameBottom"))), (0, H - 4))
         save(img, os.path.join(out, f"frame-csd-{st}.png"))
-        # tiras de 4 px para a extensão do GNOME Shell
+        # 4 px strips for the GNOME Shell extension
         save(uxrender.render(fl[i], 4, 32, margins(ms.part("Window.FrameLeft"))), os.path.join(out, f"frame-left-strip-{st}.png"))
         save(uxrender.render(fr[i], 4, 32, margins(ms.part("Window.FrameRight"))), os.path.join(out, f"frame-right-strip-{st}.png"))
         save(uxrender.render(fb[i], 64, 4, margins(ms.part("Window.FrameBottom"))), os.path.join(out, f"frame-bottom-strip-{st}.png"))
-    # Fatias de cada lado da legenda para a extensão (fixas: estão dentro das
-    # margens 28/35): as 4 colunas da moldura e, nas 6 linhas de cima, mais 8
-    # colunas do canto arredondado — o GTK arredonda (8 px) os cantos da
-    # janela das molduras do mutter e corta aí a legenda; a extensão repõe-no
-    # por cima, sem chegar aos botões (que começam na linha 6)
+    # Slices of each side of the caption for the extension (fixed: they are
+    # inside the 28/35 margins): the 4 frame columns and, in the top 6 rows,
+    # 8 more columns of the rounded corner — GTK rounds (8 px) the corners of
+    # mutter's frame windows and cuts the caption there; the extension puts
+    # it back on top, without reaching the buttons (which start at row 6)
     cap = ms.part("Window.Caption")
     for img, st in zip(_states(ms, "Window.Caption", CAPTION), CAPTION):
         full = uxrender.render(img, 100, 30, margins(cap))
@@ -186,16 +186,16 @@ def export_extras(ms, out):
                 for x in inner:
                     px[x, y] = (0, 0, 0, 0)
             save(side, os.path.join(out, f"caption-{name}-{st}.png"))
-    # Fundo das páginas com separadores (Tab.Body), usado em tamanho real
+    # Background of tabbed pages (Tab.Body), used at real size
     b = ms.part("Tab.Body")
     save(ms.image(b.get("ImageFile1")), os.path.join(out, "tab-body.png"))
 
 
-# O GTK não pinta o centro de um border-image ("fill" é ignorado). Para cada
-# parte esticável exporta-se também <nome>-<estado>-fill.png: a parte inteira
-# desenhada pelo uxrender no tamanho típico do XP, usada como fundo a 100%.
-# Nesse tamanho o resultado é idêntico ao do uxtheme; noutros tamanhos o
-# border-image por cima mantém cantos e bordas exatos.
+# GTK does not paint the centre of a border-image ("fill" is ignored). For
+# each stretchable part <name>-<state>-fill.png is exported too: the whole
+# part drawn by uxrender at XP's typical size, used as a 100% background.
+# At that size the result is identical to uxtheme's; at other sizes the
+# border-image on top keeps the corners and edges exact.
 FILL_REF = {
     "button": (75, 23),
     "toolbar-button": (23, 22),
@@ -223,12 +223,12 @@ FILL_REF = {
 
 
 def center_fill(img, w, h, m, tiled):
-    """Camada de fundo para o centro de um border-image.
+    """Background layer for the centre of a border-image.
 
-    É o centro desenhado pelo uxtheme no tamanho de referência, prolongado
-    (repetindo as linhas/colunas da orla) até cobrir a peça toda, com a
-    máscara dos píxeis opacos da peça: esticada para outros tamanhos não
-    arrasta contornos interiores para dentro do centro.
+    It is the centre drawn by uxtheme at the reference size, extended
+    (repeating the edge rows/columns) until it covers the whole piece, with
+    the mask of the piece's opaque pixels: stretched to other sizes it does
+    not drag inner outlines into the centre.
     """
     l, r, t, b = m
     full = uxrender.render(img, w, h, m, tile=tiled)
@@ -267,7 +267,7 @@ def _states(ms, part_name, names, key="ImageFile", glyph=False):
 
 
 def fixed_glyph(ms, part, names, size, gkey):
-    """Botão com glifo desenhado no tamanho fixo do XP: {estado: imagem}."""
+    """Button with a glyph drawn at XP's fixed size: {state: image}."""
     from lib import msstyles
     w, h = size
     p = ms.part(part)
@@ -303,8 +303,8 @@ def export(ms, out, fonts_dir=None):
                 save(fill, os.path.join(out, f"{name}-{s}-fill.png"))
         info[name] = {"part": part, "size": sts[0].size, "margins": margins(p),
                       "fill": name in FILL_REF, "tile": tiled}
-    # Legenda sem as 4 colunas de moldura de cada lado (molduras do mutter;
-    # a extensão desenha essas colunas por fora da janela)
+    # Caption without the 4 frame columns on each side (mutter's frames; the
+    # extension draws those columns outside the window)
     p = ms.part("Window.Caption")
     l, r, t, b = margins(p)
     for s, img in zip(CAPTION, _states(ms, "Window.Caption", CAPTION)):
@@ -315,10 +315,10 @@ def export(ms, out, fonts_dir=None):
         save(fill, os.path.join(out, f"caption-inner-{s}-fill.png"))
     info["caption-inner"] = {"part": "Window.Caption", "size": (img.width - 8, img.height),
                              "margins": (l - 4, r - 4, t, b), "fill": True, "tile": False}
-    # Legenda dividida em duas (vistas divididas do libadwaita, como as
-    # Definições: barra lateral + conteúdo, cada um com a sua barra): metade
-    # esquerda só com o canto esquerdo e metade direita só com o direito,
-    # para as duas formarem uma única legenda contínua
+    # Caption split in two (libadwaita split views, like Settings: sidebar +
+    # content, each with its own bar): the left half only with the left
+    # corner and the right half only with the right one, so that together
+    # they form one continuous caption
     for s, img in zip(CAPTION, _states(ms, "Window.Caption", CAPTION)):
         halves = {"caption-split-left": (img.crop((0, 0, img.width - r, img.height)), (l, 0, t, b)),
                   "caption-split-right": (img.crop((l, 0, img.width, img.height)), (0, r, t, b))}
@@ -332,19 +332,19 @@ def export(ms, out, fonts_dir=None):
         for s, img in zip(names, sts):
             save(img, os.path.join(out, f"{name}-{s}.png"))
         info[name] = {"part": part, "size": sts[0].size, "margins": (0, 0, 0, 0)}
-    # Moldura dos separadores sem a linha de cima (GTK4: essa linha passa a ser
-    # a borda de baixo do cabeçalho, para o separador selecionado a tapar)
+    # Tab frame without the top line (GTK4: that line becomes the bottom border
+    # of the header, for the selected tab to cover it)
     pane = _states(ms, "Tab.Pane", ["normal"])[0]
     save(pane.crop((0, 1, pane.width, pane.height)), os.path.join(out, "tab-pane-notop.png"))
     for name, part, names, size, gkey in FIXED_GLYPH:
         for s, img in fixed_glyph(ms, part, names, size, gkey).items():
             save(img, os.path.join(out, f"{name}-{s}.png"))
-        # (o botão Maximizar chama-se como a legenda maximizada, "caption-max":
-        # não substituir as medidas da legenda, que o CSS usa em {{part:…}})
+        # (the Maximize button is named like the maximized caption, "caption-max":
+        # do not replace the caption's measurements, which the CSS uses in {{part:…}})
         info.setdefault(name, {"part": part, "size": size, "margins": margins(ms.part(part))})
-    # Setas soltas, sem botão: o glifo das setas das barras de deslocamento
-    # (9×9) nos azuis das ligações do painel de tarefas do Explorador
-    # (shellstyle.dll: #215DC6, #428EFF ao passar o rato)
+    # Bare arrows, without a button: the scrollbar arrows' glyph (9×9) in the
+    # blues of the Explorer task pane links (shellstyle.dll: #215DC6,
+    # #428EFF on hover)
     from lib import msstyles
     p = ms.part("ScrollBar.ArrowBtn")
     glyphs = msstyles.slice_states(ms.image(p.get("ImageFile2"), True, (255, 0, 255)), 16)
@@ -366,16 +366,15 @@ def export(ms, out, fonts_dir=None):
 
 
 # --------------------------------------------------------------------------
-# Explorador do Windows (para o Nautilus, src/nautilus-xp): botões da barra
-# de ferramentas (shell32, ícones de 24 px com alfa), "Ir para" e o painel de
-# tarefas (shellstyle.dll do Luna azul)
+# Windows Explorer (for Nautilus, src/nautilus-xp): toolbar buttons (shell32,
+# 24 px icons with alpha), "Go" and the task pane (Luna blue's shellstyle.dll)
 # --------------------------------------------------------------------------
 EXPLORER_TB = {"back": 0, "forward": 1, "up": 28, "search": 17, "folders": 43, "views": 32}
 
 
 def _disabled(img):
-    """Botão inativo das barras de ferramentas do XP: o ícone em cinzento,
-    aclarado (o círculo verde de Retroceder fica a ~173, medido), opaco."""
+    """Disabled button of XP's toolbars: the icon in grey, lightened (Back's
+    green circle ends up at ~173, measured), opaque."""
     out = img.copy()
     px = out.load()
     for y in range(out.height):
@@ -388,9 +387,9 @@ def _disabled(img):
 
 
 def export_explorer(ms, out):
-    """Peças do Explorador do XP para o Ficheiros (src/nautilus-xp): botões da
-    barra, "Ir para", ícones das tarefas e das confirmações, a bandeira
-    animada e o painel de tarefas do tema (ms: o tema, assets.theme)."""
+    """XP Explorer pieces for Files (src/nautilus-xp): toolbar buttons, "Go",
+    the task and confirmation icons, the animated flag and the theme's task
+    pane (ms: the theme, assets.theme)."""
     from lib import msstyles
     from lib import assets
     os.makedirs(out, exist_ok=True)
@@ -406,15 +405,15 @@ def export_explorer(ms, out):
         if img.getpixel((0, 0))[:3] == (255, 0, 255):
             img = msstyles.key_out(img, (255, 0, 255))
         save(img, os.path.join(out, f"explorer-go-{st}.png"))
-    # setinha das listas pendentes da barra de ferramentas: 5×3 (medida)
+    # little arrow of the toolbar drop-downs: 5×3 (measured)
     for st, col in (("normal", (0, 0, 0, 255)), ("disabled", (172, 168, 153, 255))):
         arrow = Image.new("RGBA", (5, 3), (0, 0, 0, 0))
         for y, (x0, x1) in enumerate(((0, 4), (1, 3), (2, 2))):
             for x in range(x0, x1 + 1):
                 arrow.putpixel((x, y), col)
         save(arrow, os.path.join(out, f"explorer-dropdown-{st}.png"))
-    # ponto e visto dos menus em 13×13 (o GTK4 estica a imagem ao tamanho
-    # do elemento): o glifo do XP ao centro, sem ser esticado
+    # menu dot and check mark at 13×13 (GTK4 stretches the image to the
+    # element's size): XP's glyph in the centre, not stretched
     for glyph in ("menu-bullet", "menu-check"):
         for st in ("normal", "selected", "disabled"):
             src = os.path.join(out, f"{glyph}-{st}.png")
@@ -424,35 +423,36 @@ def export_explorer(ms, out):
             box = Image.new("RGBA", (13, 13), (0, 0, 0, 0))
             box.alpha_composite(g, ((13 - g.width) // 2, (13 - g.height) // 2))
             save(box, os.path.join(out, f"{glyph}13-{st}.png"))
-    # ícones das tarefas do painel (16 px): nova pasta, mudar o nome, mover,
-    # copiar, eliminar, reproduzir, apresentação, fundo
+    # task pane task icons (16 px): new folder, rename, move, copy, delete,
+    # play, slide show, background
     for name, icon in (("new-folder", "folder-new"), ("rename", "task-rename"), ("move", "task-move"),
                        ("copy", "task-copy"), ("delete", "edit-delete"), ("play", "media-playback-start"),
                        ("slideshow", "task-slideshow"), ("background", "desktop")):
         ic = assets.icon(icon, 16)
         if ic is not None:
             save(ic.convert("RGBA"), os.path.join(out, f"explorer-task-{name}.png"))
-    # confirmação de eliminação (32 px, os dos diálogos 1011-1013 do shell32:
-    # ficheiro, pasta, vários) e o aviso das caixas de mensagem. (Mandar para
-    # a Reciclagem mostra o ícone da própria Reciclagem, vazia ou cheia; os
-    # dos diálogos são os de eliminar de vez.)
+    # delete confirmation (32 px, the ones of shell32 dialogs 1011-1013: file,
+    # folder, several) and the message boxes' warning. (Sending to the Recycle
+    # Bin shows the Recycle Bin's own icon, empty or full; the dialogs' ones
+    # are for deleting permanently.)
     for name, icon in (("confirm-file", "delete-file"), ("confirm-folder", "delete-folder"),
                        ("confirm-many", "delete-many"), ("warning", "dialog-warning"),
                        ("bin-empty", "recycle-bin"), ("bin-full", "recycle-bin-full")):
         ic = assets.icon(icon, 32)
         if ic is not None:
             save(ic.convert("RGBA"), os.path.join(out, f"explorer-{name}.png"), scale2=False)
-    # bandeira do Windows no canto da barra de menus: 50 fotogramas de 22×22
-    # (o 1.º é a imagem parada; anima enquanto a pasta carrega)
+    # Windows flag in the menu bar corner: 50 frames of 22×22 (the first is
+    # the still image; it animates while the folder loads)
     save(assets.image("explorer/brand"), os.path.join(out, "explorer-brand.png"), scale2=False)
 
     def bmp(name):
         return msstyles.key_out(ms.shell(name), (255, 0, 255))
-    # cabeçalho das secções (186×21, esticado) e setas de recolher/abrir
+    # section header (186×21, stretched) and collapse/expand arrows
     save(bmp("section-header"), os.path.join(out, "explorer-section-header.png"))
-    # secções especiais (Música, Imagens, Vídeos): cabeçalho azul, setas, ícone
-    # de 32 px, marca de água da secção (60 px, pintada sobre (237,242,255):
-    # passa a branco com alfa) e da vista (150 px, sobre branco)
+    # special sections (Music, Pictures, Videos): blue header, arrows, 32 px
+    # icon, watermark of the section (60 px, painted over (237,242,255): it
+    # becomes white with alpha) and of the view (150 px, over white)
+
     save(bmp("special-header"), os.path.join(out, "explorer-special-header.png"))
     for name in ("collapse", "collapse-hot", "expand", "expand-hot"):
         save(bmp(f"special-{name}"), os.path.join(out, f"explorer-special-{name}.png"))

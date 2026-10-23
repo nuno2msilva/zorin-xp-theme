@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""Captura uma janela libadwaita de teste com o tema instalado.
+"""Captures a test libadwaita window with the installed theme.
 
-Reproduz a estrutura das preferências da zorin-taskbar (AdwPreferencesWindow
-com páginas no AdwViewSwitcher, linhas com interruptores, deslizador com
-marcas, botão de opções) para afinar o CSS sem abrir a janela real.
+Reproduces the structure of the zorin-taskbar preferences
+(AdwPreferencesWindow with pages in the AdwViewSwitcher, rows with switches,
+a slider with marks, an options button) to tune the CSS without opening the
+real window.
 
-Uso: adwshot.py <saida.png> [largura] [altura] [backdrop]
+Usage: adwshot.py <out.png> [width] [height] [backdrop]
 """
 import sys
 
 import gi
 import os
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 gi.require_version("Gtk", "4.0")
@@ -54,7 +55,7 @@ PAGES = []
 
 
 def xp_group_box(group):
-    """O mesmo que xpGroupBox em src/zorin-taskbar-xp/prefs.js."""
+    """The same as xpGroupBox in src/zorin-taskbar-xp/prefs.js."""
     inner = group.get_first_child()
     header = inner.get_first_child()
     content = header.get_next_sibling()
@@ -92,7 +93,7 @@ def main():
             win.add(pg)
         win.set_default_size(w, h)
         if len(sys.argv) > 4 and sys.argv[4] == "sheet":
-            # o mesmo que src/zorin-taskbar-xp/prefs.js
+            # the same as src/zorin-taskbar-xp/prefs.js
             for pg in PAGES:
                 c = pg.get_first_child()
                 while not isinstance(c, Adw.Clamp):

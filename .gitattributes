@@ -1,3 +1,3 @@
-# Recursos extraídos do Windows (tools/extract.py): guardados tal e qual,
-# sem converter fins de linha (a página de erro do IE e o .theme são CRLF)
+# Resources extracted from Windows (tools/extract.py): stored as they are,
+# without converting line endings (the IE error page and the .theme are CRLF)
 assets/** -text

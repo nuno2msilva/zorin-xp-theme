@@ -1,4 +1,4 @@
-"""Descodificação de cursores do Windows (recursos RT_CURSOR, .cur e .ani)."""
+"""Decoding Windows cursors (RT_CURSOR resources, .cur and .ani)."""
 import struct
 
 from PIL import Image
@@ -17,11 +17,11 @@ def _palette(dib, hsize, bpp, ncolors):
 
 
 def decode_dib_cursor(dib):
-    """DIB de ícone/cursor (altura dobrada: XOR + máscara AND) -> RGBA.
+    """Icon/cursor DIB (doubled height: XOR + AND mask) -> RGBA.
 
-    Píxeis com AND=1 e XOR!=0 são de "inversão" (ex.: cursor de texto);
-    não há equivalente em Xcursor, por isso ficam pretos opacos, que é como
-    aparecem sobre fundos claros.
+    Pixels with AND=1 and XOR!=0 "invert" (e.g. the text cursor); Xcursor
+    has no equivalent, so they become opaque black, which is how they look
+    on light backgrounds.
     """
     if dib[:8] == b"\x89PNG\r\n\x1a\n":
         import io
@@ -60,7 +60,7 @@ def decode_dib_cursor(dib):
             if has_alpha:
                 px[x, y] = (*rgb, a)
             elif mask:
-                # transparente (XOR preto) ou inversão (XOR não preto)
+                # transparent (black XOR) or inverting (non-black XOR)
                 if rgb == (0, 0, 0):
                     px[x, y] = (0, 0, 0, 0)
                 else:
@@ -68,7 +68,7 @@ def decode_dib_cursor(dib):
                     inverted.append((x, y))
             else:
                 px[x, y] = (*rgb, 255)
-    img.inverted = inverted       # píxeis de inversão (para cursors.invert_halo)
+    img.inverted = inverted       # inverting pixels (for cursors.invert_halo)
     return img
 
 
@@ -79,7 +79,7 @@ def decode_cursor_resource(data):
 
 
 def group_cursor(pe, group_id):
-    """Devolve [(img, hotspot)] para todos os tamanhos de um RT_GROUP_CURSOR."""
+    """Returns [(img, hotspot)] for every size of an RT_GROUP_CURSOR."""
     g = pe.get(RT_GROUP_CURSOR, group_id)
     _r, _t, count = struct.unpack_from("<HHH", g, 0)
     out = []
@@ -90,7 +90,7 @@ def group_cursor(pe, group_id):
 
 
 def read_cur(data, offset=0):
-    """Ficheiro .cur -> [(img, hotspot)]."""
+    """.cur file -> [(img, hotspot)]."""
     _r, typ, count = struct.unpack_from("<HHH", data, offset)
     out = []
     for i in range(count):
@@ -102,7 +102,7 @@ def read_cur(data, offset=0):
 
 
 def read_ani(data):
-    """Ficheiro .ani (RIFF ACON) -> (frames [(img, hotspot)], delays_ms por passo)."""
+    """.ani file (RIFF ACON) -> (frames [(img, hotspot)], delays_ms per step)."""
     assert data[:4] == b"RIFF" and data[8:12] == b"ACON", "não é .ani"
     pos = 12
     frames, rate, seq = [], None, None

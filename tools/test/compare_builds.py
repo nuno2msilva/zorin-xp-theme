@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Compara duas construções (build/) ficheiro a ficheiro: os .xpi pelo
-conteúdo (o zip guarda datas), as imagens pelos píxeis quando os bytes
-diferem. Uso: compare_builds.py <antes> <depois>"""
+"""Compares two builds (build/) file by file: the .xpi files by content
+(the zip stores dates), images by their pixels when the bytes differ.
+Usage: compare_builds.py <before> <after>"""
 import io, json, os, sys, zipfile
 from PIL import Image
 

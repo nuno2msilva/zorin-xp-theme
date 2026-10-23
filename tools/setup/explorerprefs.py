@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""O Ficheiros como o Explorador do XP: definições do GNOME (componente
-explorer do install.sh).
+"""Files as the XP Explorer: GNOME settings (install.sh's explorer
+component).
 
-  apply   sem miniaturas de PDF nos ícones, como no XP (a primeira página
-          aparece nos Detalhes, src/nautilus-xp): application/pdf entra nos
-          tipos sem miniatura (org.gnome.desktop.thumbnailers disable) e as
-          miniaturas de PDF já feitas saem da cache (~/.cache/thumbnails; são
-          refeitas se a definição voltar atrás)
-  undo    repõe a lista de antes
+  apply   no PDF thumbnails on the icons, as in XP (the first page shows in
+          Details, src/nautilus-xp): application/pdf joins the types without
+          thumbnails (org.gnome.desktop.thumbnailers disable) and the PDF
+          thumbnails already made leave the cache (~/.cache/thumbnails; they
+          are made again if the setting goes back)
+  undo    restores the previous list
 
-Estado em ~/.local/share/zorin-xp/explorer.json.
+State in ~/.local/share/zorin-xp/explorer.json.
 """
 import json
 import os
@@ -18,7 +18,7 @@ import sys
 
 import gi
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 gi.require_version('Gio', '2.0')
@@ -30,7 +30,7 @@ STATE = os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'explorer.json')
 
 
 def _thumb_text(path):
-    """As entradas tEXt de um PNG (Thumb::URI, Thumb::Mimetype...)."""
+    """The tEXt entries of a PNG (Thumb::URI, Thumb::Mimetype...)."""
     out = {}
     try:
         with open(path, 'rb') as f:

@@ -1,4 +1,4 @@
-# (para o nt.py) carrega o tema GTK4 de build/ por cima do instalado
+# (for nt.py) loads the GTK4 theme from build/ on top of the installed one
 import builtins, os
 path = os.path.expanduser("~/Os meus documentos/Projects/Zorin XP/build/gtk/WindowsXP-Luna/gtk-4.0/gtk.css")
 old = getattr(builtins, "_zxp_theme", None)

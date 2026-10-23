@@ -1,7 +1,7 @@
-/* Zorin XP — gravação do arranque: o ffmpeg (kmsgrab) abre /dev/dri/cardN, e
- * quem abre o dispositivo quando ninguém o controla fica "master" — o que
- * impediria o Plymouth ou o Xorg de o controlar. Este LD_PRELOAD larga o
- * controlo logo a seguir a abrir; para ler o ecrã não é preciso. */
+/* Zorin XP — boot recording: ffmpeg (kmsgrab) opens /dev/dri/cardN, and
+ * whoever opens the device when nobody controls it becomes "master" — which
+ * would stop Plymouth or Xorg from controlling it. This LD_PRELOAD drops the
+ * control right after opening; reading the screen does not need it. */
 #define _GNU_SOURCE
 #include <dlfcn.h>
 #include <fcntl.h>

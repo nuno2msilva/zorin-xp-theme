@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Cliente Marionette mínimo para o Zen de teste (headless, porta 2829).
+"""Minimal Marionette client for the test Zen (headless, port 2829).
 
-  mn.py shot <ficheiro.png>      captura da janela inteira (contexto chrome)
-  mn.py js '<código>'            corre JS no browser.xhtml e imprime o resultado
-  mn.py size <w> <h>             tamanho da janela
-  mn.py go <url>                 abre o endereço no separador atual
+  mn.py shot <file.png>          capture of the whole window (chrome context)
+  mn.py js '<code>'              runs JS in browser.xhtml and prints the result
+  mn.py size <w> <h>             window size
+  mn.py go <url>                 opens the address in the current tab
 """
 import base64, json, socket, sys
 
@@ -16,7 +16,7 @@ class Marionette:
         self.s = socket.create_connection(("127.0.0.1", port), timeout=60)
         self.id = 0
         self._read()
-        # (os alertas das páginas ficam abertos: são o que se quer ver)
+        # (page alerts stay open: they are what we want to see)
         self.cmd("WebDriver:NewSession", {"unhandledPromptBehavior": "ignore"})
         self.cmd("Marionette:SetContext", {"value": "chrome"})
 

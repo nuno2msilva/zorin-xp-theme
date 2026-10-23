@@ -1,17 +1,16 @@
-"""Reimplementação do desenho de fundos do uxtheme (DrawThemeBackground).
+"""Reimplementation of uxtheme's background drawing (DrawThemeBackground).
 
-Usado para pré-desenhar elementos de tamanho fixo exatamente como o XP os
-desenharia (molduras de 4 px, botões de título, setas da barra de
-deslocamento com o glifo centrado, etc.).
+Used to pre-draw fixed-size elements exactly as XP would draw them (4 px
+frames, caption buttons, scrollbar arrows with the centred glyph, etc.).
 """
 from PIL import Image
 
 
 def _axis(src_len, dst_len, m0, m1):
-    """Segmentos (src0, src1, dst0, dst1) num eixo, à maneira do uxtheme.
+    """Segments (src0, src1, dst0, dst1) on one axis, the uxtheme way.
 
-    Quando o destino é menor que a soma das margens, o uxtheme encolhe as
-    margens proporcionalmente e o centro desaparece.
+    When the destination is smaller than the sum of the margins, uxtheme
+    shrinks the margins proportionally and the centre disappears.
     """
     if dst_len >= m0 + m1:
         return [(0, m0, 0, m0, False),
@@ -20,15 +19,15 @@ def _axis(src_len, dst_len, m0, m1):
     if m0 + m1 == 0:
         return [(0, src_len, 0, dst_len, True)]
     d0 = dst_len * m0 // (m0 + m1)
-    # margens encolhidas: são sempre esticadas (nunca em mosaico)
+    # shrunk margins: always stretched (never tiled)
     return [(0, m0, 0, d0, False), (src_len - m1, src_len, d0, dst_len, False)]
 
 
 def gdi_stretch(img, w, h):
-    """StretchBlt (COLORONCOLOR) como no XP.
+    """StretchBlt (COLORONCOLOR) as in XP.
 
-    Esticar: origem = floor((i + 0,5)·s/d)  (barra de título real: 3 -> 861 e 3 -> 4)
-    Encolher: origem = floor(i·s/d + 0,5)  (barra de progresso real: 12 -> 7)
+    Stretching: source = floor((i + 0.5)·s/d)  (real title bar: 3 -> 861 and 3 -> 4)
+    Shrinking: source = floor(i·s/d + 0.5)  (real progress bar: 12 -> 7)
     """
     if img.size == (w, h):
         return img.copy()
@@ -62,7 +61,7 @@ def _fit(piece, length, tiled, horizontal):
 
 
 def render(src, w, h, margins=(0, 0, 0, 0), tile=False):
-    """src: imagem de um estado; margins: (esq, dir, topo, base) como no INI."""
+    """src: the image of one state; margins: (left, right, top, bottom) as in the INI."""
     l, r, t, b = margins
     out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     for sx0, sx1, dx0, dx1, tx in _axis(src.width, w, l, r):
@@ -71,7 +70,7 @@ def render(src, w, h, margins=(0, 0, 0, 0), tile=False):
                 continue
             piece = src.crop((sx0, sy0, sx1, sy1))
             dw, dh = dx1 - dx0, dy1 - dy0
-            # cada eixo: o centro em modo Tile repete-se (ou corta-se); o resto estica
+            # each axis: the centre in Tile mode repeats (or is cut); the rest stretches
             piece = _fit(piece, dw, tile and tx, horizontal=True)
             piece = _fit(piece, dh, tile and ty, horizontal=False)
             out.alpha_composite(piece, (dx0, dy0))
@@ -79,7 +78,7 @@ def render(src, w, h, margins=(0, 0, 0, 0), tile=False):
 
 
 def center(base, glyph, offset=(0, 0)):
-    """Compõe um glifo centrado (GlyphType=ImageGlyph, alinhamento por omissão)."""
+    """Composes a centred glyph (GlyphType=ImageGlyph, default alignment)."""
     out = base.copy()
     x = (base.width - glyph.width) // 2 + offset[0]
     y = (base.height - glyph.height) // 2 + offset[1]

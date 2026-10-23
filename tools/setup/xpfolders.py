@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
-"""Pastas pessoais com os nomes do XP português (textos do shell32.dll).
+"""Home folders with the names of Portuguese XP (shell32.dll texts).
 
     Documentos -> Os meus documentos      Imagens -> As minhas imagens
     Música -> A minha música              Vídeos -> Os meus vídeos
     Secretária -> Ambiente de trabalho    Transferências -> Downloads
-    Público -> Documentos partilhados     Modelos (igual)
+    Público -> Documentos partilhados     Modelos (the same)
 
-As pastas mudam de nome e o nome antigo fica como atalho (ligação simbólica)
-escondido no Ficheiros (~/.hidden): caminhos guardados em programas, atalhos e
-ligações que apontem para ~/Documentos/... continuam a funcionar.
-"As minhas imagens", "A minha música", "Os meus vídeos" e "Downloads" passam
-para dentro de "Os meus documentos", como no XP (também quando as pastas já
-tinham os nomes do XP): no mesmo disco é só mudar o nome, nada é copiado; os
-sítios de antes (~/Imagens, ~/As minhas imagens...) ficam como atalhos
-escondidos. Uma pasta noutro disco, ou em uso, não se mexe: fica um atalho para
-ela dentro de "Os meus documentos", com o ícone da pasta. Atualiza
-~/.config/user-dirs.dirs e os marcadores da barra lateral.
+The folders are renamed and the old name stays as a shortcut (symbolic link)
+hidden in Files (~/.hidden): paths stored in programs, shortcuts and links
+pointing to ~/Documentos/... keep working.
+"As minhas imagens", "A minha música", "Os meus vídeos" and "Downloads" move
+inside "Os meus documentos", as in XP (also when the folders already had
+the XP names): on the same disk it is only a rename, nothing is copied; the
+previous places (~/Imagens, ~/As minhas imagens...) stay as hidden
+shortcuts. A folder on another disk, or in use, is not moved: a shortcut to
+it goes inside "Os meus documentos", with the folder's icon. Updates
+~/.config/user-dirs.dirs and the sidebar bookmarks.
 
-Tudo o que muda fica em ~/.local/share/zorin-xp/folders.json para o undo.
+Everything that changes is recorded in ~/.local/share/zorin-xp/folders.json
+for undo.
 
-Uso: xpfolders.py apply | undo     (ZXP_HOME=<pasta> para ensaiar noutro sítio)
+Usage: xpfolders.py apply | undo     (ZXP_HOME=<folder> to rehearse elsewhere)
 """
 import json
 import os
@@ -27,7 +28,7 @@ import shutil
 import sys
 from urllib.parse import quote, unquote
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 HOME = os.environ.get("ZXP_HOME") or os.path.expanduser("~")
@@ -43,21 +44,21 @@ XP_NAMES = {                       # shell32.dll: 9100, 9076, 9105, 9107, 9092, 
     "XDG_MUSIC_DIR": "A minha música",
     "XDG_VIDEOS_DIR": "Os meus vídeos",
     "XDG_DESKTOP_DIR": "Ambiente de trabalho",
-    "XDG_DOWNLOAD_DIR": "Downloads",          # pedido do utilizador (o XP não tinha)
+    "XDG_DOWNLOAD_DIR": "Downloads",          # the user's request (XP did not have it)
     "XDG_PUBLICSHARE_DIR": "Documentos partilhados",
     "XDG_TEMPLATES_DIR": "Modelos",
 }
-# dentro de "Os meus documentos" (into_documents), ou atalhos lá dentro com o
-# ícone da pasta quando não se podem mudar (a extensão do Ficheiros esconde a
-# seta de atalho)
+# inside "Os meus documentos" (into_documents), or shortcuts in there with
+# the folder's icon when they cannot be moved (the Files extension hides the
+# shortcut arrow)
 INSIDE_DOCUMENTS = {"XDG_PICTURES_DIR": "folder-pictures", "XDG_MUSIC_DIR": "folder-music",
                     "XDG_VIDEOS_DIR": "folder-videos", "XDG_DOWNLOAD_DIR": "folder-download"}
 
 
-# Metadados do GNOME (gvfs: "Permitir lançamento" dos atalhos, posição dos
-# ícones no ambiente de trabalho, vista e ícone das pastas...) ficam guardados
-# pelo caminho: ao mudar o nome da pasta passam para o caminho novo. Só os
-# primeiros níveis (é onde estão; percorrer tudo seria lento).
+# GNOME metadata (gvfs: the shortcuts' "Allow Launching", the position of
+# the desktop icons, the folders' view and icon...) is stored by path: when
+# a folder is renamed it moves to the new path. Only the first levels
+# (that is where it is; walking everything would be slow).
 META_DEPTH = 3
 SKIP = {".git", "node_modules", "__pycache__", ".cache"}
 
@@ -97,7 +98,7 @@ def collect_meta(root, depth=META_DEPTH):
                     d = attrs(child)
                     if d:
                         out[crel] = d
-        except Exception as e:   # (ficheiros sem permissão, etc.)
+        except Exception as e:   # (files without permission, etc.)
             print(f"  metadados não lidos: {path}: {e}")
     walk(root, "", 0)
     return out
@@ -159,7 +160,7 @@ def uri(path):
 
 
 def rewrite_bookmarks(mapping):
-    """mapping: caminho antigo -> novo (também para o que estiver dentro)."""
+    """mapping: old path -> new (also for whatever is inside)."""
     if not os.path.exists(BOOKMARKS):
         return
     out = []
@@ -167,8 +168,8 @@ def rewrite_bookmarks(mapping):
         target, sep, label = line.partition(" ")
         if target.startswith("file://"):
             path = unquote(target[7:])
-            # (o caminho mais comprido primeiro: Os meus documentos/A minha
-            # música antes de Os meus documentos)
+            # (the longest path first: Os meus documentos/A minha música before
+            # Os meus documentos)
             for old, new in sorted(mapping.items(), key=lambda kv: -len(kv[0])):
                 if path == old or path.startswith(old + "/"):
                     path = new + path[len(old):]
@@ -184,7 +185,7 @@ def hidden_lines():
 
 
 def holders(path):
-    """Programas com ficheiros abertos (ou a trabalhar) dentro de path."""
+    """Programs with files open (or working) inside path."""
     out = set()
     for pid in filter(str.isdigit, os.listdir("/proc")):
         try:
@@ -201,15 +202,15 @@ def holders(path):
 
 
 def relink(link, target):
-    """link (ligação simbólica) passa a apontar para target (caminho relativo)."""
+    """link (symbolic link) now points to target (relative path)."""
     if os.path.islink(link):
         os.remove(link)
     os.symlink(os.path.relpath(target, os.path.dirname(link)), link)
 
 
 def into_documents(state):
-    """As minhas imagens, A minha música, Os meus vídeos e Downloads para
-    dentro de "Os meus documentos" (as que ainda lá não estão)."""
+    """As minhas imagens, A minha música, Os meus vídeos and Downloads into
+    "Os meus documentos" (the ones that are not there yet)."""
     from gi.repository import Gio
     dirs = read_user_dirs()
     docs = dirs.get("XDG_DOCUMENTS_DIR")
@@ -238,15 +239,15 @@ def into_documents(state):
             print(f"  não mudada (em uso por {', '.join(busy)}): {cur}")
             continue
         if ours:
-            # o atalho de antes sai (Gio: os metadados dele também)
+            # the previous shortcut goes (Gio: its metadata too)
             Gio.File.new_for_path(new).delete(None)
             state["inside"].remove(new)
-        # Gio.File.move leva os metadados do GNOME de toda a pasta
+        # Gio.File.move takes the GNOME metadata of the whole folder along
         Gio.File.new_for_path(cur).move(Gio.File.new_for_path(new),
                                         Gio.FileCopyFlags.NOFOLLOW_SYMLINKS, None, None)
         relink(cur, new)
         state.setdefault("moved", []).append([cur, new])
-        # os atalhos dos nomes de antes (~/Imagens) vão direitos ao sítio novo
+        # the shortcuts of the previous names (~/Imagens) go straight to the new place
         for r in state["renames"]:
             if r[1] == cur:
                 r[1] = new
@@ -265,8 +266,8 @@ def into_documents(state):
 
 
 def inside_documents(state):
-    """Para as pastas que não puderam ir para dentro de "Os meus documentos":
-    um atalho lá dentro (se faltar) com o ícone da pasta."""
+    """For the folders that could not go inside "Os meus documentos": a
+    shortcut in there (if missing) with the folder's icon."""
     from gi.repository import Gio
     dirs = read_user_dirs()
     docs = dirs.get("XDG_DOCUMENTS_DIR")
@@ -322,7 +323,7 @@ def apply():
             meta = collect_meta(old)
             os.rename(old, new)
             apply_meta(new, meta)
-            # o nome antigo fica como atalho escondido: nada se quebra
+            # the old name stays as a hidden shortcut: nothing breaks
             os.symlink(os.path.basename(new), old)
             state["renames"].append([old, new])
             mapping[old] = new
@@ -362,14 +363,14 @@ def undo():
     def points(link, target):
         return os.path.islink(link) and \
             os.readlink(link) == os.path.relpath(target, os.path.dirname(link))
-    # os atalhos dos sítios por onde as pastas passaram (~/A minha música)
+    # the shortcuts of the places the folders went through (~/A minha música)
     for cur, new in state.get("moved", []):
         if points(cur, new):
             os.remove(cur)
     for old, new in reversed(state["renames"]):
         if not old:
             continue
-        # só se o nome antigo ainda for o nosso atalho
+        # only if the old name is still our shortcut
         if points(old, new) and os.path.isdir(new):
             os.remove(old)
             Gio.File.new_for_path(new).move(Gio.File.new_for_path(old),
@@ -388,7 +389,7 @@ def undo():
     orig = os.path.join(base, "folders-user-dirs.dirs.orig")
     if os.path.exists(orig):
         shutil.move(orig, USER_DIRS)
-    # marcadores: só os caminhos voltam atrás (os que se juntaram entretanto ficam)
+    # bookmarks: only the paths go back (the ones added in the meantime stay)
     rewrite_bookmarks({new: old for old, new in state["renames"] if old})
     orig = os.path.join(base, "folders-bookmarks.orig")
     if os.path.exists(orig):
@@ -398,9 +399,9 @@ def undo():
 
 
 def remeta():
-    """Para pastas que mudaram de nome sem levar os metadados (a primeira
-    versão): o nome antigo volta por instantes, lêem-se os metadados que
-    ficaram com ele e passam para o nome novo (sem apagar os que lá estão)."""
+    """For folders that were renamed without taking their metadata (the first
+    version): the old name comes back for a moment, the metadata left with
+    it is read and moved to the new name (without deleting what is there)."""
     if not os.path.exists(STATE):
         return
     state = json.load(open(STATE, encoding="utf-8"))

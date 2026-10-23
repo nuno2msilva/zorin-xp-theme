@@ -1,9 +1,9 @@
-"""Ícones do Windows: grupos de ícones das DLL/EXE (RT_GROUP_ICON /
-RT_ICON) e ficheiros .ico (como os guarda tools/extract.py em assets/icons).
+"""Windows icons: icon groups from DLL/EXE files (RT_GROUP_ICON /
+RT_ICON) and .ico files (as tools/extract.py stores them in assets/icons).
 
-  group_icons(pe, id) / ico_icons(dados)  -> [(w, h, bpp, imagem RGBA)]
-  best(pe, id, tam) / best_ico(dados, tam) -> a melhor imagem desse tamanho
-  ico_file(pe, id)                         -> o grupo num ficheiro .ico
+  group_icons(pe, id) / ico_icons(data)   -> [(w, h, bpp, RGBA image)]
+  best(pe, id, size) / best_ico(data, size) -> the best image of that size
+  ico_file(pe, id)                         -> the group as an .ico file
 """
 import io
 import struct
@@ -17,8 +17,8 @@ RT_GROUP_ICON = 14
 
 
 def _decode(entries):
-    """[(w, h, bpp, dados)] -> [(w, h, bpp, Image RGBA)], por qualidade
-    decrescente (as imagens que não se leem ficam de fora)."""
+    """[(w, h, bpp, data)] -> [(w, h, bpp, RGBA Image)], best quality first
+    (images that cannot be read are left out)."""
     out = []
     for w, h, bpp, data in entries:
         try:
@@ -34,7 +34,7 @@ def _decode(entries):
 
 
 def _group_entries(pe, gid):
-    """[(w, h, cores, planos, bpp, dados)] de um RT_GROUP_ICON."""
+    """[(w, h, colours, planes, bpp, data)] of an RT_GROUP_ICON."""
     g = pe.get(RT_GROUP_ICON, gid)
     if g is None:
         return []
@@ -49,12 +49,12 @@ def _group_entries(pe, gid):
 
 
 def group_icons(pe, gid):
-    """[(w, h, bpp, Image RGBA)] de um RT_GROUP_ICON, por qualidade decrescente."""
+    """[(w, h, bpp, RGBA Image)] of an RT_GROUP_ICON, best quality first."""
     return _decode([(w, h, bpp, d) for w, h, _cc, _p, bpp, d in _group_entries(pe, gid)])
 
 
 def ico_file(pe, gid):
-    """Um RT_GROUP_ICON num ficheiro .ico (todas as imagens, pela ordem)."""
+    """An RT_GROUP_ICON as an .ico file (every image, in order)."""
     entries = _group_entries(pe, gid)
     offset = 6 + 16 * len(entries)
     head, blobs = struct.pack("<HHH", 0, 1, len(entries)), b""
@@ -66,7 +66,7 @@ def ico_file(pe, gid):
 
 
 def ico_icons(data):
-    """[(w, h, bpp, Image RGBA)] de um ficheiro .ico, por qualidade decrescente."""
+    """[(w, h, bpp, RGBA Image)] of an .ico file, best quality first."""
     _r, _t, count = struct.unpack_from("<HHH", data, 0)
     entries = []
     for i in range(count):
@@ -81,12 +81,12 @@ def _best(icons, size):
 
 
 def best(pe, gid, size):
-    """Melhor imagem para um tamanho: a de maior profundidade nesse tamanho."""
+    """Best image for a size: the deepest one at that size."""
     return _best(group_icons(pe, gid), size)
 
 
 def best_ico(data, size):
-    """Como best(), a partir de um ficheiro .ico."""
+    """Like best(), from an .ico file."""
     return _best(ico_icons(data), size)
 
 

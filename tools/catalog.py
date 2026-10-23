@@ -1,23 +1,23 @@
-"""Catálogo dos recursos do Windows XP que o tema usa: nome legível -> origem.
+"""Catalogue of the Windows XP resources the theme uses: readable name -> source.
 
-tools/extract.py lê este catálogo para copiar os recursos de uma cópia da
-pasta Windows (windows/<cópia>) para assets/; a construção pede-os depois
-pelo nome (tools/lib/assets.py), sem voltar a abrir o Windows.
+tools/extract.py reads this catalogue to copy the resources from a copy of
+the Windows folder (windows/<copy>) into assets/; the build then asks for
+them by name (tools/lib/assets.py), without opening Windows again.
 
-Origens: "ficheiro.dll" (procurado em system32, system32/dllcache e na raiz
-da cópia, sem olhar a maiúsculas) ou um caminho relativo à raiz da cópia
-("Resources/Themes/Luna/luna.msstyles"). Os números são os ids dos recursos
-dentro desse ficheiro (os mesmos em todas as línguas do XP).
+Sources: "file.dll" (looked up in system32, system32/dllcache and the root
+of the copy, case-insensitively) or a path relative to the root of the copy
+("Resources/Themes/Luna/luna.msstyles"). The numbers are the ids of the
+resources inside that file (the same in every XP language).
 
-Onde o Windows já dá um nome legível (sons, letras, imagens do tema), fica o
-nome do Windows; o resto (ícones, imagens das DLL, textos) tem aqui o nome.
+Where Windows already gives a readable name (sounds, fonts, theme images),
+the Windows name is kept; the rest (icons, DLL images, texts) is named here.
 """
 
 # --------------------------------------------------------------------------
-# Temas visuais (assets/themes/<nome>/): o INI do esquema de cores, tal como
-# o uxtheme o lê (theme.ini), e todas as imagens que ele usa (bitmaps/, com
-# o nome do INI); o painel de tarefas do Explorador (shellstyle.dll, shell/)
-# e o ficheiro .theme do Windows (papel de parede, sons, cursores).
+# Visual styles (assets/themes/<name>/): the colour scheme INI, as uxtheme
+# reads it (theme.ini), and every image it uses (bitmaps/, with the INI's
+# name); the Explorer task pane (shellstyle.dll, shell/) and the Windows
+# .theme file (wallpaper, sounds, cursors).
 # --------------------------------------------------------------------------
 THEMES = {
     "luna": {
@@ -29,21 +29,21 @@ THEMES = {
     },
 }
 
-# Imagens do painel de tarefas do Explorador (shellstyle.dll do tema): id
+# Images of the Explorer task pane (the theme's shellstyle.dll): id
 SHELLSTYLE = {
-    # secções normais: cabeçalho (186x21, esticado) e setas recolher/abrir
+    # normal sections: header (186x21, stretched) and collapse/expand arrows
     "section-header": 112,
     "section-collapse": 100,
     "section-collapse-hot": 101,
     "section-expand": 102,
     "section-expand-hot": 103,
-    # secções especiais (Música, Imagens, Vídeos): cabeçalho azul e setas
+    # special sections (Music, Pictures, Videos): blue header and arrows
     "special-header": 110,
     "special-collapse": 104,
     "special-collapse-hot": 105,
     "special-expand": 106,
     "special-expand-hot": 107,
-    # ícone de 32 px, marca de água da secção e da vista de cada pasta especial
+    # 32 px icon, watermark of the section and of each special folder's view
     "music-icon": 10,
     "music-section": 11,
     "music-view": 12,
@@ -56,28 +56,28 @@ SHELLSTYLE = {
 }
 
 # --------------------------------------------------------------------------
-# Sons (assets/sounds/): os de Windows/Media, com o nome original
+# Sounds (assets/sounds/): the ones in Windows/Media, with the original name
 # --------------------------------------------------------------------------
 SOUNDS_DIR = "Media"
 SOUNDS_GLOB = "*.wav"
 
 # --------------------------------------------------------------------------
-# Letras (assets/fonts/): todas as TrueType de Windows/Fonts e as de mapa de
-# bits da interface. "Courier", "System", "Terminal", "Fixedsys"... ficam de
-# fora: com nomes genéricos, tomariam o lugar da Courier New e outras em
-# documentos, só com 3-4 tamanhos.
+# Fonts (assets/fonts/): every TrueType in Windows/Fonts and the UI bitmap
+# fonts. "Courier", "System", "Terminal", "Fixedsys"... are left out: with
+# generic names, they would take the place of Courier New and others in
+# documents, with only 3-4 sizes.
 # --------------------------------------------------------------------------
 FONTS_DIR = "Fonts"
 FONT_BITMAP_FAMILIES = ("MS Sans Serif", "MS Serif", "Small Fonts")
 
 # --------------------------------------------------------------------------
-# Cursores (assets/cursors/<nome>.cur): o esquema "Predefinição do Windows",
-# que vem dos recursos das DLL (não de Windows/Cursors, que são esquemas
-# alternativos). Nomes = os do Xcursor/CSS.
-#   user32.dll   cursores do sistema (OCR_*)
-#   ole32.dll    arrastar e largar (mover / copiar / atalho / proibido)
-#   comctl32.dll redimensionamento de colunas/linhas (cabeçalhos, divisórias)
-#   mshtml.dll   texto vertical
+# Cursors (assets/cursors/<name>.cur): the "Windows Default" scheme, which
+# comes from the DLL resources (not from Windows/Cursors, which holds the
+# alternative schemes). Names = the Xcursor/CSS ones.
+#   user32.dll   system cursors (OCR_*)
+#   ole32.dll    drag and drop (move / copy / shortcut / forbidden)
+#   comctl32.dll column/row resizing (headers, dividers)
+#   mshtml.dll   vertical text
 # --------------------------------------------------------------------------
 CURSORS = {
     "default": ("user32.dll", 100),
@@ -104,8 +104,8 @@ CURSORS = {
     "ne-scroll": ("user32.dll", 32660),
     "se-scroll": ("user32.dll", 32661),
     "sw-scroll": ("user32.dll", 32662),
-    "ns-scroll": ("user32.dll", 32652),      # deslocamento automático só vertical
-    "ew-scroll": ("user32.dll", 32653),      # ... só horizontal
+    "ns-scroll": ("user32.dll", 32652),      # automatic scrolling, vertical only
+    "ew-scroll": ("user32.dll", 32653),      # ... horizontal only
     "dnd-move": ("ole32.dll", 2),
     "copy": ("ole32.dll", 3),
     "alias": ("ole32.dll", 4),
@@ -116,10 +116,10 @@ CURSORS = {
 }
 
 # --------------------------------------------------------------------------
-# Ícones (assets/icons/<nome>.ico, com todos os tamanhos e profundidades do
-# grupo): (ficheiro, id do grupo de ícones; None = o primeiro, que é o ícone
-# do programa). Os nomes são os do primeiro uso no tema de ícones (nomes
-# freedesktop: tools/builders/icons.py); as aplicações têm o nome do programa do XP.
+# Icons (assets/icons/<name>.ico, with every size and depth of the group):
+# (file, icon group id; None = the first one, which is the program's icon).
+# The names are those of their first use in the icon theme (freedesktop
+# names: tools/builders/icons.py); applications have the XP program's name.
 # --------------------------------------------------------------------------
 ICONS = {
     "folder": ("shell32.dll", 4),
@@ -315,32 +315,33 @@ ICONS = {
 }
 
 # --------------------------------------------------------------------------
-# Imagens das DLL/EXE (assets/images/<área>/<nome>.png): bitmaps (RT_BITMAP)
-# convertidos para PNG com a transparência que tinham (32 bits: alfa; os
-# outros opacos — a cor-chave, quando há, tira-se ao usar).
+# Images from the DLL/EXE files (assets/images/<area>/<name>.png): bitmaps
+# (RT_BITMAP) converted to PNG with the transparency they had (32 bits:
+# alpha; the others opaque — the colour key, when there is one, is removed
+# when used).
 # --------------------------------------------------------------------------
 IMAGES = {
-    # barra de tarefas
-    "taskbar/start-flag": ("explorer.exe", 143),          # bandeira do botão Iniciar
-    "taskbar/battery-icons": ("batmeter.dll", 301),       # tira 16x16: estados da bateria
+    # taskbar
+    "taskbar/start-flag": ("explorer.exe", 143),          # Start button flag
+    "taskbar/battery-icons": ("batmeter.dll", 301),       # 16x16 strip: battery states
     # Explorador
-    "explorer/toolbar": ("shell32.dll", 214),             # botões 24x24 (Retroceder, Acima...)
+    "explorer/toolbar": ("shell32.dll", 214),             # 24x24 buttons (Back, Up...)
     "explorer/toolbar-hot": ("shell32.dll", 215),
-    "explorer/go": ("shell32.dll", 230),                  # "Ir para" da barra de endereço
+    "explorer/go": ("shell32.dll", 230),                  # address bar "Go"
     "explorer/go-hot": ("shell32.dll", 231),
     "explorer/brand": ("shell32.dll", 240),               # bandeira animada: 50 x 22x22
-    # janela Abrir/Guardar como (botões 16x16 da barra)
+    # Open/Save As dialog (16x16 toolbar buttons)
     "file-dialog/toolbar": ("shell32.dll", 216),
     "file-dialog/toolbar-hot": ("shell32.dll", 217),
     # Internet Explorer 6
-    "ie/toolbar": ("shell32.dll", 204),                   # botões 24x24 do IE6 Luna
+    "ie/toolbar": ("shell32.dll", 204),                   # IE6 Luna 24x24 buttons
     "ie/toolbar-hot": ("shell32.dll", 205),
-    "ie/toolbar-small": ("shell32.dll", 206),             # os mesmos a 16x16
-    "ie/explorer-bar": ("shdocvw.dll", 534),              # Adicionar, Organizar, Ver (18x16)
+    "ie/toolbar-small": ("shell32.dll", 206),             # the same at 16x16
+    "ie/explorer-bar": ("shdocvw.dll", 534),              # Add, Organize, View (18x16)
     "ie/explorer-bar-hot": ("shdocvw.dll", 535),
     "ie/search-bar": ("browseui.dll", 563),               # Procurar (18x16)
     "ie/search-bar-hot": ("browseui.dll", 564),
-    # Windows Media Player 9 embutido (wmploc.dll): barra e botões redondos
+    # embedded Windows Media Player 9 (wmploc.dll): bar and round buttons
     "wmp/bar": ("wmploc.dll", 371),
     "wmp/play": ("wmploc.dll", 373), "wmp/play-hover": ("wmploc.dll", 374),
     "wmp/play-down": ("wmploc.dll", 375), "wmp/play-disabled": ("wmploc.dll", 376),
@@ -352,9 +353,9 @@ IMAGES = {
     "wmp/next-down": ("wmploc.dll", 397), "wmp/next-disabled": ("wmploc.dll", 398),
     "wmp/mute": ("wmploc.dll", 365), "wmp/mute-hover": ("wmploc.dll", 366),
     "wmp/mute-down": ("wmploc.dll", 367), "wmp/mute-disabled": ("wmploc.dll", 368),
-    # ecrã de boas-vindas (logonui.exe)
+    # welcome screen (logonui.exe)
     "logon/glow": ("logonui.exe", 100),
-    "logon/edit": ("logonui.exe", 102),                   # caixa da palavra-passe (9 partes)
+    "logon/edit": ("logonui.exe", 102),                   # password box (9 parts)
     "logon/go": ("logonui.exe", 103), "logon/go-focus": ("logonui.exe", 104),
     "logon/info": ("logonui.exe", 105), "logon/info-focus": ("logonui.exe", 106),
     "logon/power": ("logonui.exe", 107), "logon/power-hot": ("logonui.exe", 121),
@@ -366,44 +367,44 @@ IMAGES = {
     "logon/divider-v": ("logonui.exe", 124),
     "logon/divider-top": ("logonui.exe", 125),
     "logon/divider-bottom": ("logonui.exe", 126),
-    # diálogos Desligar o computador (msgina.dll) e Terminar sessão (shell32)
+    # Turn Off Computer (msgina.dll) and Log Off (shell32) dialogs
     "logoff/background": ("msgina.dll", 20142),
     "logoff/flag": ("msgina.dll", 20143),
-    "logoff/turnoff-icons": ("msgina.dll", 20150),        # tira 32x32: normal, premido, rato por cima
+    "logoff/turnoff-icons": ("msgina.dll", 20150),        # 32x32 strip: normal, pressed, hover
     "logoff/logoff-icons": ("shell32.dll", 14356),
 }
 
-# Bitmaps guardados tal e qual (assets/images/<área>/<nome>.bmp): o ecrã de
-# arranque do ntoskrnl.exe tem as paletas a zero e o tools/builders/bootscreen.py
-# põe-lhes a paleta à mão (a do bitmap 5, deslocada)
+# Bitmaps stored as they are (assets/images/<area>/<name>.bmp): the
+# ntoskrnl.exe boot screen has zeroed palettes and tools/builders/bootscreen.py
+# gives them the palette by hand (bitmap 5's, shifted)
 RAW_BITMAPS = {
     "boot/screen": ("ntoskrnl.exe", 1),                   # 640x480, 4 bits
     "boot/palette-source": ("ntoskrnl.exe", 5),
-    "boot/progress": ("ntoskrnl.exe", 8),                 # três blocos de 22x9
+    "boot/progress": ("ntoskrnl.exe", 8),                 # three 22x9 blocks
 }
 
 # --------------------------------------------------------------------------
-# Textos (assets/locales/<língua>/<ficheiro>.json): de cada um destes, todos
-# os textos (string tables), diálogos (DIALOGEX, com as medidas em DLU) e
-# menus (com o id de cada item), pelo id — que é o mesmo em todas as línguas
-# do XP. A língua é a da cópia do Windows (--locale do extract.py).
+# Texts (assets/locales/<language>/<file>.json): from each of these, every
+# text (string tables), dialog (DIALOGEX, with the measurements in DLU) and
+# menu (with each item's id), by id — which is the same in every XP
+# language. The language is the Windows copy's (--locale of extract.py).
 # --------------------------------------------------------------------------
 TEXT_FILES = [
-    "comdlg32.dll",     # janela Abrir/Guardar como
-    "shell32.dll",      # Explorador, Procurar pasta, eliminar, Terminar sessão
-    "user32.dll",       # botões e títulos das caixas de mensagem
-    "logonui.exe",      # ecrã de boas-vindas
-    "winlogon.exe",     # "A iniciar o Windows...", "A terminar a sessão..."
+    "comdlg32.dll",     # Open/Save As dialog
+    "shell32.dll",      # Explorer, Browse for Folder, delete, Log Off
+    "user32.dll",       # message box buttons and titles
+    "logonui.exe",      # welcome screen
+    "winlogon.exe",     # "Windows is starting up...", "Logging off..."
     "msgina.dll",       # Desligar o computador
-    "explorer.exe",     # barra de tarefas: o texto do botão Iniciar
+    "explorer.exe",     # taskbar: the Start button label
 ]
 
-# Páginas e imagens com nome (não numeradas) dentro das DLL:
-# a página de erro de rede do IE6 (o texto, que é da língua do Windows)...
+# Named (not numbered) pages and images inside the DLLs:
+# the IE6 network error page (the text, which is in Windows' language)...
 LOCALE_FILES = {
     "ie/dnserror.htm": ("shdoclc.dll", "DNSERROR.HTM"),
 }
-# ... e as suas imagens (iguais em todas as línguas: assets/images)
+# ... and its images (the same in every language: assets/images)
 NAMED_IMAGES = {
     "ie/pagerror.gif": ("shdoclc.dll", "PAGERROR.GIF"),
     "ie/refresh.gif": ("shdoclc.dll", "REFRESH.GIF"),
@@ -411,8 +412,8 @@ NAMED_IMAGES = {
     "ie/back.gif": ("shdoclc.dll", "BACK.GIF"),
 }
 
-# Textos que no XP vêm do registo (system32/config/<ficheiro>; HKCR =
-# software\Classes), para assets/locales/<língua>/registry.json
+# Texts that come from the registry in XP (system32/config/<file>; HKCR =
+# software\Classes), into assets/locales/<language>/registry.json
 REGISTRY_TEXTS = {
-    "folder-type": ("software", r"Classes\Directory", ""),   # "Pasta de ficheiros"
+    "folder-type": ("software", r"Classes\Directory", ""),   # "Pasta de ficheiros" (File Folder)
 }

@@ -1,9 +1,9 @@
-"""Leitura de modelos de diálogo (RT_DIALOG, DIALOGEX) dos binários do XP.
+"""Reading dialog templates (RT_DIALOG, DIALOGEX) from XP binaries.
 
-dialog(pe, id) -> {"title", "font", "size": (w, h) em DLU, "style",
+dialog(pe, id) -> {"title", "font", "size": (w, h) in DLU, "style",
                    "controls": [{"cls", "id", "text", "x", "y", "w", "h", "style"}]}
-As medidas vêm em unidades de diálogo (DLU); com MS Shell Dlg / Tahoma 8 a
-96 ppp: x * 1,5 e y * 1,625 px (arredondado como o MapDialogRect).
+The measurements are in dialog units (DLU); with MS Shell Dlg / Tahoma 8 at
+96 dpi: x * 1.5 and y * 1.625 px (rounded like MapDialogRect).
 """
 import struct
 
@@ -56,5 +56,5 @@ def dialog(pe, rid):
 
 
 def px(v, axis):
-    """DLU -> px para a Tahoma 8 a 96 ppp (base 6x13: x*6/4, y*13/8)."""
+    """DLU -> px for Tahoma 8 at 96 dpi (base 6x13: x*6/4, y*13/8)."""
     return (v * 6 + 2) // 4 if axis == "x" else (v * 13 + 4) // 8

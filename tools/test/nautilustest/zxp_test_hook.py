@@ -1,9 +1,9 @@
-"""Só para o Nautilus de teste (tools/test/nautilustest/run.sh; não se instala).
+"""Only for the test Nautilus (tools/test/nautilustest/run.sh; not installed).
 
-O Broadway não lê as definições do GNOME: o tema, os ícones e a letra do
-utilizador são postos aqui. E um canal para correr Python dentro do Nautilus
-(como o Marionette no Zen): o código escrito em $ZXP_TEST_RPC/in.py corre e o
-que imprimir vai para out.txt; shot(caminho) desenha a janela num PNG.
+Broadway does not read the GNOME settings: the user's theme, icons and font
+are set here. And a channel to run Python inside Nautilus (like Marionette
+in Zen): the code written to $ZXP_TEST_RPC/in.py runs and what it prints
+goes to out.txt; shot(path) draws the window into a PNG.
 """
 import faulthandler
 import io
@@ -20,7 +20,7 @@ gi.require_version('Graphene', '1.0')
 from gi.repository import Gdk, Gio, GLib, Graphene, Gsk, Gtk  # noqa: E402
 
 RPC = os.environ.get('ZXP_TEST_RPC')
-# kill -USR1 <pid>: onde está o Python (para quando o Nautilus encrava)
+# kill -USR1 <pid>: where Python is (for when Nautilus gets stuck)
 if RPC:
     os.makedirs(RPC, exist_ok=True)
     _stacks = open(os.path.join(RPC, 'stacks.txt'), 'a')
@@ -30,7 +30,7 @@ settings = Gtk.Settings.get_default()
 if settings is not None:
     for key, value in (('gtk-theme-name', 'WindowsXP-Luna'), ('gtk-icon-theme-name', 'WindowsXP'),
                        ('gtk-font-name', 'Tahoma 8.25'), ('gtk-cursor-theme-name', 'WindowsXP-Cursors'),
-                       # (sem isto o Broadway fica com -1 e os "sp" da libadwaita dão 0 px)
+                       # (without this Broadway stays at -1 and libadwaita's "sp" become 0 px)
                        ('gtk-xft-dpi', 96 * 1024)):
         settings.set_property(key, value)
 
@@ -45,8 +45,8 @@ _renderer = None
 
 
 def shot(path, widget=None):
-    """Desenha a janela (ou um widget) num PNG, ao tamanho real. (Um só
-    renderer, nunca libertado: o GTK aborta se um renderer ativo for libertado.)"""
+    """Draws the window (or a widget) into a PNG, at real size. (A single
+    renderer, never freed: GTK aborts if an active renderer is freed.)"""
     global _renderer
     w = widget or window()
     width, height = w.get_width(), w.get_height()

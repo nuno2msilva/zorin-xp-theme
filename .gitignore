@@ -1,21 +1,21 @@
-# Zorin XP — o que fica fora do git
+# Zorin XP — what stays out of git
 
-# Cópias da pasta Windows do XP (só servem para extrair os recursos para
-# assets/: imagens dos temas, ícones, cursores, sons, letras e textos). São
-# grandes e são binários da Microsoft: ficam só no disco.
-#   windows/xp-pro-pt  — Windows XP Professional, português (o tema Luna)
-#   windows/xp-mce-en  — Windows XP Media Center Edition, inglês (Royale, Zune)
+# Copies of the XP Windows folder (only used to extract the resources into
+# assets/: theme images, icons, cursors, sounds, fonts and texts). They are
+# big and they are Microsoft binaries: they stay on disk only.
+#   windows/xp-pro-pt  — Windows XP Professional, Portuguese (the Luna theme)
+#   windows/xp-mce-en  — Windows XP Media Center Edition, English (Royale, Zune)
 /windows/
 
-# O tema construído (install.sh / tools/build.py): gera-se de novo
+# The built theme (install.sh / tools/build.py): it is generated again
 /build/
 
 # Python
 __pycache__/
 *.pyc
 
-# Referências: capturas do XP real, recortes e folhas de comparação (para
-# medir e comparar; a construção não as usa). Ficam só no disco.
+# References: captures of a real XP, crops and comparison sheets (to
+# measure and compare; the build does not use them). They stay on disk only.
 /Screenshots/
 /reference/
 /icones-candidatos.png

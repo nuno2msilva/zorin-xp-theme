@@ -1,1 +1,2 @@
-"""Bibliotecas comuns às ferramentas do Zorin XP (extração e construção)."""
+"""Libraries shared by the Zorin XP tools (extraction and build)."""
+

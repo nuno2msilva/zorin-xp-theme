@@ -1,14 +1,14 @@
-"""Tema de ícones "WindowsXP": os ícones do XP tirados dos binários.
+"""The "WindowsXP" icon theme: XP's icons taken from the binaries.
 
-Pastas, locais, dispositivos, tipos de ficheiro, estados, ações, emblemas e as
-aplicações do sistema (Ficheiros = Explorador, Definições = Painel de
-controlo, Editor de texto = Bloco de notas, ...). As categorias do menu
-(applications-*) e os ícones simbólicos ficam os do Zorin, de quem o tema
-herda tudo o resto (ZorinBlue-Light, Adwaita, hicolor).
+Folders, places, devices, file types, status, actions, emblems and the
+system applications (Files = Explorer, Settings = Control Panel, Text
+Editor = Notepad, ...). The menu categories (applications-*) and the
+symbolic icons stay Zorin's, from which the theme inherits everything else
+(ZorinBlue-Light, Adwaita, hicolor).
 
-Cada nome freedesktop aponta para um ícone do XP em assets/icons (o nome do
-.ico; a origem de cada um está em tools/catalog.py), ou para um ícone
-composto ("composite:...", feito aqui de peças do XP).
+Each freedesktop name points to an XP icon in assets/icons (the .ico's name;
+the source of each is in tools/catalog.py), or to a composite icon
+("composite:...", made here from XP pieces).
 """
 import os
 
@@ -55,7 +55,7 @@ ICONS = {
         "computer-laptop": "computer",
     },
     "apps": {
-        # aplicações do sistema -> os programas equivalentes do XP
+        # system applications -> the equivalent XP programs
         "org.gnome.Nautilus": "explorer", "system-file-manager": "explorer",
         "org.gnome.Settings": "control-panel", "preferences-system": "control-panel",
         "gnome-control-center": "control-panel",
@@ -106,8 +106,8 @@ ICONS = {
         "application-x-executable": "application-x-executable", "application-x-ms-dos-executable": "application-x-executable",
         "application-x-msdownload": "application-x-executable", "application-x-sharedlib": "application-x-sharedlib",
         "unknown": "unknown", "application-octet-stream": "unknown",
-        # imagens como no XP (associações do Visualizador de imagens e faxes,
-        # shimgvw.dll): JPEG com o pôr do sol, PNG/GIF/BMP com as formas, TIFF
+        # images as in XP (associations of the Windows Picture and Fax Viewer,
+        # shimgvw.dll): JPEG with the sunset, PNG/GIF/BMP with the shapes, TIFF
         "image-x-generic": "image-x-generic", "image-bmp": "image-x-generic",
         "image-png": "image-x-generic", "image-gif": "image-x-generic", "image-x-icon": "image-x-generic",
         "image-jpeg": "image-jpeg", "image-tiff": "image-tiff",
@@ -143,12 +143,12 @@ ICONS = {
         "emblem-unreadable": "process-stop",
     },
 }
-# Office 2010 e Works como na VM do XP de referência: o ícone de cada tipo é
-# o DefaultIcon do registo dela (system32/config/software, HKCR\<ProgID>),
-# nos ficheiros de ícones da cache do instalador (WINDOWS\Installer\{produto});
-# os instaladores (.msi e também .deb, .rpm, flatpak, snap) com o "Pacote do
-# Windows Installer" (msiexec.exe). Aprovado pelo utilizador (2026-10-17,
-# Screenshots/proposta-icones.png); o PDF espera pelos ficheiros da Adobe.
+# Office 2010 and Works as in the reference XP VM: each type's icon is the
+# DefaultIcon from its registry (system32/config/software, HKCR\<ProgID>), in
+# the icon files of the installer cache (WINDOWS\Installer\{product}); the
+# installers (.msi and also .deb, .rpm, flatpak, snap) with the "Windows
+# Installer Package" (msiexec.exe). Approved by the user (2026-10-17,
+# Screenshots/proposta-icones.png); PDF is waiting for Adobe's files.
 OFFICE = {
     # Word
     "application-msword": "application-msword", "application-rtf": "application-msword",
@@ -158,7 +158,7 @@ OFFICE = {
     "application-vnd.openxmlformats-officedocument.wordprocessingml.template": "application-vnd.openxmlformats-officedocument.wordprocessingml.template",
     "application-vnd.ms-word.template.macroEnabled.12": "application-vnd.ms-word.template.macroEnabled.12",
     "application-vnd.oasis.opendocument.text": "application-vnd.oasis.opendocument.text",
-    # Excel (.xlt, .xla, .xlw têm o mesmo tipo do .xls no sistema)
+    # Excel (.xlt, .xla, .xlw have the same type as .xls on the system)
     "application-vnd.ms-excel": "application-vnd.ms-excel",
     "application-vnd.openxmlformats-officedocument.spreadsheetml.sheet": "application-vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "application-vnd.ms-excel.sheet.macroEnabled.12": "application-vnd.ms-excel.sheet.macroEnabled.12",
@@ -169,7 +169,7 @@ OFFICE = {
     "text-csv": "text-csv",
     "application-vnd.oasis.opendocument.spreadsheet": "application-vnd.oasis.opendocument.spreadsheet",
     "x-office-spreadsheet": "application-vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    # PowerPoint (.pps, .pot têm o mesmo tipo do .ppt no sistema)
+    # PowerPoint (.pps, .pot have the same type as .ppt on the system)
     "application-vnd.ms-powerpoint": "application-vnd.ms-powerpoint",
     "application-vnd.openxmlformats-officedocument.presentationml.presentation": "application-vnd.openxmlformats-officedocument.presentationml.presentation",
     "application-vnd.ms-powerpoint.presentation.macroEnabled.12": "application-vnd.ms-powerpoint.presentation.macroEnabled.12",
@@ -181,7 +181,7 @@ OFFICE = {
     "application-vnd.oasis.opendocument.presentation": "application-vnd.oasis.opendocument.presentation",
     "x-office-presentation": "application-vnd.openxmlformats-officedocument.presentationml.presentation",
     "application-vnd.ms-officetheme": "application-vnd.ms-officetheme",
-    # Access, Publisher, OneNote, Outlook (os tipos que o sistema não tinha:
+    # Access, Publisher, OneNote, Outlook (the types the system did not have:
     # src/mime/zorin-xp-office.xml)
     "application-vnd.ms-access": "application-vnd.ms-access", "application-x-msaccess-accdb": "application-x-msaccess-accdb",
     "application-x-msaccess-accde": "application-x-msaccess-accde", "application-x-msaccess-accdt": "application-x-msaccess-accdt",
@@ -190,7 +190,7 @@ OFFICE = {
     "application-onenote": "application-onenote", "application-x-onenote-toc": "application-x-onenote-toc",
     "application-vnd.ms-outlook": "application-vnd.ms-outlook", "application-vnd.ms-outlook-pst": "application-vnd.ms-outlook-pst",
     "text-vcard": "text-vcard", "text-x-vcard": "text-vcard", "text-calendar": "text-calendar",
-    # Microsoft Works (Processador de texto)
+    # Microsoft Works (Word Processor)
     "application-vnd.ms-works": "application-vnd.ms-works",
     # instaladores
     "application-x-msi": "application-x-msi", "application-vnd.debian.binary-package": "application-x-msi",
@@ -202,17 +202,17 @@ OFFICE = {
 ICONS["mimetypes"].update(OFFICE)
 
 SIZES = (16, 32, 48)
-# tamanhos que o XP não tem: os pequenos centrados (nítidos, como as barras de
-# ferramentas do XP), os grandes ampliados ao píxel
+# sizes XP does not have: the small ones centred (sharp, like XP's
+# toolbars), the big ones scaled up to the pixel
 EXTRA = {22: (16, "pad"), 24: (16, "pad"), 64: (32, 2), 96: (48, 2)}
 CONTEXT = {"places": "Places", "devices": "Devices", "apps": "Applications",
            "mimetypes": "MimeTypes", "status": "Status", "actions": "Actions", "emblems": "Emblems"}
 
 
-# ícones compostos de peças do XP (o XP não tinha estes)
+# icons composed from XP pieces (XP did not have these)
 def _downloads(size):
-    """"Downloads": a pasta do XP com o globo do Internet Explorer (escolha do
-    utilizador, 2026-10-13)."""
+    """"Downloads": the XP folder with the Internet Explorer globe (the user's
+    choice, 2026-10-13)."""
     folder = image("folder", size).copy()
     globe = image("internet", 48)
     bs = round(size * 0.55)
@@ -222,11 +222,11 @@ def _downloads(size):
 
 
 def _shortcut_arrow(size):
-    """Emblema de atalho: só a seta do XP (shortcut-overlay), recortada. O XP põe o
-    ícone sobreposto inteiro por cima do ícone; o GNOME desenha o emblema num
-    quadrado de 1/3 do ícone — com o sobreposto inteiro a seta ficava minúscula.
-    A seta do XP ocupa ~1/3 do ícone (11 px em 32), por isso fica do tamanho certo."""
-    # a seta recortada maior mais próxima do tamanho pedido (16 px: 7, 32: 11, 48: 20)
+    """Shortcut emblem: only XP's arrow (shortcut-overlay), cropped. XP puts the
+    whole overlay icon on top of the icon; GNOME draws the emblem in a square
+    of 1/3 of the icon — with the whole overlay the arrow was tiny. XP's
+    arrow takes ~1/3 of the icon (11 px in 32), so it ends up the right size."""
+    # the biggest cropped arrow closest to the requested size (16 px: 7, 32: 11, 48: 20)
     crops = []
     for base in (16, 32, 48):
         im = image("shortcut-overlay", base)
@@ -245,9 +245,9 @@ COMPOSITES = {"downloads": _downloads, "shortcut-arrow": _shortcut_arrow}
 
 
 def image(name, size):
-    """Um ícone num tamanho: o do XP (assets/icons/<nome>.ico) ou, se o XP não
-    o tinha nesse tamanho, o maior que tinha, reduzido; "composite:..." é
-    um dos compostos acima."""
+    """An icon at one size: XP's (assets/icons/<name>.ico) or, if XP did not
+    have it at that size, the biggest one it had, scaled down; "composite:..."
+    is one of the composites above."""
     if name.startswith("composite:"):
         return COMPOSITES[name.split(":", 1)[1]](size)
     img = assets.icon(name, size)
@@ -257,7 +257,7 @@ def image(name, size):
     return img
 
 
-# compostos desenhados já em qualquer tamanho (sem centrar nem ampliar)
+# composites drawn directly at any size (without centring or scaling up)
 DIRECT = {"composite:shortcut-arrow"}
 
 
@@ -276,7 +276,7 @@ def _render(name, size):
 
 
 def build(out_dir, name="WindowsXP"):
-    """Tema de ícones em out_dir/<name>."""
+    """Icon theme in out_dir/<name>."""
     theme = os.path.join(out_dir, name)
     dirs = []
     for ctx, icons in ICONS.items():

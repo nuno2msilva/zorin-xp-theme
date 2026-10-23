@@ -1,8 +1,8 @@
 #!/bin/bash
-# GNOME Shell de teste, headless, no modo gdm, TOTALMENTE isolado da sessão
-# real: sem XDG_SESSION_ID/seat/ecrã (o modo gdm fala com o logind sobre a
-# sessão herdada — já fez a sessão real bloquear/crashar), runtime dir,
-# dconf, dados e cache próprios. Uso: SIZE=1920x1080 ./run.sh &
+# Test GNOME Shell, headless, in gdm mode, FULLY isolated from the real
+# session: no XDG_SESSION_ID/seat/display (gdm mode talks to logind about the
+# inherited session — it once made the real session lock/crash), its own
+# runtime dir, dconf, data and cache. Usage: SIZE=1920x1080 ./run.sh &
 T="$(dirname "$(readlink -f "$0")")"; P="$(dirname "$(dirname "$(dirname "$T")")")"
 E=${ZXP_TEST_ENV:-/tmp/zxp-shelltest}; rm -rf "$E"; mkdir -p "$E"/{data/gnome-shell/extensions,data/fonts,cfg/fontconfig/conf.d,cache}
 R=$(mktemp -d /tmp/zxp-run.XXXX); chmod 700 "$R"

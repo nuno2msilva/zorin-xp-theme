@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Captura widgets GTK4 com o tema gerado (usar via tools/test/preview.sh).
+"""Captures GTK4 widgets with the generated theme (use through tools/test/preview.sh).
 
-Uso: gtk4shot.py <saida.png> [frame|gallery]
-  frame   — simula a barra de título do mutter-x11-frames
+Usage: gtk4shot.py <out.png> [frame|gallery]
+  frame   — simulates mutter-x11-frames' title bar
             (widget.default-decoration > headerbar.titlebar.default-decoration)
-  gallery — galeria de widgets GTK4
+  gallery — GTK4 widget gallery
 """
 import sys
 
 import gi
 import os
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 gi.require_version("Gtk", "4.0")
@@ -20,7 +20,7 @@ from gi.repository import GLib, Gtk  # noqa: E402
 
 
 class FrameHeader(Gtk.Box):
-    """Equivalente ao MetaFrameHeader (nome CSS "widget")."""
+    """Equivalent to MetaFrameHeader (CSS name "widget")."""
     __gtype_name__ = "ZxpFrameHeader"
 
 

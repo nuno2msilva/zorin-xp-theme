@@ -1,45 +1,44 @@
-"""Zen Browser com o aspeto do Internet Explorer 6 do XP (src/zen-ie).
+"""Zen Browser with the look of XP's Internet Explorer 6 (src/zen-ie).
 
-Imagens, todas dos binários do XP:
-  shell32.dll  bitmaps 204/205 — botões de 24 px do IE6 Luna (normal / rato
-               por cima): retroceder, avançar, parar, atualizar, página
-               inicial, procurar, favoritos, imprimir, tamanho do texto,
-               editar, ferramentas, multimédia, histórico, correio, ecrã
-               inteiro, discussão. Os desativados fazem-se como o comctl32
-               (cinzentos, mais claros).
-  shell32.dll  bitmap 240 — a bandeira do XP animada (50 imagens de 22 px
-               sobre branco; a primeira é a parada).
-  shell32.dll  bitmaps 230/231 — botão verde "Ir para" (20 px).
-  inetcpl.cpl  ícone 1313 (zona Internet, na barra de estado).
-  iexplore.exe ícone 32529 (página do IE: caixa de
-               endereço e "Concluído", como na captura).
-  luna.msstyles (via gtk-assets do tema GTK) — botões da barra de
-               ferramentas, fundo da barra de bandas (Rebar: os 13 px esticados
-               sem suavizar a 86 px, com as 4 linhas de baixo fixas — igual à
-               captura), botão da caixa de combinação.
-  Screenshots/ie6-referencia.png (captura do IE6 da VM do utilizador) — a
-               barra de estado (fundo, divisórias, pega, barra de progresso),
-               que o IE desenha por cima do fundo do tema com outras cores.
+Images, all from XP's binaries:
+  shell32.dll  bitmaps 204/205 — IE6 Luna 24 px buttons (normal / hover):
+               back, forward, stop, refresh, home, search, favorites,
+               print, text size, edit, tools, media, history, mail, full
+               screen, discuss. The disabled ones are made like comctl32
+               does (grey, lighter).
+  shell32.dll  bitmap 240 — the animated XP flag (50 images of 22 px on
+               white; the first one is the still one).
+  shell32.dll  bitmaps 230/231 — green "Go" button (20 px).
+  inetcpl.cpl  icon 1313 (Internet zone, in the status bar).
+  iexplore.exe icon 32529 (IE page: address box and "Concluído", as in
+               the capture).
+  luna.msstyles (through the GTK theme's gtk-assets) — toolbar buttons,
+               band bar background (Rebar: the 13 px stretched without
+               smoothing to 86 px, with the bottom 4 rows fixed — identical to
+               the capture), combo box button.
+  Screenshots/ie6-referencia.png (IE6 capture from the user's VM) — the
+               status bar (background, dividers, grip, progress bar), which
+               IE draws over the theme's background with other colours.
 
-Texto: "ZXP Tahoma" (tools/lib/pixelfont.py), a Tahoma 8 do XP em píxeis com as
-larguras do GDI — o Firefox não usa as larguras ajustadas e com a Tahoma
-normal as letras ficam com espaços irregulares.
+Text: "ZXP Tahoma" (tools/lib/pixelfont.py), XP's Tahoma 8 in pixels with
+GDI's widths — Firefox does not use the hinted widths and with the normal
+Tahoma the letters are irregularly spaced.
 
-Sons: extensão src/zen-ie/sounds com o clique do XP ("Iniciar navegação",
-Media/Windows XP Start.wav) e os da barra de informações do SP2 (Windows XP
-Pop-up Blocked.wav, Windows XP Information Bar.wav).
+Sounds: the src/zen-ie/sounds extension with XP's click ("Iniciar
+navegação", Media/Windows XP Start.wav) and SP2's information bar ones
+(Windows XP Pop-up Blocked.wav, Windows XP Information Bar.wav).
 
-Barras Favoritos e Histórico do IE6: extensões src/zen-ie/favorites e
-src/zen-ie/history (+ explorerbar/ comum), com os ícones da barra do
-Explorador: shdocvw.dll 534/535 (Adicionar, Organizar, Ver; 18x16, magenta =
-transparente), browseui.dll 563/564 (Procurar), shdocvw.dll ícone 20783 (dias
-do histórico), shell32.dll ícones 4/5 (pastas), os botões do XP do msstyles.
+IE6 Favorites and History bars: the src/zen-ie/favorites and
+src/zen-ie/history extensions (+ the shared explorerbar/), with the
+Explorer bar icons: shdocvw.dll 534/535 (Add, Organize, View; 18x16, magenta
+= transparent), browseui.dll 563/564 (Search), shdocvw.dll icon 20783
+(history days), shell32.dll icons 4/5 (folders), XP's buttons from msstyles.
 
-Página de erro de rede: a do IE6 (shdoclc.dll, DNSERROR.HTM), tools/ieerror.py.
+Network error page: IE6's (shdoclc.dll, DNSERROR.HTM), tools/builders/ieerror.py.
 
-build(xp_root, gtk_assets, out) -> out/zorin-xp-ie/{ie.css, content.css, img/*.png},
-                                   out/fonts/ZXPTahoma{,-Bold,13-Bold}.ttf, ZXPVerdanaIE.ttf,
-                                   out/zorin-xp-ie-sounds@zorin-xp.local.xpi
+build(gtk_assets, out) -> out/zorin-xp-ie/{ie.css, content.css, img/*.png},
+                          out/fonts/ZXPTahoma{,-Bold,13-Bold}.ttf, ZXPVerdanaIE.ttf,
+                          out/zorin-xp-ie-sounds@zorin-xp.local.xpi
 """
 import base64
 import os
@@ -51,7 +50,7 @@ import zipfile
 from PIL import Image, ImageEnhance
 
 import sys
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import msstyles
 from lib.paths import ROOT
@@ -70,14 +69,14 @@ LUNA = ["toolbar-button-hover", "toolbar-button-active", "toolbar-button-checked
         "check-unchecked-normal", "check-unchecked-hover", "check-checked-normal", "check-checked-hover",
         "button-normal", "button-hover", "button-active", "button-default",
         "caption-focused-fill",
-        # moldura de janela Luna dos diálogos das páginas (alert/confirm/prompt)
+        # Luna window frame of the page dialogs (alert/confirm/prompt)
         "caption-left-focused", "caption-right-focused", "frame-left-strip-focused",
         "frame-right-strip-focused", "frame-bottom-strip-focused",
         "caption-close-focused-normal", "caption-close-focused-hover", "caption-close-focused-active"]
 
 
 def disabled(im):
-    """Botão desativado como na captura do IE (cinzento claro, sem cor)."""
+    """Disabled button as in the IE capture (light grey, no colour)."""
     gray = ImageEnhance.Color(im).enhance(0.0)
     gray = ImageEnhance.Contrast(gray).enhance(0.55)
     gray = ImageEnhance.Brightness(gray).enhance(1.18)
@@ -97,11 +96,11 @@ def build(gtk_assets, out):
     for ttf, px, family, style, name in (
             ("tahoma.ttf", 11, "ZXP Tahoma", "Regular", "ZXPTahoma.ttf"),
             ("tahomabd.ttf", 11, "ZXP Tahoma", "Bold", "ZXPTahoma-Bold.ttf"),
-            # nome do espaço na barra lateral: Tahoma negrito 10 pt
+            # name of the space in the sidebar: Tahoma bold 10 pt
             ("tahomabd.ttf", 13, "ZXP Tahoma 13", "Bold", "ZXPTahoma13-Bold.ttf")):
         pixelfont.export(assets.font(ttf), px, family, style, os.path.join(fonts, name))
-    # página de erro do IE (tools/builders/ieerror.py): a Verdana 8 pt com o negrito e o
-    # título (13 pt) numa só fonte; as larguras ficam no .json (não se instala)
+    # IE error page (tools/builders/ieerror.py): Verdana 8 pt with the bold and
+    # the heading (13 pt) in one font; the widths go in the .json (not installed)
     pixelfont.export_mix(assets.font("verdana.ttf"), assets.font("verdanab.ttf"), 11, 17, "ZXP Verdana IE",
                          os.path.join(fonts, "ZXPVerdanaIE.ttf"))
     import json
@@ -120,17 +119,17 @@ def build(gtk_assets, out):
     with open(os.path.join(dst, "content.css"), "w", encoding="utf-8") as f:
         f.write(content)
 
-    # extensão dos sons (o XPI é um zip com o manifesto na raiz): o clique e os
-    # da barra de informações do SP2
+    # sounds extension (the XPI is a zip with the manifest at the root): the
+    # click and SP2's information bar ones
     src = os.path.join(ROOT, "src", "zen-ie", "sounds")
     oggs = {}
     for wav_name, ogg_name in (("windows xp start.wav", "start.ogg"),
                                ("windows xp pop-up blocked.wav", "popup-blocked.ogg"),
                                ("windows xp information bar.wav", "infobar.ogg")):
         wav = assets.sound(wav_name)
-        # (o Zen não toca WAV: vão em OGG Vorbis, convertidos com o ffmpeg)
+        # (Zen does not play WAV: they go as OGG Vorbis, converted with ffmpeg)
         oggs[ogg_name] = os.path.join(out, ogg_name)
-        # (bitexact e número de série fixo: o mesmo .ogg em cada construção)
+        # (bitexact and a fixed serial number: the same .ogg on every build)
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", wav, "-c:a", "libvorbis",
                         "-q:a", "6", "-fflags", "+bitexact", "-flags:a", "+bitexact",
                         "-serial_offset", "1", oggs[ogg_name]], check=True)
@@ -141,10 +140,9 @@ def build(gtk_assets, out):
         for name, path in oggs.items():
             z.write(path, name)
             os.remove(path)
-    # a pasta do "Guardar como" lembrada por sítio (src/zen-ie/lastdir), o
-    # aviso de novo separador (src/zen-ie/tabflash), o pino da barra dos
-    # separadores (src/zen-ie/sidebarpin), o título do IE (src/zen-ie/title)
-    # e as barras de deslocamento do XP (src/zen-ie/scrollbars)
+    # the "Save As" folder remembered per site (src/zen-ie/lastdir), the new tab
+    # notice (src/zen-ie/tabflash), the tab bar pin (src/zen-ie/sidebarpin),
+    # the IE title (src/zen-ie/title) and XP's scrollbars (src/zen-ie/scrollbars)
     for name in ("lastdir", "tabflash", "sidebarpin", "title", "scrollbars"):
         src = os.path.join(ROOT, "src", "zen-ie", name)
         with zipfile.ZipFile(os.path.join(out, f"zorin-xp-ie-{name}@zorin-xp.local.xpi"), "w",
@@ -154,10 +152,10 @@ def build(gtk_assets, out):
 
     normal = assets.image("ie/toolbar")
     hot = assets.image("ie/toolbar-hot")
-    # ícone do diálogo "Adicionar aos Favoritos" (estrela com +, 24 px: o 4.º
-    # botão da barra do Explorador)
+    # icon of the "Adicionar aos Favoritos" dialog (star with +, 24 px: the 4th
+    # button of the Explorer bar)
     assets.image("explorer/toolbar").crop((3 * 24, 0, 4 * 24, 24)).save(os.path.join(img, "add-favorite.png"))
-    # a pasta dos favoritos (a lista "Pasta" do mesmo diálogo)
+    # the favorites folder (the "Pasta" list of the same dialog)
     assets.icon("folder", 16).save(os.path.join(img, "folder.png"))
     for i, name in enumerate(IE_BUTTONS):
         box = (i * 24, 0, i * 24 + 24, 24)
@@ -170,14 +168,14 @@ def build(gtk_assets, out):
         assets.image(f"explorer/{name}").save(os.path.join(img, f"{name}.png"))
 
     assets.icon("ie-zone-internet", 16).save(os.path.join(img, "zone-internet.png"))
-    # cadeado da barra de estado (ligação segura): shdocvw.dll 103, da família
-    # dos ícones dos painéis (100 página inicial, 112 ocupado, 116 a imprimir)
+    # status bar padlock (secure connection): shdocvw.dll 103, from the family
+    # of the panel icons (100 home page, 112 busy, 116 printing)
     assets.icon("ie-status-lock", 16).save(os.path.join(img, "status-lock.png"))
-    # barra de informações do SP2 (xpsp2res.dll): pop-up bloqueado (5410) e o
-    # aviso pequeno (16) para os outros avisos e pedidos de permissão
+    # SP2's information bar (xpsp2res.dll): pop-up blocked (5410) and the small
+    # warning (16) for the other notices and permission requests
     assets.icon("ie-popup-blocked", 16).save(os.path.join(img, "popup-blocked.png"))
     assets.icon("ie-infobar-warning", 16).save(os.path.join(img, "infobar-warning.png"))
-    # caixas de mensagem das páginas: aviso (alert) e pergunta (confirm), user32
+    # page message boxes: warning (alert) and question (confirm), user32
     assets.icon("dialog-warning", 32).save(os.path.join(img, "mb-warning.png"))
     assets.icon("dialog-question", 32).save(os.path.join(img, "mb-question.png"))
     assets.icon("ie-page", 16).save(os.path.join(img, "page.png"))
@@ -185,12 +183,12 @@ def build(gtk_assets, out):
     rebar(gtk_assets, img)
     statusbar(img)
     tab_buttons(img)
-    # transferências (em baixo na barra lateral): o ícone de transferência do
-    # IE (shdocvw.dll 113, o da barra de estado: disco com a seta vermelha)
+    # downloads (at the bottom of the sidebar): IE's download icon (shdocvw.dll
+    # 113, the status bar one: disk with the red arrow)
     assets.icon("ie-downloads", 16).save(os.path.join(img, "downloads.png"))
-    # "Limpar" (fechar os separadores não fixos): a Limpeza do disco do XP
+    # "Limpar" (close the unpinned tabs): XP's Disk Cleanup
     assets.icon("cleanmgr", 16).save(os.path.join(img, "clear-tabs.png"))
-    # × do título das barras do Explorador (Favoritos/Histórico): 7x7, traço de 2 px
+    # × of the Explorer bars' title (Favorites/History): 7x7, 2 px stroke
     x = Image.new("RGBA", (16, 14))
     for i in range(7):
         for dx in (0, 1):
@@ -198,28 +196,28 @@ def build(gtk_assets, out):
                 if 4 <= px <= 11:
                     x.putpixel((px, py), (0, 0, 0, 255))
     x.save(os.path.join(img, "ebar-close.png"))
-    # "+" (Novo separador/espaço/pasta): a mesma espessura do × (traço de 2 px)
+    # "+" (New tab/space/folder): the same thickness as the × (2 px stroke)
     plus = Image.new("RGBA", (16, 16))
     for i in range(8):
         for d in (0, 1):
             plus.putpixel((4 + i, 7 + d), (0, 0, 0, 255))
             plus.putpixel((7 + d, 4 + i), (0, 0, 0, 255))
     plus.save(os.path.join(img, "plus.png"))
-    # o separador novo a piscar: o botão da barra de tarefas do XP que pede
-    # atenção (TaskBand.FlashButton, margens de 4 px)
+    # the flashing new tab: XP's taskbar button asking for attention
+    # (TaskBand.FlashButton, 4 px margins)
     luna = assets.theme("luna")
     luna.states("TaskBand.FlashButton")[0].convert("RGBA").save(os.path.join(img, "flash-button.png"))
-    # barras de deslocamento das páginas: as imagens do tema GTK (ScrollBar
-    # do Luna, as mesmas do Explorador) embutidas na folha "agent" que a
-    # extensão src/zen-ie/scrollbars regista
+    # page scrollbars: the GTK theme's images (Luna's ScrollBar, the same as the
+    # Explorer's) embedded in the "agent" sheet the src/zen-ie/scrollbars
+    # extension registers
     def embed(m):
         data = open(os.path.join(gtk_assets, f"{m.group(1)}.png"), "rb").read()
         return 'url("data:image/png;base64,%s")' % base64.b64encode(data).decode()
     template = open(os.path.join(ROOT, "src", "zen-ie", "scrollbars.css.in"), encoding="utf-8").read()
     with open(os.path.join(os.path.dirname(img), "scrollbars.css"), "w", encoding="utf-8") as f:
         f.write(re.sub(r"\{\{img:([\w-]+)\}\}", embed, template))
-    # o pino da barra dos separadores: o das barras do Explorador do Luna
-    # (ExplorerBar.HeaderPin: 0 deitado, 3 espetado) sem cor, em cinzentos
+    # the tab bar pin: the one of Luna's Explorer bars (ExplorerBar.HeaderPin:
+    # 0 lying, 3 pushed in) without colour, in greys
     pins = luna.states("ExplorerBar.HeaderPin")
     for name, i in (("pin-in", 3), ("pin-out", 0)):
         src = pins[i].convert("RGBA")
@@ -231,17 +229,17 @@ def build(gtk_assets, out):
                     v = (r * 299 + g * 587 + b * 114) // 1000
                     im.putpixel((x, y), (v, v, v, 255))
         im.save(os.path.join(img, f"{name}.png"))
-    # o leitor de som como o Windows Media Player 9 do XP (wmploc.dll, o leitor
-    # embutido: OCXLAYOUTFULL): a barra prateada (371, linhas 29-63) e os
-    # botões redondos, que trazem o fundo da barra à altura a que ficavam nela
-    # (reproduzir/pausa na linha 32 -> 3 px; os outros na 37 -> 8 px)
+    # the sound player like XP's Windows Media Player 9 (wmploc.dll, the
+    # embedded player: OCXLAYOUTFULL): the silver bar (371, rows 29-63) and
+    # the round buttons, which carry the bar's background at the height they
+    # had on it (play/pause at row 32 -> 3 px; the others at 37 -> 8 px)
     assets.image("wmp/bar").crop((0, 29, 44, 64)).save(os.path.join(img, "wmp-bar.png"))
     for name in ("play", "pause", "prev", "next", "mute"):
         for state in ("", "-hover", "-down", "-disabled"):
-            # (a pausa não tem imagem desativada: fica a normal)
+            # (pause has no disabled image: the normal one stays)
             src = f"wmp/{name}{state}" if (name, state) != ("pause", "-disabled") else "wmp/pause"
             assets.image(src).save(os.path.join(img, f"wmp-{name}{state}.png"))
-    # seta dos botões com menu (Retroceder/Avançar): triângulo 5x3 como na captura
+    # arrow of the buttons with a menu (Back/Forward): 5x3 triangle as in the capture
     for name, color in (("arrow", (0, 0, 0, 255)), ("arrow-disabled", (0xc9, 0xc9, 0xc2, 255))):
         a = Image.new("RGBA", (5, 3))
         for y, (x0, x1) in enumerate(((0, 5), (1, 4), (2, 3))):
@@ -258,21 +256,21 @@ def build(gtk_assets, out):
 
 
 def rebar(gtk_assets, img):
-    """Fundo das bandas: a imagem do msstyles (320x13, com gradiente nas duas
-    direções) esticada sem suavizar à janela — em altura só as 9 linhas de
-    cima (as 4 de baixo ficam fixas: igual à captura)."""
+    """Band background: the msstyles image (320x13, with a gradient in both
+    directions) stretched to the window without smoothing — vertically only
+    the top 9 rows (the bottom 4 stay fixed: identical to the capture)."""
     src = Image.open(os.path.join(gtk_assets, "rebar-normal.png")).convert("RGB")
     src.crop((0, 0, src.width, src.height - 4)).save(os.path.join(img, "rebar-top.png"))
     src.crop((0, src.height - 4, src.width, src.height)).save(os.path.join(img, "rebar-bottom.png"))
-    # (o título das barras do Explorador e os 3 px por baixo dos botões: só a
-    # 1.ª linha, esticada — o degradê da esquerda para a direita)
+    # (the Explorer bars' title and the 3 px below the buttons: only the first
+    # row, stretched — the left-to-right gradient)
     src.crop((0, 0, src.width, 1)).save(os.path.join(img, "rebar-row.png"))
 
 
 def tab_buttons(img):
-    """Fechar / descarregar nos separadores: só o desenho, a preto, como o ×
-    do título das barras do Explorador do IE (7x7, traço de 2 px) e um – da
-    mesma espessura; o realce ao passar o rato é o dos botões planos do XP."""
+    """Close / unload on the tabs: only the drawing, in black, like the × of
+    the IE Explorer bars' title (7x7, 2 px stroke) and a – of the same
+    thickness; the hover highlight is XP's flat buttons'."""
     x = Image.new("RGBA", (13, 13))
     for i in range(7):
         for dx in (0, 1):
@@ -288,13 +286,13 @@ def tab_buttons(img):
 
 
 def _strip18(name, i):
-    """O botão i (18x16) de uma tira das barras do Explorador, sem o magenta."""
+    """Button i (18x16) of a strip of the Explorer bars, without the magenta."""
     im = msstyles.key_out(assets.image(name), (255, 0, 255))
     return im.crop((i * 18, 0, i * 18 + 18, 16))
 
 
 def explorer_bars(gtk_assets, img, out):
-    """XPIs das barras Favoritos e Histórico (ver o cabeçalho)."""
+    """XPIs of the Favorites and History bars (see the header)."""
     shared = {
         "img/page.png": assets.icon("ie-page", 16),
         "img/folder.png": assets.icon("folder", 16),
@@ -314,7 +312,7 @@ def explorer_bars(gtk_assets, img, out):
             "img/ebar-search.png": _strip18("ie/search-bar", 0), "img/ebar-search-hot.png": _strip18("ie/search-bar-hot", 0),
             "img/tb-history-16.png": n16.crop((12 * 16, 0, 13 * 16, 16)),
         },
-        # (a janela Localizar não usa a barra do Explorador, só as imagens)
+        # (the Find window does not use the Explorer bar, only the images)
         "find": {"img/tb-search-16.png": n16.crop((5 * 16, 0, 6 * 16, 16))},
     }
     copies = {f"img/{n}.png": os.path.join(img, f"{n}.png") for n in
@@ -349,16 +347,17 @@ def statusbar(img):
     ref.crop((1300, y0, 1301, y1)).save(os.path.join(img, "status-bg.png"))
     ref.crop((1488, y0, 1490, y1)).save(os.path.join(img, "status-sep.png"))
     ref.crop((1898, y0, 1915, y1)).save(os.path.join(img, "status-gripper.png"))
-    # barra de progresso vazia (as colunas dos blocos tapadas com uma do meio)
+    # empty progress bar (the block columns covered with one from the middle)
     bar = ref.crop((1493, y0, 1586, y1))
     mid = bar.crop((50, 0, 51, bar.height))
     for x in range(4, 40):
         bar.paste(mid, (x, 0))
     bar.save(os.path.join(img, "progress.png"))
-    # botão da lista da caixa de endereço (15x18, dentro do rebordo)
+    # address box drop-down button (15x18, inside the border)
     ref.crop((1828, 96, 1843, 114)).save(os.path.join(img, "combo-drop.png"))
-    # tira de 11 blocos verdes (cada um: bloco + intervalo, 8 px), só as linhas
-    # dos blocos (y 917..927): entra da esquerda bloco a bloco
+    # strip of 11 green blocks (each: block + gap, 8 px), only the block rows
+    # (y 917..927): it comes in from the left block by block
+
     chunk = ref.crop((1497, 917, 1505, 928))
     strip = Image.new("RGB", (88, chunk.height))
     for i in range(11):

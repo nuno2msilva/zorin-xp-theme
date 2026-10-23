@@ -1,23 +1,22 @@
-"""Ecrã de boas-vindas do XP (logonui.exe) para o ecrã de início de sessão.
+"""XP's welcome screen (logonui.exe) for the login screen.
 
-Usa as imagens do logonui.exe que o UIFILE 1000 (folha de estilos DirectUI)
-usa (assets/images/logon), com os nomes que a extensão do GDM espera, e
-compõe nos tamanhos exatos as que o XP esticava (o St do GNOME 46 não faz
-9-slice de forma fiável). Junta a extensão (src/gdm-extension) e os tipos de
-letra.
+Uses the logonui.exe images that UIFILE 1000 (the DirectUI stylesheet) uses
+(assets/images/logon), with the names the GDM extension expects, and
+composes at the exact sizes the ones XP stretched (GNOME 46's St does not do
+9-slice reliably). Adds the extension (src/gdm-extension) and the fonts.
 
-Imagens (assets/images/logon; ver o UIFILE):
-  glow             brilho no canto superior esquerdo (conteúdo, sem escala)
-  edit             caixa da palavra-passe (borderthickness 3,3,5,5) -> 163x28
-  go / go-focus    botão "ir" (seta verde) normal/com foco
-  info / -focus    botão "?" (sugestão da palavra-passe)
-  power / -hot     "Desligar computador" normal/rato por cima
-  select           fundo do utilizador selecionado (esticado à largura da lista)
-  frame / -hot     moldura da imagem normal/rato por cima ou selecionado
-  picture          imagem por omissão (xadrez)
-  logo             logótipo Windows XP
-  divider-v / -top / -bottom   divisória vertical, linha do painel de cima,
-                   linha laranja de baixo
+Images (assets/images/logon; see the UIFILE):
+  glow             glow in the top left corner (content, unscaled)
+  edit             password box (borderthickness 3,3,5,5) -> 163x28
+  go / go-focus    "go" button (green arrow) normal/focused
+  info / -focus    "?" button (password hint)
+  power / -hot     "Desligar computador" normal/hover
+  select           background of the selected user (stretched to the list width)
+  frame / -hot     picture frame normal/hover or selected
+  picture          default picture (chess)
+  logo             Windows XP logo
+  divider-v / -top / -bottom   vertical divider, top panel line,
+                   orange bottom line
 """
 import os
 import shutil
@@ -30,22 +29,22 @@ from lib.paths import ROOT
 
 UUID = "zorin-xp-logon@zorin-xp.local"
 
-# as que vão tal e qual (logon/<nome> -> images/<nome>.png)
+# the ones that go as they are (logon/<name> -> images/<name>.png)
 PLAIN = ["glow", "go", "go-focus", "info", "info-focus", "power", "power-hot", "undock",
          "undock-hot", "frame", "frame-hot", "picture", "logo",
          "divider-v", "divider-top", "divider-bottom"]
-EDIT_SIZE = (163, 28)       # edit [id=password] width=163rp; linha de 28 px
+EDIT_SIZE = (163, 28)       # edit [id=password] width=163rp; 28 px line
 EDIT_BORDER = (3, 3, 5, 5)  # borderthickness: esquerda, cima, direita, baixo
-SELECT_W = 352              # 384 - divisória 1 - margem 26 - padding 5
+SELECT_W = 352              # 384 - divider 1 - margin 26 - padding 5
 FONTS = ["tahoma.ttf", "tahomabd.ttf", "arial.ttf", "arialbd.ttf", "arialbi.ttf",
-         "framd.ttf"]   # (título do diálogo "Desligar o computador")
+         "framd.ttf"]   # (title of the "Desligar o computador" dialog)
 
 
 def _image(name):
-    """Uma imagem de assets/images, sem a cor-chave magenta (#FF00FF) do
-    DirectUI quando a tem."""
+    """An image from assets/images, without DirectUI's magenta colour key
+    (#FF00FF) when it has one."""
     img = assets.image(name)
-    # cor-chave magenta (#FF00FF) do DirectUI
+    # DirectUI's magenta colour key (#FF00FF)
     if any(img.getpixel(p)[:3] == (255, 0, 255)
            for p in ((0, 0), (img.width - 1, 0), (0, img.height - 1))):
         img = msstyles.key_out(img, (255, 0, 255))
@@ -53,7 +52,7 @@ def _image(name):
 
 
 def nine_slice(img, size, border):
-    """Estica o centro e as arestas, mantém os cantos (como o DirectUI)."""
+    """Stretches the centre and the edges, keeps the corners (like DirectUI)."""
     l, t, r, b = border
     w, h = size
     sw, sh = img.size
@@ -68,19 +67,18 @@ def nine_slice(img, size, border):
     return out
 
 
-# textos do ecrã (tabela de strings do logonui.exe, na língua do XP)
-# textos dos ecrãs (tabelas de strings, na língua do XP)
+# texts of the screens (string tables, in XP's language)
 STRINGS = {
     "logonui.exe": {6: "password", 7: "welcome", 8: "badPassword", 10: "forgot", 11: "turnOff",
                     13: "hint", 15: "loggedOn", 22: "help", 25: "instructions", 26: "loggingOn"},
-    # estados do winlogon (ecrã de boas-vindas ao entrar e ao sair)
+    # winlogon states (welcome screen when logging on and off)
     "winlogon.exe": {1682: "loadingSettings", 1683: "closingNetwork", 1684: "shuttingDown",
                      1687: "savingSettings", 1690: "starting", 1691: "loggingOff"},
-    # dicas dos botões dos diálogos Desligar o computador / Terminar sessão
+    # tooltips of the buttons of the Turn Off Computer / Log Off dialogs
     "msgina.dll": {20129: "tipTurnOff", 20130: "tipStandby", 20132: "tipRestart"},
     "shell32.dll": {14349: "tipSwitchUser", 14350: "tipLogOff"},
 }
-# textos dos próprios diálogos (modelos DIALOGEX): msgina 20100 e shell32 1089
+# texts of the dialogs themselves (DIALOGEX templates): msgina 20100 and shell32 1089
 DIALOG_TEXTS = {
     ("msgina.dll", 20100): {20102: "turnOffTitle", 20104: "standby", 20103: "turnOffButton",
                             20105: "restart", 2: "cancel"},
@@ -89,8 +87,8 @@ DIALOG_TEXTS = {
 
 
 def export_strings():
-    """Os textos dos ecrãs e dos diálogos (STRINGS, DIALOG_TEXTS), na língua
-    de assets/locales."""
+    """The texts of the screens and dialogs (STRINGS, DIALOG_TEXTS), in the
+    language of assets/locales."""
     out = {}
     for exe, ids in STRINGS.items():
         for rid, key in ids.items():
@@ -116,19 +114,19 @@ def export_images(out):
 
 
 def build(out):
-    """build/logon/<uuid>/ (extensão + imagens) e build/logon/fonts/."""
+    """build/logon/<uuid>/ (extension + images) and build/logon/fonts/."""
     ext = os.path.join(out, UUID)
     shutil.copytree(os.path.join(ROOT, "src", "gdm-extension", UUID), ext)
     images = os.path.join(ext, "images")
     export_images(images)
-    # botão "Desligar computador": o diálogo do menu Iniciar (partilhado com a
-    # extensão da sessão), os estilos dele, a caixa de aviso "Janelas" e o som
+    # "Desligar computador" button: the Start menu's dialog (shared with the
+    # session extension), its styles, the "Janelas" warning box and the sound
     export_dialogs(images)
     from builders import msgbox
     msgbox.export(images)
     session = os.path.join(ROOT, "src", "shell-extension", "zorin-xp@zorin-xp.local")
     shutil.copyfile(os.path.join(session, "xpDialog.js"), os.path.join(ext, "xpDialog.js"))
-    # textos com as larguras de letra do XP (gdiText.js + tabela)
+    # texts with XP's glyph widths (gdiText.js + table)
     shutil.copyfile(os.path.join(session, "gdiText.js"), os.path.join(ext, "gdiText.js"))
     from lib import gdimetrics
     gdimetrics.export(assets.fonts_dir(), os.path.join(ext, "gdi-metrics.json"))
@@ -153,7 +151,7 @@ def build(out):
         shutil.copyfile(os.path.join(ROOT, "src", "fontconfig", conf), os.path.join(out, conf))
 
 
-# diálogos "Desligar o computador" (msgina) e "Terminar sessão" (shell32)
+# "Desligar o computador" (msgina) and "Terminar sessão" (shell32) dialogs
 DIALOG_ICONS = {
     # tira 32x32 por estado: normal, premido, rato por cima
     "logoff/turnoff-icons": {"turnoff": 0, "standby": 3, "restart": 6},
@@ -167,7 +165,7 @@ def export_dialogs(out):
     from builders import gtkassets
     from lib import uxrender
     os.makedirs(out, exist_ok=True)
-    # fundo e bandeira (versão de 16 bits; o shell32 tem cópias iguais)
+    # background and flag (16-bit version; shell32 has identical copies)
     _image("logoff/background").save(os.path.join(out, "dialog-bg.png"))
     _image("logoff/flag").save(os.path.join(out, "dialog-flag.png"))
     for strip_name, icons in DIALOG_ICONS.items():
@@ -176,9 +174,9 @@ def export_dialogs(out):
             for i, st in enumerate(ICON_STATES):
                 y = (first + i) * 32
                 strip.crop((0, y, 32, y + 32)).save(os.path.join(out, f"{name}-{st}.png"))
-        if strip_name == "logoff/turnoff-icons":   # Suspender indisponível
+        if strip_name == "logoff/turnoff-icons":   # Stand By unavailable
             strip.crop((0, 9 * 32, 32, 10 * 32)).save(os.path.join(out, "standby-disabled.png"))
-    # botão Cancelar com o botão de comando do Luna
+    # Cancel button with Luna's command button
     ms = assets.theme("luna")
     part = ms.part("button.pushbutton")
     states = gtkassets._states(ms, "button.pushbutton", gtkassets.PUSH)
@@ -188,15 +186,15 @@ def export_dialogs(out):
 
 
 def export_session(out):
-    """Imagens e textos para a extensão da sessão (boas-vindas ao entrar,
-    ecrãs de saída e diálogos de desligar/terminar sessão)."""
+    """Images and texts for the session extension (welcome when logging on,
+    exit screens and turn off/log off dialogs)."""
     export_images(os.path.join(out, "images"))
     export_dialogs(os.path.join(out, "images"))
 
 
-# barra de deslocamento da lista de contas: a do tema visual (o scrollviewer do
-# UIFILE usa a folha "scroller", desenhada com o uxtheme = Luna), 17 px
-# (SM_CXVSCROLL); setas de 17x17 (SM_CYVSCROLL)
+# scrollbar of the account list: the visual style's (the UIFILE's
+# scrollviewer uses the "scroller" sheet, drawn with uxtheme = Luna), 17 px
+# (SM_CXVSCROLL); 17x17 arrows (SM_CYVSCROLL)
 SCROLL_W = 17
 
 

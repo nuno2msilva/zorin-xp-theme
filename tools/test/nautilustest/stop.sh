@@ -1,5 +1,5 @@
 #!/bin/bash
-# para o Nautilus de teste (só os processos do Broadway :7 e do dconf de teste)
+# stops the test Nautilus (only the Broadway :7 and test dconf processes)
 for pid in $(pgrep -x nautilus); do
     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^BROADWAY_DISPLAY=:7$' && kill "$pid"
 done

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Leitura de ficheiros .msstyles do Windows XP (DLLs PE com recursos).
+"""Reading Windows XP .msstyles files (PE DLLs with resources).
 
-Extrai os bitmaps e o INI do esquema de cores, interpreta o INI (as mesmas
-secções/propriedades que o uxtheme.dll usa) e corta as imagens multi-estado
-em PNGs individuais com transparência correta.
+Extracts the bitmaps and the colour scheme INI, interprets the INI (the same
+sections/properties uxtheme.dll uses) and cuts the multi-state images into
+individual PNGs with the right transparency.
 """
 import io
 import re
@@ -75,10 +75,10 @@ class PEResources:
 
 
 # --------------------------------------------------------------------------
-# Bitmaps (DIB sem cabeçalho de ficheiro)
+# Bitmaps (DIB without a file header)
 # --------------------------------------------------------------------------
 def bmp_file(dib):
-    """Cabeçalho de ficheiro .bmp (BITMAPFILEHEADER) para um DIB de recurso."""
+    """.bmp file header (BITMAPFILEHEADER) for a resource DIB."""
     hsize, _w, _h, _planes, bpp, comp = struct.unpack_from("<IiiHHI", dib, 0)
     colors = struct.unpack_from("<I", dib, 32)[0] if hsize >= 36 else 0
     if bpp <= 8 and colors == 0:
@@ -88,10 +88,10 @@ def bmp_file(dib):
 
 
 def dib_to_image(dib):
-    """Converte um DIB de recurso em imagem RGBA.
+    """Converts a resource DIB into an RGBA image.
 
-    Bitmaps de 32 bpp do Luna têm alfa por píxel (não pré-multiplicado);
-    os restantes são opacos e a transparência é feita por cor-chave.
+    Luna's 32 bpp bitmaps have per-pixel alpha (not premultiplied); the
+    others are opaque and transparency is done with a colour key.
     """
     hsize, w, h, planes, bpp, comp = struct.unpack_from("<IiiHHI", dib, 0)
     if bpp == 32 and comp in (0, 3):
@@ -104,7 +104,7 @@ def dib_to_image(dib):
 
 
 def key_out(img, color):
-    """Torna transparente uma cor-chave (TransparentColor do uxtheme)."""
+    """Makes a colour key transparent (uxtheme's TransparentColor)."""
     img = img.copy()
     px = img.load()
     r0, g0, b0 = color
@@ -126,7 +126,7 @@ def slice_states(img, count, layout="vertical"):
 
 
 # --------------------------------------------------------------------------
-# INI do esquema de cores
+# Colour scheme INI
 # --------------------------------------------------------------------------
 @dataclass
 class Part:
@@ -181,7 +181,7 @@ class MsStyles:
         return self.parts[name.lower()]
 
     def bitmap(self, ini_path):
-        """'Blue\\FrameCaption.bmp' -> Image RGBA (sem transparência aplicada)."""
+        """'Blue\\FrameCaption.bmp' -> RGBA Image (no transparency applied)."""
         rname = re.sub(r"[\\/.]", "_", ini_path).upper()
         dib = self.pe.get(RT_BITMAP, rname)
         if dib is None:
@@ -193,10 +193,10 @@ class MsStyles:
         return struct.unpack_from("<H", self.pe.get(RT_BITMAP, rname), 14)[0]
 
     def image(self, path, transparent=False, key=(255, 0, 255)):
-        """Bitmap com a transparência que o uxtheme lhe daria.
+        """Bitmap with the transparency uxtheme would give it.
 
-        32 bpp com algum alfa < 255 -> alfa por píxel; caso contrário, se a
-        parte for Transparent, a cor-chave (magenta por omissão) é removida.
+        32 bpp with some alpha < 255 -> per-pixel alpha; otherwise, if the
+        part is Transparent, the colour key (magenta by default) is removed.
         """
         img = self.bitmap(path)
         has_alpha = img.getextrema()[3][0] < 255
@@ -205,7 +205,7 @@ class MsStyles:
         return img
 
     def states(self, part_name, image_key="ImageFile", count=None, glyph=False):
-        """Imagens de cada estado de uma parte, já com transparência aplicada."""
+        """Images of each state of a part, with transparency already applied."""
         p = self.part(part_name)
         path = p.get(image_key)
         if glyph:

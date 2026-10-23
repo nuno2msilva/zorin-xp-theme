@@ -1,22 +1,22 @@
-"""Larguras dos caracteres como no Windows XP.
+"""Character widths as in Windows XP.
 
-O GDI do XP posiciona o texto com as larguras por tamanho gravadas na própria
-fonte (tabela hdmx, as do hinting) e sem kerning. O Pango/HarfBuzz usa a
-largura teórica (hmtx) arredondada ao píxel e aplica o kerning: em Tahoma Bold
-a 11 px, por exemplo, o "m" fica com 10 px em vez dos 11 do XP e o texto sai
-mais apertado.
+XP's GDI places text with the per-size widths stored in the font itself (the
+hdmx table, the hinted ones) and without kerning. Pango/HarfBuzz uses the
+theoretical width (hmtx) rounded to the pixel and applies kerning: in Tahoma
+Bold at 11 px, for example, "m" gets 10 px instead of XP's 11 and the text
+comes out tighter.
 
-A hmtx não se pode mudar: o hinting das fontes da Microsoft usa-a para
-desenhar as letras (com outra largura o "s" negrito passa de 5 para 4 px).
-Em vez disso acrescenta-se uma tabela GPOS com um ajuste de avanço por glifo
-(feature "dist", ligada por omissão no HarfBuzz) para que, no tamanho
-principal da interface, a largura seja exatamente a do XP; o FreeType ignora a
-GPOS e desenha as letras como antes. Retira-se também a tabela kern. Só se
-alteram as cópias instaladas na pasta pessoal.
+The hmtx cannot be changed: the hinting of Microsoft's fonts uses it to draw
+the glyphs (with another width the bold "s" goes from 5 to 4 px). Instead a
+GPOS table is added with an advance adjustment per glyph (feature "dist", on
+by default in HarfBuzz) so that, at the UI's main size, the width is exactly
+XP's; FreeType ignores the GPOS and draws the glyphs as before. The kern
+table is removed too. Only the copies installed in the home folder are
+changed.
 """
 import struct
 
-# Tamanho principal (px) de cada família na interface do XP a 96 ppp
+# Main size (px) of each family in the XP UI at 96 dpi
 PRIMARY_PPEM = {"tahoma": 11, "verdana": 11, "micross": 11, "trebuc": 13, "framd": 19}
 DROP = {"kern", "DSIG"}
 
@@ -70,7 +70,7 @@ def _hdmx(t, num_glyphs):
 
 
 def _gpos_single_adv(deltas):
-    """GPOS com um lookup SinglePos (avanço X) na feature dist, para DFLT e latn."""
+    """GPOS with one SinglePos lookup (X advance) in the dist feature, for DFLT and latn."""
     glyphs = sorted(deltas)
     n = len(glyphs)
     # SinglePosFormat2 + Coverage formato 1
@@ -91,7 +91,7 @@ def _gpos_single_adv(deltas):
 
 
 def fix(src, dst, family):
-    """Copia src para dst com as larguras do XP. Devolve nº de glifos ajustados."""
+    """Copies src to dst with XP's widths. Returns the number of adjusted glyphs."""
     sfnt, t = _tables(open(src, "rb").read())
     upem = struct.unpack(">H", t["head"][18:20])[0]
     num_glyphs = struct.unpack(">H", t["maxp"][4:6])[0]
@@ -107,8 +107,9 @@ def fix(src, dst, family):
             w = hdmx[primary][g]
             if not w:
                 continue
-            # largura exata do XP no tamanho principal (o Pango pode acumular
-            # posições fracionárias, por isso não basta arredondar para lá)
+            # XP's exact width at the main size (Pango may accumulate fractional
+            # positions, so rounding towards it is not enough)
+
             d = int(round(w * upem / primary)) - adv
             if d:
                 deltas[g] = d

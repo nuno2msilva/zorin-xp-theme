@@ -1,21 +1,22 @@
-"""Ecrã de arranque do XP como tema do Plymouth.
+"""The XP boot screen as a Plymouth theme.
 
-Arranque: o ecrã de 640x480 do ntoskrnl.exe (bitmap 1) com a barra de
-progresso (bitmap 8, três blocos de 22x9). As paletas destes bitmaps estão a
-zero no recurso — o kernel acende-as a partir do preto com a sua própria
-tabela, que é a paleta do bitmap 5 deslocada uma entrada (sem o preto
-repetido do início, a acabar em branco; no binário logo a seguir à do
-bitmap 5). Confirmado contra o arranque de uma VM XP.
+Boot: ntoskrnl.exe's 640x480 screen (bitmap 1) with the progress bar
+(bitmap 8, three 22x9 blocks). The palettes of these bitmaps are zero in the
+resource — the kernel fades them in from black with its own table, which is
+bitmap 5's palette shifted by one entry (without the repeated black at the
+start, ending in white; in the binary right after bitmap 5's). Checked
+against the boot of an XP VM.
 
-Comportamento medido: acende do preto em ~1,75 s; os blocos andam 8 px a
-cada 100 ms dentro da caixa (x 259..376, y 354), com um passo vazio no fim
-de cada volta. O ecrã de 640x480 é refeito à resolução do ecrã com as peças no
-tamanho original: o logótipo e a barra ao centro, o "Copyright" no canto de
-baixo à esquerda e "Microsoft" à direita, às mesmas distâncias das margens.
+Measured behaviour: fades in from black in ~1.75 s; the blocks move 8 px
+every 100 ms inside the box (x 259..376, y 354), with an empty step at the
+end of each lap. The 640x480 screen is rebuilt at the screen's resolution
+with the pieces at their original size: the logo and the bar in the centre,
+the "Copyright" in the bottom left corner and "Microsoft" on the right, at
+the same distances from the edges.
 
-Desligar/reiniciar: o ecrã de estado do XP ("O Windows está a encerrar...",
-winlogon.exe) com as peças do logonui.exe, igual ao que a extensão mostra
-antes de a sessão terminar, para a passagem ser contínua.
+Turn off/restart: XP's status screen ("O Windows está a encerrar...",
+winlogon.exe) with logonui.exe's pieces, the same the extension shows before
+the session ends, so the transition is seamless.
 """
 import json
 import os
@@ -31,18 +32,18 @@ from lib import assets
 from lib.paths import ROOT
 
 THEME = "windows-xp"
-# peças do bitmap 1 (x0, y0, x1, y1): o resto é preto
-PIECES = {"center": (209, 123, 455, 366),      # logótipo e a caixa da barra
-          "copyright": (22, 447, 222, 461),     # canto de baixo, à esquerda
-          "microsoft": (546, 447, 619, 461)}    # canto de baixo, à direita
+# pieces of bitmap 1 (x0, y0, x1, y1): the rest is black
+PIECES = {"center": (209, 123, 455, 366),      # logo and the bar box
+          "copyright": (22, 447, 222, 461),     # bottom left corner
+          "microsoft": (546, 447, 619, 461)}    # bottom right corner
 FADE_FRAMES = 88          # ~1,75 s a 50 imagens/s
 STEP_FRAMES = 5           # 100 ms por passo
 BAR = {"x0": 243, "x_end": 371, "step": 8, "y": 354, "clip_l": 259, "clip_r": 377}
 
 
 def _boot_palette():
-    """A paleta com que o kernel acende o ecrã: a do bitmap 5, deslocada uma
-    entrada e a acabar em branco."""
+    """The palette the kernel fades the screen in with: bitmap 5's, shifted by
+    one entry and ending in white."""
     ref = assets.raw_bitmap("boot/palette-source")
     h = struct.unpack_from("<I", ref, 0)[0]
     return ref[h + 4:h + 64] + bytes([255, 255, 255, 0])
@@ -56,8 +57,8 @@ def _with_palette(name, pal):
 
 
 def _render_text(text, font_dir, out):
-    """Texto Arial 19 px (14 pt no XP) como o GDI: interpretador v35, hinting
-    completo, tons de cinzento — o initramfs não tem a Arial."""
+    """Arial 19 px text (14 pt in XP) as GDI draws it: v35 interpreter, full
+    hinting, greyscale — the initramfs has no Arial."""
     script = r'''
 import sys, cairo, gi
 gi.require_version("Pango", "1.0"); gi.require_version("PangoCairo", "1.0")
@@ -94,7 +95,7 @@ def build(out):
     pal = _boot_palette()
     screen = _with_palette("boot/screen", pal)
     blocks = _with_palette("boot/progress", pal)
-    # a barra em 18 passos já recortados à caixa (o último vazio)
+    # the bar in 18 steps already cropped to the box (the last one empty)
     clip_w = BAR["clip_r"] - BAR["clip_l"]
     steps = []
     for i in range(18):
@@ -103,7 +104,7 @@ def build(out):
         if x <= BAR["x_end"]:
             strip.paste(blocks, (x - BAR["clip_l"], 0))
         steps.append(strip)
-    # (o resto do bitmap tem de ser preto: senão faltaria alguma peça)
+    # (the rest of the bitmap must be black: otherwise some piece would be missing)
     rest = screen.copy()
     for box in PIECES.values():
         rest.paste((0, 0, 0, 255), box)
@@ -113,7 +114,7 @@ def build(out):
     for i, strip in enumerate(steps):
         strip.save(os.path.join(theme, f"bar-{i}.png"))
 
-    # ecrã de estado ao desligar: peças do logonui.exe e o texto do winlogon.exe
+    # status screen when turning off: logonui.exe's pieces and winlogon.exe's text
     tmp = os.path.join(out, ".logon")
     logon.export_images(tmp)
     for name in ("glow", "logo", "divider-top", "divider-bottom"):
@@ -126,7 +127,7 @@ def build(out):
     _render_text(strings["shuttingDown"], fonts, os.path.join(theme, "shutting-down.png"))
     shutil.rmtree(tmp)
     shutil.rmtree(fonts)
-    # cores lisas e o gradiente do painel de baixo (esticados no script)
+    # plain colours and the bottom panel's gradient (stretched in the script)
     for name, rgb in (("top", (0, 48, 156)), ("content", (90, 126, 220)), ("black", (0, 0, 0))):
         Image.new("RGBA", (1, 1), rgb + (255,)).save(os.path.join(theme, f"{name}.png"))
     grad = Image.new("RGBA", (256, 1))
@@ -146,7 +147,7 @@ ModuleName=script
 ImageDir=/usr/share/plymouth/themes/{THEME}
 ScriptFile=/usr/share/plymouth/themes/{THEME}/{THEME}.script
 """)
-    # o GRUB limpa o ecrã a preto antes (como o tema do Zorin)
+    # GRUB clears the screen to black first (like the Zorin theme)
     with open(os.path.join(theme, f"{THEME}.grub"), "w") as f:
         f.write("if background_color 0,0,0; then\n  clear\nfi\n")
     with open(os.path.join(ROOT, "src", "boot", "windows-xp.script")) as f:

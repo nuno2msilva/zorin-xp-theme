@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Compara o botão Iniciar desenhado (tools/builders/shelltheme.py) com os
-recortes das capturas reais (reference/start-button), píxel a píxel.
+"""Compares the drawn Start button (tools/builders/shelltheme.py) with the
+crops of the real captures (reference/start-button), pixel by pixel.
 
-    python3 tools/test/start_button.py [pasta para as imagens]
+    python3 tools/test/start_button.py [folder for the images]
 
-Escreve, para cada estado, quantos píxeis diferem (e quanto) e, com uma
-pasta, as imagens desenhadas e um mapa das diferenças ampliado 8×.
+Prints, for each state, how many pixels differ (and by how much) and, with a
+folder, the drawn images and a map of the differences scaled up 8×.
 """
 import os
 import sys

@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Zorin XP — ecrã de arranque do Windows XP (tema do Plymouth).
+# Zorin XP — the Windows XP boot screen (Plymouth theme).
 #
-# O Plymouth só procura temas em /usr/share/plymouth/themes e o tema vai para
-# dentro do initramfs, por isso isto precisa de root. Única exceção à regra de
-# não mexer em /usr/share (autorizada): uma pasta NOVA, windows-xp, sem
-# alterar nada do que lá existe. A escolha do tema é feita com o
-# update-alternatives do sistema (default.plymouth), e a remoção devolve-o ao
-# modo automático (o tema do Zorin).
+# Plymouth only looks for themes in /usr/share/plymouth/themes and the theme
+# goes into the initramfs, so this needs root. The only exception to the rule
+# of not touching /usr/share (authorised): a NEW folder, windows-xp, without
+# changing anything that is already there. The theme is chosen with the
+# system's update-alternatives (default.plymouth), and removal returns it to
+# automatic mode (the Zorin theme).
 #
-# Uso:  sudo system/bootscreen.sh install <build/boot>
-#       sudo system/bootscreen.sh remove
+# Usage:  sudo system/bootscreen.sh install <build/boot>
+#         sudo system/bootscreen.sh remove
+
 set -euo pipefail
 
 NAME=windows-xp

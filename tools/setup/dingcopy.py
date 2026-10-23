@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
-"""Cópia do programa dos ícones do ambiente de trabalho (zorin-desktop-icons)
-com a grelha do XP.
+"""Copy of the desktop icons program (zorin-desktop-icons) with XP's grid.
 
-A grelha está fixa no código da extensão do Zorin (enums.js: largura e altura
-de cada célula para cada tamanho de ícone), que fica em /usr/share e não se
-mexe. Copia-se a pasta app/ para <saída>/app e muda-se só o tamanho "small"
-(ícones de 48 px): o XP põe os ícones de 32 px a cada 78 px na vertical e
-na horizontal (medido na captura de referência; 75 px de espaçamento +
-margens); com 48 px fica 78 + 16 = 94 px. A célula final é a altura do ecrã
-dividida pelo número de linhas que cabem com ICON_HEIGHT + 8 px.
+The grid is fixed in the Zorin extension's code (enums.js: width and height
+of each cell for each icon size), which lives in /usr/share and is not
+touched. The app/ folder is copied to <out>/app and only the "small" size
+(48 px icons) is changed: XP puts its 32 px icons every 78 px vertically and
+horizontally (measured in the reference capture; 75 px of spacing +
+margins); with 48 px that is 78 + 16 = 94 px. The final cell is the screen
+height divided by the number of rows that fit with ICON_HEIGHT + 8 px.
 
-Na mesma cópia, a seleção como no XP (desktopIconItem.js): o ícone
-selecionado fica misturado com a cor de realce (ImageList ILD_BLEND50, a mesma
-conta da extensão do Ficheiros, src/nautilus-xp: _blend); se o código do
-Zorin mudar, fica só a grelha.
+In the same copy, XP's selection (desktopIconItem.js): the selected icon is
+blended with the highlight colour (ImageList ILD_BLEND50, the same maths as
+the Files extension, src/nautilus-xp: _blend); if Zorin's code changes, only
+the grid stays. The trash icon is named by our translation ("Reciclagem")
+instead of gvfs's name (fileItem.js).
 
-Ainda na cópia, o resto do ambiente de trabalho do XP (src/desktop/zxpDesktop.js,
-ligado em desktopManager.js): o nome editado no sítio (Nova pasta, F2, Mudar o
-nome), a pergunta do XP ao eliminar com o som da Reciclagem e o menu do fundo
-do XP. Os textos e os ícones das caixas vêm do XP (pasta app/zxp).
+Also in the copy, the rest of XP's desktop (src/desktop/zxpDesktop.js, hooked
+into desktopManager.js): the name edited in place (New folder, F2, Rename),
+XP's question when deleting with the Recycle Bin sound and XP's background
+menu. The texts and the boxes' icons come from XP (the app/zxp folder).
 
-desktopNames.js usa a cópia só se o stamp.json bater certo com os ficheiros
-originais (tamanho e data): depois de uma atualização do Zorin volta à
-original até se correr o install.sh outra vez.
+desktopNames.js only uses the copy if stamp.json matches the original files
+(size and date): after a Zorin update it goes back to the original until
+install.sh is run again.
 
-Uso: dingcopy.py <pasta de saída>
+Usage: dingcopy.py <output folder>
 """
 import json
 import os
@@ -32,13 +32,13 @@ import re
 import shutil
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.paths import ROOT  # noqa: E402
 
 SRC = "/usr/share/gnome-shell/extensions/zorin-desktop-icons@zorinos.com/app"
-# ganchos em desktopManager.js: (texto que tem de existir uma vez, o que se junta a seguir)
+# hooks in desktopManager.js: (text that must exist exactly once, what is added after it)
 HOOKS = [
     ("    doRename(fileItem, allowReturnOnSameName) {\n",
      "        return imports.zxpDesktop.startRename(this, fileItem, allowReturnOnSameName);\n"),
@@ -48,13 +48,13 @@ HOOKS = [
     ("        this._menu.show_all();\n    }\n\n    _selectAll() {",
      None),
 ]
-CELL = 86          # + 8 px de espaçamento da grelha -> ~94/95 px por célula
+CELL = 86          # + 8 px of grid spacing -> ~94/95 px per cell
 
 SET_ICON = re.compile(r"let surface = Gdk\.cairo_surface_create_from_pixbuf\(pixbuf, scale, null\);\n"
                       r"\s*this\._icon\.set_from_surface\(surface\);")
 SELECTED = "    _setSelectedStatus() {\n"
 BEFORE = "    _getDefaultIcon() {\n"
-METHODS = """    // Zorin XP: o ícone guardado, para o mostrar misturado quando selecionado
+METHODS = """    // Zorin XP: the stored icon, to show it blended when selected
     _zxpSetIcon(pixbuf, scale) {
         this._zxpPixbuf = pixbuf;
         this._zxpScale = scale;
@@ -76,9 +76,9 @@ METHODS = """    // Zorin XP: o ícone guardado, para o mostrar misturado quando
 
 """
 BLEND = """
-/* Zorin XP: a seleção do XP (ImageList ILD_BLEND50, medida numa captura do
-   XP): os píxeis com alfa >= 128 a meio caminho da cor de realce #316AC5, no
-   alfa pré-multiplicado; os outros (sombras) ficam iguais */
+/* Zorin XP: XP's selection (ImageList ILD_BLEND50, measured in an XP
+   capture): pixels with alpha >= 128 halfway to the highlight colour #316AC5,
+   in premultiplied alpha; the others (shadows) stay the same */
 function zxpBlend(pixbuf) {
     if (!pixbuf.get_has_alpha())
         pixbuf = pixbuf.add_alpha(false, 0, 0, 0);
@@ -140,7 +140,7 @@ def patch_trash_name(path):
 
 
 def patch_desktop(app):
-    """O módulo do XP e os ganchos no desktopManager.js (tudo ou nada)."""
+    """XP's module and the hooks in desktopManager.js (all or nothing)."""
     path = os.path.join(app, "desktopManager.js")
     text = open(path, encoding="utf-8").read()
     new = text
@@ -160,7 +160,7 @@ def patch_desktop(app):
     module = open(os.path.join(ROOT, "src", "desktop", "zxpDesktop.js"), encoding="utf-8").read()
     with open(os.path.join(app, "zxpDesktop.js"), "w", encoding="utf-8") as f:
         f.write(module.replace("'@DATA@'", json.dumps(data)))
-    # (os mesmos textos e ícones da janela de ficheiros: tools/builders/filechooser.py)
+    # (the same texts and icons as the file dialog: tools/builders/filechooser.py)
     from builders import filechooser
     with open(os.path.join(data, "strings.json"), "w", encoding="utf-8") as f:
         json.dump(filechooser.xp_strings(), f, ensure_ascii=False, indent=1)

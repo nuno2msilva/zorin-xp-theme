@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Extrai de uma cópia da pasta Windows do XP os recursos que o tema usa,
-para assets/ (ver tools/catalog.py, com o nome e a origem de cada um).
+"""Extracts from a copy of the XP Windows folder the resources the theme uses,
+into assets/ (see tools/catalog.py, with the name and source of each one).
 
-Uso:  tools/extract.py [--windows windows/xp-pro-pt] [--locale pt-PT] [grupos...]
-Grupos: themes locale icons images sounds fonts cursors (por omissão: todos)
+Usage:  tools/extract.py [--windows windows/xp-pro-pt] [--locale pt-PT] [groups...]
+Groups: themes locale icons images sounds fonts cursors (default: all)
 
-É o único passo que lê o Windows; a construção (tools/build.py) só lê
-assets/. Cada pasta de assets/ recebe um ORIGEM.md com a origem de cada
-ficheiro.
+It is the only step that reads Windows; the build (tools/build.py) only
+reads assets/. Each assets/ folder gets an ORIGEM.md with the source of
+each file.
 """
 import argparse
 import fnmatch
@@ -32,15 +32,15 @@ from lib.regf import Hive
 
 
 class Windows:
-    """Uma cópia da pasta Windows: ficheiros e recursos das DLL/EXE."""
+    """A copy of the Windows folder: files and DLL/EXE resources."""
 
     def __init__(self, root):
         self.root = root
         self._pes = {}
 
     def path(self, rel):
-        """Caminho de um ficheiro: "x.dll" em system32 (ou dllcache, ou na
-        raiz); "pasta/ficheiro" relativo à raiz."""
+        """Path of a file: "x.dll" in system32 (or dllcache, or in the
+        root); "folder/file" relative to the root."""
         parts = rel.replace("\\", "/").split("/")
         if len(parts) > 1:
             return find_ci(self.root, *parts)
@@ -58,7 +58,7 @@ class Windows:
 
 
 def write_origin(folder, title, rows):
-    """ORIGEM.md: de onde veio cada ficheiro da pasta."""
+    """ORIGEM.md: where each file in the folder came from."""
     with open(os.path.join(folder, "ORIGEM.md"), "w", encoding="utf-8") as f:
         f.write(f"# {title}\n\nGerado por `tools/extract.py` (ver `tools/catalog.py`).\n\n")
         f.write("| Ficheiro | Origem no Windows |\n|---|---|\n")
@@ -84,7 +84,7 @@ def extract_themes(win, out):
         with open(os.path.join(dst, "theme.ini"), "w", encoding="utf-8") as f:
             f.write(ms.ini_text.replace("\r\n", "\n"))
         rows.append(("theme.ini", f"{spec['msstyles']}, texto {spec['ini']}"))
-        # todas as imagens que o INI usa, com o nome do INI (sem a pasta)
+        # every image the INI uses, with the INI's name (without the folder)
         bitmaps = fresh(os.path.join(dst, "bitmaps"))
         seen = {}
         for part in ms.parts.values():
@@ -97,7 +97,7 @@ def extract_themes(win, out):
                 seen[base.lower()] = value
                 ms.bitmap(value).save(os.path.join(bitmaps, f"{base}.png"))
                 rows.append((f"bitmaps/{base}.png", f"{spec['msstyles']}, {value}"))
-        # o painel de tarefas do Explorador
+        # the Explorer task pane
         shell = fresh(os.path.join(dst, "shell"))
         style = win.pe(spec["shellstyle"])
         for key, rid in catalog.SHELLSTYLE.items():
@@ -110,7 +110,7 @@ def extract_themes(win, out):
 
 
 # --------------------------------------------------------------------------
-# Sons e letras: cópias, com o nome do Windows
+# Sounds and fonts: copies, with the Windows name
 # --------------------------------------------------------------------------
 def extract_sounds(win, out):
     dst = fresh(os.path.join(out, "sounds"))
@@ -125,7 +125,7 @@ def extract_sounds(win, out):
 
 
 def _fc_family(path):
-    """Família da (primeira) letra do ficheiro (um .fon tem várias)."""
+    """Family of the (first) font in the file (a .fon has several)."""
     out = subprocess.run(["fc-scan", "--format", "%{family[0]}\n", path], capture_output=True, text=True)
     return (out.stdout.splitlines() or [""])[0]
 
@@ -146,11 +146,11 @@ def extract_fonts(win, out):
 
 
 # --------------------------------------------------------------------------
-# Cursores: o grupo RT_GROUP_CURSOR de cada um, num ficheiro .cur
+# Cursors: each one's RT_GROUP_CURSOR group, in a .cur file
 # --------------------------------------------------------------------------
 def cur_file(pe, gid):
-    """RT_GROUP_CURSOR + RT_CURSOR -> bytes de um ficheiro .cur (todos os
-    tamanhos, com o ponto ativo)."""
+    """RT_GROUP_CURSOR + RT_CURSOR -> bytes of a .cur file (every size,
+    with the hotspot)."""
     group = pe.get(wincursor.RT_GROUP_CURSOR, gid)
     _r, _t, count = struct.unpack_from("<HHH", group, 0)
     images = []
@@ -184,7 +184,7 @@ def extract_cursors(win, out):
 
 
 # --------------------------------------------------------------------------
-# Ícones: cada grupo de ícones num .ico (todos os tamanhos e profundidades)
+# Icons: each icon group in an .ico (every size and depth)
 # --------------------------------------------------------------------------
 def extract_icons(win, out):
     dst = fresh(os.path.join(out, "icons"))
@@ -192,7 +192,7 @@ def extract_icons(win, out):
     for name, (dll, gid) in catalog.ICONS.items():
         pe = win.pe(dll)
         if gid is None:
-            gid = winicons.group_ids(pe)[0]      # o ícone do programa
+            gid = winicons.group_ids(pe)[0]      # the program's icon
         key = (dll.lower(), gid)
         if key in seen:
             raise SystemExit(f"catalog.ICONS: {name} e {seen[key]} são o mesmo ícone ({dll} {gid})")
@@ -208,8 +208,8 @@ def extract_icons(win, out):
 
 
 # --------------------------------------------------------------------------
-# Imagens das DLL: PNG (as de 32 bits com o alfa) e, para o arranque, os
-# bitmaps tal e qual (.bmp)
+# DLL images: PNG (the 32-bit ones with their alpha) and, for the boot
+# screen, the bitmaps as they are (.bmp)
 # --------------------------------------------------------------------------
 def extract_images(win, out):
     dst = fresh(os.path.join(out, "images"))
@@ -237,10 +237,10 @@ def extract_images(win, out):
 
 
 # --------------------------------------------------------------------------
-# Textos de uma língua: string tables, diálogos e menus de cada ficheiro
+# Texts of a language: string tables, dialogs and menus of each file
 # --------------------------------------------------------------------------
 def string_tables(pe):
-    """{id: texto} de todas as string tables (RT_STRING, 16 por bloco)."""
+    """{id: text} from every string table (RT_STRING, 16 per block)."""
     out = {}
     for rtype, block_id in sorted(k for k in pe.resources if k[0] == 6):
         data = pe.get(rtype, block_id)
@@ -266,7 +266,7 @@ def extract_locale(win, out, locale):
         for rtype, rid in sorted(k for k in pe.resources if k[0] == 5 and isinstance(k[1], int)):
             try:
                 dialogs[rid] = dlgtemplate.dialog(pe, rid)
-            except ValueError:                  # (só DIALOGEX)
+            except ValueError:                  # (DIALOGEX only)
                 pass
         menus = {rid: winmenus.parse(pe.get(4, rid))
                  for _t, rid in sorted(k for k in pe.resources if k[0] == 4 and isinstance(k[1], int))}
@@ -297,7 +297,8 @@ def extract_locale(win, out, locale):
 
 
 def _named(pe, name):
-    """Recurso com nome (ex.: "DNSERROR.HTM"), de qualquer tipo."""
+    """Named resource (e.g. "DNSERROR.HTM"), of any type."""
+
     for (_t, n), data in pe.resources.items():
         if isinstance(n, str) and n.upper() == name.upper():
             return data

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Zorin XP — SAÍDA DE EMERGÊNCIA.
-# Repõe o tema do sistema tal como estava no snapshot "original"
-# (ou noutro: ./restore.sh 20261011-170000) e remove tudo o que o tema XP instalou.
-# Funciona também a partir de um TTY (Ctrl+Alt+F3), com a sessão gráfica aberta.
-# O install.sh deixa uma cópia (com os ajudantes que este script chama) em
-# ~/.local/share/zorin-xp/uninstall/rescue/restore.sh: não precisa da pasta
-# do projeto.
+# Zorin XP — EMERGENCY EXIT.
+# Restores the system theme as it was in the "original" snapshot
+# (or another one: ./restore.sh 20261011-170000) and removes everything the XP theme installed.
+# Also works from a TTY (Ctrl+Alt+F3), with the graphical session open.
+# install.sh leaves a copy (with the helpers this script calls) in
+# ~/.local/share/zorin-xp/uninstall/rescue/restore.sh: it does not need the
+# project folder.
 set -uo pipefail
 
 STATE_DIR="$HOME/.local/share/zorin-xp"
@@ -25,15 +25,15 @@ fi
 
 echo "A repor snapshot: $(readlink -f "$SRC")"
 
-# 0. Aplicações com motor de browser: repor lançadores e overrides do Flatpak
+# 0. Applications with a browser engine: restore launchers and Flatpak overrides
 if [ -f "$STATE_DIR/browser-fonts.txt" ]; then
     python3 "$(dirname "$0")/../src/fontconfig/zorin-xp-browser-fonts" --undo
 fi
 
-# 0. Ficheiros (Explorador do XP): a lista de tipos sem miniatura de antes
+# 0. Files (XP Explorer): the previous list of types without thumbnails
 [ -f "$STATE_DIR/explorer.json" ] && python3 "$(dirname "$0")/../tools/setup/explorerprefs.py" undo
 
-# 0a. Zen Browser: preferências antigas e os @import do aspeto do IE
+# 0a. Zen Browser: previous preferences and the @import rules of the IE look
 for P in "$HOME"/.var/app/app.zen_browser.zen/.zen/*/; do
     [ -f "$P/zorin-xp-ie.json" ] && python3 "$(dirname "$0")/../tools/setup/zenprefs.py" undo "$P"
     for UC in "$P/chrome/userChrome.css" "$P/chrome/userContent.css"; do
@@ -44,7 +44,7 @@ for P in "$HOME"/.var/app/app.zen_browser.zen/.zen/*/; do
     done
 done
 
-# 0b. Ecrã de início de sessão (na pasta do utilizador gdm: precisa de sudo)
+# 0b. Login screen (in the gdm user's folder: needs sudo)
 if [ -f "$STATE_DIR/logon-installed" ]; then
     if sudo "$(dirname "$0")/../system/logon.sh" remove; then
         rm -f "$STATE_DIR/logon-installed"
@@ -53,7 +53,7 @@ if [ -f "$STATE_DIR/logon-installed" ]; then
     fi
 fi
 
-# 0c. Ecrã de arranque (Plymouth, com sudo)
+# 0c. Boot screen (Plymouth, with sudo)
 if [ -f "$STATE_DIR/boot-installed" ]; then
     if sudo "$(dirname "$0")/../system/bootscreen.sh" remove; then
         rm -f "$STATE_DIR/boot-installed"
@@ -62,26 +62,26 @@ if [ -f "$STATE_DIR/boot-installed" ]; then
     fi
 fi
 
-# 0d. Bloco do ecrã de carregamento no ~/.xprofile (o ficheiro, se foi o
-#     instalador que o criou, sai com o manifesto)
+# 0d. Loading screen block in ~/.xprofile (the file itself, if the
+#     installer created it, goes with the manifest)
 if [ -f "$HOME/.xprofile" ]; then
     sed -i '/^# >>> zorin-xp/,/^# <<< zorin-xp/d' "$HOME/.xprofile"
 fi
 
-# 0e. Pastas pessoais com os nomes do XP: voltam aos nomes de antes
+# 0e. Home folders with the XP names: back to the previous names
 python3 "$(dirname "$0")/../tools/setup/xpfolders.py" undo
-# ...e o bloco das legendas do ambiente de trabalho no gtk.css do GTK 3
+# ...and the desktop labels block in the GTK 3 gtk.css
 GTK3CSS="$HOME/.config/gtk-3.0/gtk.css"
 if [ -f "$GTK3CSS" ]; then
     sed -i '/^\/\* >>> zorin-xp: ícones do ambiente de trabalho/,/^\/\* <<< zorin-xp \*\//d' "$GTK3CSS"
     [ -s "$GTK3CSS" ] || rm -f "$GTK3CSS"
 fi
 
-# 1. Remover tudo o que o instalador XP registou no manifesto
+# 1. Remove everything the XP installer recorded in the manifest
 if [ -f "$MANIFEST" ]; then
     tac "$MANIFEST" | while IFS= read -r path; do
         case "$path" in
-            "$HOME"/*) ;;                      # só apaga dentro da home
+            "$HOME"/*) ;;                      # only deletes inside the home folder
             *) echo "  ignorado (fora da home): $path"; continue ;;
         esac
         if [ -e "$path" ] || [ -L "$path" ]; then
@@ -91,14 +91,14 @@ if [ -f "$MANIFEST" ]; then
     mv "$MANIFEST" "$MANIFEST.restored-$(date +%Y%m%d-%H%M%S)"
 fi
 
-# 1a. Tipos de ficheiro do utilizador: refazer a base sem os do Zorin XP
+# 1a. User file types: rebuild the database without Zorin XP's
 [ -d "$HOME/.local/share/mime/packages" ] && update-mime-database "$HOME/.local/share/mime" 2>/dev/null
 
-# 1b. Portal de ficheiros: o serviço volta a ler só a pasta do sistema
+# 1b. File chooser portal: the service goes back to reading only the system folder
 systemctl --user daemon-reload 2>/dev/null
 systemctl --user try-restart xdg-desktop-portal.service 2>/dev/null
 
-# 2. Repor os ficheiros de config do GTK (ou apagá-los se não existiam)
+# 2. Restore the GTK config files (or delete them if they did not exist)
 while read -r state f; do
     if [ "$state" = present ]; then
         mkdir -p "$(dirname "$f")"
@@ -108,7 +108,7 @@ while read -r state f; do
     fi
 done < "$SRC/files.list"
 
-# 3. Repor as definições dconf (reset do ramo + load do snapshot)
+# 3. Restore the dconf settings (reset the branch + load the snapshot)
 for ini in "$SRC"/dconf/*.ini; do
     p="$(cat "${ini%.ini}.path")"
     dconf reset -f "$p"

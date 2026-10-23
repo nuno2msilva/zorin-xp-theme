@@ -1,26 +1,26 @@
-"""Caixa de aviso do XP "Janelas" ao desligar no ecrã de boas-vindas.
+"""XP's "Janelas" warning box when turning off on the welcome screen.
 
-Com outras sessões abertas, o winlogon pergunta com um MessageBox do user32
-(MB_YESNO | MB_ICONEXCLAMATION): título 710, texto 713 (desligar) ou 714
-(reiniciar), botões 805/806 ("&Sim"/"&Não"). O ecrã de boas-vindas não tem o
-tema visual, por isso a caixa é desenhada no estilo clássico com as cores do
-Luna: moldura em relevo, título em gradiente com a letra dos títulos (Trebuchet
-MS Bold 10 pt, suavizada), o X desativado (Marlett "r"), o ícone de aviso do
-user32 (101) e o texto em Tahoma 8 pt sem suavização.
+With other sessions open, winlogon asks with a user32 MessageBox
+(MB_YESNO | MB_ICONEXCLAMATION): title 710, text 713 (turn off) or 714
+(restart), buttons 805/806 ("&Sim"/"&Não"). The welcome screen has no visual
+style, so the box is drawn in the classic style with Luna's colours: raised
+frame, gradient title with the caption font (Trebuchet MS Bold 10 pt,
+smoothed), the disabled X (Marlett "r"), user32's warning icon (101) and the
+text in Tahoma 8 pt without smoothing.
 
-Tudo é desenhado aqui como o GDI o faz (texto letra a letra com as larguras
-inteiras do hinting v35, gradiente em vírgula fixa) — comparado com uma captura
-do XP: só diferem a suavização de algumas letras do título e 1 px no "W".
+Everything is drawn here the way GDI does it (text glyph by glyph with the
+whole v35-hinted widths, fixed-point gradient) — compared with an XP capture:
+only the smoothing of a few title letters and 1 px of the "W" differ.
 
-Corre num processo à parte (o FreeType lê FREETYPE_PROPERTIES ao arrancar):
-    python3 msgbox.py <pasta das imagens>
+Runs in a separate process (FreeType reads FREETYPE_PROPERTIES when it starts):
+    python3 msgbox.py <images folder>
 """
 import json
 import os
 import subprocess
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 FACE = (236, 233, 216)
@@ -31,15 +31,15 @@ DKSHADOW = (113, 111, 100)    # COLOR_3DDKSHADOW
 TITLE_A = (0, 84, 227)        # COLOR_ACTIVECAPTION
 TITLE_B = (61, 149, 255)      # COLOR_GRADIENTACTIVECAPTION
 
-FRAME = 3                     # borda em relevo (2) + borda da janela (1)
-CAPTION_H = 25                # SM_CYCAPTION do Luna; 1 px de cara por baixo
-CLOSE = (16, 21)              # botão do título; 2 px das margens
-MARGIN = 11                   # à volta do ícone e do texto (cliente)
-TEXT_X = 62                   # texto depois do ícone (cliente)
+FRAME = 3                     # raised border (2) + window border (1)
+CAPTION_H = 25                # Luna's SM_CYCAPTION; 1 px of face underneath
+CLOSE = (16, 21)              # caption button; 2 px from the edges
+MARGIN = 11                   # around the icon and the text (client)
+TEXT_X = 62                   # text after the icon (client)
 LINE_H = 13                   # Tahoma 8 pt
 BTN = (75, 23)                # 50x14 DLU
 BTN_GAP = 6                   # 4 DLU
-BTN_SPACE = 17                # texto -> botões
+BTN_SPACE = 17                # text -> buttons
 RIGHT = 8                     # margem direita do texto (medida)
 
 
@@ -51,7 +51,7 @@ def _font(name, px, **kw):
 
 
 def text(img, font, s, x, y, color, mode="1"):
-    """Como o GDI: cada letra no seu bitmap, a avançar a largura inteira."""
+    """Like GDI: each glyph in its bitmap, advancing its whole width."""
     from PIL import Image
     for ch in s:
         mask, off = font.getmask2(ch, mode=mode)
@@ -77,7 +77,7 @@ def raised(img, x0, y0, x1, y1, outer=(LIGHT, DKSHADOW), inner=(HILIGHT, SHADOW)
 
 
 def button(label, state, default):
-    """Botão clássico 75x23: normal, por omissão (moldura preta) ou premido."""
+    """Classic 75x23 button: normal, default (black frame) or pressed."""
     from PIL import Image, ImageDraw
     w, h = BTN
     img = Image.new("RGB", (w, h), FACE)
@@ -101,7 +101,7 @@ def button(label, state, default):
 
 
 def box(title, body):
-    """A caixa sem os botões (ficam por cima, como widgets)."""
+    """The box without the buttons (they go on top, as widgets)."""
     from PIL import Image
     from lib import assets
     f = _font("tahoma.ttf", 11)
@@ -116,7 +116,7 @@ def box(title, body):
     img = Image.new("RGB", (W, H), FACE)
     raised(img, 0, 0, W - 1, H - 1)
 
-    # título: gradiente até ao botão de fechar, depois a cor final
+    # title: gradient up to the close button, then the final colour
     tw = W - 2 * FRAME
     span = tw - CLOSE[0] - 2
     for x in range(tw):
@@ -125,13 +125,14 @@ def box(title, body):
         for y in range(CAPTION_H):
             img.putpixel((FRAME + x, FRAME + y), c)
     text(img, _font("trebucbd.ttf", 13), title, FRAME + 2, FRAME + 4, (255, 255, 255), mode="L")
-    # botão de fechar desativado (MB_YESNO não deixa fechar)
+    # disabled close button (MB_YESNO does not allow closing)
     cx, cy = W - FRAME - 2 - CLOSE[0], FRAME + 2
     from PIL import ImageDraw
     ImageDraw.Draw(img).rectangle((cx, cy, cx + CLOSE[0] - 1, cy + CLOSE[1] - 1), fill=FACE)
     raised(img, cx, cy, cx + CLOSE[0] - 1, cy + CLOSE[1] - 1,
            outer=(HILIGHT, DKSHADOW), inner=(LIGHT, SHADOW))
-    # (a Marlett é uma fonte de símbolos: só o motor completo usa o mapa dela)
+    # (Marlett is a symbol font: only the full engine uses its cmap)
+
     from PIL import ImageFont
     m = _font("marlett.ttf", 11, encoding="symb", layout_engine=ImageFont.Layout.RAQM)
     text(img, m, "r", cx + 4, cy + 6, HILIGHT)

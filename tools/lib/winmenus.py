@@ -1,9 +1,9 @@
-"""Menus dos binários do Windows (RT_MENU), com o id de cada item.
+"""Menus of Windows binaries (RT_MENU), with each item's id.
 
-parse(dados) -> [{"id": int ou None, "text": str, "flags": int,
-                  "items": [...] (só nos submenus)}]
-O id de cada comando é o mesmo em todas as línguas do XP: é por ele que se
-escolhem os itens (o texto muda com a língua). Separadores: text "" e id 0.
+parse(data) -> [{"id": int or None, "text": str, "flags": int,
+                 "items": [...] (submenus only)}]
+Each command's id is the same in every XP language: items are chosen by it
+(the text changes with the language). Separators: text "" and id 0.
 """
 import struct
 
@@ -43,7 +43,7 @@ def _parse_ex(d, o):
         text, o = _sz(d, o + 14)
         o = (o + 3) & ~3
         item = {"id": mid, "text": text, "flags": flags}
-        if flags & 0x01:                       # submenu: dwHelpId e os itens
+        if flags & 0x01:                       # submenu: dwHelpId and the items
             o += 4
             item["items"], o = _parse_ex(d, o)
         items.append(item)
@@ -60,7 +60,7 @@ def parse(data):
 
 
 def flat(items):
-    """Todos os itens, pela ordem (os submenus antes dos seus itens)."""
+    """Every item, in order (submenus before their items)."""
     for it in items:
         yield it
         yield from flat(it.get("items", []))

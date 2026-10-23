@@ -1,15 +1,15 @@
-"""Larguras das letras como o GDI do XP as usa (para gdiText.js).
+"""Glyph widths as XP's GDI uses them (for gdiText.js).
 
-O XP avança cada letra a largura inteira que o hinting TrueType lhe dá
-(interpretador v35, a tabela hdmx), sem kerning. O Pango do GNOME usa as
-larguras sem hinting e arredonda as posições — o texto fica com espaços
-diferentes (medido no "Desligar computador" do ecrã de boas-vindas: 165 px
-contra os 173 px do XP, que coincidem letra a letra com estas larguras).
+XP advances each glyph by the whole width TrueType hinting gives it (v35
+interpreter, the hdmx table), without kerning. GNOME's Pango uses the
+unhinted widths and rounds the positions — the text gets different spacing
+(measured on the welcome screen's "Desligar computador": 165 px against
+XP's 173 px, which match these widths glyph for glyph).
 
-Gera gdi-metrics.json: por ficheiro de letra e tamanho em px, a subida, a
-descida, o sublinhado e a largura de cada carácter (Latim). Corre num
-processo à parte (o FreeType lê FREETYPE_PROPERTIES ao arrancar):
-    python3 gdimetrics.py <pasta Fonts do XP> <saída.json>
+Writes gdi-metrics.json: per font file and size in px, the ascent, the
+descent, the underline and the width of each character (Latin). Runs in a
+separate process (FreeType reads FREETYPE_PROPERTIES when it starts):
+    python3 gdimetrics.py <XP Fonts folder> <out.json>
 """
 import json
 import os
@@ -17,7 +17,7 @@ import struct
 import subprocess
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import ttf  # noqa: E402
 

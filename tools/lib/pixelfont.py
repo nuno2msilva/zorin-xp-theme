@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-"""Fonte "de píxeis" com o texto do XP: cada letra é o desenho que o GDI do
-XP faz da Tahoma a um tamanho fixo (hinting TrueType v35, sem suavização)
-convertido em quadrados de 1 px, e avança a largura inteira do XP.
+"""A "pixel" font with XP's text: each glyph is the drawing XP's GDI makes
+of Tahoma at a fixed size (TrueType v35 hinting, no smoothing) turned into
+1 px squares, and it advances XP's whole width.
 
-Para programas que não usam as larguras ajustadas das letras (o Firefox/Zen
-usa as da fonte sem hinting e as letras ficam com espaços irregulares — "Fav
-oritos"): com esta fonte, ao tamanho dela, não há frações e o texto sai igual
-ao do XP. Noutros tamanhos fica aos quadrados (só serve para esse tamanho).
+For programs that do not use the glyphs' hinted widths (Firefox/Zen uses
+the unhinted font widths and the letters end up irregularly spaced — "Fav
+oritos"): with this font, at its size, there are no fractions and the text
+comes out identical to XP's. At other sizes it looks blocky (it only works
+at that size).
 
-O TrueType é escrito à mão (sem dependências): só contornos retangulares.
+The TrueType is written by hand (no dependencies): rectangular outlines only.
 
-    pixelfont.py <tahoma.ttf> <px> <família> <Regular|Bold> <saída.ttf>
-    pixelfont.py mix <normal.ttf> <negrito.ttf> <px> <px grande> <família> <saída.ttf>
+    pixelfont.py <tahoma.ttf> <px> <family> <Regular|Bold> <out.ttf>
+    pixelfont.py mix <regular.ttf> <bold.ttf> <px> <big px> <family> <out.ttf>
 
-"mix" junta numa só fonte o normal, o negrito (em U+E000 + código) e o normal
-num tamanho maior (U+E400 + código), mais um espaço de 1 px (U+F8F0): para
-escrever texto com negritos e títulos num só bloco (a página de erro do IE,
-tools/builders/ieerror.py), e um .json com as larguras de cada um.
+"mix" joins into one font the regular, the bold (at U+E000 + code) and the
+regular at a bigger size (U+E400 + code), plus a 1 px space (U+F8F0): to
+write text with bold parts and headings in one block (the IE error page,
+tools/builders/ieerror.py), and a .json with the widths of each.
 """
 import math
 import os
@@ -24,17 +25,17 @@ import struct
 import subprocess
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib import ttf  # noqa: E402
 
-U = 64                                  # unidades por píxel
+U = 64                                  # units per pixel
 CHARS = [c for r in ((0x20, 0x7F), (0xA0, 0x180), (0x2010, 0x2027)) for c in range(*r)] \
     + [0x20AC, 0x2122, 0x2190, 0x2191, 0x2192, 0x2193, 0x25CF]
 
 
 def _gid_lsb(t):
-    """(código -> glifo, glifo -> lsb em unidades) da cmap 3/1 e da hmtx"""
+    """(code -> glyph, glyph -> lsb in units) from the 3/1 cmap and the hmtx"""
     cm = t["cmap"]
     n, = struct.unpack_from(">H", cm, 2)
     sub = next(off for p, e, off in (struct.unpack_from(">HHI", cm, 4 + 8 * i) for i in range(n))
@@ -65,7 +66,7 @@ def _gid_lsb(t):
 
 
 def glyphs(path, px):
-    """{código: (avanço em px, [(x0, y0, x1, y1) em px, y para cima])}"""
+    """{code: (advance in px, [(x0, y0, x1, y1) in px, y going up])}"""
     from PIL import ImageFont
     font = ImageFont.truetype(path, px, layout_engine=ImageFont.Layout.BASIC)
     t = ttf.tables(path)
@@ -89,14 +90,15 @@ def glyphs(path, px):
                     k = i
                     while k < w and mask.getpixel((k, j)):
                         k += 1
-                    y = oy + j                      # linha (para baixo, 0 = base)
+                    y = oy + j                      # row (going down, 0 = baseline)
                     rects.append((ox + i, -(y + 1), ox + k, -y))
                     i = k
                 else:
                     i += 1
-        # Letras que começam quase na origem (A, v, W, y...): o contorno
-        # ajustado cai a meio de uma coluna e o FreeType pinta-a, o GDI não —
-        # ficavam 1 px à esquerda do XP. Começam onde o lsb arredondado diz.
+        # Glyphs that start almost at the origin (A, v, W, y...): the fitted
+        # outline falls in the middle of a column and FreeType paints it, GDI
+        # does not — they were 1 px left of XP. They start where the rounded
+        # lsb says.
         if rects:
             want = math.floor(lsb(gid(c)) * px / upem + 0.5)
             have = min(r[0] for r in rects)
@@ -125,7 +127,7 @@ def _name(family, style):
 
 
 def _cmap(codes):
-    """formato 4: códigos (ordenados) -> glifo i+1 (o 0 é .notdef)"""
+    """format 4: (sorted) codes -> glyph i+1 (0 is .notdef)"""
     segs = []
     for gid, c in enumerate(codes, 1):
         if segs and c == segs[-1][1] + 1 and gid - c == segs[-1][2]:
@@ -148,7 +150,7 @@ BOLD, BIG, SPACER = 0xE000, 0xE400, 0xF8F0
 
 
 def mix(regular, bold, px, big_px, family, out):
-    """Normal + negrito (BOLD + código) + grande (BIG + código) + espaçador."""
+    """Regular + bold (BOLD + code) + big (BIG + code) + spacer."""
     import json
     g = glyphs(regular, px)
     gb = glyphs(bold, px)
@@ -192,7 +194,7 @@ def build(path, px, family, style, out, g=None):
             gb = (min(xs) * U, min(ys) * U, max(xs) * U, max(ys) * U)
             bbox = [min(bbox[0], gb[0]), min(bbox[1], gb[1]), max(bbox[2], gb[2]), max(bbox[3], gb[3])]
             ends, pts = [], []
-            for x0, y0, x1, y1 in rects:            # sentido dos ponteiros do relógio
+            for x0, y0, x1, y1 in rects:            # clockwise
                 pts += [(x0 * U, y0 * U), (x0 * U, y1 * U), (x1 * U, y1 * U), (x1 * U, y0 * U)]
                 ends.append(len(pts) - 1)
             data = struct.pack(">h4h", len(rects), *gb)
@@ -259,7 +261,7 @@ def build(path, px, family, style, out, g=None):
 
 
 def export(path, px, family, style, out):
-    """Num processo à parte com o FreeType v35 (o GDI do XP)."""
+    """In a separate process with FreeType v35 (XP's GDI)."""
     env = dict(os.environ, FREETYPE_PROPERTIES="truetype:interpreter-version=35")
     subprocess.run([sys.executable, os.path.abspath(__file__), path, str(px), family, style, out],
                    check=True, env=env)

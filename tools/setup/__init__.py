@@ -1,2 +1,2 @@
-"""O que o install.sh aplica no sistema (preferências, pastas, Zen...);
-cada um corre também sozinho (ver o cabeçalho de cada ficheiro)."""
+"""What install.sh applies to the system (preferences, folders, Zen...);
+each one also runs on its own (see each file's header)."""

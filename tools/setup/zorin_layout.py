@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Layout do Zorin para o tema XP: o estilo "Windows" da Aparência do Zorin
-(menu com todas as aplicações + zorin-taskbar, a opção de lista de janelas
-que lembra o Windows 7) com os ajustes do XP por cima.
+"""Zorin layout for the XP theme: Zorin Appearance's "Windows" style (menu
+with all applications + zorin-taskbar, the window list option that looks
+like Windows 7) with the XP adjustments on top.
 
-Aplica o mesmo que a Aparência do Zorin aplica para esse estilo
-(zorin_appearance/Layouts/20-windows-list-shell.py) e depois as definições
-aprovadas para o XP:
-  - barra de 30 px em todos os monitores;
-  - botões das janelas com texto, largura fixa de 120 px, sem agrupar;
-  - pré-visualizações das janelas e dicas;
-  - sem botão Atividades nem "Mostrar aplicações"; "Ver ADT" (mostrar o
-    ambiente de trabalho) visível, junto ao relógio;
-  - área de notificação, menu do sistema e relógio à direita;
-  - sem transparências nem bordas arredondadas.
-A cópia de segurança do instalador (/org/gnome/shell/) permite repor tudo.
+Applies the same as Zorin Appearance applies for that style
+(zorin_appearance/Layouts/20-windows-list-shell.py) and then the settings
+approved for XP:
+  - 30 px bar on every monitor;
+  - window buttons with text, fixed width of 120 px, no grouping;
+  - window previews and tooltips;
+  - no Activities button nor "Show Applications"; "Show Desktop" visible,
+    next to the clock;
+  - notification area, system menu and clock on the right;
+  - no transparency nor rounded borders.
+The installer's backup (/org/gnome/shell/) allows restoring everything.
 """
 import json
 
@@ -21,12 +21,12 @@ from gi.repository import Gio, GLib
 import os
 import sys
 
-# (também corre sozinho: tools/ no caminho, para "from lib import ...")
+# (also runs on its own: tools/ on the path, for "from lib import ...")
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 TB = 'org.gnome.shell.extensions.zorin-taskbar'
 
-# o estilo Windows da Aparência do Zorin
+# Zorin Appearance's Windows style
 ENABLE = ['zorin-menu@zorinos.com', 'zorin-taskbar@zorinos.com']
 DISABLE = ['add-to-desktop@tommimon.github.com',
            'apps-menu@gnome-shell-extensions.gcampax.github.com',
@@ -75,7 +75,7 @@ XP = [
     (TB, 'trans-use-custom-opacity', GLib.Variant('b', False)),
     (TB, 'trans-use-dynamic-opacity', GLib.Variant('b', False)),
 ]
-# ordem e visibilidade dos elementos (igual em todos os monitores)
+# order and visibility of the elements (the same on every monitor)
 ELEMENTS = [
     ('leftBox', True, 'stackedTL'),
     ('showAppsButton', False, 'stackedTL'),
@@ -87,7 +87,8 @@ ELEMENTS = [
     ('dateMenu', True, 'stackedBR'),
     ('desktopButton', True, 'stackedBR'),
 ]
-# chaves de monitor que a zorin-taskbar usa (índices e as já guardadas)
+# monitor keys zorin-taskbar uses (indexes and the ones already stored)
+
 MONITOR_KEYS = ['0', '1', '2']
 
 
