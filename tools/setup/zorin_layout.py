@@ -12,8 +12,10 @@ approved for XP:
   - no Activities button nor "Show Applications"; "Show Desktop" visible,
     next to the clock;
   - notification area, system menu and clock on the right;
-  - no transparency nor rounded borders.
-The installer's backup (/org/gnome/shell/) allows restoring everything.
+  - no transparency nor rounded borders;
+  - a single workspace, as XP (no multiple desktops).
+The installer's backup (/org/gnome/shell/, /org/gnome/mutter/ and
+/org/gnome/desktop/wm/preferences/) allows restoring everything.
 """
 import json
 
@@ -74,6 +76,9 @@ XP = [
     (TB, 'trans-use-border', GLib.Variant('b', False)),
     (TB, 'trans-use-custom-opacity', GLib.Variant('b', False)),
     (TB, 'trans-use-dynamic-opacity', GLib.Variant('b', False)),
+    # one workspace, as XP (2026-10-23, user's wish)
+    ('org.gnome.mutter', 'dynamic-workspaces', GLib.Variant('b', False)),
+    ('org.gnome.desktop.wm.preferences', 'num-workspaces', GLib.Variant('i', 1)),
 ]
 # order and visibility of the elements (the same on every monitor)
 ELEMENTS = [
