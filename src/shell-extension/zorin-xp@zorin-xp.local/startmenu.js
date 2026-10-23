@@ -134,6 +134,44 @@ export class StartMenuTweaks {
             }
             global.stage.set_key_focus(this);
         });
+        // The arrows start at the first item, as in XP. In a search, Zorin
+        // marks the first result as the default (for Enter) without showing
+        // it here, and its first arrow went past it: to the next result, a
+        // group title or "Voltar". ↑ with nothing selected went round to
+        // "Terminar sessão".
+        this._patch(proto, '_onKeyPress', function (orig, actor, event) {
+            if (!this._zxp)
+                return orig.call(this, actor, event);
+            const symbol = event.get_key_symbol();
+            const down = symbol === Clutter.KEY_Down || symbol === Clutter.KEY_KP_Down;
+            const up = symbol === Clutter.KEY_Up || symbol === Clutter.KEY_KP_Up;
+            if (!down && !up)
+                return orig.call(this, actor, event);
+            const top = this._searchResults?.get_parent() ? this._searchResults.getTopResult() : null;
+            if (top && this._searchEntry?.has_key_focus()) {
+                top.remove_style_pseudo_class('focus');
+                top.grab_key_focus();
+                return Clutter.EVENT_STOP;
+            }
+            if (up && global.stage.key_focus === this) {
+                if (this._categoriesSection?.visible)
+                    this._categoriesSection.grab_key_focus();
+                else if (this._appsSection?.visible)
+                    this._appsSection.grab_key_focus();
+                else
+                    this._placesSection?.grab_key_focus();
+                return Clutter.EVENT_STOP;
+            }
+            return orig.call(this, actor, event);
+        });
+        // The search's group titles ("Janelas abertas", "Software") are not
+        // stops for the arrows (the items move the focus themselves, through
+        // St's focus manager); hover and click still open them
+        this._patch(base.BaseMenuItem.prototype, '_init', function (orig, ...args) {
+            orig.call(this, ...args);
+            if (this.constructor.name === 'ProviderInfo')
+                this.can_focus = false;
+        });
         this._patch(proto, '_availableHeight', function (orig) {
             const h = orig.call(this);
             return this._zxp ? h - HEADER_H - FOOTER_H : h;
