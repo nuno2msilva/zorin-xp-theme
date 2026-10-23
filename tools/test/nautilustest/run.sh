@@ -17,8 +17,17 @@ done
 # settings: a copy of the user's on every start
 cp "$HOME/.config/dconf/user" "$HOME/.config/dconf/zxptest" 2>/dev/null
 printf 'user-db:zxptest\n' > "$T/dconf-profile"
-setsid gtk4-broadwayd :7 >"$T/broadway.log" 2>&1 &
-sleep 1
-setsid dbus-run-session -- env DCONF_PROFILE="$T/dconf-profile" GDK_BACKEND=broadway \
+# ZXP_WAYLAND=<socket path>: draws into a headless GNOME Shell instead (e.g.
+# MODE=user tools/test/shelltest/run.sh), where GTK gets real frames — Broadway
+# only lays out and draws while a visible browser shows its page
+if [ -n "$ZXP_WAYLAND" ]; then
+    BACKEND="GDK_BACKEND=wayland WAYLAND_DISPLAY=$ZXP_WAYLAND"
+else
+    setsid gtk4-broadwayd :7 >"$T/broadway.log" 2>&1 &
+    sleep 1
+    BACKEND="GDK_BACKEND=broadway"
+fi
+# (BROADWAY_DISPLAY also marks the test Nautilus for stop.sh)
+setsid dbus-run-session -- env DCONF_PROFILE="$T/dconf-profile" $BACKEND \
     BROADWAY_DISPLAY=:7 XDG_DATA_HOME="$T/data" NO_AT_BRIDGE=1 ZXP_TEST_RPC="$T/rpc" \
     nautilus --new-window "${1:-$HOME}" >"$T/nautilus.log" 2>&1 &

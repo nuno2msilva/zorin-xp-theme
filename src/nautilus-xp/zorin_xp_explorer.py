@@ -16,6 +16,7 @@ images come from the GTK theme (generated from shell32.dll/shellstyle.dll).
 """
 import collections
 import json
+import math
 import os
 
 import gi
@@ -160,7 +161,7 @@ VIEW_MODES = {
     'thumbnails': {'view': 2, 'zoom': 'medium', 'captions': ['none', 'none', 'none']},
     'tiles': {'view': 2, 'zoom': 'small', 'captions': ['zxp_tile', 'none', 'none']},
     'icons': {'view': 2, 'zoom': 'small', 'captions': ['none', 'none', 'none']},
-    'list': {'view': 1, 'zoom': 'small', 'columns': ['name']},
+    'list': {'view': 2, 'zoom': 'small', 'captions': ['none', 'none', 'none']},
     'details': {'view': 1, 'zoom': 'small', 'columns': ['name', 'zxp_size', 'zxp_type', 'zxp_date']},
 }
 DEFAULT_VIEW = 'icons'
@@ -177,7 +178,26 @@ THUMB_ICON = 48
 PITCHES = {'tiles': TILE_WIDTH, 'thumbnails': THUMB_PITCH, 'icons': ICON_PITCH}
 # width of the name below the icon (the column minus 2 px on each side)
 NAME_WIDTHS = {'thumbnails': THUMB_PITCH - 4, 'icons': ICON_PITCH - 4}
-TYPE_ICON_SIZES = {'thumbnails': THUMB_ICON, 'tiles': THUMB_ICON, 'icons': ICON_SIZE}
+# the rename box in Icons and Thumbnails (measured in an XP capture): centred
+# on the item, the text + 5 px on each side + the 1 px outline; it grows on
+# both sides while typing, up to 66 px of text (78 px box), then breaks into
+# more lines; 13 px lines, 2 px above and below
+EDIT_TEXT_W = 66
+EDIT_PAD = 5
+EDIT_LINE = 13
+# List as in XP (measured in an XP capture): the grid on its side — columns
+# filled from top to bottom and scrolled sideways (with Details, the only view
+# that scrolls sideways), all as wide as the folder's longest name: the 16 px
+# icon at the edge, the name 18 px from it, 8 px after the longest one, 17 px rows
+LIST_ROW = 17
+LIST_ICON = 16
+LIST_TEXT_X = 18
+LIST_GAP = 8
+TYPE_ICON_SIZES = {'thumbnails': THUMB_ICON, 'tiles': THUMB_ICON, 'icons': ICON_SIZE, 'list': LIST_ICON}
+# views whose icon is smaller than Nautilus's smallest grid icon (48 px), and
+# the icon box Nautilus asks for at each zoom (given back when leaving them)
+SMALL_ICONS = {'icons': ICON_SIZE, 'list': LIST_ICON}
+ZOOM_ICON_BOX = {'small': 48, 'medium': 96}
 # selection as in XP (ImageList ILD_BLEND50, measured in an XP capture):
 # pixels with alpha >= 128 go halfway to the highlight colour (with
 # premultiplied alpha, rounded up); the others (shadows) stay the same
@@ -512,11 +532,21 @@ class XpExplorer:
             if scroller:
                 scroller.connect('notify::width', lambda *_: self._tile_columns(grid))
                 self._tile_width_cb(scroller, grid)
-            # new cells appear while scrolling and when the folder finishes loading
-            adj = grid.get_vadjustment()
-            if adj:
-                adj.connect('value-changed', lambda *_: self._tile_cells(grid))
-                adj.connect('changed', lambda *_: GLib.idle_add(lambda: self._tile_cells(grid)))
+            # new cells appear while scrolling (sideways in List) and when the
+            # folder finishes loading
+            for adj in (grid.get_vadjustment(), grid.get_hadjustment()):
+                if adj:
+                    adj.connect('value-changed', lambda *_: self._tile_cells(grid))
+                    adj.connect('changed', lambda *_: GLib.idle_add(lambda: self._tile_cells(grid)))
+            # (List: the rows per column follow the view's height — on its side,
+            # the grid's vertical page is that height)
+            vadj = grid.get_vadjustment()
+            if vadj:
+                vadj.connect('notify::page-size', lambda *_: getattr(self, '_mode', None) == 'list' and
+                             GLib.idle_add(lambda: self._tile_columns(grid)))
+            # (List: the columns follow the folder's names)
+            grid.connect('notify::model', lambda *_: self._watch_list_model(grid))
+            self._watch_list_model(grid)
         self._on_bind(grid.get_factory(), grid, self._tile_cells)
         self._tile_cells(grid)
         tries = [10]
@@ -840,7 +870,7 @@ class XpExplorer:
                         break
         # (in Tiles, Thumbnails and Icons the emblems column always goes: in Tiles
         # it pushed the name away, in the others it took the icon off centre)
-        grid_mode = getattr(self, '_mode', None) in PITCHES
+        grid_mode = getattr(self, '_mode', None) in PITCHES or getattr(self, '_mode', None) == 'list'
         hide = special or (grid_mode and cell.__gtype__.name == 'NautilusGridCell')
         if box is not None and box.get_visible() == hide:
             box.set_visible(not hide)
@@ -848,17 +878,32 @@ class XpExplorer:
 
     def _tile_width_cb(self, scroller, grid):
         # (Gtk.Widget does not notify width changes: follow the window)
-        self.win.connect('notify::default-width', lambda *_: GLib.idle_add(
-            lambda: self._tile_columns(grid) and False))
+        for prop in ('notify::default-width', 'notify::default-height'):
+            self.win.connect(prop, lambda *_: GLib.idle_add(lambda: self._tile_columns(grid) and False))
         self.win.connect('notify::maximized', lambda *_: GLib.timeout_add(
             200, lambda: self._tile_columns(grid) and False))
 
     def _tile_columns(self, grid):
         """Columns with XP's width (PITCHES): GtkGridView spreads the leftover
         among the columns; here the number of columns is fixed and the
-        leftover stays on the right."""
+        leftover stays on the right. List: the grid on its side (_list_rows)."""
         scroller = grid.get_parent()
-        pitch = PITCHES.get(getattr(self, '_mode', None))
+        mode = getattr(self, '_mode', None)
+        listing = mode == 'list'
+        orient = Gtk.Orientation.HORIZONTAL if listing else Gtk.Orientation.VERTICAL
+        if grid.get_orientation() != orient:
+            grid.set_orientation(orient)
+        # (only List scrolls sideways — and Details, Nautilus's list view)
+        if isinstance(scroller, Gtk.ScrolledWindow):
+            policy = (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER) if listing else \
+                (Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+            if scroller.get_policy() != policy:
+                scroller.set_policy(*policy)
+        if listing and scroller:
+            self._watch_list_model(grid)
+            return self._list_rows(grid, scroller)
+        grid.set_margin_bottom(0)
+        pitch = PITCHES.get(mode)
         if pitch is None or not scroller:
             grid.set_min_columns(1)
             grid.set_max_columns(100)
@@ -873,11 +918,82 @@ class XpExplorer:
         grid.set_margin_end(max(0, width - n * pitch))
         return False
 
+    def _list_rows(self, grid, scroller):
+        """List: as many 17 px rows per column as fit in the view's height, less
+        the horizontal scrollbar when the columns do not all fit (on its side,
+        the grid's "columns" are its rows)."""
+        avail = scroller.get_height()
+        if avail <= 0:
+            return False
+        model = grid.get_model()
+        n = model.get_n_items() if model is not None else 0
+        rows = max(1, avail // LIST_ROW)
+        if -(-n // rows) * self._list_width(grid) > scroller.get_width():
+            bar = scroller.get_hscrollbar()
+            avail -= bar.measure(Gtk.Orientation.VERTICAL, -1)[1] if bar else 0
+            rows = max(1, avail // LIST_ROW)
+        grid.set_min_columns(rows)
+        grid.set_max_columns(rows)
+        grid.set_margin_end(0)
+        # (the leftover stays below the last row, as in XP: GtkGridView would
+        # stretch the rows to fill the height)
+        grid.set_margin_bottom(max(0, avail - rows * LIST_ROW))
+        return False
+
+    def _list_width(self, grid):
+        """List: every column as wide as the folder's longest name (as in XP).
+        Measured again for another folder, another number of items or a
+        changed name (_watch_list_model)."""
+        model = grid.get_model()
+        slot = getattr(self, '_slot_obj', None)
+        loc = slot.get_property('location') if slot else None
+        key = (loc.get_uri() if loc else None, model.get_n_items() if model is not None else 0)
+        cached = getattr(grid, '_zxp_list_w', None)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        layout = grid.create_pango_layout('')
+        widest = 0
+        for i in range(model.get_n_items() if model is not None else 0):
+            item = model.get_item(i)
+            if isinstance(item, Gtk.TreeListRow):
+                item = item.get_item()
+            f = item.get_property('file') if item is not None else None
+            if f is not None:
+                layout.set_text(Nautilus.FileInfo.get_name(f), -1)
+                widest = max(widest, layout.get_pixel_size()[0])
+        width = LIST_TEXT_X + widest + LIST_GAP
+        grid._zxp_list_w = (key, width)
+        return width
+
+    def _watch_list_model(self, grid):
+        """A name added, removed or changed: List measures its columns again."""
+        model = grid.get_model()
+        if model is None or getattr(model, '_zxp_list_watch', False):
+            return
+        model._zxp_list_watch = True
+
+        def changed(*_):
+            grid._zxp_list_w = None
+            if getattr(self, '_mode', None) == 'list' and not getattr(grid, '_zxp_list_idle', 0):
+                def run():
+                    grid._zxp_list_idle = 0
+                    self._tile_columns(grid)
+                    self._tile_cells(grid)
+                    return False
+                grid._zxp_list_idle = GLib.idle_add(run)
+        model.connect('items-changed', changed)
+
     def _tile_cells(self, grid):
         on = getattr(self, '_tiles', False)
+        listing = getattr(self, '_mode', None) == 'list'
+        # (List and Tiles: the icon beside the name)
+        side = on or listing
+        list_w = self._list_width(grid) if listing else None
+        # (a cell is redone when the view — or List's column width — changes)
+        mark = (self._mode, list_w)
         for cell in walk(grid):
             if cell.__gtype__.name != 'NautilusGridCell' or \
-                    getattr(cell, '_zxp_tile', None) == self._mode:
+                    getattr(cell, '_zxp_tile', None) == mark:
                 continue
             clamp = cell.get_first_child()
             box = clamp.get_first_child() if clamp else None
@@ -886,19 +1002,33 @@ class XpExplorer:
                 continue
             if not hasattr(cell, '_zxp_clamp'):
                 cell._zxp_clamp = clamp.get_maximum_size()
-            cell._zxp_tile = self._mode
-            box.set_orientation(Gtk.Orientation.HORIZONTAL if on else Gtk.Orientation.VERTICAL)
+            cell._zxp_tile = mark
+            box.set_orientation(Gtk.Orientation.HORIZONTAL if side else Gtk.Orientation.VERTICAL)
+            # (List: from the column's left edge; Nautilus centres the cell's content)
+            if not hasattr(box, '_zxp_halign'):
+                box._zxp_halign = (box.get_halign(), box.get_spacing())
+            box.set_halign(Gtk.Align.START if listing else box._zxp_halign[0])
+            # (and the name 18 px from the edge: without Nautilus's 6 px after the icon)
+            box.set_spacing(0 if listing else box._zxp_halign[1])
             icon_box = box.get_first_child()
             if not hasattr(icon_box, '_zxp_halign'):
                 icon_box._zxp_halign = icon_box.get_halign()
-            icon_box.set_halign(Gtk.Align.START if on else icon_box._zxp_halign)
+            icon_box.set_halign(Gtk.Align.START if side else icon_box._zxp_halign)
             if not hasattr(icon_box, '_zxp_hexpand'):
                 icon_box._zxp_hexpand = icon_box.get_hexpand()
-            icon_box.set_hexpand(False if on else icon_box._zxp_hexpand)
-            icon_box.set_valign(Gtk.Align.CENTER if on else Gtk.Align.FILL)
-            labels.set_valign(Gtk.Align.CENTER if on else Gtk.Align.FILL)
-            labels.set_hexpand(on)
-            clamp.set_maximum_size(TILE_WIDTH if on else cell._zxp_clamp)
+            icon_box.set_hexpand(False if side else icon_box._zxp_hexpand)
+            icon_box.set_valign(Gtk.Align.CENTER if on else (Gtk.Align.START if listing else Gtk.Align.FILL))
+            labels.set_valign(Gtk.Align.CENTER if side else Gtk.Align.FILL)
+            labels.set_hexpand(side)
+            clamp.set_maximum_size(TILE_WIDTH if on else (list_w if listing else cell._zxp_clamp))
+            # (List: the whole column; above its tightening threshold the clamp gives
+            # the content less than the width, centred)
+            if not hasattr(cell, '_zxp_tight'):
+                cell._zxp_tight = clamp.get_tightening_threshold()
+            clamp.set_tightening_threshold(list_w if listing else cell._zxp_tight)
+            # List: every cell as wide as the longest name, 17 px high (the grid on
+            # its side gives each column the width of its widest cell)
+            cell.set_size_request(list_w if listing else -1, LIST_ROW if listing else -1)
             # Icons and Thumbnails: the name in up to 2 lines, broken at spaces
             # and cut with "…" at the end (as in XP)
             two = self._mode in ('icons', 'thumbnails')
@@ -911,17 +1041,17 @@ class XpExplorer:
                     if two:
                         wrap, chars, ell, lines = False, -1, Pango.EllipsizeMode.NONE, -1
                     lbl.set_wrap_mode(wrap_mode)
-                    lbl.set_xalign(0 if on else 0.5)
+                    lbl.set_xalign(0 if side else 0.5)
                     # the selection highlight only behind the text, as in XP
                     if not hasattr(lbl, '_zxp_halign'):
                         lbl._zxp_halign = lbl.get_halign()
-                    lbl.set_halign(Gtk.Align.START if on else Gtk.Align.CENTER)
-                    lbl.set_justify(Gtk.Justification.LEFT if on else Gtk.Justification.CENTER)
-                    # one line per text, cut with "…" (like XP's tiles)
-                    lbl.set_wrap(False if on else wrap)
-                    lbl.set_lines(1 if on else lines)
-                    lbl.set_max_width_chars(-1 if on else chars)
-                    lbl.set_ellipsize(Pango.EllipsizeMode.END if on else ell)
+                    lbl.set_halign(Gtk.Align.START if side else Gtk.Align.CENTER)
+                    lbl.set_justify(Gtk.Justification.LEFT if side else Gtk.Justification.CENTER)
+                    # one line per text: cut with "…" in Tiles (like XP's), whole in List
+                    lbl.set_wrap(False if side else wrap)
+                    lbl.set_lines(1 if side else lines)
+                    lbl.set_max_width_chars(-1 if side else chars)
+                    lbl.set_ellipsize(Pango.EllipsizeMode.END if on else (Pango.EllipsizeMode.NONE if listing else ell))
             name = labels.get_first_child()
             if isinstance(name, Gtk.Label):
                 if not getattr(name, '_zxp_watch', False):
@@ -949,10 +1079,12 @@ class XpExplorer:
             lbl._zxp_name = text        # (a name set by Nautilus)
         name = lbl._zxp_name
         width = NAME_WIDTHS.get(getattr(self, '_mode', None))
-        # the focused item (the last one clicked, even without selection) shows the
-        # whole name while the view has the focus — as in XP
+        # the selected item with the focus (the last one clicked) shows the whole
+        # name while the view has the focus; every other name, long or short,
+        # stays cut — also the focused one once it is no longer selected
         row = getattr(lbl, '_zxp_row', None)
-        focused = row is not None and bool(row.get_state_flags() & Gtk.StateFlags.FOCUSED) and \
+        flags = row.get_state_flags() if row is not None else 0
+        focused = bool(flags & Gtk.StateFlags.FOCUSED) and bool(flags & Gtk.StateFlags.SELECTED) and \
             self.win.is_active()
         key = (name, width, focused)
         if key == getattr(lbl, '_zxp_key', None) and text == getattr(lbl, '_zxp_text', None):
@@ -992,19 +1124,23 @@ class XpExplorer:
             if isinstance(icon_box, Gtk.Box):
                 if not hasattr(icon_box, '_zxp_margin'):
                     icon_box._zxp_margin = icon_box.get_margin_start()
-                centred = mode in ('thumbnails', 'icons')
-                icon_box.set_margin_start(0 if centred else icon_box._zxp_margin)
-                # Icons: 32x32 instead of the 48x48 Nautilus asks for (its own comes back
-                # when leaving, unless it asked for another one in the meantime)
-                req = icon_box.get_size_request()
-                if mode == 'icons':
-                    if (req.width, req.height) != (ICON_SIZE, ICON_SIZE):
-                        icon_box._zxp_req = (req.width, req.height)
-                        icon_box.set_size_request(ICON_SIZE, ICON_SIZE)
-                elif getattr(icon_box, '_zxp_req', None) and \
-                        (req.width, req.height) == (ICON_SIZE, ICON_SIZE):
-                    icon_box.set_size_request(*icon_box._zxp_req)
-                    icon_box._zxp_req = None
+                flush = mode in ('thumbnails', 'icons', 'list')
+                icon_box.set_margin_start(0 if flush else icon_box._zxp_margin)
+                # Icons and List: 32x32 / 16x16 instead of the 48x48 Nautilus asks for;
+                # leaving them, Nautilus's size for the new view's zoom (a size kept
+                # from before could be the previous zoom's: Nautilus may set its own
+                # after this runs)
+                req = (icon_box.get_size_request().width, icon_box.get_size_request().height)
+                small = SMALL_ICONS.get(mode)
+                if small:
+                    if req != (small, small):
+                        icon_box._zxp_small = True
+                        icon_box.set_size_request(small, small)
+                elif getattr(icon_box, '_zxp_small', False):
+                    icon_box._zxp_small = False
+                    size = ZOOM_ICON_BOX.get(VIEW_MODES.get(mode, {}).get('zoom'))
+                    if size and req != (size, size):
+                        icon_box.set_size_request(size, size)
             self._thumb_picture(pic)
 
     def _thumb_picture(self, pic):
@@ -1647,25 +1783,25 @@ class XpExplorer:
         if not ok:
             return False
         # the box as in XP (measured): the text stays where the name was; with the
-        # name centred (Icons, Thumbnails) the box is the text + 5 px on each
-        # side; on the left (Tiles) 4 px before and 15 after; in List and
+        # name centred (Icons, Thumbnails) the box is centred on the item (see
+        # EDIT_TEXT_W); on the left (Tiles) 4 px before and 15 after; in List and
         # Details 2 px before (so it does not touch the icon) and 15 after.
         # 17 px high: the text (13) + 1 px + the outline, above and below.
         mode = getattr(self, '_mode', None)
-        grid = label.get_ancestor(Gtk.GridView) is not None
+        # (List is the grid on its side, but its box is the one of Nautilus's list:
+        # the whole 17 px row, 2 px before the name)
+        grid = label.get_ancestor(Gtk.GridView) is not None and mode != 'list'
         centred = grid and mode in ('icons', 'thumbnails')
         kind = 'zxp-rename-left' if grid and not centred else ('zxp-rename-list' if not grid else '')
-        before, after = (5, 5) if centred else ((4, 15) if grid else (2, 15))
-        # a name wider than the Icons/Thumbnails one: a multi-line box of that
-        # width, the text centred and broken (as in XP)
-        probe = label.create_pango_layout(display).get_pixel_size()[0]
-        multi = centred and probe > NAME_WIDTHS.get(mode, probe)
-        if multi:
-            # (inside a frame with the height calculated here: a wrapping text asks
-            # for the height of a 1-letter-wide column)
+        before, after = (EDIT_PAD, EDIT_PAD) if centred else ((4, 15) if grid else (2, 15))
+        if centred:
+            # (always a box that can take more lines: the name may outgrow one line
+            # while typing; inside a frame with the size calculated here, because a
+            # wrapping text asks for the height of a 1-letter-wide column and for
+            # the width of its last layout — EXTERNAL keeps both out of the frame's size)
             editor = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR, justification=Gtk.Justification.CENTER,
                                   accepts_tab=False)
-            entry = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER,
+            entry = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
                                        vscrollbar_policy=Gtk.PolicyType.EXTERNAL, child=editor,
                                        css_classes=['zxp-rename', 'zxp-rename-multi'],
                                        halign=Gtk.Align.START, valign=Gtk.Align.START)
@@ -1679,8 +1815,8 @@ class XpExplorer:
                                        halign=Gtk.Align.START, valign=Gtk.Align.START,
                                        width_chars=1, max_width_chars=1)
             get_text = entry.get_text
-        text_w = NAME_WIDTHS[mode] if multi else probe
-        width = text_w + before + after + 2
+        multi = centred
+        size = [0, 17]
 
         def place():
             # (a new item's cell still moves for a few moments, and the view may
@@ -1691,9 +1827,9 @@ class XpExplorer:
             pad = label.get_style_context().get_padding()
             shown_w = label.get_layout().get_pixel_size()[0]
             if centred:
-                # (the centre of the name that was visible)
+                # (on the centre of the item's name; XP rounds the half pixel up)
                 centre = rect.get_x() + pad.left + (rect.get_width() - pad.left - pad.right) / 2
-                x = int(round(centre - text_w / 2)) - before - 1
+                x = math.floor(centre - size[0] / 2 + 0.5)
             else:
                 x = int(round(rect.get_x() + pad.left + label.get_xalign() *
                               (rect.get_width() - pad.left - pad.right - shown_w))) - before - 1
@@ -1703,7 +1839,7 @@ class XpExplorer:
             else:
                 # (in List and Details the box takes the row: 17 px)
                 row = label.get_parent()
-                while row is not None and row.get_css_name() != 'row':
+                while row is not None and row.get_css_name() not in ('row', 'child'):
                     row = row.get_parent()
                 ok_row, rrect = row.compute_bounds(overlay) if row is not None else (False, None)
                 y = int(rrect.get_y()) if ok_row else int(rect.get_y()) - 1
@@ -1711,16 +1847,20 @@ class XpExplorer:
             entry.set_margin_top(max(0, y))
 
         def grow(*_):
-            # grows with the typed text (the multi-line one grows downwards)
-            if multi:
-                layout = editor.create_pango_layout(get_text())
-                layout.set_width(text_w * Pango.SCALE)
+            # grows with the typed text: centred, on both sides while it fits on
+            # one line, then downwards with more lines (as in XP)
+            layout = editor.create_pango_layout(get_text())
+            w = layout.get_pixel_size()[0]
+            if centred and w > EDIT_TEXT_W:
+                layout.set_width(EDIT_TEXT_W * Pango.SCALE)
                 layout.set_wrap(Pango.WrapMode.WORD_CHAR)
-                entry.set_size_request(width, layout.get_pixel_size()[1] + 2)
-                return
-            w = entry.create_pango_layout(entry.get_text()).get_pixel_size()[0]
-            entry.set_size_request(w + before + after + 2, 17)
-        place()
+                size[:] = [EDIT_TEXT_W + before + after + 2, 4 + EDIT_LINE * layout.get_line_count()]
+            else:
+                size[:] = [w + before + after + 2, 17]
+            entry.set_size_request(*size)
+            place()
+        grow()
+        (buf if multi else entry).connect('changed', grow)
 
         def follow():
             if getattr(self, '_editor', None) is None or self._editor[0] is not entry:
@@ -1728,9 +1868,6 @@ class XpExplorer:
             place()
             return True
         GLib.timeout_add(50, follow)
-        entry.set_size_request(width, 17)
-        grow()
-        (buf if multi else entry).connect('changed', grow)
         overlay.add_overlay(entry)
         label.set_opacity(0)
         self._editor = (entry, label, overlay, target, display)

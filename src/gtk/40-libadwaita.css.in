@@ -482,6 +482,15 @@ window.zxp-explorer .zxp-icons .icon-ui-labels-box { margin-top: -2px; margin-bo
 /* Icons as in XP: 32 px icons, 75 px columns, name 71 px wide */
 window.zxp-explorer .zxp-icons #NautilusViewCell { padding: 0 2px; }
 window.zxp-explorer .zxp-icons gridview > child { min-height: 75px; }
+/* List as in XP (measured): the grid on its side, columns filled from top to
+ * bottom (src/nautilus-xp: _tile_columns, _list_rows); 17 px rows from the
+ * view's top-left corner, the 16 px icon at the edge and the name 18 px from
+ * it, one whole line */
+window.zxp-explorer .zxp-list .nautilus-grid-view gridview { padding: 0; }
+window.zxp-explorer .zxp-list gridview > child { min-height: 17px; min-width: 0; padding: 0; }
+window.zxp-explorer .zxp-list #NautilusViewCell { padding: 0; }
+window.zxp-explorer .zxp-list #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
+window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 2px; }
 
 /* Details / List (Nautilus's list view) as in the Explorer: 17 px rows,
  * 16 px icon 4 px from the edge, no corners nor gaps between rows */
@@ -608,9 +617,11 @@ window.zxp-explorer entry.zxp-rename.zxp-rename-list { padding: 0 15px 0 2px; }
 /* (Tahoma's line in GTK is 15 px: 15 + the outline = XP's 17) */
 window.zxp-explorer entry.zxp-rename > text { padding: 0; min-height: 0; }
 window.zxp-explorer entry.zxp-rename > text > selection { background-color: @xp_highlight; color: @xp_highlight_text; }
-/* (long names in Icons/Thumbnails: a multi-line box) */
+/* (Icons/Thumbnails: a centred box that takes more lines, XP's 13 px each;
+ * 1 px less on the right because GtkTextView breaks a line that fills its
+ * whole width — src/nautilus-xp: EDIT_TEXT_W) */
 window.zxp-explorer scrolledwindow.zxp-rename {
-  padding: 0 5px;
+  padding: 1px 4px 1px 5px;
   border: 1px solid #000000;
   border-radius: 0;
   box-shadow: none;
@@ -618,7 +629,7 @@ window.zxp-explorer scrolledwindow.zxp-rename {
   background-color: #FFFFFF;
 }
 window.zxp-explorer scrolledwindow.zxp-rename textview,
-window.zxp-explorer scrolledwindow.zxp-rename textview > text { background-color: #FFFFFF; color: #000000; padding: 0; }
+window.zxp-explorer scrolledwindow.zxp-rename textview > text { background-color: #FFFFFF; color: #000000; padding: 0; line-height: 13px; }
 window.zxp-explorer scrolledwindow.zxp-rename textview > text > selection { background-color: @xp_highlight; color: @xp_highlight_text; }
 /* selection in the grid (Thumbnails, Tiles, Icons) as in XP: the cell does
  * not change its background; the name is highlighted (blue, white); the
