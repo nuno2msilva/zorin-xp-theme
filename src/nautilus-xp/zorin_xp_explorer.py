@@ -91,7 +91,7 @@ TEXTS = {
         'ask-extension': 'Se alterar uma extensão de nome de ficheiro, poderá não ser possível '
                          'utilizar o ficheiro.\n\nTem a certeza de que pretende alterá-la?',
         'recent': 'Recentes',
-        'shortcuts': 'Atalhos', 'add-shortcut': 'Adicionar atalho',
+        'shortcuts': 'Atalhos', 'add-shortcut': 'Adicionar atalho', 'open-terminal': 'Abrir num terminal',
         'remove-shortcut': 'Remover atalho', 'open': 'Abrir',
         'open-window': 'Abrir numa nova janela',
     },
@@ -149,7 +149,7 @@ TEXTS = {
         'ask-extension': 'If you change a file name extension, the file might become unusable.'
                          '\n\nAre you sure you want to change it?',
         'recent': 'Recent',
-        'shortcuts': 'Shortcuts', 'add-shortcut': 'Add Shortcut',
+        'shortcuts': 'Shortcuts', 'add-shortcut': 'Add Shortcut', 'open-terminal': 'Open in Terminal',
         'remove-shortcut': 'Remove Shortcut', 'open': 'Open',
         'open-window': 'Open in New Window',
     },
@@ -384,6 +384,7 @@ class XpExplorer:
         # (win.toggle-sidebar only works with a narrow window)
         add('toggle-folders', lambda: self.split.set_show_sidebar(not self.split.get_show_sidebar()))
         add('go', self._go)
+        add('open-terminal', self._open_terminal)
 
         def add_uri(name, fn):
             a = Gio.SimpleAction.new(name, GLib.VariantType.new('s'))
@@ -2321,6 +2322,60 @@ class XpExplorer:
         section.set_attribute_value('zxp-shortcut', GLib.Variant('b', True))
         model.insert_item(min(pos, model.get_n_items()), section)
 
+    def _menu_terminal(self, pop):
+        """"Abrir num terminal" in the folder background's menu, right above
+        Properties (in its section), for folders on disk; it replaces Nautilus's
+        "Abrir na Consola"."""
+        model = pop.get_menu_model()
+        if not isinstance(model, Gio.Menu) or not menu_has_action(model, 'view.current-directory-properties'):
+            return
+        slot = self._slot()
+        loc = slot.get_property('location') if slot else None
+        local = bool(loc and loc.get_path())
+        # (Nautilus's own "Abrir na Consola" only opens GNOME Console: this one
+        # takes its place)
+        for i in range(model.get_n_items()):
+            section = model.get_item_link(i, Gio.MENU_LINK_SECTION)
+            if isinstance(section, Gio.Menu):
+                for j in reversed(range(section.get_n_items())):
+                    if menu_has_action_at(section, j, 'view.current-directory-console') and \
+                            section.get_item_link(j, Gio.MENU_LINK_SECTION) is None:
+                        section.remove(j)
+        for i in range(model.get_n_items()):
+            section = model.get_item_link(i, Gio.MENU_LINK_SECTION)
+            if not isinstance(section, Gio.Menu) or \
+                    not menu_has_action(section, 'view.current-directory-properties'):
+                continue
+            ours = next((j for j in range(section.get_n_items())
+                         if section.get_item_attribute_value(j, 'zxp-terminal', None) is not None), None)
+            if ours is not None and not local:
+                section.remove(ours)
+            elif ours is None and local:
+                item = Gio.MenuItem.new(T['open-terminal'], 'xp.open-terminal')
+                item.set_attribute_value('zxp-terminal', GLib.Variant('b', True))
+                at = next(j for j in range(section.get_n_items())
+                          if menu_has_action_at(section, j, 'view.current-directory-properties'))
+                section.insert_item(at, item)
+            return
+
+    def _open_terminal(self):
+        """The system's terminal (x-terminal-emulator, the Start menu's one) in
+        the open folder."""
+        slot = self._slot()
+        loc = slot.get_property('location') if slot else None
+        path = loc.get_path() if loc else None
+        if not path:
+            return
+        for cmd in ('x-terminal-emulator', 'gnome-terminal', 'kgx', 'ptyxis', 'xterm'):
+            if GLib.find_program_in_path(cmd):
+                launcher = Gio.SubprocessLauncher.new(Gio.SubprocessFlags.NONE)
+                launcher.set_cwd(path)
+                try:
+                    launcher.spawnv([cmd])
+                except GLib.Error as e:
+                    print(f'Zorin XP: terminal: {e}')
+                return
+
     # --------------------------------------------- tarefas e detalhes
     def _selection(self):
         """Files selected in the current view (Gio.File, Nautilus's FileInfo)."""
@@ -2559,7 +2614,7 @@ class XpExplorer:
                     pop.connect('notify::menu-model', lambda p, _x: self._xp_background_menu(p))
                     pop.connect('notify::visible', lambda p, _x: p.get_visible() and (
                         swap_menu_actions(p.get_menu_model()),
-                        self._xp_background_menu(p), self._menu_shortcut(p)))
+                        self._xp_background_menu(p), self._menu_shortcut(p), self._menu_terminal(p)))
                     self._xp_background_menu(pop)
                 elif pop.__gtype__.name == 'NautilusRenameFilePopover' and \
                         not getattr(pop, '_zxp_menu', False):
