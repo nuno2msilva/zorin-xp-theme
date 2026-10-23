@@ -114,12 +114,20 @@
   transition: none;
 }
 /*@gtk4*/
-/* GTK4 always draws the outline; in XP the focus rectangle only appears with the keyboard */
-*:focus-visible {
+/* GTK4 always draws the outline; in XP the focus rectangle only appears with the keyboard,
+   and only on the control with the focus (GTK4 also marks every widget around
+   it focus-visible: the task pane, the list and the row each got one) */
+*:focus:focus-visible {
   outline-color: @xp_text;
   outline-style: dotted;
   outline-offset: -3px;
   outline-width: 1px;
+}
+/* (a notebook keeps the focus itself: XP's rectangle goes on the open tab) */
+notebook:focus:focus-visible { outline: none; }
+notebook:focus:focus-visible > header > tabs > tab:checked {
+  outline: 1px dotted @xp_text;
+  outline-offset: -3px;
 }
 /*@end*/
 
