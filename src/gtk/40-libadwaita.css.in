@@ -429,7 +429,8 @@ window.zxp-explorer .nautilus-grid-view gridview { padding: 8px 4px; border-spac
 window.zxp-explorer .nautilus-grid-view gridview > child,
 window.zxp-explorer .nautilus-grid-view #NautilusViewCell { border-radius: 0; }
 window.zxp-explorer .zxp-tiles gridview > child { min-width: 218px; min-height: 56px; }
-window.zxp-explorer .zxp-tiles #NautilusViewCell { padding: 0 0 0 3px; }
+/* the icon 10 px from the view's left edge, as in XP (4 of the grid's padding) */
+window.zxp-explorer .zxp-tiles #NautilusViewCell { padding: 0 0 0 1px; }
 /* the text 9 px after the icon and 1 px above the centre, as in XP */
 window.zxp-explorer .zxp-tiles gridview > child .icon-ui-labels-box { margin: -1px 0 1px -1px; }
 window.zxp-explorer .zxp-tiles #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }

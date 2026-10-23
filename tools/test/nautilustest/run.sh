@@ -20,7 +20,12 @@ printf 'user-db:zxptest\n' > "$T/dconf-profile"
 # ZXP_WAYLAND=<socket path>: draws into a headless GNOME Shell instead (e.g.
 # MODE=user tools/test/shelltest/run.sh), where GTK gets real frames — Broadway
 # only lays out and draws while a visible browser shows its page
-if [ -n "$ZXP_WAYLAND" ]; then
+# ZXP_X11=<display>: on X11 instead, as the real session (e.g. a rootful
+# Xwayland inside that headless Shell: WAYLAND_DISPLAY=<socket> Xwayland :77
+# -geometry 1920x1080) — never the real display
+if [ -n "$ZXP_X11" ]; then
+    BACKEND="GDK_BACKEND=x11 DISPLAY=$ZXP_X11"
+elif [ -n "$ZXP_WAYLAND" ]; then
     BACKEND="GDK_BACKEND=wayland WAYLAND_DISPLAY=$ZXP_WAYLAND"
 else
     setsid gtk4-broadwayd :7 >"$T/broadway.log" 2>&1 &

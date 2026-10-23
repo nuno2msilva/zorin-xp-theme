@@ -176,8 +176,10 @@ ICON_SIZE = 32
 # thumbnail. In Icons and Tiles images get the type icon, as in XP
 THUMB_ICON = 48
 PITCHES = {'tiles': TILE_WIDTH, 'thumbnails': THUMB_PITCH, 'icons': ICON_PITCH}
-# width of the name below the icon (the column minus 2 px on each side)
-NAME_WIDTHS = {'thumbnails': THUMB_PITCH - 4, 'icons': ICON_PITCH - 4}
+# width of the name below the icon (the column minus 2 px on each side);
+# Tiles: the text beside the icon (found from XP's line breaks in a capture)
+TILE_TEXT = 158
+NAME_WIDTHS = {'thumbnails': THUMB_PITCH - 4, 'icons': ICON_PITCH - 4, 'tiles': TILE_TEXT}
 # the rename box in Icons and Thumbnails (measured in an XP capture): centred
 # on the item, the text + 5 px on each side + the 1 px outline; it grows on
 # both sides while typing, up to 66 px of text (78 px box), then breaks into
@@ -924,9 +926,11 @@ class XpExplorer:
             grid.set_margin_end(0)
             return False
         width = scroller.get_width() - 8   # grid padding (CSS)
-        # (less the vertical scrollbar when it shows: the columns go beside it)
+        # (less the vertical scrollbar when it shows: the columns go beside it —
+        # unless it is GTK's overlay one, drawn over them)
         bar = scroller.get_vscrollbar() if isinstance(scroller, Gtk.ScrolledWindow) else None
-        if bar is not None and bar.get_child_visible():
+        overlay = scroller.get_overlay_scrolling() and Gtk.Settings.get_default().props.gtk_overlay_scrolling
+        if bar is not None and bar.get_child_visible() and not overlay:
             width -= bar.get_width() or bar.measure(Gtk.Orientation.HORIZONTAL, -1)[1]
         if width <= 0:
             return False
@@ -1037,10 +1041,11 @@ class XpExplorer:
                 cell._zxp_clamp = clamp.get_maximum_size()
             cell._zxp_tile = mark
             box.set_orientation(Gtk.Orientation.HORIZONTAL if side else Gtk.Orientation.VERTICAL)
-            # (List: from the column's left edge; Nautilus centres the cell's content)
+            # (List and Tiles: from the column's left edge; Nautilus centres the
+            # cell's content, and a short name would move the icon)
             if not hasattr(box, '_zxp_halign'):
                 box._zxp_halign = (box.get_halign(), box.get_spacing())
-            box.set_halign(Gtk.Align.START if listing else box._zxp_halign[0])
+            box.set_halign(Gtk.Align.START if side else box._zxp_halign[0])
             # (and the name 18 px from the edge: without Nautilus's 6 px after the icon)
             box.set_spacing(0 if listing else box._zxp_halign[1])
             icon_box = box.get_first_child()
@@ -1086,11 +1091,27 @@ class XpExplorer:
                     lbl.set_max_width_chars(-1 if side else chars)
                     lbl.set_ellipsize(Pango.EllipsizeMode.END if on else (Pango.EllipsizeMode.NONE if listing else ell))
             name = labels.get_first_child()
+            # Tiles: the name comes already cut, in its lines (_xp_name)
+            if on and isinstance(name, Gtk.Label):
+                name.set_lines(-1)
+                name.set_ellipsize(Pango.EllipsizeMode.NONE)
+            # Tiles: a folder's caption (type and size) is empty — hidden, or its
+            # blank line would keep the name off the icon's middle, where XP has it
+            for cap in walk(labels):
+                if isinstance(cap, Gtk.Label) and cap is not name:
+                    if not getattr(cap, '_zxp_blank', False):
+                        cap._zxp_blank = True
+                        for prop in ('notify::label', 'notify::visible'):
+                            cap.connect(prop, lambda c, _p: self._blank_caption(c))
+                    self._blank_caption(cap)
             if isinstance(name, Gtk.Label):
                 if not getattr(name, '_zxp_watch', False):
                     name._zxp_watch = True
                     name.add_css_class('zxp-name')
                     name.connect('notify::label', lambda l, _p: self._xp_name(l))
+                    # (Tiles: a folder's name has 2 lines, a file's 1 — cells are reused)
+                    name._zxp_cell = cell
+                    cell.connect('notify::item', lambda _c, _p, l=name: self._xp_name(l))
                     row = cell.get_parent()
                     if row is not None and row.get_css_name() == 'child':
                         name._zxp_row = row
@@ -1111,7 +1132,14 @@ class XpExplorer:
         if text != getattr(lbl, '_zxp_text', None):
             lbl._zxp_name = text        # (a name set by Nautilus)
         name = lbl._zxp_name
-        width = NAME_WIDTHS.get(getattr(self, '_mode', None))
+        mode = getattr(self, '_mode', None)
+        width = NAME_WIDTHS.get(mode)
+        # Tiles (as XP's, measured): words that do not fit broken where the line
+        # ends; folders (nothing below the name) in up to 2 lines, files in 1
+        # (type and size below)
+        lines, split = 2, False
+        if mode == 'tiles':
+            lines, split = (2 if self._is_folder(lbl) else 1), True
         # the selected item with the focus (the last one clicked) shows the whole
         # name while the view has the focus; every other name, long or short,
         # stays cut — also the focused one once it is no longer selected
@@ -1123,16 +1151,34 @@ class XpExplorer:
         def measure(t):
             return lbl.create_pango_layout(t).get_pixel_size()[0]
         # (the whole name goes on top of the rows below; the cell keeps the cut one,
-        # so the grid never moves)
-        self._name_on_top(lbl, xp_wrap(name, width, measure, None) if focused and width else None)
-        key = (name, width)
+        # so the grid never moves. Icons and Thumbnails only)
+        whole = focused and width and mode != 'tiles'
+        self._name_on_top(lbl, xp_wrap(name, width, measure, None) if whole else None)
+        key = (name, width, lines)
         if key == getattr(lbl, '_zxp_key', None) and text == getattr(lbl, '_zxp_text', None):
             return
         lbl._zxp_key = key
-        out = name if width is None else xp_wrap(name, width, measure, 2)
+        out = name if width is None else xp_wrap(name, width, measure, lines, split=split, strip=not split)
         lbl._zxp_text = out
         if out != text:
             lbl.set_label(out)
+
+    def _blank_caption(self, cap):
+        """Tiles: a caption shows only with a text (Nautilus shows it while the
+        caption is on, empty for folders); in the other views Nautilus sets
+        the captions' visibility itself (all off)."""
+        if getattr(self, '_mode', None) != 'tiles':
+            return
+        want = bool(cap.get_label())
+        if cap.get_visible() != want:
+            cap.set_visible(want)
+
+    @staticmethod
+    def _is_folder(lbl):
+        cell = getattr(lbl, '_zxp_cell', None)
+        item = cell.get_property('item') if cell is not None else None
+        f = item.get_property('file') if item is not None else None
+        return f is not None and f.is_directory()
 
     def _name_on_top(self, lbl, full):
         """The whole name of the selected item (full; None: cut) goes over the
@@ -1217,7 +1263,7 @@ class XpExplorer:
             if isinstance(icon_box, Gtk.Box):
                 if not hasattr(icon_box, '_zxp_margin'):
                     icon_box._zxp_margin = icon_box.get_margin_start()
-                flush = mode in ('thumbnails', 'icons', 'list')
+                flush = mode in ('thumbnails', 'icons', 'list', 'tiles')
                 icon_box.set_margin_start(0 if flush else icon_box._zxp_margin)
                 # Icons and List: 32x32 / 16x16 instead of the 48x48 Nautilus asks for;
                 # leaving them, Nautilus's size for the new view's zoom (a size kept
@@ -2923,12 +2969,14 @@ def swap_menu_actions(model):
             swap_menu_actions(links.get_value())
 
 
-def xp_wrap(text, width, measure, lines=2):
+def xp_wrap(text, width, measure, lines=2, split=False, strip=True):
     """text in up to `lines` lines of `width` px, like XP's DrawText with
     DT_WORDBREAK | DT_END_ELLIPSIS: breaks at spaces; a word wider than the
     line is cut with "..." and ends there; the last line takes the rest of
     the text, cut at the end. lines=None: the whole text (the focused item's
-    name in XP), with long words broken where the line ends."""
+    name in XP), with long words broken where the line ends. split: long
+    words broken where the line ends with a line limit too (XP's Tiles);
+    strip=False: a space before the "..." stays (also Tiles)."""
     if measure(text) <= width:
         return text
 
@@ -2946,13 +2994,15 @@ def xp_wrap(text, width, measure, lines=2):
         if measure(t) <= width:
             return t
         lo, hi = 0, len(t)
+        def start(n):
+            return t[:n].rstrip() if strip else t[:n]
         while lo < hi:                  # the longest start that fits with "..."
             mid = (lo + hi + 1) // 2
-            if measure(t[:mid].rstrip() + '...') <= width:
+            if measure(start(mid) + '...') <= width:
                 lo = mid
             else:
                 hi = mid - 1
-        return t[:lo].rstrip() + '...'
+        return start(lo) + '...'
     out = []
     rest = text
     while rest and (lines is None or len(out) < lines):
@@ -2962,7 +3012,7 @@ def xp_wrap(text, width, measure, lines=2):
         words = rest.split(' ')
         line = words[0]
         if measure(line) > width:
-            if lines is None:
+            if lines is None or split:
                 n = fits(line)
                 out.append(line[:n])
                 rest = rest[n:]
