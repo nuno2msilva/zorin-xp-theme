@@ -1086,67 +1086,76 @@ class XpExplorer:
         flags = row.get_state_flags() if row is not None else 0
         focused = bool(flags & Gtk.StateFlags.FOCUSED) and bool(flags & Gtk.StateFlags.SELECTED) and \
             self.win.is_active()
-        self._name_on_top(lbl, focused and width is not None)
-        key = (name, width, focused)
+
+        def measure(t):
+            return lbl.create_pango_layout(t).get_pixel_size()[0]
+        # (the whole name goes on top of the rows below; the cell keeps the cut one,
+        # so the grid never moves)
+        self._name_on_top(lbl, xp_wrap(name, width, measure, None) if focused and width else None)
+        key = (name, width)
         if key == getattr(lbl, '_zxp_key', None) and text == getattr(lbl, '_zxp_text', None):
             return
         lbl._zxp_key = key
-        out = name if width is None else xp_wrap(
-            name, width, lambda t: lbl.create_pango_layout(t).get_pixel_size()[0],
-            None if focused else 2)
+        out = name if width is None else xp_wrap(name, width, measure, 2)
         lbl._zxp_text = out
         if out != text:
             lbl.set_label(out)
 
-    def _name_on_top(self, lbl, expanded):
-        """The whole name of the selected item goes over the rows below it, as
-        in XP. GtkGridView draws the following cells after it (on top), so a
-        live copy of the label (Gtk.WidgetPaintable: the same text, highlight
-        and state) is shown in the view's overlay, following the label every
-        frame while it is expanded."""
+    def _name_on_top(self, lbl, full):
+        """The whole name of the selected item (full; None: cut) goes over the
+        rows below it without moving them, as in XP. In the cell it would
+        make the row taller, and GtkGridView draws the following cells on top
+        of it: it is a label in the view's overlay instead, centred on the
+        cell's name and following it every frame; the cut name hides under it."""
         cur = getattr(self, '_name_over', None)
-        if not expanded:
+        if full is None:
             if cur is not None and cur[1] is lbl:
                 self._drop_name_over()
             return
         if cur is not None and cur[1] is lbl:
+            if cur[0].get_label() != full:
+                cur[0].set_label(full)
             return
         self._drop_name_over()
         view = self._files_view()
         overlay = view.get_first_child() if view else None
         if not isinstance(overlay, Gtk.Overlay):
             return
-        pic = Gtk.Picture(paintable=Gtk.WidgetPaintable.new(lbl), can_shrink=False,
-                          can_target=False, focusable=False, content_fit=Gtk.ContentFit.FILL,
-                          halign=Gtk.Align.START, valign=Gtk.Align.START, opacity=0)
-        overlay.add_overlay(pic)
+        over = Gtk.Label(label=full, xalign=0.5, justify=Gtk.Justification.CENTER,
+                         can_target=False, focusable=False, css_classes=['zxp-name-over'],
+                         halign=Gtk.Align.START, valign=Gtk.Align.START, opacity=0)
+        overlay.add_overlay(over)
         # (inside the files' area only: not over the view's scrollbar)
-        overlay.set_clip_overlay(pic, True)
+        overlay.set_clip_overlay(over, True)
+        lbl.add_css_class('zxp-name-under')
 
         def follow(*_):
             ok, r = lbl.compute_bounds(overlay)
             # (hidden while the rename box is over the name, or the cell is gone)
             show = ok and lbl.get_mapped() and lbl.get_opacity() > 0
             if show:
-                pic.set_margin_start(max(0, int(r.get_x())))
-                pic.set_margin_top(max(0, int(r.get_y())))
-                pic.set_size_request(int(r.get_width()), int(r.get_height()))
+                # (measure() counts the margins, which are the position given here)
+                w = over.measure(Gtk.Orientation.HORIZONTAL, -1)[1] - \
+                    over.get_margin_start() - over.get_margin_end()
+                over.set_margin_start(max(0, math.floor(r.get_x() + r.get_width() / 2 - w / 2 + 0.5)))
+                over.set_margin_top(max(0, int(r.get_y())))
             # (shown and hidden by opacity: a hidden widget gets no frame ticks)
-            if (pic.get_opacity() > 0) != show:
-                pic.set_opacity(1 if show else 0)
+            if (over.get_opacity() > 0) != show:
+                over.set_opacity(1 if show else 0)
             return GLib.SOURCE_CONTINUE
         follow()
-        self._name_over = (pic, lbl, overlay, pic.add_tick_callback(follow))
+        self._name_over = (over, lbl, overlay, over.add_tick_callback(follow))
 
     def _drop_name_over(self):
         cur = getattr(self, '_name_over', None)
         if cur is None:
             return
         self._name_over = None
-        pic, _lbl, overlay, tick = cur
-        pic.remove_tick_callback(tick)
-        if pic.get_parent() is overlay:
-            overlay.remove_overlay(pic)
+        over, lbl, overlay, tick = cur
+        over.remove_tick_callback(tick)
+        lbl.remove_css_class('zxp-name-under')
+        if over.get_parent() is overlay:
+            overlay.remove_overlay(over)
 
     # ------------------------------------------------------------ thumbnails
     # Thumbnails: XP's 96x96 frame (1 px #ECE9D8, white background), images

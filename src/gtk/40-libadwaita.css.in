@@ -656,6 +656,17 @@ window.zxp-explorer:backdrop .nautilus-list-view columnview > listview > row:sel
 window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.zxp-name { padding: 1px 2px; margin: -1px -2px; }
 /* (in Thumbnails the text sits 1 px higher in the highlight, as in XP) */
 window.zxp-explorer .zxp-thumbs .icon-ui-labels-box > label.zxp-name { padding: 0 2px 2px; }
+/* the selected item's whole name goes over the rows below without moving
+ * them, as in XP: a label in the view's overlay with the selected name's look
+ * (src/nautilus-xp: _name_on_top); the cut name in the cell hides under it */
+window.zxp-explorer label.zxp-name-over {
+  background-color: @xp_highlight;
+  color: @xp_highlight_text;
+  line-height: 13px;
+  padding: 1px 2px;
+}
+window.zxp-explorer .zxp-thumbs label.zxp-name-over { padding: 0 2px 2px; }
+window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.zxp-name-under { opacity: 0; }
 /* no shading when the mouse goes over the items (XP has none) */
 window.zxp-explorer .nautilus-grid-view gridview > child:hover,
 window.zxp-explorer .nautilus-grid-view gridview > child:hover #NautilusViewCell,
