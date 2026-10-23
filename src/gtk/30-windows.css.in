@@ -198,8 +198,11 @@ widget.titlebar > headerbar.default-decoration, widget.default-decoration > head
 }
 widget.titlebar > headerbar.default-decoration:backdrop,
 widget.default-decoration > headerbar.titlebar:backdrop { {{state:caption-inner:unfocused}} }
+/* (GTK's centred title is hidden: the extension draws XP's, on the left.
+   opacity, not a transparent colour: colour emoji ignore the text colour and
+   showed in the middle of the caption) */
 widget.titlebar > headerbar.default-decoration .title,
-widget.default-decoration > headerbar.titlebar .title { color: transparent; text-shadow: none; }
+widget.default-decoration > headerbar.titlebar .title { color: transparent; text-shadow: none; opacity: 0; }
 .maximized widget.titlebar > headerbar.default-decoration,
 .maximized widget.default-decoration > headerbar.titlebar {
   margin: -4px -4px 0 -4px;
