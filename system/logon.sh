@@ -59,7 +59,12 @@ as_gdm() {  # as GDM itself does (/usr/share/gdm/generate-config)
     setpriv --reuid "$GDM_USER" --regid "$GDM_USER" --init-groups --reset-env \
         env HOME="$GDM_HOME" "$@"
 }
-gs() { as_gdm dbus-run-session -- gsettings "$@"; }
+gs() {  # (the private bus's dbus-daemon logs each activation on stderr: left out)
+    local err rc
+    { err=$(as_gdm dbus-run-session -- gsettings "$@" 2>&1 >&3); rc=$?; } 3>&1 || true
+    [ -z "$err" ] || grep -v '^dbus-daemon\[' <<<"$err" >&2 || true
+    return $rc
+}
 gdm_dir() { install -d -o "$GDM_USER" -g "$GDM_USER" -m 755 "$@"; }
 
 # take the zorin-xp block out of the Prime hook (the rest stays as it was)
