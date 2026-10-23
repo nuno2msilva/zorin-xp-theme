@@ -8,6 +8,13 @@ the window titles (smoothed bold Trebuchet) the right weight. Browser engines
 unhinted widths, and with v35's horizontal hinting the letter spacing gets
 irregular (in VSCode, unreadable).
 
+The theme's copies of XP's interface fonts (Tahoma, Verdana, Microsoft Sans
+Serif, Trebuchet, Franklin Gothic) have their letter widths fixed for the
+XP interface's size (tools/lib/fontfix.py); at a page's sizes some letters
+came out too wide or too tight. These applications get the fonts as they
+come instead (installed in ~/.local/share/zorin-xp/browser-fonts, outside
+the font folders; copied into each Flatpak's own font folder).
+
 Besides, these engines use the system font (Tahoma 8.25 in the theme) for
 the interface and for "system-ui", and XP's rules turn off Tahoma's
 smoothing at small sizes: with fractional positions it ends up jagged and
@@ -44,6 +51,9 @@ BACKUP = os.path.join(STATE, 'backup/desktop-files')
 USER_APPS = os.path.join(HOME, '.local/share/applications')
 USER_BIN = os.path.join(HOME, '.local/bin')
 MARK = '# zorin-xp-browser-fonts'
+# XP's fonts as they come (install.sh fonts), and where a Flatpak gets them
+ORIGINALS = os.path.join(STATE, 'browser-fonts')
+FLATPAK_FONTS = 'data/fonts/zorin-xp-browser'
 # the interface font in these applications (the user's choice, 2026-10-23)
 UI_FONT = 'Microsoft Sans Serif'
 
@@ -97,9 +107,35 @@ def ui_family():
     return 'Sans'
 
 
-def fc_rules():
-    family = ui_family()
+def originals():
+    try:
+        return sorted(f for f in os.listdir(ORIGINALS) if f.lower().endswith(('.ttf', '.ttc')))
+    except FileNotFoundError:
+        return []
+
+
+def fc_originals(native):
+    """The original fonts instead of the theme's copies (same names, other
+    widths): the copies are rejected here only."""
+    names = originals()
+    if not names:
+        return ''
+    from xml.sax.saxutils import escape
+    rejects = ''.join(f'\n      <glob>*/WindowsXP/{escape(n)}</glob>' for n in names)
+    where = f'\n  <dir>{escape(ORIGINALS)}</dir>' if native else ''
     return f"""
+  <!-- as letras do XP como vêm (as do tema têm as larguras acertadas para o
+       tamanho da interface do XP; nas páginas ficavam desencontradas) -->{where}
+  <selectfont>
+    <rejectfont>{rejects}
+    </rejectfont>
+  </selectfont>
+"""
+
+
+def fc_rules(native=True):
+    family = ui_family()
+    return fc_originals(native) + f"""
   <!-- Zorin XP: nas aplicações com motor de browser, o tipo de letra do
        sistema (Tahoma) passa a {family} e tudo é suavizado -->
   <match target="pattern">
@@ -148,6 +184,9 @@ def write_fc_conf():
           '<fontconfig>\n  <include ignore_missing="yes">/etc/fonts/fonts.conf</include>\n'
           + fc_rules() + '</fontconfig>\n')
     log_add(f'created\t{FC_CONF}')
+    # (the cache of the originals' folder now, not on the first start)
+    subprocess.run(['fc-cache', ORIGINALS], env=dict(os.environ, FONTCONFIG_FILE=FC_CONF),
+                   check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def engine_kind(path):
@@ -319,8 +358,15 @@ def fix_flatpaks():
         # (inside the Flatpak the user's configuration is the one in the app's folder)
         conf = os.path.join(HOME, '.var/app', app, FLATPAK_CONF)
         write(conf, '<?xml version="1.0"?>\n<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">\n'
-              '<fontconfig>' + fc_rules() + '</fontconfig>\n')
+              '<fontconfig>' + fc_rules(native=False) + '</fontconfig>\n')
         log_add(f'created\t{conf}')
+        # (the originals inside the app's own font folder: the sandbox does not
+        # see ~/.local/share/zorin-xp)
+        fonts = os.path.join(HOME, '.var/app', app, FLATPAK_FONTS)
+        for name in originals():
+            os.makedirs(fonts, exist_ok=True)
+            shutil.copyfile(os.path.join(ORIGINALS, name), os.path.join(fonts, name))
+            log_add(f'created\t{os.path.join(fonts, name)}')
         print(f'  flatpak: {app}')
 
 

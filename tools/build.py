@@ -51,6 +51,12 @@ def build_fonts(out):
             if family:
                 # character widths as in XP's GDI (see fontfix.py)
                 fontfix.fix(src, os.path.join(dst, low), family)
+                # (and the original, for the applications with a browser engine:
+                # the widths are fixed for the UI's size, and at the sizes of a
+                # page some letters came out too wide or too tight —
+                # src/fontconfig/zorin-xp-browser-fonts)
+                os.makedirs(os.path.join(out, "browser"), exist_ok=True)
+                shutil.copyfile(src, os.path.join(out, "browser", low))
             else:
                 shutil.copyfile(src, os.path.join(dst, low))
             families |= _fc_faces(src)

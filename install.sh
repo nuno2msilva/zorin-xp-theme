@@ -125,6 +125,9 @@ for c in "${COMPONENTS[@]}"; do
         # fractional pixels and with v35 the spacing becomes irregular: those
         # applications keep the normal interpreter (run the command again
         # after installing new applications)
+        # (the XP fonts as they come, for the applications with a browser engine:
+        # outside the font folders, only their own configuration reads them)
+        install_dir "$BUILD/fonts/browser" "$HOME/.local/share/zorin-xp/browser-fonts"
         install_file "$HERE/src/fontconfig/zorin-xp-browser-fonts" "$HOME/.local/bin/zorin-xp-browser-fonts"
         "$HOME/.local/bin/zorin-xp-browser-fonts"
         fc-cache -f "$HOME/.local/share/fonts" >/dev/null
