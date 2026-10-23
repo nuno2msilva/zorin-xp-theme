@@ -190,10 +190,11 @@ EDIT_LINE = 13
 # List as in XP (measured in an XP capture): the grid on its side — columns
 # filled from top to bottom and scrolled sideways (with Details, the only view
 # that scrolls sideways), all as wide as the folder's longest name: the 16 px
-# icon at the edge, the name 18 px from it, 8 px after the longest one, 17 px rows
+# icon at the edge, the name 22 px from it (4 more than XP's: as far from the
+# icon as in Details, at the user's wish), 8 px after the longest one, 17 px rows
 LIST_ROW = 17
 LIST_ICON = 16
-LIST_TEXT_X = 18
+LIST_TEXT_X = 22
 LIST_GAP = 8
 TYPE_ICON_SIZES = {'thumbnails': THUMB_ICON, 'tiles': THUMB_ICON, 'icons': ICON_SIZE, 'list': LIST_ICON}
 # views whose icon is smaller than Nautilus's smallest grid icon (48 px), and
@@ -1046,7 +1047,8 @@ class XpExplorer:
             if not hasattr(box, '_zxp_halign'):
                 box._zxp_halign = (box.get_halign(), box.get_spacing())
             box.set_halign(Gtk.Align.START if side else box._zxp_halign[0])
-            # (and the name 18 px from the edge: without Nautilus's 6 px after the icon)
+            # (and the name 22 px from the edge, set in the CSS: without Nautilus's 6 px
+            # after the icon)
             box.set_spacing(0 if listing else box._zxp_halign[1])
             icon_box = box.get_first_child()
             if not hasattr(icon_box, '_zxp_halign'):

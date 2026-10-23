@@ -491,7 +491,9 @@ window.zxp-explorer .zxp-list .nautilus-grid-view gridview { padding: 0; }
 window.zxp-explorer .zxp-list gridview > child { min-height: 17px; min-width: 0; padding: 0; }
 window.zxp-explorer .zxp-list #NautilusViewCell { padding: 0; }
 window.zxp-explorer .zxp-list #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
-window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 2px; }
+/* (the name as far from the icon as in Details — 4 px more than XP's List,
+   at the user's wish: XP's touches the icon) */
+window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 6px; }
 
 /* Details / List (Nautilus's list view) as in the Explorer: 17 px rows,
  * 16 px icon 4 px from the edge, no corners nor gaps between rows */
