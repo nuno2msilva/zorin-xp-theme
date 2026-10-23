@@ -226,6 +226,10 @@ export class EndSession {
             sessionManagerCall('Logout', new GLib.Variant('(u)', [1]));
             return;
         }
+        // (nobody waits for an answer to a dialog the Shell opened: Canceled and
+        // Closed — Cancel, Esc, Switch User, Stand By — only close it)
+        if (signal !== 'ConfirmedShutdown' && signal !== 'ConfirmedReboot')
+            return;
         // (gnome-session 46 no longer implements RequestShutdown/RequestReboot:
         // Shutdown()/Reboot() ask us for the dialog, which _open confirms at once)
         const reboot = signal === 'ConfirmedReboot';
