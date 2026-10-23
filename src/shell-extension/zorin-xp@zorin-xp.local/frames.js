@@ -24,6 +24,9 @@ const BORDER = 4;          // SM_CXSIZEFRAME
 const CAPTION = 30;        // SM_CYCAPTION (26) + moldura (4)
 const ICON_X = 6, ICON_Y = 8, ICON_SIZE = 16;
 const TEXT_X = 26;
+// maximized or tiled, the frame's 4 columns are off-screen and XP's icon is
+// 2 px from the edge: 2 more here, at the user's wish (and the title with it)
+const EDGE_INSET = 2;
 const BUTTONS_WIDTH = 73;  // from the minimize button to the right edge
 // pieces of the caption sides: 4 frame columns + 8 of the rounded corner
 // (which GTK cuts in mutter's frame window; only the top 6 rows)
@@ -137,9 +140,10 @@ export class XpFrame {
                 `border-image: ${this._asset(`frame-bottom-strip-${state}`)} 0 5 0 5;`);
         }
 
-        this._icon.set_position(ox + ICON_X, oy + ICON_Y);
-        this._title.set_position(ox + TEXT_X, oy + this._ext.titleY);
-        this._title.set_width(Math.max(0, fullW - TEXT_X - BUTTONS_WIDTH - 4));
+        const inset = borders ? 0 : EDGE_INSET;
+        this._icon.set_position(ox + ICON_X + inset, oy + ICON_Y);
+        this._title.set_position(ox + TEXT_X + inset, oy + this._ext.titleY);
+        this._title.set_width(Math.max(0, fullW - TEXT_X - inset - BUTTONS_WIDTH - 4));
         this._title.style_class = w.appears_focused ? 'zxp-title' : 'zxp-title zxp-title-inactive';
     }
 

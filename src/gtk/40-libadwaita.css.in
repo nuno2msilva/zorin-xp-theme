@@ -159,6 +159,15 @@ window.zxp-property-sheet headerbar .title { padding: 0; margin: 0 0 0 1px; }
  * the caption, with 4 px between them, as in XP */
 window.zxp-explorer headerbar .zxp-explorer-title { border-spacing: 4px; margin: 0; padding: 0; }
 window.zxp-explorer headerbar .zxp-explorer-title .title { padding: 0; margin: 1px 0 0 -4px; }
+/* maximized or tiled (the frame columns off-screen) the icon was 1 px from
+ * the screen's edge: 4 px, as the other windows' (frames.js), at the
+ * user's wish — XP has it at 2 */
+window.zxp-explorer.maximized headerbar .zxp-explorer-title,
+window.zxp-explorer.tiled headerbar .zxp-explorer-title,
+window.zxp-explorer.tiled-left headerbar .zxp-explorer-title,
+window.zxp-explorer.tiled-right headerbar .zxp-explorer-title,
+window.zxp-explorer.tiled-top headerbar .zxp-explorer-title,
+window.zxp-explorer.tiled-bottom headerbar .zxp-explorer-title { margin-left: 3px; }
 
 /* Sidebar (AdwNavigationSplitView / Settings) — light pane like XP */
 .navigation-sidebar, .sidebar-pane, navigation-view.sidebar {
