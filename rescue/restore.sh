@@ -30,6 +30,13 @@ if [ -f "$STATE_DIR/browser-fonts.txt" ]; then
     python3 "$(dirname "$0")/../src/fontconfig/zorin-xp-browser-fonts" --undo
 fi
 
+# 0. Flatpaks given the XP file dialog's GTK module (filechooser component)
+if [ -f "$STATE_DIR/filechooser-flatpaks.txt" ] && command -v flatpak >/dev/null; then
+    while read -r app; do
+        [ -n "$app" ] && flatpak override --user --unset-env=GTK3_MODULES "$app" && echo "  flatpak reposto: $app"
+    done < "$STATE_DIR/filechooser-flatpaks.txt"
+fi
+
 # 0. Files (XP Explorer): the previous list of types without thumbnails
 [ -f "$STATE_DIR/explorer.json" ] && python3 "$(dirname "$0")/../tools/setup/explorerprefs.py" undo
 

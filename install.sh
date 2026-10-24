@@ -435,8 +435,30 @@ PY
           echo 'org.freedesktop.impl.portal.FileChooser=zorinxp;'; } > "$PD/portals.conf"
         # normal GTK applications: they also ask the portal for the dialog (after a new login)
 
+        # applications that make GTK 3's dialog themselves (Electron ones such as
+        # VS Code, ONLYOFFICE) never ask the portal: a GTK 3 module hands their
+        # dialog to it too (src/filechooser/zorin-xp-filechooser-module.c; only
+        # the C library's headers needed)
+        MOD="$FC/libzorin-xp-filechooser-module.so"
+        MODENV=""
+        if cc -O2 -shared -fPIC -fvisibility=hidden -o "$MOD" "$HERE/src/filechooser/zorin-xp-filechooser-module.c" \
+               -l:libgtk-3.so.0 -l:libgdk-3.so.0 -l:libgio-2.0.so.0 -l:libgobject-2.0.so.0 -l:libglib-2.0.so.0 2>/dev/null; then
+            MODENV="GTK3_MODULES=$MOD\${GTK3_MODULES:+:\$GTK3_MODULES}\n"
+            # Flatpaks do not get the session's environment: the ones that make GTK's
+            # dialog themselves (and see the home folder), each with an override
+            : > "$STATE_DIR/filechooser-flatpaks.txt"
+            for app in org.onlyoffice.desktopeditors; do
+                if flatpak info "$app" >/dev/null 2>&1; then
+                    flatpak override --user --env=GTK3_MODULES="$MOD" "$app"
+                    echo "$app" >> "$STATE_DIR/filechooser-flatpaks.txt"
+                fi
+            done
+            record "$STATE_DIR/filechooser-flatpaks.txt"
+        else
+            echo "  (sem compilador C: as aplicações com o diálogo do GTK feito por elas ficam com ele)"
+        fi
         mkdir -p "$HOME/.config/environment.d"
-        printf 'GTK_USE_PORTAL=1\nGDK_DEBUG=portals\n' > "$HOME/.config/environment.d/60-zorin-xp-filechooser.conf"
+        printf "GTK_USE_PORTAL=1\nGDK_DEBUG=portals\n$MODENV" > "$HOME/.config/environment.d/60-zorin-xp-filechooser.conf"
         record "$HOME/.config/environment.d/60-zorin-xp-filechooser.conf"
         systemctl --user daemon-reload
         systemctl --user restart xdg-desktop-portal.service 2>/dev/null || true
