@@ -19,3 +19,6 @@ __pycache__/
 /Screenshots/
 /reference/
 /icones-candidatos.png
+
+# Context handed from one Claude Code session to the next (local only)
+/SESSION-HANDOFF.md
