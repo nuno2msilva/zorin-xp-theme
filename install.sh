@@ -39,7 +39,7 @@ fi
 UNINSTALL="$STATE_DIR/uninstall"
 rm -rf "$UNINSTALL"
 for f in rescue/restore.sh src/fontconfig/zorin-xp-browser-fonts \
-         tools/setup/explorerprefs.py tools/setup/zenprefs.py tools/setup/xpfolders.py \
+         tools/setup/explorerprefs.py tools/setup/zenprefs.py tools/setup/xpfolders.py tools/setup/flatpak_override.py \
          system/logon.sh system/bootscreen.sh; do
     install -D -m "$(stat -c %a "$HERE/$f")" "$HERE/$f" "$UNINSTALL/$f"
 done
@@ -495,7 +495,8 @@ XPROFILE
                 if [ -f "$STATE_DIR/filechooser-flatpaks.txt" ]; then
                     while read -r app _; do
                         [ -n "$app" ] && [ "$app" != global ] &&
-                            flatpak override --user --unset-env=GTK3_MODULES "$app" 2>/dev/null || true
+                            python3 "$HERE/tools/setup/flatpak_override.py" \
+                                "$HOME/.local/share/flatpak/overrides/$app" --env GTK3_MODULES || true
                     done < "$STATE_DIR/filechooser-flatpaks.txt"
                 fi
                 flatpak override --user --env=GTK3_MODULES="$MOD" --filesystem="~/.local/share/zorin-xp/filechooser:ro"
