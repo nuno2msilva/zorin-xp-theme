@@ -338,6 +338,16 @@ LINE = xpviews.LINE          # Tahoma 8 in XP: 13 px lines...
 ASCENT = xpviews.ASCENT      # ... with the baseline 11 px from the top
 
 
+def close_only(win):
+    """Only the Close button in the caption, as XP's dialogs (Open, Save As,
+    Browse for Folder, the message boxes): no Minimize nor Maximize — the
+    window manager leaves out the buttons of what the window does not allow.
+    (Resizing stays allowed: the grip asks for it.)"""
+    gw = win.get_window()
+    if gw is not None:
+        gw.set_functions(Gdk.WMFunction.MOVE | Gdk.WMFunction.RESIZE | Gdk.WMFunction.CLOSE)
+
+
 _arrows = {}
 
 
@@ -936,6 +946,7 @@ class XpFileDialog(Gtk.Window):
 
     # ------------------------------------------------------------ pieces
     def _set_transient(self, *_):
+        close_only(self)
         pw = self._parent_window or ""
         if pw.startswith("x11:"):
             try:
@@ -2037,6 +2048,7 @@ class XpFileDialog(Gtk.Window):
         win.set_skip_taskbar_hint(True)
         win.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         win.get_style_context().add_class("zxp-msgbox")
+        win.connect("realize", close_only)
         win.add(fixed)
         result = [None]
         loop = GLib.MainLoop()
