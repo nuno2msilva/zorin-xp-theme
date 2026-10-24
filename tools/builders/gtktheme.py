@@ -69,7 +69,24 @@ def substitute(text, info):
         if kind == "bw":
             return f"{t}px {r}px {b}px {l}px"
         raise KeyError(kind)
-    return re.sub(r"\{\{(slice|bw):([a-z0-9-]+)\}\}", tok, text)
+    text = re.sub(r"\{\{(slice|bw):([a-z0-9-]+)\}\}", tok, text)
+
+    # XP's view rules shared by the Explorer and the file dialogs (src/common/xpviews.py)
+    views = _xpviews().css_values()
+
+    def view(m):
+        if m.group(1) not in views:
+            raise KeyError(f"regra de vista desconhecida no CSS: {m.group(1)}")
+        return str(views[m.group(1)])
+    return re.sub(r"\{\{view:([A-Z_]+)\}\}", view, text)
+
+
+def _xpviews():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("xpviews", os.path.join(ROOT, "src", "common", "xpviews.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def build(out_dir, name="WindowsXP-Luna", theme_name="luna"):

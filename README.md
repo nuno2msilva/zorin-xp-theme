@@ -183,7 +183,11 @@ out).
   dialog with the places bar (Desktop, My Documents, My Computer, My
   Pictures, Downloads), the five views, menus, rename, delete and the resize
   grip.
-- XP's "Procurar pasta" (Browse for Folder) for picking folders.
+- The five views are the Explorer's: the same rules (measurements, how names
+  are cut, selection, the rename box) live in one place,
+  `src/common/xpviews.py`, used by both and by the theme's Explorer CSS.
+- XP's "Procurar pasta" (Browse for Folder) for picking folders, with the
+  tree's [+]/[-] and its keys (→ opens a folder, ← closes it).
 - If anything fails, GNOME's dialog opens instead.
 
 ### Folders and desktop
@@ -246,7 +250,8 @@ assets/      the XP resources, already extracted, with readable names
   icons/ cursors/ sounds/ fonts/ images/
   locales/pt-PT/  texts, dialogs and menus of the XP programs, by id
 src/         the theme's code and stylesheets (Shell extensions, GTK CSS,
-             Explorer, file dialogs, Zen, ...)
+             Explorer, file dialogs, Zen, ...); common/ has the views' rules
+             the Explorer and the file dialogs share
 tools/
   extract.py     extracts from a copy of Windows into assets/ (catalog.py
                  says what and from where)

@@ -432,18 +432,24 @@ window.zxp-explorer .zxp-taskpane-body label.zxp-details-name { font-weight: bol
 window.zxp-explorer .zxp-taskpane-body label.zxp-details-first { margin-top: 6px; }
 window.zxp-explorer .zxp-taskpane-body picture.zxp-details-preview { margin: 4px 0 2px 0; }
 
+/* The grids as in XP ({{view:...}}: src/common/xpviews.py, the rules shared
+ * with the file dialogs): Nautilus puts an item's icon (and the thumbnail's
+ * frame) at the top of its cell, so the grid's top padding is where XP has
+ * it — 6 px in Icons and Tiles, 8 in Thumbnails — and 4 px at the sides */
+window.zxp-explorer .nautilus-grid-view gridview { padding: {{view:GRID_TOP_THUMBS}}px {{view:GRID_SIDE}}px 8px; border-spacing: 0; }
+window.zxp-explorer .zxp-icons .nautilus-grid-view gridview { padding-top: {{view:GRID_TOP_ICONS}}px; }
+window.zxp-explorer .zxp-tiles .nautilus-grid-view gridview { padding-top: {{view:GRID_TOP_TILES}}px; }
 /* Tiles (XP view): horizontal 218 × 56 cells — 48 px icon on the left,
  * name and captions (type, size) in grey beside it */
-window.zxp-explorer .nautilus-grid-view gridview { padding: 8px 4px; border-spacing: 0; }
 window.zxp-explorer .nautilus-grid-view gridview > child,
 window.zxp-explorer .nautilus-grid-view #NautilusViewCell { border-radius: 0; }
-window.zxp-explorer .zxp-tiles gridview > child { min-width: 218px; min-height: 56px; }
+window.zxp-explorer .zxp-tiles gridview > child { min-width: {{view:TILE_W}}px; min-height: {{view:TILE_H}}px; }
 /* the icon 10 px from the view's left edge, as in XP (4 of the grid's padding) */
 window.zxp-explorer .zxp-tiles #NautilusViewCell { padding: 0 0 0 1px; }
 /* the text 9 px after the icon and 1 px above the centre, as in XP */
 window.zxp-explorer .zxp-tiles gridview > child .icon-ui-labels-box { margin: -1px 0 1px -1px; }
 window.zxp-explorer .zxp-tiles #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
-window.zxp-explorer .zxp-tiles gridview > child label.caption { color: #808080; }
+window.zxp-explorer .zxp-tiles gridview > child label.caption { color: {{view:GREY}}; }
 
 /* Thumbnails as in XP (measured in captures): the image at 96x96 with the
  * 1 px #ECE9D8 frame drawn over its edge (outline, which goes on top of the
@@ -454,7 +460,7 @@ window.zxp-explorer .nautilus-grid-view clamp.zxp-thumb-frame {
   min-width: 96px;
   min-height: 96px;
   background-color: #FFFFFF;
-  outline: 1px solid #ECE9D8;
+  outline: 1px solid {{view:FACE}};
   outline-offset: -1px;
 }
 window.zxp-explorer .nautilus-grid-view gridview > child:selected clamp.zxp-thumb-frame {
@@ -465,11 +471,11 @@ window.zxp-explorer .nautilus-grid-view gridview > child:selected clamp.zxp-thum
  * or with the window inactive: the 3 px frame turns beige, as in XP */
 window.zxp-explorer .nautilus-grid-view gridview:not(:focus-within) > child:selected clamp.zxp-thumb-frame,
 window.zxp-explorer:backdrop .nautilus-grid-view gridview > child:selected clamp.zxp-thumb-frame {
-  outline: 3px solid #ECE9D8;
+  outline: 3px solid {{view:FACE}};
   outline-offset: 0;
 }
 window.zxp-explorer .zxp-thumbs #NautilusViewCell { padding: 0 2px; }
-window.zxp-explorer .zxp-thumbs gridview > child { min-height: 139px; }
+window.zxp-explorer .zxp-thumbs gridview > child { min-height: {{view:THUMB_H}}px; }
 /* the name 8 px below the frame (to the top of the letters), as in XP; the
  * full name of the focused item goes over the line below instead of pushing
  * it (negative bottom margin: up to 3 lines; a bigger margin would give
@@ -485,27 +491,27 @@ window.zxp-explorer .nautilus-grid-view picture,
 window.zxp-explorer .nautilus-list-view picture { filter: none; }
 /* 13 px lines in names and captions, like Tahoma 8 in XP; the captions with
  * the name's font (Nautilus makes them bigger) */
-window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label { line-height: 13px; }
+window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label { line-height: {{view:LINE}}px; }
 window.zxp-explorer .nautilus-grid-view .icon-ui-labels-box > label.caption { font-size: 11px; }
 /* Icons: the name 7 px below the icon (to the top of the letters), as in XP */
 window.zxp-explorer .zxp-icons .icon-ui-labels-box { margin-top: -2px; margin-bottom: -11px; }
 /* Icons as in XP: 32 px icons, 75 px columns, name 71 px wide */
 window.zxp-explorer .zxp-icons #NautilusViewCell { padding: 0 2px; }
-window.zxp-explorer .zxp-icons gridview > child { min-height: 75px; }
+window.zxp-explorer .zxp-icons gridview > child { min-height: {{view:ICON_H}}px; }
 /* List as in XP (measured): the grid on its side, columns filled from top to
  * bottom (src/nautilus-xp: _tile_columns, _list_rows); 17 px rows from the
  * view's top, the 16 px icon and the name 18 px from its edge, one whole
  * line. 4 px before the first column, as Details' icon (the user's wish:
  * XP's List starts at the view's edge) */
-window.zxp-explorer .zxp-list .nautilus-grid-view gridview { padding: 0 0 0 4px; }
-window.zxp-explorer .zxp-list gridview > child { min-height: 17px; min-width: 0; padding: 0; }
+window.zxp-explorer .zxp-list .nautilus-grid-view gridview { padding: 0 0 0 {{view:LIST_PAD}}px; }
+window.zxp-explorer .zxp-list gridview > child { min-height: {{view:LIST_ROW}}px; min-width: 0; padding: 0; }
 window.zxp-explorer .zxp-list #NautilusViewCell { padding: 0; }
 window.zxp-explorer .zxp-list #NautilusViewCell box.horizontal { padding: 0; margin: 0; border-spacing: 0; }
-window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 2px; }
+window.zxp-explorer .zxp-list gridview > child .icon-ui-labels-box { margin: 0 0 0 {{view:LIST_NAME_GAP}}px; }
 
 /* Details / List (Nautilus's list view) as in the Explorer: 17 px rows,
  * 16 px icon 4 px from the edge, no corners nor gaps between rows */
-window.zxp-explorer .nautilus-list-view columnview { padding-left: 4px; padding-right: 0; }
+window.zxp-explorer .nautilus-list-view columnview { padding-left: {{view:DETAILS_PAD}}px; padding-right: 0; }
 window.zxp-explorer .nautilus-list-view columnview > listview {
   padding: 0;
   margin-left: -4px;
@@ -513,7 +519,7 @@ window.zxp-explorer .nautilus-list-view columnview > listview {
   border-spacing: 0;
 }
 window.zxp-explorer .nautilus-list-view columnview > listview > row {
-  min-height: 17px;
+  min-height: {{view:DETAILS_ROW}}px;
   margin-left: 4px;
   margin-right: 0;
   padding: 0;
@@ -557,7 +563,9 @@ window.zxp-explorer .nautilus-list-view columnview > header > button label {
 }
 window.zxp-explorer .nautilus-list-view .dim-label { opacity: 1; }
 /* 6 px gap in the columns' text cells (Size, Type, Date) */
-window.zxp-explorer .nautilus-list-view #NautilusViewCell label.numeric { margin-left: 6px; margin-right: 6px; color: @xp_text; }
+window.zxp-explorer .nautilus-list-view #NautilusViewCell label.numeric { margin-left: {{view:COLUMN_PAD}}px; margin-right: {{view:COLUMN_PAD}}px; color: @xp_text; }
+/* (on the name's line, as in XP: centred in the row they were 1 px lower) */
+window.zxp-explorer .nautilus-list-view #NautilusViewCell label.numeric { margin-top: -1px; margin-bottom: 1px; }
 /* selection in Details/List: only the name is highlighted, as in XP */
 window.zxp-explorer .nautilus-list-view columnview > listview > row:selected { background: none; color: @xp_text; }
 window.zxp-explorer .nautilus-list-view columnview > listview > row:selected label { color: @xp_text; }
@@ -565,6 +573,7 @@ window.zxp-explorer .nautilus-list-view columnview > listview > row:selected .co
   background-color: @xp_highlight;
   color: @xp_highlight_text;
   padding: 0 1px;
+  margin: 0 -1px;          /* (the text stays where it was) */
 }
 /* special sections (Music, Pictures, Videos): blue header (110) with the
  * 32 px icon sticking out 9 px above it, white title 32 px from the border;
@@ -654,12 +663,12 @@ window.zxp-explorer .nautilus-list-view columnview > listview > row:selected .co
   background-color: @xp_highlight;
   color: @xp_highlight_text;
 }
-window.zxp-explorer .nautilus-grid-view gridview > child:selected label.caption { color: #808080; background: none; }
+window.zxp-explorer .nautilus-grid-view gridview > child:selected label.caption { color: {{view:GREY}}; background: none; }
 window.zxp-explorer .nautilus-grid-view gridview:not(:focus-within) > child:selected .icon-ui-labels-box > label:first-child,
 window.zxp-explorer .nautilus-list-view columnview:not(:focus-within) > listview > row:selected .column-name-labels-box > box > label,
 window.zxp-explorer:backdrop .nautilus-grid-view gridview > child:selected .icon-ui-labels-box > label:first-child,
 window.zxp-explorer:backdrop .nautilus-list-view columnview > listview > row:selected .column-name-labels-box > box > label {
-  background-color: #ECE9D8;
+  background-color: {{view:FACE}};
   color: @xp_text;
 }
 /* the name's highlight tight around the letters as in XP: 2 px on the
@@ -673,7 +682,7 @@ window.zxp-explorer .zxp-thumbs .icon-ui-labels-box > label.zxp-name { padding: 
 window.zxp-explorer label.zxp-name-over {
   background-color: @xp_highlight;
   color: @xp_highlight_text;
-  line-height: 13px;
+  line-height: {{view:LINE}}px;
   padding: 1px 2px;
 }
 window.zxp-explorer .zxp-thumbs label.zxp-name-over { padding: 0 2px 2px; }

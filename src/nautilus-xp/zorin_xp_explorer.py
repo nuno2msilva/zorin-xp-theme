@@ -18,6 +18,7 @@ import collections
 import json
 import math
 import os
+import sys
 
 import gi
 
@@ -27,6 +28,16 @@ gi.require_version('Gdk', '4.0')
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('Graphene', '1.0')
 from gi.repository import Adw, Gdk, GdkPixbuf, Gio, GLib, GObject, Graphene, Gtk, Nautilus, Pango  # noqa: E402
+
+# XP's view rules, shared with the file dialogs (src/common/xpviews.py, next
+# to the project's src/nautilus-xp; installed in ~/.local/share/zorin-xp/common)
+for _d in (os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'common'),
+           os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'common')):
+    if os.path.isfile(os.path.join(_d, 'xpviews.py')):
+        sys.path.insert(0, os.path.normpath(_d))
+        break
+import xpviews  # noqa: E402
+from xpviews import xp_wrap  # noqa: E402
 
 ASSETS = os.path.expanduser('~/.themes/WindowsXP-Luna/gtk-4.0/assets')
 BRAND_SIZE = 22
@@ -165,52 +176,39 @@ VIEW_MODES = {
     'details': {'view': 1, 'zoom': 'small', 'columns': ['name', 'zxp_size', 'zxp_type', 'zxp_date']},
 }
 DEFAULT_VIEW = 'icons'
-# steps of the Explorer's grids (measured in XP captures): Tiles 218 x 56,
-# Thumbnails 125 x 139 (96 px frame), Icons 75 (32 px icons)
-TILE_WIDTH = 218
-THUMB_PITCH = 125
-ICON_PITCH = 75
-ICON_SIZE = 32
+# The views' rules (measured in XP captures) are xpviews', shared with the
+# file dialogs: the grids' steps (Tiles 218 x 56, Thumbnails 125 x 139 with
+# the 96 px frame, Icons 75 with 32 px icons), the names' widths and lines,
+# List's columns (filled from top to bottom, as wide as the longest name,
+# 17 px rows, 4 px before the first one), the rename box
+TILE_WIDTH = xpviews.PITCH['tiles'][0]
+PITCHES = {k: v[0] for k, v in xpviews.PITCH.items()}
+ICON_SIZE = xpviews.ICON_SIZE['icons']
 # Thumbnails: XP's icons only go up to 48 px — as in XP, they are not
 # stretched (they stay at 48 in the centre of the frame); only images get a
 # thumbnail. In Icons and Tiles images get the type icon, as in XP
-THUMB_ICON = 48
-PITCHES = {'tiles': TILE_WIDTH, 'thumbnails': THUMB_PITCH, 'icons': ICON_PITCH}
-# width of the name below the icon (the column minus 2 px on each side);
-# Tiles: the text beside the icon (found from XP's line breaks in a capture)
-TILE_TEXT = 158
-NAME_WIDTHS = {'thumbnails': THUMB_PITCH - 4, 'icons': ICON_PITCH - 4, 'tiles': TILE_TEXT}
-# the rename box in Icons and Thumbnails (measured in an XP capture): centred
-# on the item, the text + 5 px on each side + the 1 px outline; it grows on
-# both sides while typing, up to 66 px of text (78 px box), then breaks into
-# more lines; 13 px lines, 2 px above and below
-EDIT_TEXT_W = 66
-EDIT_PAD = 5
-EDIT_LINE = 13
-# List as in XP (measured in an XP capture): the grid on its side — columns
-# filled from top to bottom and scrolled sideways (with Details, the only view
-# that scrolls sideways), all as wide as the folder's longest name: the 16 px
-# icon at the column's edge, the name 18 px from it, 8 px after the longest
-# one, 17 px rows; 4 px before the first column, as Details' icon (the user's
-# wish: XP's List starts at the view's edge; CSS)
-LIST_ROW = 17
-LIST_ICON = 16
-LIST_TEXT_X = 18
-LIST_GAP = 8
-LIST_PAD = 4
-TYPE_ICON_SIZES = {'thumbnails': THUMB_ICON, 'tiles': THUMB_ICON, 'icons': ICON_SIZE, 'list': LIST_ICON}
+THUMB_ICON = xpviews.THUMB_ICON
+NAME_WIDTHS = xpviews.NAME_WIDTH
+EDIT_TEXT_W = xpviews.EDIT_TEXT_W
+EDIT_PAD = xpviews.EDIT_PAD
+EDIT_LINE = xpviews.EDIT_LINE
+LIST_ROW = xpviews.LIST_ROW
+LIST_TEXT_X = xpviews.LIST_TEXT_X
+LIST_GAP = xpviews.LIST_GAP
+LIST_PAD = xpviews.LIST_PAD
+TYPE_ICON_SIZES = {k: xpviews.ICON_SIZE[k] for k in ('thumbnails', 'tiles', 'icons', 'list')}
 # views whose icon is smaller than Nautilus's smallest grid icon (48 px), and
 # the icon box Nautilus asks for at each zoom (given back when leaving them)
-SMALL_ICONS = {'icons': ICON_SIZE, 'list': LIST_ICON}
+SMALL_ICONS = {'icons': ICON_SIZE, 'list': xpviews.ICON_SIZE['list']}
 ZOOM_ICON_BOX = {'small': 48, 'medium': 96}
 # selection as in XP (ImageList ILD_BLEND50, measured in an XP capture):
 # pixels with alpha >= 128 go halfway to the highlight colour (with
 # premultiplied alpha, rounded up); the others (shadows) stay the same
-HIGHLIGHT = (0x31, 0x6A, 0xC5)
+HIGHLIGHT = xpviews.HIGHLIGHT
 # Details: the column the list is sorted by with a light grey background from
 # top to bottom, as in XP (measured); the header strip is the theme's
 # (src/gtk/40-libadwaita.css.in, ".nautilus-list-view columnview")
-SORTED_COLUMN_BG = '#F7F7F7'
+SORTED_COLUMN_BG = xpviews.css_colour(xpviews.SORTED_BG)
 HEADER_BAND = ('linear-gradient(to bottom, #EEEAD8 0, #EEEAD8 17px, #E2DECD 17px, #E2DECD 18px, '
                '#D6D2C2 18px, #D6D2C2 19px, #CBC7B8 19px, #CBC7B8 20px, transparent 20px)')
 # "Outros locais" (Other Places), in this order (Nautilus's other places go;
@@ -223,9 +221,10 @@ BOOKMARKS = os.path.join(GLib.get_user_config_dir(), 'gtk-3.0', 'bookmarks')
 SHORTCUT_ICONS = os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'shortcut-icons.json')
 NETWORK_FS = ('cifs', 'smb3', 'smbfs', 'nfs', 'nfs4', 'fuse.sshfs', 'sshfs', '9p', 'vboxsf', 'davfs')
 OPEN_NORMAL = 1                    # NautilusOpenFlags
-# widths of the Details columns in the Explorer (measured)
-COLUMN_WIDTHS = {'name': 179, 'size': 97, 'type': 119, 'date_modified': 121,
-                 'zxp_size': 97, 'zxp_type': 119, 'zxp_date': 121}
+# widths of the Details columns in the Explorer (measured; xpviews)
+_W = xpviews.COLUMN_WIDTHS
+COLUMN_WIDTHS = {'name': _W['name'], 'size': _W['size'], 'type': _W['type'], 'date_modified': _W['date'],
+                 'zxp_size': _W['size'], 'zxp_type': _W['type'], 'zxp_date': _W['date']}
 RIGHT_ALIGNED = ('size', 'zxp_size')
 STATE_FILE = os.path.join(GLib.get_user_data_dir(), 'zorin-xp', 'explorer.ini')
 # "Dispor ícones por" (background menu): Nautilus's own sorting (the
@@ -622,7 +621,7 @@ class XpExplorer:
             col = cols.get_item(i)
             if not getattr(col, '_zxp_titles', False):
                 col._zxp_titles = True
-                col.connect('notify::fixed-width', lambda *_: self._header_titles(cv))
+                col.connect('notify::fixed-width', lambda *_: (self._header_titles(cv), self._align_cells(cv)))
         for i in range(cols.get_n_items()):
             col = cols.get_item(i)
             self._on_bind(col.get_factory(), cv, self._align_cells)
@@ -777,6 +776,7 @@ class XpExplorer:
         cols = cv.get_columns()
         visible = [cols.get_item(i) for i in range(cols.get_n_items())
                    if cols.get_item(i).get_visible()]
+        self._cut_cells(cv, visible)
         right = [i for i, c in enumerate(visible) if (c.get_id() or '') in RIGHT_ALIGNED]
         if not right:
             return False
@@ -813,6 +813,48 @@ class XpExplorer:
                                 lbl.set_xalign(1)
             row = row.get_next_sibling()
         return False
+
+    def _cut_cells(self, cv, visible):
+        """Details: a text that does not fit in its column is cut with "..." as
+        in XP (xpviews.cut_line) — GTK's labels cut with "…" (the name) or not
+        at all (Type, Date). The room comes from the column's width: the cells
+        are recycled, and their own width is only known once drawn."""
+        listview = next((w for w in walk(cv) if w.get_css_name() == 'listview'), None)
+        row = listview.get_first_child() if listview else None
+        while row:
+            if row.get_css_name() == 'row':
+                cell = row.get_first_child()
+                for col in visible:
+                    if cell is None:
+                        break
+                    # (a column that takes the spare width — the name in Recent — is GTK's)
+                    width = col.get_fixed_width()
+                    room = width - (xpviews.DETAILS_TEXT_X + xpviews.COLUMN_PAD if col.get_id() == 'name'
+                                    else 2 * xpviews.COLUMN_PAD + 1) if width > 0 else 0
+                    lbl = next((w for w in walk(cell) if isinstance(w, Gtk.Label) and w.get_visible()
+                                and not w.has_css_class('caption')), None)
+                    if lbl is not None and (room > 0 or getattr(lbl, '_zxp_cut', False)):
+                        self._cut_label(lbl, room)
+                    cell = cell.get_next_sibling()
+            row = row.get_next_sibling()
+
+    def _cut_label(self, lbl, room=None):
+        text = lbl.get_label()
+        if text != getattr(lbl, '_zxp_text', None):
+            lbl._zxp_name = text            # (set by Nautilus: the whole text)
+        if not getattr(lbl, '_zxp_cut', False):
+            lbl._zxp_cut = True
+            lbl._zxp_ellipsize = lbl.get_ellipsize()
+            lbl.connect('notify::label', lambda l, _p: self._cut_label(l))
+        if room is not None:
+            lbl._zxp_room = room
+        cut = lbl._zxp_room > 0
+        lbl.set_ellipsize(Pango.EllipsizeMode.NONE if cut else lbl._zxp_ellipsize)
+        out = xpviews.cut_line(lbl._zxp_name, lbl._zxp_room,
+                               lambda t: lbl.create_pango_layout(t).get_pixel_size()[0]) if cut else lbl._zxp_name
+        lbl._zxp_text = out
+        if out != text:
+            lbl.set_label(out)
 
     # ----------------------------- shortcuts of the special folders, without the arrow
     # "As minhas imagens", "A minha música"... inside "Os meus documentos" are
@@ -928,7 +970,7 @@ class XpExplorer:
             grid.set_max_columns(100)
             grid.set_margin_end(0)
             return False
-        width = scroller.get_width() - 8   # grid padding (CSS)
+        width = scroller.get_width() - 2 * xpviews.ORIGIN_X   # grid padding (CSS)
         # (less the vertical scrollbar when it shows: the columns go beside it —
         # unless it is GTK's overlay one, drawn over them)
         bar = scroller.get_vscrollbar() if isinstance(scroller, Gtk.ScrolledWindow) else None
@@ -1140,16 +1182,14 @@ class XpExplorer:
         # Tiles (as XP's, measured): words that do not fit broken where the line
         # ends; folders (nothing below the name) in up to 2 lines, files in 1
         # (type and size below)
-        lines, split = 2, False
-        if mode == 'tiles':
-            lines, split = (2 if self._is_folder(lbl) else 1), True
+        lines, split, strip = xpviews.name_lines(mode, self._is_folder(lbl))
         # the selected item with the focus (the last one clicked) shows the whole
         # name while the view has the focus; every other name, long or short,
         # stays cut — also the focused one once it is no longer selected
         row = getattr(lbl, '_zxp_row', None)
         flags = row.get_state_flags() if row is not None else 0
-        focused = bool(flags & Gtk.StateFlags.FOCUSED) and bool(flags & Gtk.StateFlags.SELECTED) and \
-            self.win.is_active()
+        focused = xpviews.full_name(bool(flags & Gtk.StateFlags.FOCUSED) and self.win.is_active(),
+                                    bool(flags & Gtk.StateFlags.SELECTED))
 
         def measure(t):
             return lbl.create_pango_layout(t).get_pixel_size()[0]
@@ -1161,7 +1201,7 @@ class XpExplorer:
         if key == getattr(lbl, '_zxp_key', None) and text == getattr(lbl, '_zxp_text', None):
             return
         lbl._zxp_key = key
-        out = name if width is None else xp_wrap(name, width, measure, lines, split=split, strip=not split)
+        out = name if width is None else xp_wrap(name, width, measure, lines, split=split, strip=strip)
         lbl._zxp_text = out
         if out != text:
             lbl.set_label(out)
@@ -1269,20 +1309,15 @@ class XpExplorer:
                 flush = mode in ('thumbnails', 'icons', 'list', 'tiles')
                 icon_box.set_margin_start(0 if flush else icon_box._zxp_margin)
                 # Icons and List: 32x32 / 16x16 instead of the 48x48 Nautilus asks for;
-                # leaving them, Nautilus's size for the new view's zoom (a size kept
-                # from before could be the previous zoom's: Nautilus may set its own
-                # after this runs)
+                # the others Nautilus's size for the view's zoom — always set here:
+                # Nautilus only sets it on the cells it makes again, and the ones it
+                # keeps (the focused item's, among others) kept the previous view's
+                # (Thumbnails -> Tiles: 96 px boxes, 96 px rows and cells wider than
+                # their column, laid over one another)
                 req = (icon_box.get_size_request().width, icon_box.get_size_request().height)
-                small = SMALL_ICONS.get(mode)
-                if small:
-                    if req != (small, small):
-                        icon_box._zxp_small = True
-                        icon_box.set_size_request(small, small)
-                elif getattr(icon_box, '_zxp_small', False):
-                    icon_box._zxp_small = False
-                    size = ZOOM_ICON_BOX.get(VIEW_MODES.get(mode, {}).get('zoom'))
-                    if size and req != (size, size):
-                        icon_box.set_size_request(size, size)
+                size = SMALL_ICONS.get(mode) or ZOOM_ICON_BOX.get(VIEW_MODES.get(mode, {}).get('zoom'))
+                if size and req != (size, size):
+                    icon_box.set_size_request(size, size)
             self._thumb_picture(pic)
 
     def _thumb_picture(self, pic):
@@ -1935,7 +1970,7 @@ class XpExplorer:
         grid = label.get_ancestor(Gtk.GridView) is not None and mode != 'list'
         centred = grid and mode in ('icons', 'thumbnails')
         kind = 'zxp-rename-left' if grid and not centred else ('zxp-rename-list' if not grid else '')
-        before, after = (EDIT_PAD, EDIT_PAD) if centred else ((4, 15) if grid else (2, 15))
+        before, after = xpviews.EDIT_SIDES[mode if grid else 'details']
         if centred:
             # (always a box that can take more lines: the name may outgrow one line
             # while typing; inside a frame with the size calculated here, because a
@@ -1996,9 +2031,9 @@ class XpExplorer:
             if centred and w > EDIT_TEXT_W:
                 layout.set_width(EDIT_TEXT_W * Pango.SCALE)
                 layout.set_wrap(Pango.WrapMode.WORD_CHAR)
-                size[:] = [EDIT_TEXT_W + before + after + 2, 4 + EDIT_LINE * layout.get_line_count()]
+                size[:] = xpviews.edit_box(mode, w, layout.get_line_count())
             else:
-                size[:] = [w + before + after + 2, 17]
+                size[:] = xpviews.edit_box(mode if grid else 'details', w)
             entry.set_size_request(*size)
             place()
         grow()
@@ -2972,65 +3007,6 @@ def swap_menu_actions(model):
             swap_menu_actions(links.get_value())
 
 
-def xp_wrap(text, width, measure, lines=2, split=False, strip=True):
-    """text in up to `lines` lines of `width` px, like XP's DrawText with
-    DT_WORDBREAK | DT_END_ELLIPSIS: breaks at spaces; a word wider than the
-    line is cut with "..." and ends there; the last line takes the rest of
-    the text, cut at the end. lines=None: the whole text (the focused item's
-    name in XP), with long words broken where the line ends. split: long
-    words broken where the line ends with a line limit too (XP's Tiles);
-    strip=False: a space before the "..." stays (also Tiles)."""
-    if measure(text) <= width:
-        return text
-
-    def fits(t):                        # the longest start of t that fits (>= 1)
-        lo, hi = 1, len(t)
-        while lo < hi:
-            mid = (lo + hi + 1) // 2
-            if measure(t[:mid]) <= width:
-                lo = mid
-            else:
-                hi = mid - 1
-        return lo
-
-    def cut(t):
-        if measure(t) <= width:
-            return t
-        lo, hi = 0, len(t)
-        def start(n):
-            return t[:n].rstrip() if strip else t[:n]
-        while lo < hi:                  # the longest start that fits with "..."
-            mid = (lo + hi + 1) // 2
-            if measure(start(mid) + '...') <= width:
-                lo = mid
-            else:
-                hi = mid - 1
-        return start(lo) + '...'
-    out = []
-    rest = text
-    while rest and (lines is None or len(out) < lines):
-        if lines is not None and len(out) == lines - 1:
-            out.append(cut(rest))
-            break
-        words = rest.split(' ')
-        line = words[0]
-        if measure(line) > width:
-            if lines is None or split:
-                n = fits(line)
-                out.append(line[:n])
-                rest = rest[n:]
-                continue
-            out.append(cut(line))
-            break
-        i = 1
-        while i < len(words) and measure(line + ' ' + words[i]) <= width:
-            line += ' ' + words[i]
-            i += 1
-        out.append(line)
-        rest = ' '.join(words[i:])
-    return '\n'.join(out)
-
-
 def human_size(n):
     """Tamanho como no XP (3 algarismos): 54,4 KB, 1,21 MB, 512 bytes."""
     if n < 1024:
@@ -3095,8 +3071,7 @@ if app is not None:
 def _xp_size(info):
     # XP's Details: always in KB, rounded up, with a thousands separator;
     # empty for folders
-    kb = (info.get_size() + 1023) // 1024
-    return f'{kb:,}'.replace(',', '.' if LANG == 'pt' else ',') + ' KB'
+    return xpviews.kb_size(info.get_size(), '.' if LANG == 'pt' else ',') + ' KB'
 
 
 def _xp_type(ctype):
@@ -3149,10 +3124,7 @@ class ZorinXpExplorer(GObject.GObject, Nautilus.ColumnProvider, Nautilus.InfoPro
         # Tiles (a two-line caption, as in XP): images with the dimensions and the
         # type, other files with the type and size, folders with the name only
 
-        tile = ''
-        if not is_dir:
-            dims = _image_size(loc, ctype)
-            tile = f'{dims}\n{kind}' if dims else f'{kind}\n{size}'
+        tile = '\n'.join(xpviews.tile_captions(is_dir, kind, size, '' if is_dir else _image_size(loc, ctype)))
         file.add_string_attribute('zxp_tile', tile)
         dt = info.get_modification_date_time()
-        file.add_string_attribute('zxp_date', dt.to_local().format('%d-%m-%Y %H:%M') if dt else '')
+        file.add_string_attribute('zxp_date', dt.to_local().format(xpviews.DATE_FORMAT) if dt else '')

@@ -48,6 +48,13 @@ record() {  # records an installed path (once)
     grep -qxF "$1" "$MANIFEST" || echo "$1" >> "$MANIFEST"
 }
 
+# XP's view rules, shared by the Explorer and the file dialogs (src/common)
+install_views() {
+    mkdir -p "$STATE_DIR/common"
+    cp "$HERE/src/common/xpviews.py" "$STATE_DIR/common/xpviews.py"
+    record "$STATE_DIR/common"
+}
+
 install_dir() {  # install_dir <origem> <destino>
     rm -rf -- "$2"
     mkdir -p "$(dirname "$2")"
@@ -369,6 +376,7 @@ PY
         # Files as the XP Explorer: the nautilus-python extension (bars,
         # task pane, views, menus, sound when changing folders) and, as in
         # XP, no PDF thumbnails in the icons (they go to Details)
+        install_views
         install_file "$HERE/src/nautilus-xp/zorin_xp_explorer.py" \
             "$HOME/.local/share/nautilus-python/extensions/zorin_xp_explorer.py"
         record "$HOME/.local/share/nautilus-python/extensions/__pycache__"
@@ -416,6 +424,7 @@ PY
         # GNOME's, which stays as a fallback if this one fails)
         FC="$STATE_DIR/filechooser"
         install_dir "$BUILD/filechooser/zorin-xp-filechooser" "$FC"
+        install_views
         mkdir -p "$HOME/.local/share/dbus-1/services"
         printf '[D-BUS Service]\nName=org.freedesktop.impl.portal.desktop.zorinxp\nExec=%s/zorin-xp-filechooser\n' \
             "$FC" > "$HOME/.local/share/dbus-1/services/org.freedesktop.impl.portal.desktop.zorinxp.service"
