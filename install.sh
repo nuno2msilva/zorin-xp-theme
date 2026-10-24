@@ -247,7 +247,7 @@ for c in "${COMPONENTS[@]}"; do
         # its own. Marked block, removed by restore.sh.
         install -m 755 "$HERE/src/session-splash/zorin-xp-splash" "$HOME/.local/bin/zorin-xp-splash"
         record "$HOME/.local/bin/zorin-xp-splash"
-        if ! grep -qF '# >>> zorin-xp' "$HOME/.xprofile" 2>/dev/null; then
+        if ! grep -qF 'zorin-xp-splash' "$HOME/.xprofile" 2>/dev/null; then
             if [ ! -e "$HOME/.xprofile" ]; then
                 touch "$HOME/.xprofile"
                 record "$HOME/.xprofile"
@@ -459,16 +459,49 @@ PY
         if cc -O2 -shared -fPIC -fvisibility=hidden -o "$MOD" "$HERE/src/filechooser/zorin-xp-filechooser-module.c" \
                -l:libgtk-3.so.0 -l:libgdk-3.so.0 -l:libgio-2.0.so.0 -l:libgobject-2.0.so.0 -l:libglib-2.0.so.0 2>/dev/null; then
             MODENV="GTK3_MODULES=$MOD\${GTK3_MODULES:+:\$GTK3_MODULES}\n"
-            # Flatpaks do not get the session's environment: the ones that make GTK's
-            # dialog themselves (and see the home folder), each with an override
-            : > "$STATE_DIR/filechooser-flatpaks.txt"
-            for app in org.onlyoffice.desktopeditors; do
-                if flatpak info "$app" >/dev/null 2>&1; then
-                    flatpak override --user --env=GTK3_MODULES="$MOD" "$app"
-                    echo "$app" >> "$STATE_DIR/filechooser-flatpaks.txt"
+            # X11: GDM's Xsession sets GTK3_MODULES again after environment.d
+            # (/etc/X11/Xsession.d/80xapp-gtk3-module) and the session lost it;
+            # ~/.xprofile is read before it: the module first, the system's after
+            # (marked block, removed by restore.sh)
+            if ! grep -qF 'libzorin-xp-filechooser-module' "$HOME/.xprofile" 2>/dev/null; then
+                if [ ! -e "$HOME/.xprofile" ]; then
+                    touch "$HOME/.xprofile"
+                    record "$HOME/.xprofile"
                 fi
-            done
-            record "$STATE_DIR/filechooser-flatpaks.txt"
+                cat >> "$HOME/.xprofile" <<'XPROFILE'
+# >>> zorin-xp: XP file dialog in the apps that make GTK 3's chooser themselves
+ZXP_FC_MODULE="$HOME/.local/share/zorin-xp/filechooser/libzorin-xp-filechooser-module.so"
+if [ -r "$ZXP_FC_MODULE" ]; then
+    case ":$GTK3_MODULES:" in
+        *":$ZXP_FC_MODULE:"*) ;;
+        *) GTK3_MODULES="$ZXP_FC_MODULE${GTK3_MODULES:+:$GTK3_MODULES}"; export GTK3_MODULES ;;
+    esac
+fi
+unset ZXP_FC_MODULE
+# <<< zorin-xp
+XPROFILE
+            fi
+            # this session: the apps D-Bus and systemd start (the Shell's own get it
+            # from the Zorin XP extension, src/shell-extension: fileDialogs.js)
+            CUR=$(systemctl --user show-environment 2>/dev/null | sed -n 's/^GTK3_MODULES=//p')
+            case ":$CUR:" in
+                *":$MOD:"*) ;;
+                *) dbus-update-activation-environment --systemd "GTK3_MODULES=$MOD${CUR:+:$CUR}" 2>/dev/null || true ;;
+            esac
+            # Flatpaks do not get the session's environment: every one gets the
+            # module (and may read its folder; the ones without GTK 3 ignore it) —
+            # a global override, instead of the per-application ones of before
+            if command -v flatpak >/dev/null; then
+                if [ -f "$STATE_DIR/filechooser-flatpaks.txt" ]; then
+                    while read -r app _; do
+                        [ -n "$app" ] && [ "$app" != global ] &&
+                            flatpak override --user --unset-env=GTK3_MODULES "$app" 2>/dev/null || true
+                    done < "$STATE_DIR/filechooser-flatpaks.txt"
+                fi
+                flatpak override --user --env=GTK3_MODULES="$MOD" --filesystem="~/.local/share/zorin-xp/filechooser:ro"
+                echo "global ~/.local/share/zorin-xp/filechooser:ro" > "$STATE_DIR/filechooser-flatpaks.txt"
+                record "$STATE_DIR/filechooser-flatpaks.txt"
+            fi
         else
             echo "  (sem compilador C: as aplicações com o diálogo do GTK feito por elas ficam com ele)"
         fi

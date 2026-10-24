@@ -18,6 +18,8 @@
  *   ieFind.js  — IE's (Zen's) Find window off the taskbar
  *   zenIcons.js — IE (Zen) with the page's favicon in the caption and on the
  *                taskbar button (the icon comes from the src/zen-ie/title extension)
+ *   fileDialogs.js — the XP file dialog's GTK 3 module in the environment of
+ *                the applications the Shell starts
  */
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
@@ -33,10 +35,12 @@ import {DesktopNames} from './desktopNames.js';
 import {ExplorerIcons} from './explorerIcons.js';
 import {ZenIcons} from './zenIcons.js';
 import {IeFind} from './ieFind.js';
+import {FileDialogModule} from './fileDialogs.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 export default class ZorinXpExtension extends Extension {
     enable() {
+        this._fileDialogs = new FileDialogModule();
         this._frames = new Frames(this);
         this._taskbar = new TaskbarTweaks(this);
         this._startmenu = new StartMenuTweaks(this);
@@ -84,5 +88,7 @@ export default class ZorinXpExtension extends Extension {
         this._taskbar = null;
         this._frames?.destroy();
         this._frames = null;
+        this._fileDialogs?.destroy();
+        this._fileDialogs = null;
     }
 }

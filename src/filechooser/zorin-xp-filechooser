@@ -653,8 +653,10 @@ class XpFileDialog(Gtk.Window):
         self.look_store = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str, int)
         self.look.set_model(self.look_store)
         self._popup = False
-        rp = Gtk.CellRendererPixbuf()
-        rt = Gtk.CellRendererText()
+        # (without the cells' own 2 px above and below: the 16 px icon and the
+        # text centred in the box as XP's, 3 px from its top)
+        rp = Gtk.CellRendererPixbuf(ypad=0)
+        rt = Gtk.CellRendererText(ypad=0)
         rt.set_property("ellipsize", Pango.EllipsizeMode.END)
         self.look.pack_start(rp, False)
         self.look.pack_start(rt, True)
@@ -667,7 +669,7 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1091, [6, 11, 85, 13])
         self.box.place(look_lbl, [r[0], r[1] - 1, r[2], r[3] + 2])
         r = c.get(1137, [99, 7, 261, 22])
-        self.box.place(self.look, [r[0], r[1] - 1, r[2], 22])
+        self.box.place(self.look, [r[0], r[1] - 1, r[2], 24])
 
         # toolbar
         tb = Gtk.Box(spacing=0)
@@ -743,6 +745,9 @@ class XpFileDialog(Gtk.Window):
         self.tree.get_style_context().add_class("zxp-details")
         self.tree.set_rubber_banding(self.multiple)
         self.tree.get_selection().set_mode(sel_mode)
+        self._no_autoselect = False
+        self.tree.get_selection().set_select_function(
+            lambda _sel, _model, _path, selected: selected or not self._no_autoselect)
         self.tree.connect("row-activated", lambda tv, p, col: self.activate_entry(self.store[p][0]))
         self.tree.get_selection().connect("changed", lambda *_: self._on_select())
         self.tree.connect("button-press-event", self._on_view_button)
@@ -804,12 +809,14 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1090, [101, 304, 96, 13])
         self.box.place(name_lbl, [r[0], r[1], r[2] + 10, r[3]], "lb")
         r = c.get(1148, [206, 299, 264, 20])
-        self.box.place(self.name, [r[0], r[1] - 1, r[2], 22], "lb", "w")
+        self.box.place(self.name, [r[0], r[1] - 1, r[2], 24], "lb", "w")
 
         type_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("saveAsType") if kind == "save"
                                                         else t("filesOfType", "Ficheiros do &tipo:")))
         type_lbl.set_xalign(0)
         self.types = Gtk.ComboBoxText()
+        for cell in self.types.get_cells():
+            cell.set_property("ypad", 0)        # (the text where XP has it, as in "Guardar em")
         for flt in self.filters:
             self.types.append_text(flt[0])
         cur = options.get("current_filter")
@@ -823,7 +830,7 @@ class XpFileDialog(Gtk.Window):
         r = c.get(1089, [101, 330, 99, 13])
         self.box.place(type_lbl, [r[0], r[1], r[2] + 10, r[3]], "lb")
         r = c.get(1136, [206, 327, 264, 22])
-        self.box.place(self.types, [r[0], r[1] - 1, r[2], 22], "lb", "w")
+        self.box.place(self.types, [r[0], r[1] - 1, r[2], 24], "lb", "w")
 
         accept = options.get("accept_label") or (t("saveButton", "&Guardar") if kind == "save"
                                                  else t("openButton", "A&brir"))
@@ -1583,6 +1590,19 @@ class XpFileDialog(Gtk.Window):
 
     # ------------------------------------------------------------ right click
     def _on_view_button(self, view, ev):
+        if ev.type == Gdk.EventType.BUTTON_PRESS and ev.button == 1 and self._entry_at(view, ev) is None:
+            # a click on the empty space: the focus on the list and nothing selected,
+            # as in XP (with Ctrl or Shift the selection stays)
+            if not ev.state & (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK):
+                self.select_entries([])
+            if view is self.tree:
+                # (GTK selects the first row when the list takes the focus without a
+                # cursor: not this time)
+                self._no_autoselect = True
+                GLib.idle_add(lambda: setattr(self, "_no_autoselect", False))
+            elif view is self.flow:
+                self.focus_view()           # (the FlowBox itself does not take it)
+            return False
         if ev.type != Gdk.EventType.BUTTON_PRESS or ev.button != 3:
             return False
         e = self._entry_at(view, ev)

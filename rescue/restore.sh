@@ -32,8 +32,36 @@ fi
 
 # 0. Flatpaks given the XP file dialog's GTK module (filechooser component)
 if [ -f "$STATE_DIR/filechooser-flatpaks.txt" ] && command -v flatpak >/dev/null; then
-    while read -r app; do
-        [ -n "$app" ] && flatpak override --user --unset-env=GTK3_MODULES "$app" && echo "  flatpak reposto: $app"
+    while read -r app path; do
+        if [ "$app" = global ]; then
+            # (only our two entries leave the global overrides: the rest stays)
+            python3 - "$HOME/.local/share/flatpak/overrides/global" "$path" <<'PY'
+import sys
+from gi.repository import GLib
+f, path = sys.argv[1], sys.argv[2]
+kf = GLib.KeyFile()
+try:
+    kf.load_from_file(f, GLib.KeyFileFlags.KEEP_COMMENTS)
+except GLib.Error:
+    sys.exit(0)
+try:
+    kf.remove_key("Environment", "GTK3_MODULES")
+except GLib.Error:
+    pass
+try:
+    fs = [x for x in kf.get_string("Context", "filesystems").split(";") if x and x != path]
+    if fs:
+        kf.set_string("Context", "filesystems", ";".join(fs) + ";")
+    else:
+        kf.remove_key("Context", "filesystems")
+except GLib.Error:
+    pass
+kf.save_to_file(f)
+PY
+            echo "  flatpak reposto: módulo do diálogo de ficheiros (global)"
+        elif [ -n "$app" ]; then
+            flatpak override --user --unset-env=GTK3_MODULES "$app" && echo "  flatpak reposto: $app"
+        fi
     done < "$STATE_DIR/filechooser-flatpaks.txt"
 fi
 

@@ -9,7 +9,9 @@
  * thumbnails, without catching the mouse):
  *   - the 4 columns on each side of the caption (rounded corners),
  *   - the 4 px left, right and bottom borders,
- *   - the 16×16 icon at (6, 8) and the title from x = 26.
+ *   - the 16×16 icon at (6, 8) and the title from x = 26 — dialogs (Open,
+ *     Save As, message boxes, property sheets) have no icon in XP: there
+ *     the title starts at x = 8.
  * Measurements checked to the pixel against real Windows XP captures.
  */
 import Clutter from 'gi://Clutter';
@@ -24,6 +26,9 @@ const BORDER = 4;          // SM_CXSIZEFRAME
 const CAPTION = 30;        // SM_CYCAPTION (26) + moldura (4)
 const ICON_X = 6, ICON_Y = 8, ICON_SIZE = 16;
 const TEXT_X = 26;
+// (measured on XP's Save As / Save Image captions: no icon, the title's first
+// letter 8 px from the window's edge)
+const DIALOG_TEXT_X = 8;
 // maximized or tiled, the frame's 4 columns are off-screen and XP's icon is
 // 2 px from the edge: 2 more here, at the user's wish (and the title with it)
 const EDGE_INSET = 2;
@@ -141,9 +146,13 @@ export class XpFrame {
         }
 
         const inset = borders ? 0 : EDGE_INSET;
+        const type = w.get_window_type();
+        const dialog = type === Meta.WindowType.DIALOG || type === Meta.WindowType.MODAL_DIALOG;
+        const textX = dialog ? DIALOG_TEXT_X : TEXT_X;
+        this._icon.visible = !dialog;
         this._icon.set_position(ox + ICON_X + inset, oy + ICON_Y);
-        this._title.set_position(ox + TEXT_X + inset, oy + this._ext.titleY);
-        this._title.set_width(Math.max(0, fullW - TEXT_X - inset - BUTTONS_WIDTH - 4));
+        this._title.set_position(ox + textX + inset, oy + this._ext.titleY);
+        this._title.set_width(Math.max(0, fullW - textX - inset - BUTTONS_WIDTH - 4));
         this._title.style_class = w.appears_focused ? 'zxp-title' : 'zxp-title zxp-title-inactive';
     }
 
