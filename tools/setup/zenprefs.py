@@ -42,6 +42,10 @@ PREFS = {
     # compact mode: hides only the sidebar (the IE bars stay)
     "zen.view.compact.hide-toolbar": False,
     "zen.view.compact.hide-tabbar": True,
+    # the hidden tab bar closes as soon as the mouse leaves it (Zen kept it
+    # 150 ms, and 1 s when the mouse left the window by that edge)
+    "zen.view.compact.sidebar-keep-hover.duration": 0,
+    "zen.view.compact.toolbar-hide-after-hover.duration": 0,
     # on start, go back to the last page seen (Zen picked an empty tab)
     "zen.workspaces.continue-where-left-off": True,
     # switching spaces swaps the tabs and the name at once, without sliding

@@ -988,7 +988,9 @@ body::before {
    It is hidden with "left" and not with "translate" (Zen's): a translated
    element drags the fixed ones inside it along — the menu bar.
    When open, it sits exactly where the pinned bar sits: against the window,
-   below the bands, with the same width (Zen made it 4 px wider) */
+   below the bands, with the same width (Zen made it 4 px wider). It opens
+   and closes at once, without sliding (the user's wish; Zen's delay before
+   closing is 0 too: tools/setup/zenprefs.py) */
 :root[zen-compact-mode="true"] #navigator-toolbox:not([animate="true"]) {
     top: var(--ie-rebar) !important;
     bottom: var(--ie-status) !important;
@@ -998,7 +1000,7 @@ body::before {
     padding: 0 !important;
     translate: none !important;
     left: calc(-1 * var(--zen-sidebar-width, 222px) - 6px) !important;
-    transition: left 0.15s ease !important;
+    transition: none !important;
 }
 /* (Zen gives #titlebar the bar's whole width: the title and the button
    strip went over the divider) */
