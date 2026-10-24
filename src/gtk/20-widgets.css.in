@@ -461,13 +461,22 @@ treeview.view {
 treeview.view { border-left-color: #A0A0A0; border-top-color: #A0A0A0; }
 /*@end*/
 treeview.view:selected, treeview.view:selected:focus { color: @xp_highlight_text; background-color: @xp_highlight; }
+/* (GTK 3 stretches a url() image to the whole row height: an icon, which
+ * -gtk-icontheme() draws at its own 9×9, centred on whole pixels; install.sh
+ * puts both in ~/.local/share/icons, found whatever the icon theme) */
 treeview.view.expander {
   min-width: 9px;
   min-height: 9px;
-  -gtk-icon-source: url("assets/tree-expander-closed.png");
+  /*@gtk3*/-gtk-icon-source: -gtk-icontheme("zorin-xp-tree-expander-closed");/*@end*/
+  /*@gtk4*/-gtk-icon-source: url("assets/tree-expander-closed.png");/*@end*/
   color: transparent;
 }
+/*@gtk3*/
+treeview.view.expander:checked { -gtk-icon-source: -gtk-icontheme("zorin-xp-tree-expander-open"); }
+/*@end*/
+/*@gtk4*/
 treeview.view.expander:checked { -gtk-icon-source: url("assets/tree-expander-open.png"); }
+/*@end*/
 treeview.view.progressbar { background-image: url("assets/progress-chunk-tile.png"); border: 0; }
 treeview.view.trough { background-color: @xp_window; border: 1px solid @xp_field_border; }
 treeview.view header button, columnview > header > button, treeview > header > button {

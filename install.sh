@@ -151,6 +151,12 @@ for c in "${COMPONENTS[@]}"; do
             mv "$KEEP/gnome-shell" "$HOME/.themes/WindowsXP-Luna/"
             rmdir "$KEEP"
         fi
+        # the trees' [+]/[-] as loose icons (outside any icon theme, so they are
+        # found with any): GTK 3 stretches the theme's images to the row height
+        for s in closed open; do
+            install_file "$BUILD/gtk/WindowsXP-Luna/gtk-assets/tree-expander-$s.png" \
+                "$HOME/.local/share/icons/zorin-xp-tree-expander-$s.png"
+        done
         # zorin-auto-theme puts the Zorin theme back at sunrise/sunset: turn it off
         gsettings set com.zorin.desktop.auto-theme enabled false 2>/dev/null || true
         gsettings set org.gnome.desktop.interface gtk-theme 'WindowsXP-Luna'

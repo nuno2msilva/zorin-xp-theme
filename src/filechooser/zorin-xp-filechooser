@@ -2131,7 +2131,10 @@ class XpBrowseFolder(Gtk.Window):
         self.name_col = col
         self.tree.append_column(col)
         self.tree.set_expander_column(col)
-        self.tree.connect("row-expanded", lambda tv, it, p: self._load(it))
+        # (the subfolders come in before the row opens: swapping the "+" row for
+        # them once it is open leaves it empty for a moment, and GTK closes it)
+        self.tree.connect("test-expand-row", lambda tv, it, p: self._load(it) or not self.store.iter_has_child(it))
+        self.tree.connect("key-press-event", self._tree_key)
         self.tree.connect("focus-in-event", lambda *_: self.tree.queue_draw())
         self.tree.connect("focus-out-event", lambda *_: self.tree.queue_draw())
         self.tree.get_selection().connect("changed", lambda *_: self._on_select())
@@ -2255,6 +2258,34 @@ class XpBrowseFolder(Gtk.Window):
                 if root and root != "/":
                     info = ICONS.lookup_by_gicon(m.get_icon(), 16, Gtk.IconLookupFlags.FORCE_SIZE)
                     self._add(it, root, m.get_name(), info.load_icon() if info else None)
+
+    def _tree_key(self, _w, ev):
+        # XP's tree: → opens the folder, or goes to its first subfolder if it is
+        # already open; ← closes it, or goes to the folder above if it is closed
+        mods = Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.MOD1_MASK
+        if ev.state & mods or ev.keyval not in (Gdk.KEY_Left, Gdk.KEY_KP_Left, Gdk.KEY_Right, Gdk.KEY_KP_Right):
+            return False
+        path, _col = self.tree.get_cursor()
+        if path is None:
+            return True
+        it = self.store.get_iter(path)
+        right = ev.keyval in (Gdk.KEY_Right, Gdk.KEY_KP_Right)
+        if self.tree.get_direction() == Gtk.TextDirection.RTL:
+            right = not right
+        target = None
+        if right and self.store.iter_has_child(it):
+            if not self.tree.row_expanded(path):
+                self.tree.expand_row(path, False)
+            else:
+                target = self.store.iter_children(it)
+        elif not right:
+            if self.tree.row_expanded(path):
+                self.tree.collapse_row(path)
+            else:
+                target = self.store.iter_parent(it)
+        if target is not None:
+            self.tree.set_cursor(self.store.get_path(target), None, False)
+        return True
 
     def _children(self, it):
         child = self.store.iter_children(it)
