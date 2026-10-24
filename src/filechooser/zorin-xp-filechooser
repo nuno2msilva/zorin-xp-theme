@@ -594,6 +594,10 @@ treeview.zxp-details header button.zxp-filler, treeview.zxp-details header butto
   background-image: linear-gradient(to bottom, #EEEAD8 0, #EEEAD8 17px, #E2DECD 17px, #E2DECD 18px,
     #D6D2C2 18px, #D6D2C2 19px, #CBC7B8 19px, #CBC7B8 20px, transparent 20px);
   background-color: transparent; }
+/* "Procurar em" / "Guardar em": o caminho da pasta atual depois do seu ícone,
+   como o endereço do Explorador (22 px, o ícone 3 px antes do texto) */
+entry.zxp-path { min-height: 0; padding: 0 1px 0 3px; }
+entry.zxp-path image.left { margin: 0 3px 0 0; }
 /* a moldura da lista de ficheiros: a do XP (1 px #7F9DB9), não a das caixas de grupo */
 frame.zxp-view-frame > border { border: 1px solid rgb(127, 157, 185); border-radius: 0; border-image: none; box-shadow: none; }
 """.replace("@LIST_ROW@", str(xpviews.LIST_ROW)).replace(
@@ -649,27 +653,19 @@ class XpFileDialog(Gtk.Window):
         # "Guardar em:" / "Procurar em:" (Save in / Look in) and the places list
         look_lbl = Gtk.Label.new_with_mnemonic(mnemonic(t("saveIn") if save else t("lookIn", "Procurar &em:")))
         look_lbl.set_xalign(1)          # (in XP it sits against the box)
-        self.look = Gtk.ComboBox()
-        self.look_store = Gtk.ListStore(GdkPixbuf.Pixbuf, str, str, int)
-        self.look.set_model(self.look_store)
-        self._popup = False
-        # (without the cells' own 2 px above and below: the 16 px icon and the
-        # text centred in the box as XP's, 3 px from its top)
-        rp = Gtk.CellRendererPixbuf(ypad=0)
-        rt = Gtk.CellRendererText(ypad=0)
-        rt.set_property("ellipsize", Pango.EllipsizeMode.END)
-        self.look.pack_start(rp, False)
-        self.look.pack_start(rt, True)
-        self.look.add_attribute(rp, "pixbuf", 0)
-        self.look.add_attribute(rt, "text", 1)
-        self.look.set_cell_data_func(rp, self._indent)
-        self.look.connect("notify::popup-shown", self._on_popup)
-        self.look_changed = self.look.connect("changed", self._on_look)
+        # the current folder's whole path, after its icon, that can be written
+        # (the user's wish, instead of XP's drop-down list of places): Enter
+        # opens the folder written — it never saves nor opens a file
+        self.look = Gtk.Entry()
+        self.look.get_style_context().add_class("zxp-path")
+        self.look.connect("activate", lambda *_: self._on_path())
+        self.look.connect("key-press-event", self._path_key)
+        self.look.connect("focus-out-event", lambda *_: self._show_path() and False)
         look_lbl.set_mnemonic_widget(self.look)
         r = c.get(1091, [6, 11, 85, 13])
         self.box.place(look_lbl, [r[0], r[1] - 1, r[2], r[3] + 2])
         r = c.get(1137, [99, 7, 261, 22])
-        self.box.place(self.look, [r[0], r[1] - 1, r[2], 24])
+        self.box.place(self.look, [r[0], r[1], r[2], 22])
 
         # toolbar
         tb = Gtk.Box(spacing=0)
@@ -1003,13 +999,6 @@ class XpFileDialog(Gtk.Window):
         btn.connect("clicked", lambda *_: self.navigate(path))
         self.place_buttons[path] = btn
         return btn
-
-    def _indent(self, layout, cell, model, it, data=None):
-        cell.set_property("xpad", model[it][3] * 10 + 2 if self._popup else 2)
-
-    def _on_popup(self, *_):
-        self._popup = self.look.get_property("popup-shown")
-        self.look.queue_draw()
 
     # ------------------------------------------------------------ pega do canto
     def _clamp_grow(self):
@@ -1376,7 +1365,7 @@ class XpFileDialog(Gtk.Window):
             self.history.append(self.cwd)
         self.cwd = path
         self.refresh(keep=False)
-        self._fill_look()
+        self._show_path()
         self.btn_back.set_sensitive(bool(self.history))
         self.btn_up.set_sensitive(path != "/")
         self.btn_new.set_sensitive(os.access(path, os.W_OK))
@@ -1394,51 +1383,39 @@ class XpFileDialog(Gtk.Window):
         if self.cwd and self.cwd != "/":
             self.navigate(os.path.dirname(self.cwd))
 
-    def _fill_look(self):
-        """Ambiente de trabalho > Os meus documentos / O meu computador > ... /
-        Os meus locais na rede, with the current path in the right place."""
-        rows = [(DESKTOP, 0), (DOCUMENTS, 1), (HOME, 1)]
-        mounts = []
-        for m in Gio.VolumeMonitor.get().get_mounts():
-            root = m.get_root().get_path()
-            if root and root != "/":
-                mounts.append((root, m.get_name(), m.get_icon()))
-        rows.append(("/", 2))
-        rows += [(r, 2) for r, _n, _i in mounts]
-        rows.append((NETWORK, 1))
-        # the current path: from the closest place that contains it
-        cur = self.cwd
-        if cur not in [r for r, _ in rows]:
-            anchors = [(r, lvl) for r, lvl in rows if r != NETWORK and
-                       (cur == r or cur.startswith(r.rstrip("/") + "/"))]
-            if anchors:
-                anchor, lvl = max(anchors, key=lambda a: len(a[0]))
-                rel = os.path.relpath(cur, anchor).split(os.sep)
-                chain = []
-                p = anchor
-                for i, part in enumerate(rel):
-                    p = os.path.join(p, part)
-                    chain.append((p, lvl + 1 + i))
-                pos = [r for r, _ in rows].index(anchor) + 1
-                rows[pos:pos] = chain
-        self.look.handler_block(self.look_changed)
-        self.look_store.clear()
-        active = 0
-        names = {r: n for r, n, _i in mounts}
-        for i, (p, lvl) in enumerate(rows):
-            name = place_name(p) or names.get(p) or os.path.basename(p) or p
-            self.look_store.append([file_icon(p, True, None, 16), name, p, lvl])
-            if p == cur:
-                active = i
-        self.look.set_active(active)
-        self.look.handler_unblock(self.look_changed)
+    def _show_path(self):
+        """The current folder in the path box: its icon and whole path, the end
+        in view when it does not fit."""
+        if not self.cwd:
+            return
+        if self.look.get_text() != self.cwd:
+            self.look.set_text(self.cwd)
+        self.look.set_icon_from_pixbuf(Gtk.EntryIconPosition.PRIMARY, file_icon(self.cwd, True, None, 16))
+        self.look.set_position(-1)
 
-    def _on_look(self, *_):
-        it = self.look.get_active_iter()
-        if it:
-            path = self.look_store[it][2]
-            if path != self.cwd:
-                self.navigate(path)
+    def _on_path(self):
+        """Enter in the path box: that folder opens (a file: its folder, with it
+        selected); a path that does not exist gets XP's message."""
+        text = self.look.get_text().strip()
+        p = os.path.expanduser(text) if text else self.cwd
+        p = os.path.normpath(p if os.path.isabs(p) else os.path.join(self.cwd, p))
+        if os.path.isdir(p):
+            self.navigate(p)
+        elif os.path.isfile(p) and os.path.isdir(os.path.dirname(p)):
+            self.navigate(os.path.dirname(p))
+            self.select_entries([e for e in self.entries if e.path == p])
+        else:
+            self.xp_msgbox(self.get_title(), t("pathNotFound", "%s\nO caminho não existe.").replace("%s", text))
+            return
+        self._show_path()
+
+    def _path_key(self, _w, ev):
+        # (Esc puts the current folder back; with it already there, it closes the
+        # dialog as anywhere else)
+        if ev.keyval == Gdk.KEY_Escape and self.look.get_text() != self.cwd:
+            self._show_path()
+            return True
+        return False
 
     def refresh(self, keep=True):
         sel = [e.name for e in self.selected()] if keep else []
@@ -2342,7 +2319,7 @@ class XpBrowseFolder(Gtk.Window):
         lab.set_xalign(0)
         self.box.place(lab, c.get(14152, [15, 224, 45, 13]), "lb")
         self.folder = Gtk.Entry()
-        self.folder.set_activates_default(True)
+        self.folder.connect("activate", lambda *_: self._folder_enter())
         lab.set_mnemonic_widget(self.folder)
         self.box.place(self.folder, c.get(14148, [68, 218, 236, 23]), "lb", "w")
 
@@ -2529,9 +2506,24 @@ class XpBrowseFolder(Gtk.Window):
     def _on_select(self):
         path, it = self.selected_path()
         if it is not None:
-            self.folder.set_text(self.store[it][1])
+            # the folder's whole path (the user's wish; XP shows its name), the
+            # end in view when it does not fit
+            self.folder.set_text(path or self.store[it][1])
+            self.folder.set_position(-1)
             self.btn_new.set_sensitive(bool(path) and os.access(path, os.W_OK))
         self.tree.queue_draw()
+
+    def _folder_enter(self):
+        """Enter in "Pasta:": another folder written there opens in the tree
+        (as the path box of Open/Save); the selected one is chosen (OK)."""
+        path, _it = self.selected_path()
+        text = self.folder.get_text().strip()
+        cand = os.path.expanduser(text)
+        cand = os.path.normpath(cand if os.path.isabs(cand) else os.path.join(path or HOME, cand)) if text else ""
+        if cand and cand != path and os.path.isdir(cand):
+            self.select_folder(cand)
+            return
+        self.accept()
 
     # ------------------------------------------------------------ new folder
     def new_folder(self):
@@ -2683,7 +2675,7 @@ class XpBrowseFolder(Gtk.Window):
         self._end_edit(True)
         path, it = self.selected_path()
         text = self.folder.get_text().strip()
-        if it is not None and text and text != self.store[it][1]:
+        if it is not None and text and text not in (path, self.store[it][1]):
             cand = os.path.expanduser(text)
             cand = cand if os.path.isabs(cand) else os.path.join(path or HOME, cand)
             if not os.path.isdir(cand):

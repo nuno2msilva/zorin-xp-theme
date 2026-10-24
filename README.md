@@ -186,8 +186,12 @@ out).
 - The five views are the Explorer's: the same rules (measurements, how names
   are cut, selection, the rename box) live in one place,
   `src/common/xpviews.py`, used by both and by the theme's Explorer CSS.
+- "Procurar em" / "Guardar em" (Look in / Save in) shows the folder's whole
+  path after its icon and takes a path written by hand (Enter opens that
+  folder) — instead of XP's drop-down list.
 - XP's "Procurar pasta" (Browse for Folder) for picking folders, with the
-  tree's [+]/[-] and its keys (→ opens a folder, ← closes it).
+  tree's [+]/[-] and its keys (→ opens a folder, ← closes it); "Pasta:" shows
+  the whole path (Enter on another path opens it in the tree).
 - If anything fails, GNOME's dialog opens instead.
 
 ### Folders and desktop
