@@ -7,8 +7,10 @@ applications, browsers and, with GTK_USE_PORTAL=1 / GDK_DEBUG=portals, every
 GTK application. The window follows comdlg32.dll's template 1552 (positions,
 texts), with the places bar, the toolbar and XP's five views (Thumbnails,
 Tiles, Icons, List, Details), the right-click menu, names edited in place,
-XP's message boxes and the resize grip in the corner. The size and the view
-are remembered from one time to the next (~/.local/share/zorin-xp/filechooser.json).
+XP's message boxes and the resize grip in the corner. The view and the
+sorting are remembered from one time to the next
+(~/.local/share/zorin-xp/filechooser.json); the size is not: every dialog
+opens at XP's (the user's wish), whatever it was resized to before.
 
 If something goes wrong when opening the window, the request goes to
 GNOME's dialog (org.freedesktop.impl.portal.desktop.gnome): no application
@@ -881,12 +883,6 @@ class XpFileDialog(Gtk.Window):
         self._grip = None
         self.box.place(self.grip, [bw - 17, bh + extra - 17, 17, 17], "rb")
 
-        # the size from last time
-        size = self.state.get("size") or []
-        if len(size) == 2:
-            self.box.grow = [max(0, int(size[0]) - bw), max(0, int(size[1]) - (bh + extra))]
-            self._clamp_grow()
-
         # the view from last time
         self.set_view(self.view_mode, remember=False)
 
@@ -925,8 +921,10 @@ class XpFileDialog(Gtk.Window):
             return {}
 
     def _save_state(self):
-        self.state.update({"view": self.view_mode, "sort": list(self.sort),
-                           "size": [self.box.base[0] + self.box.grow[0], self.box.base[1] + self.box.grow[1]]})
+        self.state.update({"view": self.view_mode, "sort": list(self.sort)})
+        # (sizes kept by earlier versions: every dialog opens at XP's size now)
+        for key in ("size", "browseSize"):
+            self.state.pop(key, None)
         try:
             os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
             tmp = STATE_FILE + ".tmp"
@@ -2345,10 +2343,6 @@ class XpBrowseFolder(Gtk.Window):
         self.grip.connect("button-press-event", self._grip_press)
         self.grip.connect("motion-notify-event", self._grip_motion)
         self.box.place(self.grip, [bw - 17, bh - 17, 17, 17], "rb")
-        size = self.state.get("browseSize") or []
-        if len(size) == 2:
-            self.box.grow = [max(0, int(size[0]) - bw), max(0, int(size[1]) - bh)]
-            self._clamp_grow()
 
         # Ambiente de trabalho > Os meus documentos, O meu computador (the home
         # folders, the disk and the connected drives), Os meus locais na rede
@@ -2696,16 +2690,6 @@ class XpBrowseFolder(Gtk.Window):
             return
         self._end_edit(False)
         self._finished = True
-        self.state = self._load_state()
-        self.state["browseSize"] = [self.box.base[0] + self.box.grow[0], self.box.base[1] + self.box.grow[1]]
-        try:
-            os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
-            tmp = STATE_FILE + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f:
-                json.dump(self.state, f)
-            os.replace(tmp, STATE_FILE)
-        except OSError:
-            pass
         results = {}
         if response == 0:
             results["uris"] = GLib.Variant("as", uris or [])
